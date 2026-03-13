@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>XLFitness – Lat Pulldown Counter</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:#0d0d0d;color:#fff;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+
+    header{width:100%;padding:14px 24px;background:#111;border-bottom:2px solid #00aaff;display:flex;align-items:center;gap:12px;}
+    header h1{font-size:1.3rem;font-weight:700;color:#00aaff;letter-spacing:1px;}
+    header span{color:#aaa;font-size:.9rem;}
+    .badge{background:#0f022222;border:1px solid #0f0;color:#0f0;border-radius:6px;padding:2px 10px;font-size:.75rem;font-weight:700;letter-spacing:1px;}
+
+    /* Upload Screen */
+    #upload-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:20px;padding:24px;width:100%;max-width:480px;text-align:center;}
+    #upload-screen h2{font-size:1.3rem;color:#00aaff;}
+    #upload-screen p{color:#888;font-size:.9rem;line-height:1.6;}
+
+    .upload-area{width:100%;border:2px dashed #333;border-radius:12px;padding:32px;cursor:pointer;transition:border-color .2s;}
+    .upload-area:hover{border-color:#00aaff;}
+    .upload-area input{display:none;}
+    .upload-icon{font-size:2.5rem;margin-bottom:10px;}
+    .upload-area p{color:#666;}
+
+    .or-divider{color:#444;font-size:.8rem;letter-spacing:2px;}
+
+    #default-btn{padding:12px 28px;background:none;border:2px solid #00aaff;color:#00aaff;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;transition:background .2s;}
+    #default-btn:hover{background:#00aaff22;}
+
+    /* App Screen */
+    #app-screen{display:none;flex-direction:column;align-items:center;width:100%;padding:16px;}
+
+    #top-bar{display:flex;gap:12px;width:100%;max-width:900px;margin-bottom:12px;flex-wrap:wrap;}
+
+    .cal-card{background:#111;border:1px solid #222;border-radius:8px;padding:8px 16px;text-align:center;flex:1;min-width:80px;}
+    .cal-card .cl{font-size:.6rem;letter-spacing:1.5px;color:#666;text-transform:uppercase;}
+    .cal-card .cv{font-size:1.2rem;font-weight:800;color:#00aaff;}
+
+    #content{display:flex;gap:16px;width:100%;max-width:900px;flex-wrap:wrap;justify-content:center;}
+
+    #cam-wrap{position:relative;flex:1;min-width:300px;max-width:640px;}
+    video{width:100%;border-radius:10px;display:block;transform:scaleX(-1);}
+    canvas{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:10px;transform:scaleX(-1);}
+
+    /* HUD */
+    #hud{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;gap:10px;}
+
+    .hud-box{background:rgba(0,0,0,.82);border-radius:10px;padding:6px 16px;text-align:center;}
+    #rep-box{border:2px solid #00aaff;}
+    #form-box{border:2px solid #555;min-width:80px;transition:border-color .3s;}
+    #form-box.good{border-color:#0f0;}
+    #form-box.partial{border-color:#f90;}
+
+    .hud-lbl{font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:#aaa;}
+    #rep-count{font-size:3.5rem;font-weight:900;line-height:1;color:#fff;}
+    #form-status{font-size:1.4rem;font-weight:800;color:#fff;}
+    #form-box.good #form-status{color:#0f0;}
+    #form-box.partial #form-status{color:#f90;}
+
+    #phase-hud{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:1rem;font-weight:800;padding:5px 18px;border-radius:8px;background:rgba(0,0,0,.8);border:2px solid #555;}
+    #phase-hud.down{border-color:#f30;color:#f30;}
+    #phase-hud.up{border-color:#0f0;color:#0f0;}
+
+    /* ROM bar */
+    #rom-bar-wrap{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;}
+    #rom-bar-lbl{font-size:.6rem;letter-spacing:1px;color:#aaa;writing-mode:vertical-rl;text-transform:uppercase;}
+    #rom-bar-track{width:14px;height:160px;background:#1a1a1a;border-radius:7px;border:1px solid #333;position:relative;overflow:hidden;}
+    #rom-bar-fill{position:absolute;bottom:0;width:100%;background:#00aaff;border-radius:7px;transition:height .15s;height:0;}
+
+    #loading-overlay{position:absolute;inset:0;background:rgba(0,0,0,.85);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+    .spinner{width:34px;height:34px;border:4px solid #222;border-top-color:#00aaff;border-radius:50%;animation:spin .8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* Side panel */
+    #side-panel{flex:0 0 250px;display:flex;flex-direction:column;gap:12px;}
+
+    #history-box{background:#111;border:1px solid #222;border-radius:10px;padding:12px;flex:1;overflow:hidden;}
+    #history-box h3{font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;color:#aaa;margin-bottom:8px;}
+    #history-list{display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto;}
+    .rep-row{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:6px;background:#0d0d0d;font-size:.85rem;}
+    .rep-row .rn{color:#aaa;font-weight:700;}
+    .rep-row .rrom{color:#fff;}
+    .rep-row .rtag{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:4px;}
+    .rtag.good{background:#0f021a;color:#0f0;border:1px solid #0f0;}
+    .rtag.partial{background:#1a0f00;color:#f90;border:1px solid #f90;}
+
+    .ctrl-btns{display:flex;gap:8px;}
+    .ctrl-btn{flex:1;padding:9px;border-radius:8px;border:none;font-size:.8rem;font-weight:700;cursor:pointer;}
+    #reset-btn{background:#1a1a1a;color:#888;border:1px solid #333;}
+    #reset-btn:hover{border-color:#f60;color:#f60;}
+    #load-btn{background:#00aaff22;color:#00aaff;border:1px solid #00aaff;font-size:.75rem;}
+    #load-btn:hover{background:#00aaff44;}
+    #load-file{display:none;}
+  </style>
+</head>
+<body>
+<header>
+  <h1>XLFitness</h1>
+  <span>Lat Pulldown Counter</span>
+  <div style="flex:1"></div>
+  <span class="badge">LIVE COUNTER</span>
+</header>
+
+<!-- Upload Screen -->
+<div id="upload-screen">
+  <h2>Load Training Data</h2>
+  <p>Upload your recorded training JSON to calibrate the rep counter, or use the demo defaults.</p>
+
+  <label class="upload-area" id="drop-zone">
+    <input type="file" id="json-file" accept=".json"/>
+    <div class="upload-icon">📂</div>
+    <p>Click to upload training JSON<br><small style="color:#555">nautilus_nitro_lat_pulldown_training.json</small></p>
+  </label>
+
+  <span class="or-divider">— OR —</span>
+  <button id="default-btn">Use Demo Defaults</button>
+  <p style="font-size:.75rem;color:#444">Demo uses typical lat pulldown thresholds</p>
+</div>
+
+<!-- App Screen -->
+<div id="app-screen">
+
+  <div id="top-bar">
+    <div class="cal-card"><div class="cl">Top Threshold</div><div class="cv" id="cv-top">—</div></div>
+    <div class="cal-card"><div class="cl">Bottom Threshold</div><div class="cv" id="cv-bot">—</div></div>
+    <div class="cal-card"><div class="cl">Min Good ROM</div><div class="cv" id="cv-rom">—</div></div>
+    <div class="cal-card"><div class="cl">Avg Good ROM</div><div class="cv" id="cv-avg">—</div></div>
+    <div class="cal-card"><div class="cl">Machine</div><div class="cv" id="cv-mac" style="font-size:.85rem;">—</div></div>
+  </div>
+
+  <div id="content">
+    <div id="cam-wrap">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas"></canvas>
+
+      <div id="hud">
+        <div class="hud-box" id="rep-box">
+          <div class="hud-lbl">Reps</div>
+          <div id="rep-count">0</div>
+        </div>
+        <div class="hud-box" id="form-box">
+          <div class="hud-lbl">Form</div>
+          <div id="form-status">—</div>
+        </div>
+      </div>
+
+      <div id="phase-hud">—</div>
+
+      <div id="rom-bar-wrap">
+        <div id="rom-bar-track"><div id="rom-bar-fill"></div></div>
+        <div id="rom-bar-lbl">ROM</div>
+      </div>
+
+      <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p id="loading-msg">Loading…</p>
+      </div>
+    </div>
+
+    <div id="side-panel">
+      <div id="history-box">
+        <h3>Rep History</h3>
+        <div id="history-list"><p style="color:#444;font-size:.8rem">No reps yet</p></div>
+      </div>
+      <div class="ctrl-btns">
+        <button class="ctrl-btn" id="reset-btn">↺ Reset</button>
+        <button class="ctrl-btn" id="load-btn">📂 New JSON<input type="file" id="load-file" accept=".json"/></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+<script>
+const KP = {LS:5,RS:6,LE:7,RE:8,LW:9,RW:10};
+const SKELETON = [[5,7],[7,9],[6,8],[8,10],[5,6],[5,11],[6,12],[11,12],[11,13],[13,15],[12,14],[14,16]];
+const MIN_CONF = 0.3;
+
+// Default calibration (typical lat pulldown)
+const DEMO_CONFIG = {
+  machine: "demo_defaults",
+  summary: {top_threshold:145, bottom_threshold:90, min_good_rom:70, avg_good_rom:100}
+};
+
+let config      = null;
+let detector    = null;
+let repCount    = 0;
+let phase       = 'up';
+let repMaxAngle = 0;
+let repMinAngle = 999;
+let repHistory  = [];
+let currentAngle= null;
+
+// DOM
+const video      = document.getElementById('video');
+const canvas     = document.getElementById('canvas');
+const ctx        = canvas.getContext('2d');
+const repCountEl = document.getElementById('rep-count');
+const formStatus = document.getElementById('form-status');
+const formBox    = document.getElementById('form-box');
+const phaseHud   = document.getElementById('phase-hud');
+const romFill    = document.getElementById('rom-bar-fill');
+const loadingEl  = document.getElementById('loading-overlay');
+const loadingMsg = document.getElementById('loading-msg');
+const historyList= document.getElementById('history-list');
+
+// ── Geometry ──────────────────────────────────────────────────────────────────
+function calcAngle(a,b,c) {
+  const ab={x:a.x-b.x,y:a.y-b.y}, cb={x:c.x-b.x,y:c.y-b.y};
+  const dot=ab.x*cb.x+ab.y*cb.y;
+  const mag=Math.sqrt((ab.x**2+ab.y**2)*(cb.x**2+cb.y**2));
+  if(!mag) return 180;
+  return Math.acos(Math.min(1,Math.max(-1,dot/mag)))*(180/Math.PI);
+}
+function getKP(pose,idx){const p=pose.keypoints[idx];return p&&p.score>=MIN_CONF?p:null;}
+
+function getElbowAngle(pose) {
+  const ls=getKP(pose,KP.LS),le=getKP(pose,KP.LE),lw=getKP(pose,KP.LW);
+  const rs=getKP(pose,KP.RS),re=getKP(pose,KP.RE),rw=getKP(pose,KP.RW);
+  const a=[];
+  if(ls&&le&&lw) a.push(calcAngle(ls,le,lw));
+  if(rs&&re&&rw) a.push(calcAngle(rs,re,rw));
+  return a.length ? a.reduce((x,y)=>x+y,0)/a.length : null;
+}
+
+// ── Draw ──────────────────────────────────────────────────────────────────────
+function drawPose(pose) {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const sx=canvas.width/video.videoWidth, sy=canvas.height/video.videoHeight;
+  ctx.strokeStyle='rgba(0,170,255,.8)'; ctx.lineWidth=3;
+  for(const [a,b] of SKELETON) {
+    const pa=pose.keypoints[a],pb=pose.keypoints[b];
+    if(pa?.score>=MIN_CONF&&pb?.score>=MIN_CONF){
+      ctx.beginPath();ctx.moveTo(pa.x*sx,pa.y*sy);ctx.lineTo(pb.x*sx,pb.y*sy);ctx.stroke();
+    }
+  }
+  for(const kp of pose.keypoints){
+    if(kp.score>=MIN_CONF){
+      ctx.beginPath();ctx.arc(kp.x*sx,kp.y*sy,5,0,Math.PI*2);
+      ctx.fillStyle='#fff';ctx.fill();
+      ctx.strokeStyle='#00aaff';ctx.lineWidth=2;ctx.stroke();
+    }
+  }
+}
+
+// ── Rep detection ─────────────────────────────────────────────────────────────
+function processAngle(a) {
+  if (a === null) return;
+  const {top_threshold:TOP, bottom_threshold:BOT, min_good_rom:MIN_ROM} = config.summary;
+  currentAngle = a;
+
+  // Track ROM progress during contraction
+  if (phase === 'down') {
+    repMinAngle = Math.min(repMinAngle, a);
+    const romSoFar = repMaxAngle - repMinAngle;
+    const pct = Math.min(100, (romSoFar / config.summary.avg_good_rom) * 100);
+    romFill.style.height = pct + '%';
+    romFill.style.background = romSoFar >= MIN_ROM ? '#0f0' : '#f90';
+  }
+
+  if (phase === 'up') {
+    repMaxAngle = Math.max(repMaxAngle, a);
+    if (a < BOT) { phase = 'down'; repMinAngle = a; }
+  } else if (phase === 'down') {
+    if (a > TOP) {
+      phase = 'up';
+      const rom = Math.round(repMaxAngle - repMinAngle);
+      const isGood = rom >= MIN_ROM;
+      completeRep(rom, isGood);
+      repMaxAngle = a; repMinAngle = 999;
+      romFill.style.height = '0%';
+    }
+  }
+
+  // Phase display
+  if (a < BOT) {
+    phaseHud.textContent = 'CONTRACTED ↓';
+    phaseHud.className = 'down';
+  } else if (a > TOP) {
+    phaseHud.textContent = 'EXTENDED ↑';
+    phaseHud.className = 'up';
+  } else {
+    phaseHud.textContent = 'MOVING';
+    phaseHud.className = '';
+  }
+}
+
+function completeRep(rom, isGood) {
+  repCount++;
+  repCountEl.textContent = repCount;
+  repHistory.unshift({n: repCount, rom, good: isGood});
+
+  formStatus.textContent = isGood ? 'GOOD ✓' : 'PARTIAL ⚠';
+  formBox.className = 'hud-box ' + (isGood ? 'good' : 'partial');
+
+  renderHistory();
+
+  // Flash counter
+  repCountEl.style.color = isGood ? '#0f0' : '#f90';
+  setTimeout(()=>{ repCountEl.style.color='#fff'; }, 400);
+}
+
+function renderHistory() {
+  if (!repHistory.length) { historyList.innerHTML='<p style="color:#444;font-size:.8rem">No reps yet</p>'; return; }
+  historyList.innerHTML = repHistory.slice(0,15).map(r => `
+    <div class="rep-row">
+      <span class="rn">#${r.n}</span>
+      <span class="rrom">${r.rom}° ROM</span>
+      <span class="rtag ${r.good?'good':'partial'}">${r.good?'GOOD':'PARTIAL'}</span>
+    </div>`).join('');
+}
+
+// ── Camera & model loop ───────────────────────────────────────────────────────
+function resizeCanvas() { canvas.width=video.clientWidth; canvas.height=video.clientHeight; }
+
+async function loop() {
+  if (video.readyState>=2) {
+    const poses = await detector.estimatePoses(video);
+    if (poses.length>0) {
+      drawPose(poses[0]);
+      processAngle(getElbowAngle(poses[0]));
+    } else {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+async function startApp(cfg) {
+  config = cfg;
+  document.getElementById('upload-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display   = 'flex';
+
+  // Update calibration display
+  const s = cfg.summary;
+  document.getElementById('cv-top').textContent = s.top_threshold + '°';
+  document.getElementById('cv-bot').textContent = s.bottom_threshold + '°';
+  document.getElementById('cv-rom').textContent = s.min_good_rom + '°';
+  document.getElementById('cv-avg').textContent = s.avg_good_rom + '°';
+  document.getElementById('cv-mac').textContent = (cfg.machine||'unknown').replace(/_/g,' ');
+
+  loadingEl.style.display = 'flex';
+  loadingMsg.textContent  = 'Starting camera…';
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false
+    });
+    video.srcObject = stream;
+    await video.play();
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    video.addEventListener('loadedmetadata', resizeCanvas);
+
+    loadingMsg.textContent = 'Loading pose model…';
+    detector = await poseDetection.createDetector(
+      poseDetection.SupportedModels.MoveNet,
+      {modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING}
+    );
+    loadingEl.style.display = 'none';
+    loop();
+  } catch(err) {
+    loadingEl.style.display = 'none';
+    alert('Camera error: ' + err.message);
+  }
+}
+
+// ── File loading ──────────────────────────────────────────────────────────────
+function loadFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try { startApp(JSON.parse(e.target.result)); }
+    catch { alert('Invalid JSON file'); }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('json-file').addEventListener('change', e => {
+  if (e.target.files[0]) loadFile(e.target.files[0]);
+});
+
+document.getElementById('drop-zone').addEventListener('dragover', e => {
+  e.preventDefault(); e.currentTarget.style.borderColor='#00aaff';
+});
+document.getElementById('drop-zone').addEventListener('dragleave', e => {
+  e.currentTarget.style.borderColor='#333';
+});
+document.getElementById('drop-zone').addEventListener('drop', e => {
+  e.preventDefault(); e.currentTarget.style.borderColor='#333';
+  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+});
+
+document.getElementById('default-btn').addEventListener('click', () => startApp(DEMO_CONFIG));
+
+// In-app controls
+document.getElementById('reset-btn').addEventListener('click', () => {
+  repCount=0; phase='up'; repMaxAngle=0; repMinAngle=999; repHistory=[];
+  repCountEl.textContent='0'; formStatus.textContent='—'; formBox.className='hud-box';
+  phaseHud.textContent='—'; phaseHud.className=''; romFill.style.height='0%';
+  renderHistory();
+});
+
+const loadFile2 = document.getElementById('load-file');
+document.getElementById('load-btn').addEventListener('click', ()=>loadFile2.click());
+loadFile2.addEventListener('change', e=>{ if(e.target.files[0]) loadFile(e.target.files[0]); });
+</script>
+</body>
+</html>

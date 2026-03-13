@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XLFitness – Push-up Counter</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d0d0d;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      width: 100%;
+      padding: 16px 24px;
+      background: #111;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 2px solid #f60;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #f60;
+    }
+
+    header span { font-size: 1.1rem; color: #aaa; }
+
+    #container {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      margin-top: 16px;
+    }
+
+    #video {
+      width: 100%;
+      border-radius: 12px;
+      display: block;
+      transform: scaleX(-1); /* mirror */
+    }
+
+    #canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      transform: scaleX(-1); /* mirror to match video */
+    }
+
+    #hud {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    #counter-box {
+      background: rgba(0,0,0,0.75);
+      border: 2px solid #f60;
+      border-radius: 12px;
+      padding: 8px 24px;
+      text-align: center;
+    }
+
+    #counter-label { font-size: 0.7rem; letter-spacing: 2px; color: #f60; text-transform: uppercase; }
+    #counter { font-size: 3.5rem; font-weight: 900; line-height: 1; }
+
+    #status-box {
+      background: rgba(0,0,0,0.75);
+      border: 2px solid #555;
+      border-radius: 12px;
+      padding: 8px 20px;
+      text-align: center;
+      min-width: 90px;
+      transition: border-color 0.2s;
+    }
+
+    #status-box.up   { border-color: #0f0; }
+    #status-box.down { border-color: #f30; }
+
+    #status-label { font-size: 0.7rem; letter-spacing: 2px; color: #aaa; text-transform: uppercase; }
+    #status {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    #status-box.up   #status { color: #0f0; }
+    #status-box.down #status { color: #f30; }
+
+    #info {
+      margin: 16px 24px;
+      color: #666;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    #start-btn {
+      margin: 20px auto;
+      display: block;
+      background: #f60;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 40px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: background 0.2s;
+    }
+    #start-btn:hover { background: #e55; }
+    #start-btn:disabled { background: #444; cursor: default; }
+
+    #reset-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(0,0,0,0.7);
+      color: #aaa;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    #reset-btn:hover { color: #fff; border-color: #f60; }
+
+    #loading {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      gap: 12px;
+    }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid #333;
+      border-top-color: #f60;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #loading p { color: #aaa; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>XLFitness</h1>
+  <span>Push-up Counter</span>
+</header>
+
+<button id="start-btn">📷 Start Camera</button>
+
+<div id="container" style="display:none">
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="canvas"></canvas>
+
+  <div id="hud">
+    <div id="counter-box">
+      <div id="counter-label">Reps</div>
+      <div id="counter">0</div>
+    </div>
+    <div id="status-box">
+      <div id="status-label">Position</div>
+      <div id="status">—</div>
+    </div>
+  </div>
+
+  <button id="reset-btn">Reset</button>
+  <div id="loading"><div class="spinner"></div><p>Loading model…</p></div>
+</div>
+
+<p id="info">Press Start to enable your camera and begin tracking.</p>
+
+<!-- TensorFlow.js + MoveNet -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+
+<script>
+const KEYPOINTS = {
+  LEFT_SHOULDER: 5,
+  RIGHT_SHOULDER: 6,
+  LEFT_ELBOW: 7,
+  RIGHT_ELBOW: 8,
+  LEFT_WRIST: 9,
+  RIGHT_WRIST: 10,
+  LEFT_HIP: 11,
+  RIGHT_HIP: 12,
+  LEFT_KNEE: 13,
+  RIGHT_KNEE: 14,
+  LEFT_ANKLE: 15,
+  RIGHT_ANKLE: 16,
+};
+
+const SKELETON = [
+  [5,7],[7,9],   // left arm
+  [6,8],[8,10],  // right arm
+  [5,6],         // shoulders
+  [5,11],[6,12], // torso
+  [11,12],       // hips
+  [11,13],[13,15], // left leg
+  [12,14],[14,16], // right leg
+];
+
+const MIN_CONFIDENCE = 0.3;
+const ANGLE_DOWN = 90;
+const ANGLE_UP = 140;
+
+let detector = null;
+let repCount = 0;
+let phase = 'up'; // 'up' | 'down'
+
+const video   = document.getElementById('video');
+const canvas  = document.getElementById('canvas');
+const ctx     = canvas.getContext('2d');
+const counter = document.getElementById('counter');
+const status  = document.getElementById('status');
+const statusBox = document.getElementById('status-box');
+const loading = document.getElementById('loading');
+const startBtn = document.getElementById('start-btn');
+const container = document.getElementById('container');
+const info    = document.getElementById('info');
+const resetBtn = document.getElementById('reset-btn');
+
+function angle(a, b, c) {
+  const ab = { x: a.x - b.x, y: a.y - b.y };
+  const cb = { x: c.x - b.x, y: c.y - b.y };
+  const dot = ab.x * cb.x + ab.y * cb.y;
+  const mag = Math.sqrt((ab.x**2 + ab.y**2) * (cb.x**2 + cb.y**2));
+  if (mag === 0) return 180;
+  return Math.acos(Math.min(1, Math.max(-1, dot / mag))) * (180 / Math.PI);
+}
+
+function kp(pose, idx) {
+  const p = pose.keypoints[idx];
+  return p && p.score >= MIN_CONFIDENCE ? p : null;
+}
+
+function drawSkeleton(pose) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw connections
+  ctx.strokeStyle = 'rgba(255,100,0,0.8)';
+  ctx.lineWidth = 3;
+  for (const [a, b] of SKELETON) {
+    const pa = pose.keypoints[a];
+    const pb = pose.keypoints[b];
+    if (pa?.score >= MIN_CONFIDENCE && pb?.score >= MIN_CONFIDENCE) {
+      const sx = canvas.width / video.videoWidth;
+      const sy = canvas.height / video.videoHeight;
+      ctx.beginPath();
+      ctx.moveTo(pa.x * sx, pa.y * sy);
+      ctx.lineTo(pb.x * sx, pb.y * sy);
+      ctx.stroke();
+    }
+  }
+
+  // Draw keypoints
+  for (const kpt of pose.keypoints) {
+    if (kpt.score >= MIN_CONFIDENCE) {
+      const sx = canvas.width / video.videoWidth;
+      const sy = canvas.height / video.videoHeight;
+      ctx.beginPath();
+      ctx.arc(kpt.x * sx, kpt.y * sy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      ctx.strokeStyle = '#f60';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  }
+}
+
+function processPose(pose) {
+  const lShoulder = kp(pose, KEYPOINTS.LEFT_SHOULDER);
+  const lElbow    = kp(pose, KEYPOINTS.LEFT_ELBOW);
+  const lWrist    = kp(pose, KEYPOINTS.LEFT_WRIST);
+  const rShoulder = kp(pose, KEYPOINTS.RIGHT_SHOULDER);
+  const rElbow    = kp(pose, KEYPOINTS.RIGHT_ELBOW);
+  const rWrist    = kp(pose, KEYPOINTS.RIGHT_WRIST);
+
+  const angles = [];
+  if (lShoulder && lElbow && lWrist) angles.push(angle(lShoulder, lElbow, lWrist));
+  if (rShoulder && rElbow && rWrist) angles.push(angle(rShoulder, rElbow, rWrist));
+
+  if (angles.length === 0) {
+    status.textContent = '—';
+    statusBox.className = '';
+    return;
+  }
+
+  const avg = angles.reduce((a, b) => a + b, 0) / angles.length;
+
+  if (avg < ANGLE_DOWN) {
+    status.textContent = 'DOWN';
+    statusBox.className = 'down';
+    if (phase === 'up') phase = 'down';
+  } else if (avg > ANGLE_UP) {
+    status.textContent = 'UP';
+    statusBox.className = 'up';
+    if (phase === 'down') {
+      phase = 'up';
+      repCount++;
+      counter.textContent = repCount;
+    }
+  }
+}
+
+async function loop() {
+  if (video.readyState >= 2) {
+    const poses = await detector.estimatePoses(video);
+    if (poses.length > 0) {
+      drawSkeleton(poses[0]);
+      processPose(poses[0]);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+function resizeCanvas() {
+  canvas.width  = video.clientWidth;
+  canvas.height = video.clientHeight;
+}
+
+startBtn.addEventListener('click', async () => {
+  startBtn.disabled = true;
+  startBtn.textContent = 'Starting…';
+  info.textContent = '';
+  container.style.display = 'block';
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+      audio: false
+    });
+    video.srcObject = stream;
+    await video.play();
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    video.addEventListener('loadedmetadata', resizeCanvas);
+
+    detector = await poseDetection.createDetector(
+      poseDetection.SupportedModels.MoveNet,
+      { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
+    );
+
+    loading.style.display = 'none';
+    startBtn.style.display = 'none';
+    loop();
+  } catch (err) {
+    loading.style.display = 'none';
+    container.style.display = 'none';
+    startBtn.disabled = false;
+    startBtn.textContent = '📷 Start Camera';
+    info.textContent = 'Error: ' + err.message;
+  }
+});
+
+resetBtn.addEventListener('click', () => {
+  repCount = 0;
+  phase = 'up';
+  counter.textContent = '0';
+  status.textContent = '—';
+  statusBox.className = '';
+});
+</script>
+</body>
+</html>
