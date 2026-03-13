@@ -1,0 +1,76 @@
+{
+  "machine": "nautilus_nitro_lat_pulldown",
+  "version": "1.0",
+  "recorded_at": "2026-03-13T02:56:20.161Z",
+  "good_reps": [
+    {
+      "rep_number": 1,
+      "min_elbow": 47,
+      "max_elbow": 170,
+      "range_of_motion": 123
+    },
+    {
+      "rep_number": 2,
+      "min_elbow": 45,
+      "max_elbow": 167,
+      "range_of_motion": 122
+    },
+    {
+      "rep_number": 3,
+      "min_elbow": 41,
+      "max_elbow": 167,
+      "range_of_motion": 126
+    },
+    {
+      "rep_number": 4,
+      "min_elbow": 43,
+      "max_elbow": 166,
+      "range_of_motion": 123
+    },
+    {
+      "rep_number": 5,
+      "min_elbow": 52,
+      "max_elbow": 167,
+      "range_of_motion": 115
+    }
+  ],
+  "bad_reps": [
+    {
+      "rep_number": 1,
+      "min_elbow": 83,
+      "max_elbow": 177,
+      "range_of_motion": 94
+    },
+    {
+      "rep_number": 2,
+      "min_elbow": 86,
+      "max_elbow": 165,
+      "range_of_motion": 79
+    },
+    {
+      "rep_number": 3,
+      "min_elbow": 88,
+      "max_elbow": 160,
+      "range_of_motion": 71
+    },
+    {
+      "rep_number": 4,
+      "min_elbow": 86,
+      "max_elbow": 169,
+      "range_of_motion": 83
+    },
+    {
+      "rep_number": 5,
+      "min_elbow": 86,
+      "max_elbow": 169,
+      "range_of_motion": 83
+    }
+  ],
+  "summary": {
+    "avg_good_rom": 122,
+    "avg_bad_rom": 82,
+    "top_threshold": 147,
+    "bottom_threshold": 52,
+    "min_good_rom": 92
+  }
+}
