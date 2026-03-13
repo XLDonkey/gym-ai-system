@@ -6,93 +6,86 @@
   <title>XLFitness – AI Rep Counter</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{background:#07090f;color:#fff;font-family:'Segoe UI',Arial,sans-serif;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
+    body{background:#000;color:#fff;font-family:'Segoe UI',Arial,sans-serif;height:100dvh;overflow:hidden;display:flex;flex-direction:column;}
 
-    header{padding:10px 18px;background:#0b0f18;border-bottom:1px solid #141e2e;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-    .logo{font-size:1rem;font-weight:900;color:#00aaff;letter-spacing:3px;}
-    .logo-sub{font-size:.7rem;color:#334;letter-spacing:1px;}
-    #hdr-status{margin-left:auto;display:flex;align-items:center;gap:7px;}
-    #sdot{width:9px;height:9px;border-radius:50%;background:#1a2a3a;transition:all .3s;}
-    #sdot.waiting{background:#1a2a3a;}
-    #sdot.seated{background:#f90;box-shadow:0 0 8px #f904;}
-    #sdot.active{background:#0f0;box-shadow:0 0 10px #0f04;animation:pulse 1.2s infinite alternate;}
-    #stxt{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#334;}
-    #stxt.active{color:#0f0;} #stxt.seated{color:#f90;}
-    @keyframes pulse{to{box-shadow:0 0 16px #0f0;}}
-
-    /* Boot */
-    #boot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;}
-    #boot h2{color:#00aaff;font-size:1.4rem;font-weight:900;letter-spacing:2px;text-align:center;}
-    #boot .tagline{color:#334;font-size:.78rem;letter-spacing:1px;text-align:center;}
-    #start-btn{padding:16px 40px;background:#00aaff;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;letter-spacing:1px;width:220px;}
-    #start-btn:active{background:#0080cc;}
-    #prog-wrap{width:260px;display:none;flex-direction:column;gap:8px;}
-    #prog-bar{width:100%;height:8px;background:#141e2e;border-radius:4px;overflow:hidden;}
-    #prog-fill{height:100%;background:linear-gradient(90deg,#0066cc,#00aaff);width:0%;transition:width .5s ease;}
-    #prog-pct{font-size:.9rem;font-weight:800;color:#00aaff;text-align:center;}
-    #prog-txt{font-size:.75rem;color:#445;text-align:center;min-height:1.2em;}
-    #steps{display:none;flex-direction:column;gap:6px;width:260px;}
-    .step{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#0b0f18;border-radius:8px;border:1px solid #141e2e;font-size:.78rem;color:#445;transition:all .3s;}
-    .step.done{border-color:#0f04;color:#0f0;background:#0f021a;}
-    .step.active{border-color:#00aaff44;color:#00aaff;background:#00aaff08;animation:stepPulse 1s infinite alternate;}
-    .step.error{border-color:#f444;color:#f44;background:#1a0000;}
-    .step-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
-    @keyframes stepPulse{from{border-color:#00aaff22;}to{border-color:#00aaff99;}}
-    .big-spin{width:48px;height:48px;border:4px solid #141e2e;border-top-color:#00aaff;border-radius:50%;animation:spin .9s linear infinite;display:none;}
+    /* ── Boot screen ── */
+    #boot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;background:#07090f;}
+    #boot h1{font-size:1.4rem;font-weight:900;color:#00aaff;letter-spacing:3px;}
+    #boot p{color:#445;font-size:.8rem;letter-spacing:1px;}
+    #start-btn{margin-top:8px;padding:16px 44px;background:#00aaff;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;letter-spacing:1px;}
+    #prog-wrap{width:260px;display:none;flex-direction:column;gap:7px;text-align:center;}
+    #prog-bar{height:8px;background:#141e2e;border-radius:4px;overflow:hidden;}
+    #prog-fill{height:100%;background:linear-gradient(90deg,#005fcc,#00aaff);width:0%;transition:width .4s;}
+    #prog-pct{font-size:.85rem;font-weight:800;color:#00aaff;}
+    #prog-txt{font-size:.73rem;color:#445;min-height:1em;}
+    #steps{display:none;flex-direction:column;gap:5px;width:260px;}
+    .step{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;border:1px solid #1a2a3a;font-size:.77rem;color:#445;transition:all .3s;}
+    .step.active{border-color:#00aaff66;color:#00aaff;animation:sp 1s infinite alternate;}
+    .step.done{border-color:#0f05;color:#0f0;background:#0f021a;}
+    .step.error{border-color:#f445;color:#f44;}
+    @keyframes sp{from{border-color:#00aaff22;}to{border-color:#00aaff;};}
+    .big-spin{width:44px;height:44px;border:4px solid #141e2e;border-top-color:#00aaff;border-radius:50%;animation:spin .8s linear infinite;display:none;}
     @keyframes spin{to{transform:rotate(360deg);}}
-    #err-msg{color:#f44;font-size:.78rem;text-align:center;display:none;max-width:260px;}
+    #err-txt{color:#f44;font-size:.78rem;text-align:center;max-width:260px;display:none;}
 
-    /* Main layout */
-    #app{display:none;flex:1;flex-direction:row;gap:10px;padding:10px;min-height:0;}
+    /* ── App: full screen camera ── */
+    #app{display:none;flex:1;position:relative;overflow:hidden;}
 
-    /* Camera — KEY FIX: no object-fit:cover, no CSS transform on canvas */
-    #cam-wrap{position:relative;flex:1 1 auto;min-width:0;min-height:0;border-radius:12px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;}
-    #video{display:block;max-width:100%;max-height:100%;width:auto;height:auto;}
-    #pose-canvas{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
-    #banner{position:absolute;top:0;left:0;right:0;padding:8px 12px;background:rgba(0,0,0,.8);font-size:.75rem;font-weight:700;color:#334;text-align:center;letter-spacing:.5px;z-index:2;}
-    #banner.active{color:#0f0;background:rgba(0,255,0,.07);}
-    #banner.seated{color:#f90;background:rgba(255,150,0,.07);}
-    #debug-hud{position:absolute;bottom:42px;left:10px;background:rgba(0,0,0,.8);border:1px solid #1a2a3a;border-radius:7px;padding:6px 10px;font-size:.68rem;line-height:1.7;z-index:3;}
-    #flip-btn{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.8);border:1px solid #1a2a3a;border-radius:50%;width:36px;height:36px;font-size:1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;}
-    #flip-btn:hover{border-color:#00aaff;}
+    /* Video fills the screen - no object-fit:cover to avoid skeleton offset */
+    #video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;}
+    /* Canvas sits exactly over the video - transparent, no background fill */
+    #pose-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
 
-    /* Right panel */
-    #panel{flex:0 0 240px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
+    /* Header bar - thin, semi-transparent */
+    #topbar{position:absolute;top:0;left:0;right:0;padding:10px 14px;display:flex;align-items:center;gap:10px;background:linear-gradient(rgba(0,0,0,.7),transparent);z-index:10;}
+    .logo{font-size:.9rem;font-weight:900;color:#00aaff;letter-spacing:3px;}
+    #status-dot{width:8px;height:8px;border-radius:50%;background:#333;margin-left:auto;transition:all .3s;}
+    #status-dot.seated{background:#f90;box-shadow:0 0 8px #f90;}
+    #status-dot.active{background:#0f0;box-shadow:0 0 10px #0f0;animation:glow 1s infinite alternate;}
+    #status-txt{font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#556;}
+    #status-txt.active{color:#0f0;} #status-txt.seated{color:#f90;}
+    @keyframes glow{to{box-shadow:0 0 18px #0f0;}}
 
-    #rep-card{background:#0b0f18;border:1px solid #141e2e;border-radius:12px;padding:18px 14px;text-align:center;}
-    #rep-card .clbl{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#334;margin-bottom:8px;}
-    #rep-n{font-size:5rem;font-weight:900;line-height:1;color:#fff;transition:color .15s,transform .15s;}
-    #rep-n.fg{color:#0f0;transform:scale(1.14);}
-    #rep-n.fp{color:#f90;transform:scale(1.1);}
-    #rep-sub{font-size:.72rem;color:#334;margin-top:4px;min-height:1em;}
+    /* Big rep counter - bottom left */
+    #rep-overlay{position:absolute;bottom:70px;left:14px;z-index:10;}
+    #rep-lbl{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);}
+    #rep-n{font-size:6rem;font-weight:900;line-height:1;text-shadow:0 2px 20px rgba(0,0,0,.8);transition:color .15s,transform .15s;}
+    #rep-n.fg{color:#0f0;transform:scale(1.12);}
+    #rep-n.fp{color:#f90;transform:scale(1.08);}
+    #rep-sub{font-size:.75rem;color:rgba(255,255,255,.6);margin-top:2px;text-shadow:0 1px 6px #000;}
 
-    #ctrl-row{display:flex;gap:8px;}
-    .cbtn{flex:1;padding:10px 6px;background:none;border:1px solid #1a2a3a;border-radius:9px;color:#445;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;}
-    #reset-btn:hover{border-color:#f60;color:#f60;}
-    #manual-btn{border-color:#00aaff33;color:#00aaff;}
-    #manual-btn:hover,#manual-btn.on{border-color:#0f0;color:#0f0;background:#0f021a;}
+    /* Debug HUD - bottom right corner, small */
+    #debug{position:absolute;bottom:70px;right:14px;background:rgba(0,0,0,.65);border-radius:8px;padding:5px 10px;font-size:.63rem;line-height:1.8;z-index:10;border:1px solid rgba(255,255,255,.08);}
+    #debug span{color:rgba(255,255,255,.35);}
 
-    #brain-card{background:#0b0f18;border:1px solid #9900ff22;border-radius:12px;padding:12px;flex:1;display:flex;flex-direction:column;gap:8px;min-height:180px;}
-    #brain-card .clbl{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:#aa66ff;}
-    #brain-cv{width:100%;flex:1;display:block;border-radius:8px;background:#050810;min-height:0;}
-    .pbars{display:flex;flex-direction:column;gap:4px;}
-    .prow{display:flex;align-items:center;gap:6px;}
-    .plbl{font-size:.63rem;color:#556;width:72px;flex-shrink:0;}
-    .ptrack{flex:1;height:6px;background:#141e2e;border-radius:3px;overflow:hidden;}
+    /* NN Brain - top right, collapsible */
+    #brain-wrap{position:absolute;top:50px;right:10px;width:180px;z-index:10;}
+    #brain-toggle{background:rgba(0,0,0,.7);border:1px solid rgba(150,0,255,.3);border-radius:8px;padding:5px 10px;font-size:.65rem;font-weight:700;color:#aa66ff;cursor:pointer;letter-spacing:1px;width:100%;text-align:center;margin-bottom:4px;}
+    #brain-panel{display:none;background:rgba(7,9,20,.88);border:1px solid rgba(150,0,255,.2);border-radius:10px;padding:10px;}
+    #brain-panel.open{display:block;}
+    #brain-cv{width:100%;height:120px;display:block;border-radius:6px;background:#050810;margin-bottom:8px;}
+    .prow{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
+    .plbl{font-size:.6rem;color:#667;width:64px;flex-shrink:0;}
+    .ptrack{flex:1;height:5px;background:#141e2e;border-radius:3px;overflow:hidden;}
     .pfill{height:100%;border-radius:3px;transition:width .2s;}
-    .pval{font-size:.63rem;font-weight:800;width:28px;text-align:right;}
-    #nn-verdict{text-align:center;font-size:.78rem;font-weight:800;padding:5px 8px;border-radius:7px;border:1px solid #1a2a3a;color:#334;transition:all .3s;}
+    .pval{font-size:.6rem;font-weight:800;width:26px;text-align:right;}
+    #nn-verdict{text-align:center;font-size:.72rem;font-weight:800;padding:4px;border-radius:6px;margin-top:5px;border:1px solid #1a2a3a;color:#334;}
+
+    /* Bottom controls */
+    #controls{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:10px;z-index:10;}
+    .cbtn{padding:9px 20px;border-radius:9px;font-size:.78rem;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.7);color:rgba(255,255,255,.6);backdrop-filter:blur(4px);}
+    #manual-btn{border-color:rgba(0,170,255,.4);color:#00aaff;}
+    #manual-btn.on{border-color:#0f0;color:#0f0;}
+    #reset-btn:hover{border-color:#f60;color:#f60;}
+    #flip-btn{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.6);}
   </style>
 </head>
 <body>
-<header>
-  <div><div class="logo">XLFITNESS</div><div class="logo-sub">Lat Pulldown · AI Rep Counter</div></div>
-  <div id="hdr-status"><div id="sdot" class="waiting"></div><span id="stxt">Loading…</span></div>
-</header>
 
+<!-- Boot -->
 <div id="boot">
-  <h2>AI REP COUNTER</h2>
-  <p class="tagline">Neural Network · XLFitness</p>
+  <h1>AI REP COUNTER</h1>
+  <p>XLFitness · Lat Pulldown</p>
   <div class="big-spin" id="big-spin"></div>
   <div id="prog-wrap">
     <div id="prog-bar"><div id="prog-fill"></div></div>
@@ -100,57 +93,64 @@
     <div id="prog-txt"></div>
   </div>
   <div id="steps">
-    <div class="step" id="s-cfg"><span class="step-icon">📋</span>Loading training data</div>
-    <div class="step" id="s-cam"><span class="step-icon">📷</span>Starting camera</div>
-    <div class="step" id="s-ai"><span class="step-icon">🧠</span>Loading AI model <span style="color:#223;font-size:.67rem;margin-left:auto">~15–20s</span></div>
-    <div class="step" id="s-go"><span class="step-icon">✅</span>Ready!</div>
+    <div class="step" id="s-cfg">📋 Loading training data</div>
+    <div class="step" id="s-cam">📷 Starting camera</div>
+    <div class="step" id="s-ai">🧠 Loading AI model <small style="opacity:.4;margin-left:4px">~15–20s</small></div>
+    <div class="step" id="s-go">✅ Ready!</div>
   </div>
   <button id="start-btn">▶ START</button>
-  <div id="err-msg"></div>
+  <div id="err-txt"></div>
 </div>
 
+<!-- App (full screen) -->
 <div id="app">
-  <div id="cam-wrap">
-    <video id="video" autoplay playsinline muted></video>
-    <canvas id="pose-canvas"></canvas>
-    <div id="banner">Waiting for pose…</div>
-    <div id="debug-hud">
-      <span style="color:#445">Elbow: </span><span id="d-elbow" style="color:#0af;font-weight:800">—</span>
-      <span style="color:#445"> │ Phase: </span><span id="d-phase" style="color:#aaa">up</span>
-      <span style="color:#445"> │ State: </span><span id="d-state" style="color:#aaa">waiting</span>
-    </div>
-    <div id="flip-btn">🔄</div>
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="pose-canvas"></canvas>
+
+  <!-- Top bar -->
+  <div id="topbar">
+    <span class="logo">XLFITNESS</span>
+    <div id="status-dot"></div>
+    <span id="status-txt">Ready</span>
   </div>
 
-  <div id="panel">
-    <div id="rep-card">
-      <div class="clbl">Reps This Set</div>
-      <div id="rep-n">0</div>
-      <div id="rep-sub">Tap Start or sit at machine</div>
-    </div>
+  <!-- Rep counter -->
+  <div id="rep-overlay">
+    <div id="rep-lbl">REPS</div>
+    <div id="rep-n">0</div>
+    <div id="rep-sub">Tap Start or sit at machine</div>
+  </div>
 
-    <div id="ctrl-row">
-      <button class="cbtn" id="manual-btn">▶ Start Now</button>
-      <button class="cbtn" id="reset-btn">↺ Reset</button>
-    </div>
+  <!-- Debug HUD -->
+  <div id="debug">
+    <span>Elbow </span><b id="d-elbow" style="color:#0af">—</b>
+    <span> · Phase </span><b id="d-phase" style="color:#aaa">up</b>
+  </div>
 
-    <div id="brain-card">
-      <div class="clbl">🧠 Neural Network</div>
+  <!-- NN Brain (collapsible) -->
+  <div id="brain-wrap">
+    <button id="brain-toggle">🧠 NEURAL NETWORK ▾</button>
+    <div id="brain-panel">
       <canvas id="brain-cv"></canvas>
-      <div class="pbars">
-        <div class="prow"><span class="plbl">Good Rep</span><div class="ptrack"><div class="pfill" id="pb-good" style="background:#0f0;width:0%"></div></div><span class="pval" id="pv-good" style="color:#0f0">0%</span></div>
-        <div class="prow"><span class="plbl">Bad Rep</span><div class="ptrack"><div class="pfill" id="pb-bad" style="background:#f44;width:0%"></div></div><span class="pval" id="pv-bad" style="color:#f44">0%</span></div>
-        <div class="prow"><span class="plbl">False Move</span><div class="ptrack"><div class="pfill" id="pb-false" style="background:#f90;width:0%"></div></div><span class="pval" id="pv-false" style="color:#f90">0%</span></div>
-      </div>
+      <div class="prow"><span class="plbl">Good Rep</span><div class="ptrack"><div class="pfill" id="pb-good" style="background:#0f0;width:0%"></div></div><span class="pval" id="pv-good" style="color:#0f0">0%</span></div>
+      <div class="prow"><span class="plbl">Bad Rep</span><div class="ptrack"><div class="pfill" id="pb-bad" style="background:#f44;width:0%"></div></div><span class="pval" id="pv-bad" style="color:#f44">0%</span></div>
+      <div class="prow"><span class="plbl">False Move</span><div class="ptrack"><div class="pfill" id="pb-false" style="background:#f90;width:0%"></div></div><span class="pval" id="pv-false" style="color:#f90">0%</span></div>
       <div id="nn-verdict">Waiting…</div>
     </div>
+  </div>
+
+  <!-- Controls -->
+  <div id="controls">
+    <button class="cbtn" id="manual-btn">▶ Start Session</button>
+    <button class="cbtn" id="reset-btn">↺ Reset</button>
+    <button class="cbtn" id="flip-btn">🔄 Flip</button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
 <script>
-// ── Neural Network ─────────────────────────────────────────────────────────
+// ── Neural Network ──────────────────────────────────────────────────────────
 const M={"classes":["bad_rep","false_movement","good_rep"],"scaler_mean":[59.0,115.79411764705883,34.71380523485762,4.254323529411764,126.24518458128263],"scaler_scale":[27.0761453508217,30.744468093286315,12.673451918018374,0.8763237288135366,14.712718976106613],"weights":[[[-0.21544180113002273,0.4733945190164231,-0.28568686375739477,0.055520904159142445,-0.29222931564406807],[0.1473600646249914,-0.041312722582370516,0.776100382675977,-0.5818704502172488,-0.7704401168634055],[0.34647057648982177,-0.3014494929049592,-0.3581476340053432,-0.24096539581930532,1.0543217203117927],[0.769357479235919,-0.8612495057963973,0.28587196610124554,0.177106122643847,0.3206658678278194],[-0.8620167620127267,0.11762726141011128,0.5499458720337328,-1.1017332994334668,0.5855545120636735],[-1.0247191547443735,0.6134930421387772,-0.6342446730838386,0.5698063216316074,1.2763540564876947],[-0.7557770817941678,0.10600804815784581,0.48033594587764233,-0.6662698826772256,-0.1400474779809729],[0.48919865535883367,-0.2579784682488491,-0.39519953268149893,0.5355488876096055,0.22812077051425003],[-0.03601249981232388,-0.4756222613804594,-1.2672343606563414,-0.5695755246748293,-1.2497752445941643],[0.270178335099781,-0.2799098657512839,0.837866978447285,-0.21079732379129942,-0.39812447288934405],[-0.4639567413665239,-0.43549914002098766,0.33982242230960674,0.06184319698560971,-0.7887155537220194],[1.3147212725351507,-0.6523969281956086,0.3405497765305692,0.07525426742647041,-0.43638467321410096]],[[-0.898277382946494,0.894212060602343,0.2806738363592763,-0.45262387352799166,0.9974458747696329,0.5578824132333144,0.726390707801245,-0.9577429736449832,-0.1102507688615629,0.26405275779966697,-0.021950727509539702,-0.28544741795839446],[1.0221667696121954,0.2243147325868772,0.07384263115511389,-0.4976293149275185,-1.204533536077999,1.2797071795989154,0.18191402449564326,0.24813324068373835,1.0159984035951217,-1.00803356502199,0.8201978348126182,-0.5846477183084205],[0.20881113597184656,-0.3262445384030498,0.11447931003317495,0.05625355214397291,-0.19766796228749733,0.731192248093407,-0.30974972152545716,0.3317285068769236,0.29413194363876427,0.009327458667149754,0.4339569633116398,0.5513161541121668],[0.8523427572047566,-0.8646980447680225,0.9904267818421707,0.30520789469574305,0.561444742553861,0.6043859805667411,-0.8305225764915235,0.2981431556766447,0.4395079652275639,0.6768745012939313,-0.8012818911113907,0.9047939448090766],[0.26619677742770714,-0.355032021926615,0.5724588997244712,-1.2045611403206655,0.5262964437575096,0.83253866998875,-0.6556966022662108,-0.7864954428226686,0.4442359267686766,-1.093114633763563,-0.009884859578571593,-0.7846715601439768],[-0.008761733881903874,-2.163425880992605e-08,-5.477670139699893e-23,3.221929311052655e-13,-0.008353669262081326,-0.0006319741769549905,-6.104803232452121e-22,-2.133383759430888e-09,-3.2604922992809015e-05,-4.83230686648843e-06,7.002831814503273e-05,0.0012482286810295395],[-0.057173232560072215,0.6872454132169997,0.17244749768069195,-0.3967418335330171,0.03022863445335705,0.7458713299830223,0.6282633872387864,0.3784862047618281,-0.10380473817168479,0.6802425553440028,-0.09577271471745767,-0.6432566247137614],[-0.4473656254903604,0.10044409880339343,6.047215876743936e-26,6.187200397156517e-26,-0.09830777311548566,7.450850496680107e-25,0.34392993229934193,-2.9790453855847503e-08,-0.03200084180549218,-0.3295982843777312,0.2083038946037539,-0.0006330763093053648]],[[0.18204085958078653,-1.4805482271337294,0.5693937407115133,1.1217433376679913,0.8315142143905013,0.03397320384233605,-0.584456525478809,0.525382312951934],[-1.0506498163571603,0.6364613163568834,0.7165052790055405,0.2597674838433229,-0.968962824571812,0.03537948921633541,0.05067015064169449,0.455169957773523],[1.0260269734023635,-0.898393362217454,-0.35743881049930115,-0.6431481593906692,-0.8500409260428844,4.510195889376646e-08,0.38920428079281677,0.4077205121192418]]],"biases":[[-0.1611613140540126,-0.1801056046926474,0.5702975162975089,-0.2993724153560971,-0.2011084922073068,0.5330908128058144,-0.3622680543805991,0.5687726092748876,0.09614576109589434,0.7002104348510434,0.19901917871705985,0.01347397163953556],[-0.3155662614850692,0.5316115168456971,0.19801811342579476,0.13200910954206513,-0.6836893816958481,-0.2996088669941066,0.1756605346080453,-0.39968111934128864],[0.1711375371848895,-0.46790937310390696,-0.807105587807865]]};
 function relu(x){return x.map(v=>Math.max(0,v));}
 function softmax(x){const m=Math.max(...x),e=x.map(v=>Math.exp(v-m)),s=e.reduce((a,b)=>a+b,0);return e.map(v=>v/s);}
@@ -167,38 +167,41 @@ function nnRun(minA,rom,std,durS,avg){
   return{acts,probs:h};
 }
 
-// ── Brain canvas ────────────────────────────────────────────────────────────
+// ── Brain visualiser ────────────────────────────────────────────────────────
 const LAYERS=[5,12,8,3];
 let bActs=LAYERS.map(n=>new Array(n).fill(0));
 let pulses=[];
 const bCv=document.getElementById('brain-cv');
 const bCtx=bCv.getContext('2d');
-function nPos(l,n,cw,ch){const x=(l+0.5)/LAYERS.length*cw,cnt=LAYERS[l],gap=Math.min(ch/(cnt+1),15);return{x,y:(ch-(cnt-1)*gap)/2+n*gap};}
+document.getElementById('brain-toggle').addEventListener('click',()=>{
+  document.getElementById('brain-panel').classList.toggle('open');
+});
+function nPos(l,n,cw,ch){const x=(l+0.5)/LAYERS.length*cw,cnt=LAYERS[l],gap=Math.min(ch/(cnt+1),13);return{x,y:(ch-(cnt-1)*gap)/2+n*gap};}
 function drawBrain(){
-  const cw=bCv.width,ch=bCv.height;if(!cw||!ch)return;
+  const cw=bCv.width||160,ch=bCv.height||120;
   bCtx.fillStyle='#050810';bCtx.fillRect(0,0,cw,ch);
   for(let l=0;l<LAYERS.length-1;l++)for(let i=0;i<LAYERS[l];i++)for(let j=0;j<LAYERS[l+1];j++){
     const p1=nPos(l,i,cw,ch),p2=nPos(l+1,j,cw,ch);
     const act=(bActs[l][i]+bActs[l+1][j])/2;
     const w=M.weights[l][j]?M.weights[l][j][i]||0:0;
     bCtx.strokeStyle=w>=0?`rgba(0,170,255,${.04+act*.35})`:`rgba(255,60,60,${.04+act*.35})`;
-    bCtx.lineWidth=.5+act*1.5;bCtx.beginPath();bCtx.moveTo(p1.x,p1.y);bCtx.lineTo(p2.x,p2.y);bCtx.stroke();
+    bCtx.lineWidth=.4+act*1.2;bCtx.beginPath();bCtx.moveTo(p1.x,p1.y);bCtx.lineTo(p2.x,p2.y);bCtx.stroke();
   }
   pulses=pulses.filter(p=>p.t<1);
-  pulses.forEach(p=>{p.t+=.05;const x=p.x1+(p.x2-p.x1)*p.t,y=p.y1+(p.y2-p.y1)*p.t;bCtx.beginPath();bCtx.arc(x,y,3,0,Math.PI*2);bCtx.fillStyle=p.c;bCtx.fill();});
+  pulses.forEach(p=>{p.t+=.06;const x=p.x1+(p.x2-p.x1)*p.t,y=p.y1+(p.y2-p.y1)*p.t;bCtx.beginPath();bCtx.arc(x,y,2.5,0,Math.PI*2);bCtx.fillStyle=p.c;bCtx.fill();});
   for(let l=0;l<LAYERS.length;l++)for(let n=0;n<LAYERS[l];n++){
     const pos=nPos(l,n,cw,ch),act=bActs[l]?bActs[l][n]:0;
     const nc=l===LAYERS.length-1?(n===2?`rgba(0,255,0,${.3+act*.7})`:n===0?`rgba(255,60,60,${.3+act*.7})`:`rgba(255,150,0,${.3+act*.7})`):`rgba(${Math.floor(act*255)},${Math.floor(act*160+80)},255,${.4+act*.5})`;
-    if(act>.5){bCtx.shadowColor=nc;bCtx.shadowBlur=9;}
-    bCtx.beginPath();bCtx.arc(pos.x,pos.y,4+act*2,0,Math.PI*2);bCtx.fillStyle=nc;bCtx.fill();bCtx.shadowBlur=0;
-    if(l===0){bCtx.fillStyle='rgba(80,130,180,.8)';bCtx.font='7px Arial';bCtx.textAlign='right';bCtx.fillText(['min°','ROM','std','dur','avg'][n],pos.x-7,pos.y+3);}
-    if(l===LAYERS.length-1){const cs=['#f44','#f90','#0f0'];bCtx.fillStyle=cs[n];bCtx.font='bold 7px Arial';bCtx.textAlign='left';bCtx.fillText(['BAD','FALSE','GOOD'][n],pos.x+7,pos.y+3);}
+    if(act>.5){bCtx.shadowColor=nc;bCtx.shadowBlur=7;}
+    bCtx.beginPath();bCtx.arc(pos.x,pos.y,3+act*2,0,Math.PI*2);bCtx.fillStyle=nc;bCtx.fill();bCtx.shadowBlur=0;
+    if(l===0){bCtx.fillStyle='rgba(80,130,180,.7)';bCtx.font='6px Arial';bCtx.textAlign='right';bCtx.fillText(['min°','ROM','std','dur','avg'][n],pos.x-5,pos.y+2);}
+    if(l===LAYERS.length-1){const cs=['#f44','#f90','#0f0'];bCtx.fillStyle=cs[n];bCtx.font='bold 6px Arial';bCtx.textAlign='left';bCtx.fillText(['BAD','FALSE','GOOD'][n],pos.x+5,pos.y+2);}
   }
   bCtx.textAlign='left';
 }
 (function ab(){drawBrain();requestAnimationFrame(ab);})();
 function firePulse(c){for(let l=0;l<LAYERS.length-1;l++)for(let i=0;i<LAYERS[l];i++)for(let j=0;j<LAYERS[l+1];j++)if(Math.random()<.2){const p1=nPos(l,i,bCv.width,bCv.height),p2=nPos(l+1,j,bCv.width,bCv.height);pulses.push({x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y,t:0,c});}}
-function resizeBrain(){bCv.width=bCv.clientWidth;bCv.height=bCv.clientHeight||150;}
+function resizeBrain(){bCv.width=bCv.clientWidth||160;bCv.height=120;}
 function updateBrain(minA,rom,std,durS,avg){
   try{
     const{acts,probs}=nnRun(minA,rom,std,durS,avg);
@@ -212,141 +215,126 @@ function updateBrain(minA,rom,std,durS,avg){
     document.getElementById('pv-false').textContent=Math.round(pf*100)+'%';
     const best=pg>pb&&pg>pf?'good':pb>pf?'bad':'false';
     const v=document.getElementById('nn-verdict');
-    if(best==='good'){v.textContent='✅ GOOD REP';v.style.cssText='border-color:#0f0;color:#0f0;background:#0f021a;';}
-    else if(best==='bad'){v.textContent='⚠ BAD REP';v.style.cssText='border-color:#f44;color:#f44;background:#1a0000;';}
-    else{v.textContent='⚡ FALSE MOVE';v.style.cssText='border-color:#f90;color:#f90;background:#1a1000;';}
+    if(best==='good'){v.textContent='✅ GOOD REP';v.style.cssText='border-color:#0f0;color:#0f0;';}
+    else if(best==='bad'){v.textContent='⚠ BAD REP';v.style.cssText='border-color:#f44;color:#f44;';}
+    else{v.textContent='⚡ FALSE MOVE';v.style.cssText='border-color:#f90;color:#f90;';}
     return best;
   }catch(e){return'good';}
 }
 
-// ── Pose helpers ────────────────────────────────────────────────────────────
-// MoveNet keypoint indices
-// 0=nose 1=l_eye 2=r_eye 3=l_ear 4=r_ear 5=l_shoulder 6=r_shoulder
-// 7=l_elbow 8=r_elbow 9=l_wrist 10=r_wrist 11=l_hip 12=r_hip
+// ── Pose ────────────────────────────────────────────────────────────────────
 const SKEL=[[5,7],[7,9],[6,8],[8,10],[5,6],[5,11],[6,12],[11,12],[11,13],[13,15],[12,14],[14,16]];
-const CONF=0.25; // confidence threshold — lowered from 0.3
-
+const CONF=0.25;
 function gkp(pose,i){const p=pose.keypoints[i];return p&&p.score>=CONF?p:null;}
-
-function ang(a,b,c){
-  const ab={x:a.x-b.x,y:a.y-b.y},cb={x:c.x-b.x,y:c.y-b.y};
-  const d=ab.x*cb.x+ab.y*cb.y,m=Math.sqrt((ab.x**2+ab.y**2)*(cb.x**2+cb.y**2));
-  return m?Math.acos(Math.min(1,Math.max(-1,d/m)))*180/Math.PI:null;
-}
-
+function ang(a,b,c){const ab={x:a.x-b.x,y:a.y-b.y},cb={x:c.x-b.x,y:c.y-b.y},d=ab.x*cb.x+ab.y*cb.y,m=Math.sqrt((ab.x**2+ab.y**2)*(cb.x**2+cb.y**2));return m?Math.acos(Math.min(1,Math.max(-1,d/m)))*180/Math.PI:null;}
 function bestElbow(pose){
-  // Return the single best elbow angle (highest confidence arm)
-  const candidates=[];
+  const cands=[];
   const ls=gkp(pose,5),le=gkp(pose,7),lw=gkp(pose,9);
   const rs=gkp(pose,6),re=gkp(pose,8),rw=gkp(pose,10);
-  if(ls&&le&&lw){const a=ang(ls,le,lw);if(a!==null)candidates.push({a,conf:(ls.score+le.score+lw.score)/3});}
-  if(rs&&re&&rw){const a=ang(rs,re,rw);if(a!==null)candidates.push({a,conf:(rs.score+re.score+rw.score)/3});}
-  if(!candidates.length)return null;
-  // Use highest confidence arm
-  candidates.sort((a,b)=>b.conf-a.conf);
-  return candidates[0].a;
+  if(ls&&le&&lw){const a=ang(ls,le,lw);if(a!==null)cands.push({a,c:(ls.score+le.score+lw.score)/3});}
+  if(rs&&re&&rw){const a=ang(rs,re,rw);if(a!==null)cands.push({a,c:(rs.score+re.score+rw.score)/3});}
+  if(!cands.length)return null;
+  cands.sort((a,b)=>b.c-a.c);
+  return cands[0].a;
 }
 
-// ── Canvas — correctly sized overlay (no object-fit, no CSS transform on canvas) ──
+// ── Canvas ──────────────────────────────────────────────────────────────────
 const video=document.getElementById('video');
 const pCv=document.getElementById('pose-canvas');
 const pCtx=pCv.getContext('2d');
 
 function syncCanvas(){
-  // Match canvas pixel size exactly to the video's displayed size
-  const vw=video.clientWidth,vh=video.clientHeight;
-  if(vw>0&&vh>0){pCv.width=vw;pCv.height=vh;}
+  // Use the video's natural rendered size for accurate keypoint mapping
+  const rect=video.getBoundingClientRect();
+  pCv.width=Math.round(rect.width);
+  pCv.height=Math.round(rect.height);
+  pCv.style.top=rect.top+'px';
+  pCv.style.left=rect.left+'px';
+  pCv.style.width=rect.width+'px';
+  pCv.style.height=rect.height+'px';
 }
-window.addEventListener('resize',syncCanvas);
+window.addEventListener('resize',()=>{syncCanvas();resizeBrain();});
 video.addEventListener('loadedmetadata',syncCanvas);
+video.addEventListener('playing',()=>{setTimeout(syncCanvas,100);});
 
 function drawPose(pose,color){
+  // clearRect: fully transparent — does NOT paint any background
   pCtx.clearRect(0,0,pCv.width,pCv.height);
   if(!pCv.width||!video.videoWidth)return;
-  // Scale from video coords to canvas display coords
-  const sx=pCv.width/video.videoWidth, sy=pCv.height/video.videoHeight;
+
+  // Calculate actual rendered video area (letterbox-aware)
+  const cw=pCv.width,ch=pCv.height;
+  const vw=video.videoWidth,vh=video.videoHeight;
+  const scale=Math.min(cw/vw,ch/vh);
+  const ox=(cw-vw*scale)/2, oy=(ch-vh*scale)/2;
+
   pCtx.strokeStyle=color;pCtx.lineWidth=3;
   for(const[a,b]of SKEL){
     const pa=pose.keypoints[a],pb=pose.keypoints[b];
     if(pa?.score>=CONF&&pb?.score>=CONF){
-      pCtx.beginPath();pCtx.moveTo(pa.x*sx,pa.y*sy);pCtx.lineTo(pb.x*sx,pb.y*sy);pCtx.stroke();
+      pCtx.beginPath();
+      pCtx.moveTo(pa.x*scale+ox,pa.y*scale+oy);
+      pCtx.lineTo(pb.x*scale+ox,pb.y*scale+oy);
+      pCtx.stroke();
     }
   }
   for(const p of pose.keypoints){
     if(p.score>=CONF){
-      pCtx.beginPath();pCtx.arc(p.x*sx,p.y*sy,5,0,Math.PI*2);
+      pCtx.beginPath();pCtx.arc(p.x*scale+ox,p.y*scale+oy,5,0,Math.PI*2);
       pCtx.fillStyle='#fff';pCtx.fill();
       pCtx.strokeStyle=color;pCtx.lineWidth=2;pCtx.stroke();
     }
   }
 }
 
-// ── State ───────────────────────────────────────────────────────────────────
-let config=null;
-let appState='loading';
-let seatedF=0,unseatedF=0,manualSession=false;
-
-// Rep detection — RELAXED thresholds (more forgiving than before)
-// TOP: angle above this = arms extended up
-// BOT: angle below this = bar pulled down (set to 80° — way more forgiving than 52°)
+// ── App state ───────────────────────────────────────────────────────────────
+let appState='loading',seatedF=0,unseatedF=0,manualSession=false;
 let TOP=140,BOT=80,MIN_DROP=35,MIN_CF=4,MIN_EF=3,MIN_MS=700;
-
 let phase='up',repMax=0,repMin=999,repStart=null;
 let contractedF=0,extendedF=6;
-let smooth=[],repBuf=[],repCount=0;
-let frameN=0;
+let smooth=[],repBuf=[],repCount=0,frameN=0;
 
 const repNEl=document.getElementById('rep-n');
 const repSubEl=document.getElementById('rep-sub');
-const banner=document.getElementById('banner');
-const sdot=document.getElementById('sdot');
-const stxt=document.getElementById('stxt');
+const sdot=document.getElementById('status-dot');
+const stxt=document.getElementById('status-txt');
 
 function setState(s){
   appState=s;sdot.className=s;stxt.className=s;
-  document.getElementById('d-state').textContent=s;
-  if(s==='waiting'){stxt.textContent='Machine Ready';banner.textContent='Point camera at person on the machine';banner.className='';}
-  else if(s==='seated'){stxt.textContent='Person Detected';banner.textContent='🟡 Person detected — pull to start';banner.className='seated';}
-  else if(s==='active'){stxt.textContent='Set in Progress';banner.textContent='🟢 Counting reps…';banner.className='active';}
+  if(s==='waiting'){stxt.textContent='Machine Ready';}
+  else if(s==='seated'){stxt.textContent='Person Detected';}
+  else if(s==='active'){stxt.textContent='Set in Progress';}
 }
-
 function smoothA(v){smooth.push(v);if(smooth.length>5)smooth.shift();return smooth.reduce((a,b)=>a+b,0)/smooth.length;}
 
 function processAngle(raw){
   if(raw===null)return;
   const ea=smoothA(raw);
   repBuf.push(ea);if(repBuf.length>200)repBuf.shift();
-
   document.getElementById('d-elbow').textContent=Math.round(ea)+'°';
   document.getElementById('d-phase').textContent=phase;
-
   if(phase==='up'){
     repMax=Math.max(repMax,ea);
     if(ea>TOP)extendedF++;else extendedF=0;
-    if(ea<BOT&&extendedF>=MIN_EF&&(repMax-ea)>=MIN_DROP){
-      phase='down';repMin=ea;repStart=Date.now();contractedF=0;
-    }
+    if(ea<BOT&&extendedF>=MIN_EF&&(repMax-ea)>=MIN_DROP){phase='down';repMin=ea;repStart=Date.now();contractedF=0;}
   }else{
     repMin=Math.min(repMin,ea);
     if(ea<BOT)contractedF++;else contractedF=0;
     const dur=repStart?Date.now()-repStart:0;
     if(ea>TOP&&contractedF>=MIN_CF&&dur>=MIN_MS){
-      // ── REP COUNTED ──
       phase='up';
       const rom=Math.round(repMax-repMin);
-      const a=repBuf.slice(-80);
-      const avg=a.length?a.reduce((x,y)=>x+y,0)/a.length:100;
+      const a=repBuf.slice(-80),avg=a.length?a.reduce((x,y)=>x+y,0)/a.length:100;
       const std=a.length>1?Math.sqrt(a.reduce((s,v)=>s+(v-avg)**2,0)/a.length):20;
-      // NN is cosmetic only — rep is counted regardless
       const nnBest=updateBrain(repMin,rom,std,dur/1000,avg);
-      const isGood=rom>=60&&repMin<85; // rule-based good: big ROM + pulled down low
+      const isGood=rom>=55&&repMin<90;
       repCount++;
       repNEl.textContent=repCount;
-      repSubEl.textContent=isGood?'✓ Good rep':'Partial rep — go deeper';
+      repSubEl.textContent=isGood?'✓ Good rep':'Partial — pull deeper';
       repNEl.className=isGood?'fg':'fp';setTimeout(()=>{repNEl.className='';},600);
       firePulse(isGood?'#0f0':'#f44');
       repMax=ea;repMin=999;extendedF=0;contractedF=0;repBuf=[];
-      if(appState==='seated'||appState==='waiting')setState('active');
+      if(appState!=='active')setState('active');
     }
   }
 }
@@ -359,18 +347,14 @@ async function loop(){
     if(poses.length>0){
       const pose=poses[0];
       const ea=bestElbow(pose);
-      const skelColor=appState==='active'?'rgba(0,255,100,.85)':'rgba(0,170,255,.75)';
+      const skelColor=appState==='active'?'rgba(0,255,100,.9)':'rgba(0,170,255,.8)';
       drawPose(pose,skelColor);
-
-      // Seated detection: just need to see shoulders/hips in frame
+      // Occupancy
       const ls=gkp(pose,5),rs=gkp(pose,6),lh=gkp(pose,11),rh=gkp(pose,12);
       let seated=manualSession;
       if(!manualSession&&(ls||rs)){
-        if(lh||rh){
-          const hy=(lh&&rh?(lh.y+rh.y)/2:(lh||rh).y);
-          const sy=(ls&&rs?(ls.y+rs.y)/2:(ls||rs).y);
-          seated=hy>0.3&&sy<hy+0.05;
-        }else{seated=true;} // upper body visible only
+        if(lh||rh){const hy=(lh&&rh?(lh.y+rh.y)/2:(lh||rh).y),sy=(ls&&rs?(ls.y+rs.y)/2:(ls||rs).y);seated=hy>0.3&&sy<hy+0.05;}
+        else seated=true;
       }
       if(seated){seatedF++;unseatedF=0;}else{unseatedF++;seatedF=0;}
       if(appState==='waiting'&&seatedF>12)setState('seated');
@@ -378,11 +362,8 @@ async function loop(){
         setState('waiting');repCount=0;repNEl.textContent='0';repSubEl.textContent='Tap Start or sit at machine';
         phase='up';repMax=0;repMin=999;smooth=[];repBuf=[];
       }
-      // Always process angle when person is visible and session active
       if(appState!=='waiting')processAngle(ea);
-      else if(manualSession)processAngle(ea);
-
-      // Brain live update every 8 frames
+      // Brain live update
       if(frameN++%8===0&&repBuf.length>=5){
         const a=repBuf.slice(-50),avg=a.reduce((x,y)=>x+y,0)/a.length;
         const std=Math.sqrt(a.reduce((s,v)=>s+(v-avg)**2,0)/a.length);
@@ -398,46 +379,25 @@ async function loop(){
 }
 
 // ── Camera ──────────────────────────────────────────────────────────────────
-let stream=null;
-// Default to rear camera — typically filming someone else on the machine
-let facing='environment';
-
+let stream=null,facing='environment';
 async function startCam(f){
   if(stream)stream.getTracks().forEach(t=>t.stop());
-  try{
-    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:f,width:{ideal:1280},height:{ideal:720}},audio:false});
-  }catch(e){
-    // Fallback: no facingMode constraint
-    stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
-  }
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:f,width:{ideal:1280},height:{ideal:720}},audio:false});}
+  catch(e){stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});}
   video.srcObject=stream;await video.play();
-  setTimeout(syncCanvas,200); // sync after video settles
+  setTimeout(syncCanvas,300);
 }
-
-document.getElementById('flip-btn').addEventListener('click',async()=>{
-  facing=facing==='environment'?'user':'environment';
-  try{await startCam(facing);}catch(e){}
-});
-
-// ── Controls ────────────────────────────────────────────────────────────────
+document.getElementById('flip-btn').addEventListener('click',async()=>{facing=facing==='environment'?'user':'environment';try{await startCam(facing);}catch(e){}});
 document.getElementById('manual-btn').addEventListener('click',()=>{
-  manualSession=true;seatedF=99;
-  setState('seated');
-  const b=document.getElementById('manual-btn');
-  b.textContent='✓ Active';b.classList.add('on');
+  manualSession=true;seatedF=99;setState('seated');
+  const b=document.getElementById('manual-btn');b.textContent='✓ Active';b.classList.add('on');
 });
-
 document.getElementById('reset-btn').addEventListener('click',()=>{
   manualSession=false;seatedF=0;unseatedF=0;
-  repCount=0;phase='up';repMax=0;repMin=999;repStart=null;
-  contractedF=0;extendedF=6;smooth=[];repBuf=[];
-  repNEl.textContent='0';repNEl.className='';
-  repSubEl.textContent='Tap Start or sit at machine';
-  document.getElementById('nn-verdict').textContent='Waiting…';
-  document.getElementById('nn-verdict').style.cssText='';
-  document.getElementById('manual-btn').textContent='▶ Start Now';
-  document.getElementById('manual-btn').classList.remove('on');
-  document.getElementById('manual-btn').style.cssText='';
+  repCount=0;phase='up';repMax=0;repMin=999;repStart=null;contractedF=0;extendedF=6;smooth=[];repBuf=[];
+  repNEl.textContent='0';repNEl.className='';repSubEl.textContent='Tap Start or sit at machine';
+  document.getElementById('nn-verdict').textContent='Waiting…';document.getElementById('nn-verdict').style.cssText='';
+  const b=document.getElementById('manual-btn');b.textContent='▶ Start Session';b.classList.remove('on');
   setState('waiting');
 });
 
@@ -445,41 +405,33 @@ document.getElementById('reset-btn').addEventListener('click',()=>{
 const TRAINING_URL='https://raw.githubusercontent.com/XLDonkey/XLFitness_pose-estimation/main/machine_configs/nautilus_nitro_lat_pulldown_training.json';
 function setStep(id,s){const el=document.getElementById(id);el.classList.remove('active','done','error');el.classList.add(s);}
 function setProg(pct,msg){document.getElementById('prog-fill').style.width=pct+'%';document.getElementById('prog-pct').textContent=pct+'%';document.getElementById('prog-txt').textContent=msg;}
-
 document.getElementById('start-btn').addEventListener('click',async()=>{
   document.getElementById('start-btn').style.display='none';
   document.getElementById('big-spin').style.display='block';
   document.getElementById('prog-wrap').style.display='flex';
   document.getElementById('steps').style.display='flex';
-  const errEl=document.getElementById('err-msg');
+  const errEl=document.getElementById('err-txt');
   try{
     setStep('s-cfg','active');setProg(5,'Fetching training data…');
     try{const r=await fetch(TRAINING_URL,{cache:'no-cache'});if(r.ok){const j=await r.json();if(j.summary){TOP=j.summary.top_threshold??140;BOT=Math.max(70,j.summary.bottom_threshold??80);}}}catch(e){}
-    setStep('s-cfg','done');setProg(20,'Training data loaded ✓');
-
+    setStep('s-cfg','done');setProg(20,'Done ✓');
     setStep('s-cam','active');setProg(25,'Requesting camera…');
     await startCam(facing);
     setStep('s-cam','done');setProg(40,'Camera ready ✓');
-
     setStep('s-ai','active');setProg(45,'Loading AI model…');
-    let fp=45;
-    const ft=setInterval(()=>{if(fp<88){fp++;setProg(fp,'Loading AI model — takes ~15–20s on mobile…');}},350);
+    let fp=45;const ft=setInterval(()=>{if(fp<88){fp++;setProg(fp,'Loading AI model — ~15–20s on mobile…');}},350);
     detector=await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING});
-    clearInterval(ft);
-    setStep('s-ai','done');setProg(95,'AI model ready ✓');
-
+    clearInterval(ft);setStep('s-ai','done');setProg(95,'AI model ready ✓');
     resizeBrain();syncCanvas();
     setStep('s-go','done');setProg(100,'All systems go!');
     await new Promise(r=>setTimeout(r,400));
     document.getElementById('boot').style.display='none';
-    document.getElementById('app').style.display='flex';
-    setState('waiting');
-    loop();
+    document.getElementById('app').style.display='block';
+    setState('waiting');loop();
   }catch(e){
     document.getElementById('big-spin').style.display='none';
     document.getElementById('start-btn').style.display='block';
-    errEl.style.display='block';
-    errEl.textContent='❌ '+e.message+' — use Chrome & allow camera';
+    errEl.style.display='block';errEl.textContent='❌ '+e.message+' — use Chrome & allow camera';
     ['s-cfg','s-cam','s-ai','s-go'].forEach(id=>{if(document.getElementById(id).classList.contains('active'))setStep(id,'error');});
   }
 });
