@@ -106,17 +106,14 @@
 <!-- Upload Screen -->
 <div id="upload-screen">
   <h2>Load Training Data</h2>
-  <p>Upload your recorded training JSON to calibrate the rep counter, or use the demo defaults.</p>
-
+  <p id="upload-status">Loading training data from GitHub…</p>
+  <div class="spinner" id="auto-spinner"></div>
+  <p style="font-size:.75rem;color:#444;margin-top:8px">Or upload manually if needed:</p>
   <label class="upload-area" id="drop-zone">
     <input type="file" id="json-file" accept=".json"/>
     <div class="upload-icon">📂</div>
     <p>Click to upload training JSON<br><small style="color:#555">nautilus_nitro_lat_pulldown_training.json</small></p>
   </label>
-
-  <span class="or-divider">— OR —</span>
-  <button id="default-btn">Use Demo Defaults</button>
-  <p style="font-size:.75rem;color:#444">Demo uses typical lat pulldown thresholds</p>
 </div>
 
 <!-- App Screen -->
@@ -393,7 +390,23 @@ document.getElementById('drop-zone').addEventListener('drop', e => {
   if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
 });
 
-document.getElementById('default-btn').addEventListener('click', () => startApp(DEMO_CONFIG));
+// Auto-load training JSON from GitHub on page load
+const TRAINING_URL = 'https://raw.githubusercontent.com/XLDonkey/XLFitness_pose-estimation/main/machine_configs/nautilus_nitro_lat_pulldown_training.json';
+
+async function autoLoad() {
+  try {
+    const res = await fetch(TRAINING_URL);
+    if (!res.ok) throw new Error('fetch failed');
+    const cfg = await res.json();
+    document.getElementById('upload-status').textContent = '✅ Training data loaded! Starting…';
+    document.getElementById('auto-spinner').style.display = 'none';
+    setTimeout(() => startApp(cfg), 600);
+  } catch(e) {
+    document.getElementById('auto-spinner').style.display = 'none';
+    document.getElementById('upload-status').textContent = 'Could not auto-load — upload manually below:';
+  }
+}
+autoLoad();
 
 // In-app controls
 document.getElementById('reset-btn').addEventListener('click', () => {
