@@ -3,262 +3,164 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XLFitness AI Rep Counter – Investor Demo</title>
+  <title>XLFitness – AI Rep Counter Demo</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{background:#050810;color:#fff;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;}
+    body{background:#07090f;color:#fff;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;}
 
-    /* Nav */
-    nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #0a1520;}
-    .logo{font-size:1.3rem;font-weight:900;color:#00aaff;letter-spacing:3px;}
-    .logo span{color:#fff;}
-    .nav-tag{background:#00aaff15;border:1px solid #00aaff44;color:#00aaff;padding:4px 14px;border-radius:20px;font-size:.75rem;font-weight:700;letter-spacing:1px;}
+    nav{padding:16px 32px;display:flex;align-items:center;gap:14px;border-bottom:1px solid #141e2e;}
+    .logo{font-size:1.1rem;font-weight:900;color:#00aaff;letter-spacing:3px;}
+    .nav-sub{color:#334;font-size:.75rem;letter-spacing:1px;}
+    .nav-tag{margin-left:auto;background:#00aaff15;border:1px solid #00aaff44;color:#00aaff;padding:4px 14px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:1px;}
 
     /* Hero */
-    .hero{padding:80px 40px 60px;text-align:center;max-width:800px;margin:0 auto;}
-    .hero-tag{display:inline-block;background:#0f022a;border:1px solid #6600ff44;color:#9966ff;padding:5px 18px;border-radius:20px;font-size:.75rem;font-weight:700;letter-spacing:2px;margin-bottom:20px;}
-    .hero h1{font-size:3rem;font-weight:900;line-height:1.15;margin-bottom:16px;}
+    .hero{padding:70px 32px 60px;text-align:center;max-width:700px;margin:0 auto;}
+    .hero-tag{display:inline-block;background:#0f022a;border:1px solid #6600ff44;color:#9966ff;padding:5px 18px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:2px;margin-bottom:22px;}
+    .hero h1{font-size:clamp(2rem,6vw,3.2rem);font-weight:900;line-height:1.15;margin-bottom:16px;}
     .hero h1 span{color:#00aaff;}
-    .hero p{color:#778;font-size:1.05rem;line-height:1.7;max-width:580px;margin:0 auto 32px;}
-
-    .cta-group{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
-    .btn-primary{padding:14px 32px;background:#00aaff;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;text-decoration:none;letter-spacing:.5px;transition:background .2s;}
-    .btn-primary:hover{background:#0088dd;}
-    .btn-secondary{padding:14px 32px;background:none;color:#00aaff;border:2px solid #00aaff44;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;text-decoration:none;transition:border-color .2s;}
+    .hero p{color:#556;font-size:1rem;line-height:1.7;margin-bottom:32px;}
+    .hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+    .btn-primary{padding:14px 30px;background:#00aaff;color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;text-decoration:none;letter-spacing:.5px;}
+    .btn-primary:hover{background:#0090ee;}
+    .btn-secondary{padding:14px 30px;background:none;color:#00aaff;border:2px solid #00aaff44;border-radius:10px;font-size:.95rem;font-weight:700;text-decoration:none;}
     .btn-secondary:hover{border-color:#00aaff;}
 
-    /* Stats bar */
-    .stats-bar{background:#0a0e15;border-top:1px solid #0a1520;border-bottom:1px solid #0a1520;padding:28px 40px;display:flex;gap:0;justify-content:center;flex-wrap:wrap;}
-    .stat-item{flex:1;min-width:140px;text-align:center;padding:0 24px;border-right:1px solid #0a1520;}
-    .stat-item:last-child{border-right:none;}
-    .stat-item .n{font-size:2.2rem;font-weight:900;color:#00aaff;}
-    .stat-item .l{font-size:.75rem;color:#556;margin-top:4px;letter-spacing:1px;text-transform:uppercase;}
+    /* Stats */
+    .stats{display:flex;justify-content:center;flex-wrap:wrap;gap:0;border-top:1px solid #141e2e;border-bottom:1px solid #141e2e;background:#0b0f18;padding:24px 32px;}
+    .stat{padding:12px 32px;text-align:center;border-right:1px solid #141e2e;}
+    .stat:last-child{border-right:none;}
+    .stat-n{font-size:1.8rem;font-weight:900;color:#00aaff;}
+    .stat-l{font-size:.65rem;text-transform:uppercase;letter-spacing:2px;color:#445;margin-top:3px;}
 
     /* Features */
-    .section{padding:70px 40px;max-width:1000px;margin:0 auto;}
-    .section-tag{font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:#00aaff;margin-bottom:12px;}
-    .section h2{font-size:2rem;font-weight:800;margin-bottom:40px;}
-
-    .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;}
-    .feature-card{background:#0a0e15;border:1px solid #0a1520;border-radius:14px;padding:24px;transition:border-color .2s;}
-    .feature-card:hover{border-color:#00aaff33;}
-    .fc-icon{font-size:2rem;margin-bottom:12px;}
-    .fc-title{font-size:1rem;font-weight:800;margin-bottom:8px;}
-    .fc-desc{color:#556;font-size:.85rem;line-height:1.6;}
+    .section{padding:60px 32px;max-width:1000px;margin:0 auto;}
+    .section-label{font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:#445;margin-bottom:10px;}
+    .section h2{font-size:1.7rem;font-weight:900;margin-bottom:32px;}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+    .card{background:#0b0f18;border:1px solid #141e2e;border-radius:12px;padding:22px;}
+    .card-icon{font-size:1.8rem;margin-bottom:12px;}
+    .card h3{font-size:.95rem;font-weight:800;margin-bottom:8px;}
+    .card p{font-size:.8rem;color:#556;line-height:1.6;}
 
     /* How it works */
-    .steps{display:flex;gap:0;flex-wrap:wrap;position:relative;}
-    .step{flex:1;min-width:200px;padding:24px;position:relative;}
-    .step-num{width:36px;height:36px;border-radius:50%;background:#00aaff15;border:2px solid #00aaff44;display:flex;align-items:center;justify-content:center;font-weight:900;color:#00aaff;margin-bottom:14px;font-size:.9rem;}
-    .step h3{font-size:.95rem;font-weight:800;margin-bottom:6px;}
-    .step p{color:#556;font-size:.82rem;line-height:1.6;}
+    .steps{display:flex;flex-direction:column;gap:10px;max-width:560px;}
+    .step-row{display:flex;align-items:flex-start;gap:16px;padding:16px 20px;background:#0b0f18;border:1px solid #141e2e;border-radius:10px;}
+    .step-n{width:32px;height:32px;border-radius:50%;background:#00aaff15;border:2px solid #00aaff44;display:flex;align-items:center;justify-content:center;font-weight:900;color:#00aaff;font-size:.85rem;flex-shrink:0;}
+    .step-row h4{font-size:.88rem;font-weight:800;margin-bottom:4px;}
+    .step-row p{font-size:.77rem;color:#556;line-height:1.5;}
 
     /* Roadmap */
-    .roadmap{display:flex;flex-direction:column;gap:12px;}
-    .phase-row{display:flex;align-items:center;gap:16px;padding:16px 20px;background:#0a0e15;border:1px solid #0a1520;border-radius:10px;}
-    .phase-row.done{border-color:#0f044433;background:#0f02100d;}
-    .phase-row.active{border-color:#00aaff33;background:#00aaff08;}
-    .phase-num{font-size:.7rem;font-weight:900;letter-spacing:1px;color:#556;width:60px;flex-shrink:0;}
-    .phase-title{font-size:.9rem;font-weight:800;flex:1;}
-    .phase-desc{font-size:.8rem;color:#556;flex:2;}
-    .phase-badge{font-size:.7rem;font-weight:700;padding:3px 12px;border-radius:20px;flex-shrink:0;}
-    .phase-badge.done{background:#0f02102a;color:#0f0;border:1px solid #0f0;}
-    .phase-badge.active{background:#00aaff15;color:#00aaff;border:1px solid #00aaff;}
-    .phase-badge.soon{background:#1a1a1a;color:#556;border:1px solid #333;}
+    .phases{display:flex;flex-direction:column;gap:8px;max-width:560px;}
+    .phase{display:flex;align-items:center;gap:14px;padding:14px 18px;background:#0b0f18;border:1px solid #141e2e;border-radius:10px;}
+    .phase.done{border-color:#0f044433;}
+    .phase.active{border-color:#00aaff33;}
+    .badge{padding:3px 12px;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:1px;border:1px solid;flex-shrink:0;}
+    .badge.done{background:#0f02102a;color:#0f0;border-color:#0f0;}
+    .badge.active{background:#00aaff15;color:#00aaff;border-color:#00aaff;}
+    .badge.soon{background:#1a1a1a;color:#556;border-color:#333;}
+    .phase-txt{font-size:.82rem;color:#aaa;line-height:1.5;}
 
-    /* Tech */
-    .tech-pills{display:flex;flex-wrap:wrap;gap:10px;}
-    .pill{background:#0a0e15;border:1px solid #0a1520;border-radius:8px;padding:8px 16px;font-size:.82rem;color:#778;}
+    /* CTA */
+    .cta{background:#0b0f18;border-top:1px solid #141e2e;border-bottom:1px solid #141e2e;padding:60px 32px;text-align:center;}
+    .cta h2{font-size:1.6rem;font-weight:900;margin-bottom:10px;}
+    .cta p{color:#556;margin-bottom:28px;font-size:.9rem;}
 
-    /* CTA section */
-    .cta-section{background:#0a0e15;border-top:1px solid #0a1520;border-bottom:1px solid #0a1520;padding:70px 40px;text-align:center;}
-    .cta-section h2{font-size:2rem;font-weight:900;margin-bottom:12px;}
-    .cta-section p{color:#556;margin-bottom:28px;}
-
-    /* Gallery */
-    .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:32px;}
-    .gallery-img{width:100%;height:220px;object-fit:cover;border-radius:12px;border:1px solid #0a1520;filter:brightness(.85);}
-    .gallery-img:hover{filter:brightness(1);transition:filter .3s;}
-
-    /* Screenshot mockup */
-    .mockup-wrap{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:32px;}
-    .mockup{background:#0a0e15;border:1px solid #00aaff22;border-radius:14px;overflow:hidden;flex:1;min-width:260px;max-width:420px;}
-    .mockup-bar{background:#050810;padding:8px 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #0a1520;}
-    .mockup-dot{width:8px;height:8px;border-radius:50%;}
-    .mockup-url{flex:1;background:#0d1117;border-radius:4px;height:18px;margin:0 8px;}
-    .mockup-body{padding:20px;text-align:center;}
-    .mockup-body img{width:100%;border-radius:8px;}
-
-    footer{padding:28px 40px;color:#334;font-size:.75rem;text-align:center;border-top:1px solid #0a1520;}
+    footer{padding:24px 32px;text-align:center;color:#223;font-size:.75rem;border-top:1px solid #0f141e;}
   </style>
 </head>
 <body>
 
 <nav>
-  <div class="logo">XL<span>FITNESS</span></div>
-  <span class="nav-tag">INVESTOR DEMO · PHASE 1</span>
+  <span class="logo">XLFITNESS</span>
+  <span class="nav-sub">AI Rep Counter</span>
+  <span class="nav-tag">DEMO BUILD</span>
 </nav>
 
 <div class="hero">
-  <div class="hero-tag">AI-POWERED GYM TECHNOLOGY</div>
-  <h1>Automatic Rep Counting<br>for <span>Every Machine</span></h1>
-  <p>Computer vision that counts exercise reps in real time — no wearables, no sensors, no manual logging. Just a camera and AI.</p>
-  <div class="cta-group">
-    <a href="scripts/lat_pulldown_counter.html" class="btn-primary">🎬 Live Demo — Lat Pulldown</a>
-    <a href="scripts/lat_pulldown_recorder.html" class="btn-secondary">📹 Record Training Data</a>
+  <div class="hero-tag">PROOF OF CONCEPT · MARCH 2026</div>
+  <h1>AI-Powered Rep Counting<br/>for <span>120+ Machines</span></h1>
+  <p>Real-time pose estimation, neural network form classification, and occupancy detection — running entirely in the browser, zero infrastructure cost.</p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="scripts/lat_pulldown_counter.html">▶ Launch Live Demo</a>
+    <a class="btn-secondary" href="https://github.com/XLDonkey/XLFitness_pose-estimation" target="_blank">View on GitHub</a>
   </div>
 </div>
 
-<!-- Hero image strip -->
-<div style="width:100%;overflow:hidden;max-height:320px;border-bottom:1px solid #0a1520;">
-  <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1400&q=80&fit=crop"
-       alt="Gym floor" style="width:100%;height:320px;object-fit:cover;filter:brightness(.5);"/>
-</div>
-
-<div class="stats-bar">
-  <div class="stat-item"><div class="n">120+</div><div class="l">Target Machines</div></div>
-  <div class="stat-item"><div class="n">33</div><div class="l">Body Landmarks</div></div>
-  <div class="stat-item"><div class="n">30fps</div><div class="l">Real-Time Analysis</div></div>
-  <div class="stat-item"><div class="n">0</div><div class="l">Wearables Needed</div></div>
-  <div class="stat-item"><div class="n">5min</div><div class="l">Per Machine Setup</div></div>
+<div class="stats">
+  <div class="stat"><div class="stat-n">120+</div><div class="stat-l">Target Machines</div></div>
+  <div class="stat"><div class="stat-n">91%</div><div class="stat-l">NN Accuracy</div></div>
+  <div class="stat"><div class="stat-n">34</div><div class="stat-l">Training Samples</div></div>
+  <div class="stat"><div class="stat-n">$0</div><div class="stat-l">Hosting Cost</div></div>
 </div>
 
 <div class="section">
-  <div class="section-tag">What it does</div>
-  <h2>AI-Powered Form Analysis</h2>
-  <div class="feature-grid">
-    <div class="feature-card">
-      <div class="fc-icon">🪑</div>
-      <div class="fc-title">Machine Occupancy Detection</div>
-      <div class="fc-desc">Automatically detects when a member sits at a machine using hip and knee position analysis. Sessions start and stop without any button presses.</div>
+  <div class="section-label">What it does</div>
+  <h2>Built for the gym floor</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🔢</div>
+      <h3>Rep Counting</h3>
+      <p>Detects each rep using elbow angle tracking with smoothing and anti-false-rep guards.</p>
     </div>
-    <div class="feature-card">
-      <div class="fc-icon">🔢</div>
-      <div class="fc-title">Automatic Rep Counting</div>
-      <div class="fc-desc">Tracks joint angles through each rep cycle. Counts only full reps — partial reps are flagged separately, encouraging proper form.</div>
+    <div class="card">
+      <div class="card-icon">🧠</div>
+      <h3>Neural Network</h3>
+      <p>MLP classifier trained on recorded reps — distinguishes good reps, bad reps, and false movements in real time.</p>
     </div>
-    <div class="feature-card">
-      <div class="fc-icon">📐</div>
-      <div class="fc-title">Back Posture Tracking</div>
-      <div class="fc-desc">Monitors spine alignment in real time. Warns when excessive back lean is detected, reducing injury risk and improving technique.</div>
+    <div class="card">
+      <div class="card-icon">👤</div>
+      <h3>Occupancy Detection</h3>
+      <p>Automatically detects when someone sits at the machine and starts a session — no buttons needed.</p>
     </div>
-    <div class="feature-card">
-      <div class="fc-icon">🧠</div>
-      <div class="fc-title">Per-Machine AI Calibration</div>
-      <div class="fc-desc">Each machine gets its own training profile recorded from real reps. The AI scores form against that machine's specific range of motion.</div>
-    </div>
-    <div class="feature-card">
-      <div class="fc-icon">📊</div>
-      <div class="fc-title">Form Scoring (0–100)</div>
-      <div class="fc-desc">Every rep is scored across three dimensions: range of motion, back angle, and rep control speed. Instant feedback after each rep.</div>
-    </div>
-    <div class="feature-card">
-      <div class="fc-icon">💬</div>
-      <div class="fc-title">Live Coaching Cues</div>
-      <div class="fc-desc">Real-time coaching messages guide members: "Pull all the way down", "Keep your back straight", "Extend fully at the top".</div>
+    <div class="card">
+      <div class="card-icon">📱</div>
+      <h3>Zero Infrastructure</h3>
+      <p>Pure browser app. Runs on any phone or tablet. No server, no app install, no backend costs.</p>
     </div>
   </div>
 </div>
 
-<div class="section" style="padding-top:0">
-  <div class="section-tag">How it works</div>
-  <h2>From Camera to Rep Count in Milliseconds</h2>
+<div class="section">
+  <div class="section-label">How it works</div>
+  <h2>From camera to counted rep</h2>
   <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <h3>Camera captures the user</h3>
-      <p>A standard webcam or IP camera is mounted side-on to each machine. No special hardware required.</p>
+    <div class="step-row">
+      <div class="step-n">1</div>
+      <div><h4>Camera captures the person</h4><p>Phone or tablet pointed at the machine. Works on any modern browser — Chrome recommended.</p></div>
     </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <h3>AI detects 17 body landmarks</h3>
-      <p>TensorFlow MoveNet runs in real time, tracking key joints — shoulders, elbows, wrists, hips, knees — at 30fps.</p>
+    <div class="step-row">
+      <div class="step-n">2</div>
+      <div><h4>MoveNet detects 17 keypoints</h4><p>Google's MoveNet Lightning model identifies joints in real time at 30fps — shoulders, elbows, wrists, hips, knees.</p></div>
     </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <h3>Joint angles are calculated</h3>
-      <p>The system calculates elbow angle, back angle, and other form metrics frame by frame using the detected landmarks.</p>
+    <div class="step-row">
+      <div class="step-n">3</div>
+      <div><h4>Elbow angle drives rep detection</h4><p>Shoulder → Elbow → Wrist angle is tracked frame by frame. A rep is counted when the angle cycles from extended to contracted and back.</p></div>
     </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <h3>Reps counted and scored</h3>
-      <p>Each angle cycle is compared against the machine's training profile. Reps are counted, scored, and coaching cues delivered instantly.</p>
+    <div class="step-row">
+      <div class="step-n">4</div>
+      <div><h4>Neural network classifies the rep</h4><p>A 5→12→8→3 MLP trained on 34 recorded sequences scores each rep: Good, Bad, or False Movement.</p></div>
     </div>
   </div>
 </div>
 
-<div class="section" style="padding-top:0">
-  <div class="section-tag">Rollout plan</div>
-  <h2>Phased Deployment Across 120 Machines</h2>
-  <div class="roadmap">
-    <div class="phase-row done">
-      <span class="phase-num">PHASE 1</span>
-      <span class="phase-title">Lat Pulldown Proof of Concept</span>
-      <span class="phase-desc">Full pipeline built and tested. Recorder, counter, form scoring, occupancy detection.</span>
-      <span class="phase-badge done">✓ COMPLETE</span>
-    </div>
-    <div class="phase-row active">
-      <span class="phase-num">PHASE 2</span>
-      <span class="phase-title">Expand to 10 Machines</span>
-      <span class="phase-desc">Record training profiles for the 10 highest-traffic machines. Validate accuracy across movement types.</span>
-      <span class="phase-badge active">IN PROGRESS</span>
-    </div>
-    <div class="phase-row">
-      <span class="phase-num">PHASE 3</span>
-      <span class="phase-title">Member Session Logging</span>
-      <span class="phase-desc">Link rep counts to member profiles. Coach dashboard showing form trends per member.</span>
-      <span class="phase-badge soon">PLANNED</span>
-    </div>
-    <div class="phase-row">
-      <span class="phase-num">PHASE 4</span>
-      <span class="phase-title">All 120 Machines</span>
-      <span class="phase-desc">Full gym floor rollout. One training session per machine, permanent AI monitoring.</span>
-      <span class="phase-badge soon">PLANNED</span>
-    </div>
-    <div class="phase-row">
-      <span class="phase-num">PHASE 5</span>
-      <span class="phase-title">Free Weights + Neural Network</span>
-      <span class="phase-desc">Deep learning model trained on thousands of reps. Handles barbells, dumbbells, and complex movements.</span>
-      <span class="phase-badge soon">FUTURE</span>
-    </div>
+<div class="section">
+  <div class="section-label">Roadmap</div>
+  <h2>Where we're going</h2>
+  <div class="phases">
+    <div class="phase done"><span class="badge done">DONE</span><span class="phase-txt">Rep counting · Occupancy detection · Form scoring · Neural network classifier · Live brain visualiser</span></div>
+    <div class="phase active"><span class="badge active">NOW</span><span class="phase-txt">Training data collection · Model accuracy improvement · Multi-person testing</span></div>
+    <div class="phase"><span class="badge soon">NEXT</span><span class="phase-txt">Back arch / posture analysis · Per-machine calibration · Session history dashboard</span></div>
+    <div class="phase"><span class="badge soon">PHASE 2</span><span class="phase-txt">120-machine rollout · Tablet mounting solution · Member-facing rep history</span></div>
   </div>
 </div>
 
-<div class="section" style="padding-top:0">
-  <div class="section-tag">Technology</div>
-  <h2>Built on Proven Open-Source AI</h2>
-  <div class="tech-pills">
-    <div class="pill">TensorFlow.js — Browser AI</div>
-    <div class="pill">MoveNet SinglePose Thunder — Pose Estimation</div>
-    <div class="pill">JavaScript / HTML5 — No App Install</div>
-    <div class="pill">GitHub — Machine Config Storage</div>
-    <div class="pill">Python 3.11 — Backend Processing</div>
-    <div class="pill">OpenCV — Camera Integration</div>
-    <div class="pill">JSON — Lightweight Machine Profiles</div>
-    <div class="pill">Runs on Any Standard Camera</div>
-  </div>
+<div class="cta">
+  <h2>See it in action</h2>
+  <p>Open on your phone, point at the Nautilus Nitro Lat Pulldown and start pulling.</p>
+  <a class="btn-primary" href="scripts/lat_pulldown_counter.html">▶ Launch Demo</a>
 </div>
 
-<!-- Photo gallery section -->
-<div class="section" style="padding-top:0">
-  <div class="section-tag">The Gym Floor</div>
-  <h2>Built for Real Gym Environments</h2>
-  <div class="gallery">
-    <img class="gallery-img" src="https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600&q=80&fit=crop" alt="Gym machines"/>
-    <img class="gallery-img" src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&q=80&fit=crop" alt="Lat pulldown machine"/>
-    <img class="gallery-img" src="https://images.unsplash.com/photo-1517963879433-6ad2b056d712?w=600&q=80&fit=crop" alt="Weight training"/>
-  </div>
-</div>
-
-<div class="cta-section">
-  <h2>See It Live</h2>
-  <p>Open the demo on any device with a camera — no install, no login required.</p>
-  <div class="cta-group">
-    <a href="scripts/lat_pulldown_counter.html" class="btn-primary">🎬 Open Live Demo</a>
-  </div>
-</div>
-
-<footer>XLFitness AI Rep Counter · Phase 1 Demo · Confidential</footer>
+<footer>XLFitness AI Rep Counter · Proof of Concept · March 2026 · Built by XLDonkey</footer>
 
 </body>
 </html>
