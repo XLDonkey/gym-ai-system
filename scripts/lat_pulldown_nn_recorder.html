@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>XLFitness – NN Training Recorder</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:#080c10;color:#fff;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+
+    header{width:100%;padding:12px 24px;background:#0d1117;border-bottom:1px solid #1a2a3a;display:flex;align-items:center;gap:10px;}
+    header h1{font-size:1.2rem;font-weight:900;color:#00aaff;letter-spacing:2px;}
+    header span{color:#556;font-size:.85rem;}
+    .badge{background:#9900ff22;border:1px solid #9900ff66;color:#cc66ff;border-radius:6px;padding:2px 10px;font-size:.72rem;font-weight:700;letter-spacing:1px;margin-left:auto;}
+
+    #boot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px;flex:1;text-align:center;}
+    #boot h2{font-size:1.3rem;color:#00aaff;}
+    #boot p{color:#556;font-size:.9rem;max-width:400px;line-height:1.6;}
+    #boot-btn{padding:12px 32px;background:#00aaff;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;}
+    #boot-btn:hover{background:#0088dd;}
+    .spinner{width:34px;height:34px;border:4px solid #1a2a3a;border-top-color:#00aaff;border-radius:50%;animation:spin .8s linear infinite;display:none;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    #app{display:none;width:100%;max-width:1000px;padding:14px;gap:14px;flex-direction:row;flex-wrap:wrap;justify-content:center;}
+
+    /* Camera */
+    #cam-wrap{position:relative;flex:1;min-width:280px;max-width:580px;}
+    video{width:100%;border-radius:12px;display:block;transform:scaleX(-1);}
+    canvas{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;transform:scaleX(-1);}
+
+    #angle-badge{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);border:1px solid #1a2a3a;border-radius:8px;padding:5px 18px;text-align:center;}
+    #angle-lbl{font-size:.6rem;letter-spacing:1.5px;color:#556;text-transform:uppercase;}
+    #angle-val{font-size:2rem;font-weight:900;color:#00aaff;}
+
+    #rec-indicator{position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.85);border-radius:8px;padding:5px 12px;font-size:.75rem;font-weight:700;opacity:0;transition:opacity .2s;}
+    #rec-indicator.active{opacity:1;}
+    #rec-dot{width:9px;height:9px;border-radius:50%;animation:blink .6s infinite alternate;}
+    .rec-good #rec-dot{background:#0f0;} .rec-good{color:#0f0;border:1px solid #0f044a;}
+    .rec-bad  #rec-dot{background:#f44;} .rec-bad{color:#f44;border:1px solid #3a0000;}
+    .rec-false #rec-dot{background:#f90;} .rec-false{color:#f90;border:1px solid #3a2000;}
+    @keyframes blink{from{opacity:1;}to{opacity:.3;}}
+
+    #frame-count{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);border-radius:6px;padding:4px 14px;font-size:.8rem;color:#aaa;}
+
+    /* Panel */
+    #panel{flex:0 0 280px;display:flex;flex-direction:column;gap:12px;}
+
+    .card{background:#0d1117;border:1px solid #1a2a3a;border-radius:12px;padding:16px;}
+    .card-lbl{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:#556;margin-bottom:12px;}
+
+    /* Progress */
+    #progress-card{}
+    .prog-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+    .prog-lbl{font-size:.78rem;width:110px;flex-shrink:0;}
+    .prog-bar{flex:1;height:7px;background:#1a2a3a;border-radius:4px;overflow:hidden;}
+    .prog-fill{height:100%;border-radius:4px;transition:width .3s;}
+    .fill-good{background:#0f0;}
+    .fill-bad{background:#f44;}
+    .fill-false{background:#f90;}
+    .prog-count{font-size:.78rem;font-weight:800;width:40px;text-align:right;}
+    .count-good{color:#0f0;} .count-bad{color:#f44;} .count-false{color:#f90;}
+
+    /* Record buttons */
+    .rec-btn{width:100%;padding:14px;border-radius:10px;border:2px solid;font-size:.95rem;font-weight:800;cursor:pointer;letter-spacing:.5px;transition:all .15s;user-select:none;-webkit-user-select:none;touch-action:none;background:none;}
+    .rec-btn:active,.rec-btn.held{transform:scale(.97);}
+
+    #btn-good{border-color:#0f044a;color:#0f0;}
+    #btn-good.held{background:#0f021a;border-color:#0f0;box-shadow:0 0 20px #0f044a;}
+    #btn-bad{border-color:#3a0000;color:#f44;}
+    #btn-bad.held{background:#1a0000;border-color:#f44;box-shadow:0 0 20px #3a0000;}
+    #btn-false{border-color:#3a2000;color:#f90;}
+    #btn-false.held{background:#1a1000;border-color:#f90;box-shadow:0 0 20px #3a2000;}
+
+    .btn-hint{font-size:.7rem;color:#334;margin-top:4px;text-align:center;}
+
+    /* Instructions */
+    #inst-card ol{padding-left:16px;color:#556;font-size:.8rem;line-height:1.9;}
+    #inst-card ol li span{color:#aaa;}
+
+    /* Save */
+    #save-btn{width:100%;padding:13px;background:#9900ff;color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;transition:background .2s;}
+    #save-btn:hover:not(:disabled){background:#7700cc;}
+    #save-btn:disabled{background:#1a1a2a;color:#445;cursor:default;}
+    #save-status{font-size:.75rem;color:#556;text-align:center;margin-top:4px;min-height:1em;}
+
+    /* Camera flip */
+    #flip-btn{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.75);border:1px solid #1a2a3a;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;}
+    #flip-btn:hover{border-color:#00aaff;}
+  </style>
+</head>
+<body>
+<header>
+  <h1>XLFITNESS</h1>
+  <span>Lat Pulldown · NN Training Recorder</span>
+  <span class="badge">DATA COLLECTION v2</span>
+</header>
+
+<div id="boot">
+  <h2>Neural Network Data Recorder</h2>
+  <p>Captures full angle sequences for every movement. Hold each button while performing the movement — release when done. Aim for 10 of each type.</p>
+  <div class="spinner" id="spinner"></div>
+  <p id="boot-msg"></p>
+  <button id="boot-btn">📷 Start Camera</button>
+</div>
+
+<div id="app">
+  <div id="cam-wrap">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas"></canvas>
+    <div id="angle-badge">
+      <div id="angle-lbl">Elbow Angle</div>
+      <div id="angle-val">—</div>
+    </div>
+    <div id="rec-indicator">
+      <div id="rec-dot"></div>
+      <span id="rec-label">REC</span>
+    </div>
+    <div id="frame-count" style="display:none">⏺ <span id="fc">0</span> frames</div>
+    <button id="flip-btn" title="Flip camera">🔄</button>
+  </div>
+
+  <div id="panel">
+
+    <div class="card" id="progress-card">
+      <div class="card-lbl">Sequences Recorded</div>
+      <div class="prog-row">
+        <span class="prog-lbl">✅ Good Reps</span>
+        <div class="prog-bar"><div class="prog-fill fill-good" id="fill-good" style="width:0%"></div></div>
+        <span class="prog-count count-good" id="cnt-good">0/10</span>
+      </div>
+      <div class="prog-row">
+        <span class="prog-lbl">❌ Bad Reps</span>
+        <div class="prog-bar"><div class="prog-fill fill-bad" id="fill-bad" style="width:0%"></div></div>
+        <span class="prog-count count-bad" id="cnt-bad">0/10</span>
+      </div>
+      <div class="prog-row">
+        <span class="prog-lbl">⚡ False Moves</span>
+        <div class="prog-bar"><div class="prog-fill fill-false" id="fill-false" style="width:0%"></div></div>
+        <span class="prog-count count-false" id="cnt-false">0/10</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-lbl">Record a Sequence</div>
+      <button class="rec-btn" id="btn-good">HOLD — Good Rep</button>
+      <div class="btn-hint">Full range · controlled · proper form</div>
+      <br/>
+      <button class="rec-btn" id="btn-bad">HOLD — Bad Rep</button>
+      <div class="btn-hint">Partial range · too fast · sloppy form</div>
+      <br/>
+      <button class="rec-btn" id="btn-false">HOLD — False Movement</button>
+      <div class="btn-hint">Adjust weight · reach up · stand up · fidget</div>
+    </div>
+
+    <div class="card" id="inst-card">
+      <div class="card-lbl">How to Use</div>
+      <ol>
+        <li><span>Get in position</span> at the machine</li>
+        <li><span>Press & hold</span> the right button</li>
+        <li><span>Perform</span> the movement fully</li>
+        <li><span>Release</span> the button when done</li>
+        <li>Aim for <span>10 of each type</span></li>
+      </ol>
+    </div>
+
+    <button id="save-btn" disabled>💾 Download Training Data</button>
+    <div id="save-status">Record at least 5 of each type to enable save</div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+<script>
+const KP = {LS:5,RS:6,LE:7,RE:8,LW:9,RW:10,LH:11,RH:12};
+const SKELETON=[[5,7],[7,9],[6,8],[8,10],[5,6],[5,11],[6,12],[11,12],[11,13],[13,15],[12,14],[14,16]];
+const MIN_CONF = 0.3;
+const TARGET = 10;
+const MIN_SAVE = 5;
+
+let detector = null;
+let facingMode = 'user';
+let currentStream = null;
+
+// Recording state
+let isRecording = false;
+let recType = null; // 'good' | 'bad' | 'false'
+let currentFrames = [];
+let currentStartMs = null;
+
+// Collected data
+const sequences = { good: [], bad: [], false: [] };
+
+// DOM
+const video       = document.getElementById('video');
+const canvas      = document.getElementById('canvas');
+const ctx         = canvas.getContext('2d');
+const angleVal    = document.getElementById('angle-val');
+const recInd      = document.getElementById('rec-indicator');
+const recLabel    = document.getElementById('rec-label');
+const frameCount  = document.getElementById('frame-count');
+const fcEl        = document.getElementById('fc');
+const saveBtn     = document.getElementById('save-btn');
+const saveStatus  = document.getElementById('save-status');
+
+// ── Geometry ──────────────────────────────────────────────────────────────────
+function calcAngle(a,b,c){
+  const ab={x:a.x-b.x,y:a.y-b.y},cb={x:c.x-b.x,y:c.y-b.y};
+  const dot=ab.x*cb.x+ab.y*cb.y;
+  const mag=Math.sqrt((ab.x**2+ab.y**2)*(cb.x**2+cb.y**2));
+  if(!mag) return 180;
+  return Math.acos(Math.min(1,Math.max(-1,dot/mag)))*(180/Math.PI);
+}
+function getKP(pose,idx){const p=pose.keypoints[idx];return p&&p.score>=MIN_CONF?p:null;}
+
+function getElbowAngle(pose){
+  const ls=getKP(pose,KP.LS),le=getKP(pose,KP.LE),lw=getKP(pose,KP.LW);
+  const rs=getKP(pose,KP.RS),re=getKP(pose,KP.RE),rw=getKP(pose,KP.RW);
+  const a=[];
+  if(ls&&le&&lw) a.push(calcAngle(ls,le,lw));
+  if(rs&&re&&rw) a.push(calcAngle(rs,re,rw));
+  return a.length ? Math.round(a.reduce((x,y)=>x+y,0)/a.length) : null;
+}
+
+function getBackAngle(pose){
+  const ls=getKP(pose,KP.LS),rs=getKP(pose,KP.RS);
+  const lh=getKP(pose,KP.LH),rh=getKP(pose,KP.RH);
+  if(!(ls&&rs&&lh&&rh)) return null;
+  const sh={(x:(ls.x+rs.x)/2,y:(ls.y+rs.y)/2)};
+  const hp={(x:(lh.x+rh.x)/2,y:(lh.y+rh.y)/2)};
+  const dx=hp.x-sh.x, dy=hp.y-sh.y;
+  return Math.round(Math.abs(Math.atan2(Math.abs(dx),Math.abs(dy))*180/Math.PI));
+}
+
+// ── Draw ──────────────────────────────────────────────────────────────────────
+function drawPose(pose){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const sx=canvas.width/video.videoWidth, sy=canvas.height/video.videoHeight;
+  const col = isRecording
+    ? (recType==='good'?'rgba(0,255,80,.85)':recType==='bad'?'rgba(255,60,60,.85)':'rgba(255,150,0,.85)')
+    : 'rgba(0,170,255,.7)';
+  ctx.strokeStyle=col; ctx.lineWidth=3;
+  for(const [a,b] of SKELETON){
+    const pa=pose.keypoints[a],pb=pose.keypoints[b];
+    if(pa?.score>=MIN_CONF&&pb?.score>=MIN_CONF){
+      ctx.beginPath();ctx.moveTo(pa.x*sx,pa.y*sy);ctx.lineTo(pb.x*sx,pb.y*sy);ctx.stroke();
+    }
+  }
+  for(const kp of pose.keypoints){
+    if(kp.score>=MIN_CONF){
+      ctx.beginPath();ctx.arc(kp.x*sx,kp.y*sy,5,0,Math.PI*2);
+      ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();
+    }
+  }
+}
+
+// ── Recording ─────────────────────────────────────────────────────────────────
+function startRec(type){
+  isRecording=true; recType=type; currentFrames=[]; currentStartMs=Date.now();
+  recInd.className='active rec-'+type;
+  recLabel.textContent=type==='good'?'✅ GOOD REP':type==='bad'?'❌ BAD REP':'⚡ FALSE MOVE';
+  frameCount.style.display='block'; fcEl.textContent='0';
+}
+
+function stopRec(){
+  if(!isRecording||currentFrames.length<5) { cancelRec(); return; }
+  const dur = Date.now()-currentStartMs;
+  const angles = currentFrames.map(f=>f.elbow).filter(a=>a!==null);
+  if(angles.length<5) { cancelRec(); return; }
+
+  const seq = {
+    label: recType==='good'?'good_rep':recType==='bad'?'bad_rep':'false_movement',
+    frames: currentFrames,
+    duration_ms: dur,
+    min_angle: Math.min(...angles),
+    max_angle: Math.max(...angles),
+    rom: Math.max(...angles) - Math.min(...angles),
+    frame_count: currentFrames.length
+  };
+
+  sequences[recType].push(seq);
+  updateProgress();
+  cancelRec();
+}
+
+function cancelRec(){
+  isRecording=false; recType=null; currentFrames=[];
+  recInd.className=''; frameCount.style.display='none';
+}
+
+// ── Progress ──────────────────────────────────────────────────────────────────
+function updateProgress(){
+  ['good','bad','false'].forEach(t=>{
+    const n=sequences[t].length;
+    document.getElementById('fill-'+t).style.width=Math.min(100,(n/TARGET)*100)+'%';
+    document.getElementById('cnt-'+t).textContent=n+'/'+TARGET;
+  });
+
+  const g=sequences.good.length, b=sequences.bad.length, f=sequences.false.length;
+  const min=Math.min(g,b,f);
+  if(min>=MIN_SAVE){
+    saveBtn.disabled=false;
+    saveStatus.textContent=`${g+b+f} sequences ready — save when you have 10 of each`;
+    if(min>=TARGET) saveStatus.textContent=`✅ Full dataset ready! Download now.`;
+  }
+}
+
+// ── Save JSON ─────────────────────────────────────────────────────────────────
+saveBtn.addEventListener('click',()=>{
+  const allSeqs = [
+    ...sequences.good,
+    ...sequences.bad,
+    ...sequences.false
+  ];
+
+  const json = {
+    machine: 'nautilus_nitro_lat_pulldown',
+    version: '2.0',
+    recorded_at: new Date().toISOString(),
+    format: 'nn_training',
+    description: 'Full angle sequences for LSTM neural network training',
+    counts: {
+      good_reps: sequences.good.length,
+      bad_reps: sequences.bad.length,
+      false_movements: sequences.false.length,
+      total: allSeqs.length
+    },
+    sequences: allSeqs
+  };
+
+  const blob=new Blob([JSON.stringify(json,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`lat_pulldown_nn_training_${Date.now()}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  saveStatus.textContent='✅ Saved! Send this JSON to Donkey via Google Drive.';
+});
+
+// ── Record buttons ────────────────────────────────────────────────────────────
+function bindBtn(id, type){
+  const btn = document.getElementById(id);
+  const start = e => { e.preventDefault(); if(!isRecording) { btn.classList.add('held'); startRec(type); }};
+  const stop  = e => { e.preventDefault(); btn.classList.remove('held'); if(isRecording&&recType===type) stopRec(); };
+  btn.addEventListener('mousedown', start);
+  btn.addEventListener('touchstart', start, {passive:false});
+  btn.addEventListener('mouseup', stop);
+  btn.addEventListener('mouseleave', stop);
+  btn.addEventListener('touchend', stop);
+  btn.addEventListener('touchcancel', stop);
+}
+bindBtn('btn-good','good');
+bindBtn('btn-bad','bad');
+bindBtn('btn-false','false');
+
+// ── Camera flip ───────────────────────────────────────────────────────────────
+async function startCamera(facing){
+  if(currentStream) currentStream.getTracks().forEach(t=>t.stop());
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video:{facingMode:facing,width:{ideal:640},height:{ideal:480}},audio:false
+  });
+  currentStream=stream; video.srcObject=stream; await video.play(); resizeCanvas();
+}
+document.getElementById('flip-btn').addEventListener('click',async()=>{
+  facingMode=facingMode==='user'?'environment':'user';
+  try{await startCamera(facingMode);}catch(e){facingMode=facingMode==='user'?'environment':'user';}
+});
+
+// ── Main loop ─────────────────────────────────────────────────────────────────
+function resizeCanvas(){canvas.width=video.clientWidth;canvas.height=video.clientHeight;}
+
+async function loop(){
+  if(video.readyState>=2){
+    const poses=await detector.estimatePoses(video);
+    if(poses.length>0){
+      const pose=poses[0];
+      const elbow=getElbowAngle(pose);
+      const back=getBackAngle(pose);
+      drawPose(pose);
+      if(elbow!==null) angleVal.textContent=elbow+'°';
+      else angleVal.textContent='—';
+
+      if(isRecording){
+        currentFrames.push({
+          t: Date.now()-currentStartMs,
+          elbow: elbow,
+          back: back
+        });
+        fcEl.textContent=currentFrames.length;
+      }
+    } else {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      angleVal.textContent='—';
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+document.getElementById('boot-btn').addEventListener('click',async()=>{
+  const btn=document.getElementById('boot-btn');
+  const spinner=document.getElementById('spinner');
+  const msg=document.getElementById('boot-msg');
+  btn.style.display='none'; spinner.style.display='block';
+
+  try{
+    msg.textContent='Starting camera…';
+    await startCamera(facingMode);
+    window.addEventListener('resize',resizeCanvas);
+    video.addEventListener('loadedmetadata',resizeCanvas);
+
+    msg.textContent='Loading pose model…';
+    detector=await poseDetection.createDetector(
+      poseDetection.SupportedModels.MoveNet,
+      {modelType:poseDetection.movenet.modelType.SINGLEPOSE_THUNDER}
+    );
+    document.getElementById('boot').style.display='none';
+    document.getElementById('app').style.display='flex';
+    loop();
+  }catch(e){
+    spinner.style.display='none';
+    btn.style.display='block';
+    msg.textContent='Error: '+e.message;
+  }
+});
+</script>
+</body>
+</html>
