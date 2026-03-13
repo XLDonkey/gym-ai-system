@@ -403,23 +403,26 @@ document.getElementById('boot-btn').addEventListener('click',async()=>{
   btn.style.display='none'; spinner.style.display='block';
 
   try{
-    msg.textContent='Starting camera…';
+    msg.textContent='Step 1/3 — Requesting camera access…';
     await startCamera(facingMode);
     window.addEventListener('resize',resizeCanvas);
     video.addEventListener('loadedmetadata',resizeCanvas);
 
-    msg.textContent='Loading pose model…';
+    msg.textContent='Step 2/3 — Loading AI model (first load may take 20s)…';
     detector=await poseDetection.createDetector(
       poseDetection.SupportedModels.MoveNet,
-      {modelType:poseDetection.movenet.modelType.SINGLEPOSE_THUNDER}
+      {modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING}
     );
+    msg.textContent='Step 3/3 — Ready!';
+    await new Promise(r=>setTimeout(r,400));
     document.getElementById('boot').style.display='none';
     document.getElementById('app').style.display='flex';
     loop();
   }catch(e){
     spinner.style.display='none';
     btn.style.display='block';
-    msg.textContent='Error: '+e.message;
+    msg.textContent='❌ Error: '+e.message+' — try Chrome and allow camera access';
+    msg.style.color='#f44';
   }
 });
 </script>
