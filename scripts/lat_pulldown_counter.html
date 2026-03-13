@@ -236,6 +236,7 @@
 
 <div id="bottom-bar">
   <button id="reset-btn">↺ Reset Session</button>
+  <button id="manual-start-btn" style="padding:8px 18px;background:none;border:1px solid #00aaff44;color:#00aaff;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:700;margin-left:8px;">▶ Start Session Manually</button>
   <button id="train-toggle">🧠 Training Mode</button>
 </div>
 
@@ -374,34 +375,31 @@ function getBackAngle(pose) {
 }
 
 // ─── Seated detection ─────────────────────────────────────────────────────────
+let manualSessionActive = false;
+
 function checkSeated(pose) {
+  // Manual override — user pressed Start Session button
+  if(manualSessionActive) return true;
+
   const lh=getKP(pose,KP.LH),rh=getKP(pose,KP.RH);
-  const lk=getKP(pose,KP.LK),rk=getKP(pose,KP.RK);
-  const la=getKP(pose,KP.LA),ra=getKP(pose,KP.RA);
   const ls=getKP(pose,KP.LS),rs=getKP(pose,KP.RS);
 
-  if(!(lh||rh)) return false;
+  // Minimum: must detect shoulders OR hips
+  const hasShoulders = ls||rs;
+  const hasHips      = lh||rh;
+  if(!hasShoulders) return false;
 
-  const hipY = lh&&rh ? (lh.y+rh.y)/2 : (lh||rh).y;
-  const shoulderY = ls&&rs ? (ls.y+rs.y)/2 : (ls||rs)?.y;
-
-  // Hip must be in lower half of frame
-  if(hipY < 0.4) return false;
-
-  // Shoulders must be above hips (torso upright, not lying down)
-  if(shoulderY && shoulderY >= hipY) return false;
-
-  // If knees visible, check they're bent (seated, not standing)
-  const kneeAngles = [];
-  if(lh&&lk&&la) kneeAngles.push(calcAngle(lh,lk,la));
-  if(rh&&rk&&ra) kneeAngles.push(calcAngle(rh,rk,ra));
-
-  if(kneeAngles.length > 0) {
-    const avgKnee = kneeAngles.reduce((a,b)=>a+b,0)/kneeAngles.length;
-    // Seated: knees bent 60-120°. Standing = closer to 180°
-    if(avgKnee > 150) return false;
+  // If we can see hips: shoulders must be above hips (not lying down)
+  if(hasHips) {
+    const hipY      = lh&&rh ? (lh.y+rh.y)/2 : (lh||rh).y;
+    const shoulderY = ls&&rs ? (ls.y+rs.y)/2 : (ls||rs).y;
+    // Hips in lower 60% of frame and shoulders above hips = likely seated/standing at machine
+    if(hipY < 0.3) return false;          // hips too high — probably not in frame properly
+    if(shoulderY >= hipY + 0.05) return false; // shoulders must be above hips
   }
 
+  // If no hips visible but shoulders are: camera may be cropped — allow it
+  // (common with side-on camera that only shows upper body)
   return true;
 }
 
@@ -829,7 +827,19 @@ document.getElementById('new-session-btn').addEventListener('click',()=>{
   resetSession();
 });
 
-document.getElementById('reset-btn').addEventListener('click', resetFullSession);
+document.getElementById('reset-btn').addEventListener('click', () => {
+  manualSessionActive = false;
+  resetFullSession();
+});
+
+document.getElementById('manual-start-btn').addEventListener('click', () => {
+  manualSessionActive = true;
+  seatedFrames = SEATED_MIN_FRAMES + 1;
+  if(appState === 'waiting') setState('seated');
+  document.getElementById('manual-start-btn').textContent = '✓ Session Active';
+  document.getElementById('manual-start-btn').style.borderColor = '#0f0';
+  document.getElementById('manual-start-btn').style.color = '#0f0';
+});
 
 
 // ─── Training Mode ────────────────────────────────────────────────────────────
