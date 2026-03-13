@@ -21,16 +21,26 @@
     @keyframes pulse{to{box-shadow:0 0 16px #0f0;}}
 
     /* Boot */
-    #boot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
-    #boot h2{color:#00aaff;font-size:1.3rem;font-weight:900;letter-spacing:2px;}
-    #boot p{color:#334;font-size:.82rem;}
-    #start-btn{padding:14px 36px;background:#00aaff;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:800;cursor:pointer;letter-spacing:1px;}
-    #start-btn:hover{background:#0090ee;}
-    .spinner{width:28px;height:28px;border:3px solid #1a2a3a;border-top-color:#00aaff;border-radius:50%;animation:spin .8s linear infinite;display:none;}
+    #boot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;}
+    #boot h2{color:#00aaff;font-size:1.4rem;font-weight:900;letter-spacing:2px;text-align:center;}
+    #boot .tagline{color:#334;font-size:.78rem;letter-spacing:1px;text-align:center;}
+    #start-btn{padding:16px 40px;background:#00aaff;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;letter-spacing:1px;width:220px;}
+    #start-btn:active{background:#0080cc;}
+    #prog-wrap{width:260px;display:flex;flex-direction:column;gap:8px;}
+    #prog-bar{width:100%;height:8px;background:#141e2e;border-radius:4px;overflow:hidden;}
+    #prog-fill{height:100%;background:linear-gradient(90deg,#0066cc,#00aaff);width:0%;transition:width .5s ease;}
+    #prog-pct{font-size:.9rem;font-weight:800;color:#00aaff;text-align:center;}
+    #prog-txt{font-size:.75rem;color:#445;text-align:center;min-height:1.2em;}
+    #steps{display:none;flex-direction:column;gap:6px;width:260px;}
+    .step{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#0b0f18;border-radius:8px;border:1px solid #141e2e;font-size:.78rem;color:#445;transition:all .3s;}
+    .step.done{border-color:#0f04;color:#0f0;background:#0f021a;}
+    .step.active{border-color:#00aaff44;color:#00aaff;background:#00aaff08;animation:stepPulse 1s infinite alternate;}
+    .step.error{border-color:#f444;color:#f44;background:#1a0000;}
+    .step-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
+    @keyframes stepPulse{from{border-color:#00aaff22;}to{border-color:#00aaff99;}}
+    .big-spin{width:48px;height:48px;border:4px solid #141e2e;border-top-color:#00aaff;border-radius:50%;animation:spin .9s linear infinite;display:none;}
     @keyframes spin{to{transform:rotate(360deg);}}
-    #prog-bar{width:240px;height:5px;background:#141e2e;border-radius:3px;overflow:hidden;}
-    #prog-fill{height:100%;background:#00aaff;width:0%;transition:width .4s;}
-    #prog-txt{font-size:.72rem;color:#334;}
+    #err-msg{color:#f44;font-size:.78rem;text-align:center;display:none;max-width:260px;}
 
     /* Main layout */
     #app{display:none;flex:1;flex-direction:row;gap:10px;padding:10px;min-height:0;}
@@ -93,10 +103,21 @@
 <!-- Boot screen -->
 <div id="boot">
   <h2>AI REP COUNTER</h2>
-  <div class="spinner" id="spinner"></div>
-  <div id="prog-bar"><div id="prog-fill"></div></div>
-  <p id="prog-txt">Tap Start to begin</p>
+  <p class="tagline">Powered by Neural Network · XLFitness</p>
+  <div class="big-spin" id="big-spin"></div>
+  <div id="prog-wrap" style="display:none">
+    <div id="prog-bar"><div id="prog-fill"></div></div>
+    <div id="prog-pct">0%</div>
+    <div id="prog-txt">Initialising…</div>
+  </div>
+  <div id="steps">
+    <div class="step" id="s-cfg"><span class="step-icon">📋</span>Loading training data</div>
+    <div class="step" id="s-cam"><span class="step-icon">📷</span>Starting camera</div>
+    <div class="step" id="s-ai"><span class="step-icon">🧠</span>Loading AI model <span style="color:#223;font-size:.68rem;margin-left:auto">(may take ~20s)</span></div>
+    <div class="step" id="s-go"><span class="step-icon">✅</span>Ready!</div>
+  </div>
   <button id="start-btn">▶ START</button>
+  <div id="err-msg"></div>
 </div>
 
 <!-- Main app -->
@@ -370,32 +391,65 @@ document.getElementById('reset-btn').addEventListener('click',()=>{
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 const TRAINING_URL='https://raw.githubusercontent.com/XLDonkey/XLFitness_pose-estimation/main/machine_configs/nautilus_nitro_lat_pulldown_training.json';
-function setProg(pct,msg){document.getElementById('prog-fill').style.width=pct+'%';document.getElementById('prog-txt').textContent=msg;}
+
+function setStep(id,state){
+  const el=document.getElementById(id);
+  el.classList.remove('active','done','error');
+  el.classList.add(state);
+}
+function setProg(pct,msg){
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-txt').textContent=msg;
+}
 
 document.getElementById('start-btn').addEventListener('click',async()=>{
   document.getElementById('start-btn').style.display='none';
-  document.getElementById('spinner').style.display='block';
+  document.getElementById('big-spin').style.display='block';
+  document.getElementById('prog-wrap').style.display='flex';
+  document.getElementById('steps').style.display='flex';
+  const errEl=document.getElementById('err-msg');
   try{
-    setProg(10,'Loading training config…');
+    // Step 1: training config
+    setStep('s-cfg','active'); setProg(5,'Fetching training data…');
     try{const r=await fetch(TRAINING_URL);if(r.ok)config=await r.json();}catch(e){}
     if(!config)config={summary:{top_threshold:145,bottom_threshold:90,min_good_rom:70,avg_good_rom:110}};
-    setProg(30,'Starting camera…');
+    setStep('s-cfg','done'); setProg(20,'Training data loaded ✓');
+
+    // Step 2: camera
+    setStep('s-cam','active'); setProg(25,'Requesting camera…');
     await startCam(facing);
-    setProg(60,'Loading AI pose model…');
+    setStep('s-cam','done'); setProg(40,'Camera ready ✓');
+
+    // Step 3: AI model (slow on mobile)
+    setStep('s-ai','active'); setProg(45,'Loading AI model — please wait…');
+    // Animate progress while model loads
+    let fakeP=45;
+    const fakeTimer=setInterval(()=>{
+      if(fakeP<88){fakeP+=1;setProg(fakeP,'Loading AI model… (this takes ~15–20s on mobile)');}
+    },400);
     detector=await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING});
-    setProg(90,'Warming up…');
+    clearInterval(fakeTimer);
+    setStep('s-ai','done'); setProg(95,'AI model loaded ✓');
+
+    // Step 4: ready
     resizeBrain();
-    setProg(100,'Ready!');
-    await new Promise(r=>setTimeout(r,200));
+    setStep('s-go','done'); setProg(100,'All systems go!');
+    await new Promise(r=>setTimeout(r,500));
     document.getElementById('boot').style.display='none';
     document.getElementById('app').style.display='flex';
     setState('waiting');
     loop();
   }catch(e){
-    document.getElementById('spinner').style.display='none';
+    document.getElementById('big-spin').style.display='none';
     document.getElementById('start-btn').style.display='block';
-    document.getElementById('prog-txt').textContent='Error: '+e.message;
-    document.getElementById('prog-txt').style.color='#f44';
+    errEl.style.display='block';
+    errEl.textContent='❌ '+e.message+' — use Chrome & allow camera access';
+    // Mark current step as error
+    ['s-cfg','s-cam','s-ai','s-go'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el.classList.contains('active'))setStep(id,'error');
+    });
   }
 });
 </script>
