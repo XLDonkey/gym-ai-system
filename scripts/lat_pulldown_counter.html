@@ -202,6 +202,30 @@
       </div>
     </div>
 
+
+    <div class="card" id="brain-card">
+      <div class="card-lbl">🧠 Neural Network Brain</div>
+      <canvas id="brain-canvas"></canvas>
+      <div class="prob-bars">
+        <div class="prob-row">
+          <span class="prob-lbl">Good Rep</span>
+          <div class="prob-track"><div class="prob-fill" id="pb-good" style="background:#0f0;width:0%"></div></div>
+          <span class="prob-val" id="pv-good" style="color:#0f0">0%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-lbl">Bad Rep</span>
+          <div class="prob-track"><div class="prob-fill" id="pb-bad" style="background:#f44;width:0%"></div></div>
+          <span class="prob-val" id="pv-bad" style="color:#f44">0%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-lbl">False Move</span>
+          <div class="prob-track"><div class="prob-fill" id="pb-false" style="background:#f90;width:0%"></div></div>
+          <span class="prob-val" id="pv-false" style="color:#f90">0%</span>
+        </div>
+      </div>
+      <div id="nn-verdict" style="background:#1a1a2a;color:#556;">Waiting for movement…</div>
+    </div>
+
     <div class="card" id="history-card">
       <div class="card-lbl">Rep History</div>
       <div id="history-list"><p style="color:#334;font-size:.8rem">No reps yet</p></div>
@@ -541,6 +565,9 @@ function updateRepUI(n, scored, isGood) {
   repNumEl.textContent = n;
   repSub.textContent = isGood ? 'Good rep ✓' : 'Partial rep — full range next time';
   repNumEl.className = isGood ? 'flash-good' : 'flash-partial';
+  // Fire NN brain pulses
+  const pulseColor = isGood ? '#0f0' : '#f44';
+  for(let l=0;l<LAYERS.length-1;l++) triggerPulse(l, pulseColor);
   setTimeout(()=>{ repNumEl.className=''; }, 500);
 
   const sc = scored.total;
@@ -728,7 +755,16 @@ async function loop() {
       }
 
       // Coaching (update every 20 frames)
-      if(frameCount++%20===0){
+      // Update brain visualiser every 10 frames
+  if(frameCount % 10 === 0) {
+    const bf_angles = repFrameAnglesBuffer.slice(-60);
+    if(bf_angles.length >= 5) {
+      const bf_std = Math.sqrt(bf_angles.reduce((s,v)=>s+(v-bf_angles.reduce((a,b)=>a+b,0)/bf_angles.length)**2,0)/bf_angles.length);
+      const bf_avg = bf_angles.reduce((a,b)=>a+b,0)/bf_angles.length;
+      updateBrain(repMinAngle<900?repMinAngle:100, repMaxAngle-repMinAngle>0?repMaxAngle-repMinAngle:50, bf_std, 2.5, bf_avg);
+    }
+  }
+  if(frameCount++%20===0){
         const coach = getCoach(appState, elbowAngle, backAngle, lastRepData);
         if(coach.msg!==lastCoach){ coachingMsg.textContent=coach.msg; coachingMsg.className=coach.cls; lastCoach=coach.msg; }
       }
@@ -903,6 +939,198 @@ function nnPredict(minAngle, rom, stdAngle, durationS, avgAngle) {
   const best = probs.indexOf(Math.max(...probs));
   return { label: classes[best], confidence: probs[best], probs: Object.fromEntries(classes.map((c,i)=>[c,probs[i]])) };
 }
+
+
+// ─── Neural Network Brain Visualiser ─────────────────────────────────────────
+const brainCanvas = document.getElementById('brain-canvas');
+const bCtx = brainCanvas.getContext('2d');
+
+// Network topology
+const LAYERS = [5, 12, 8, 3];
+const LAYER_LABELS = [['min°','ROM','std','dur','avg'],null,null,['BAD','FALSE','GOOD']];
+let brainActivations = LAYERS.map(n => new Array(n).fill(0));
+let brainPulses = []; // {x1,y1,x2,y2,progress,color}
+let lastPrediction = null;
+
+function getNodePos(layer, node, cw, ch) {
+  const nLayers = LAYERS.length;
+  const x = (layer + 0.5) / nLayers * cw;
+  const n = LAYERS[layer];
+  const gap = Math.min(ch / (n + 1), 18);
+  const totalH = (n - 1) * gap;
+  const y = (ch - totalH) / 2 + node * gap;
+  return {x, y};
+}
+
+function sigmoid(x) { return 1 / (1 + Math.exp(-x)); }
+
+function forwardPassWithActivations(minAngle, rom, stdAngle, durationS, avgAngle) {
+  const raw = [minAngle, rom, stdAngle, durationS, avgAngle];
+  let h = raw.map((v,i) => (v - NN_MODEL.scaler_mean[i]) / NN_MODEL.scaler_scale[i]);
+
+  const acts = [h.map(v => Math.max(0, Math.min(1, (v + 2) / 4)))] ; // normalize inputs for display
+
+  for(let i = 0; i < NN_MODEL.weights.length; i++) {
+    const W = NN_MODEL.weights[i];
+    const b = NN_MODEL.biases[i];
+    const next = W.map((row, ri) => row.reduce((s,w,ci) => s + w*h[ci], 0) + b[ri]);
+    if(i < NN_MODEL.weights.length - 1) {
+      h = next.map(v => Math.max(0, v)); // relu
+      acts.push(h.map(v => Math.min(1, Math.max(0, v / (Math.max(...h.map(Math.abs)) + 1e-6)))));
+    } else {
+      // softmax
+      const mx = Math.max(...next);
+      const exp = next.map(v => Math.exp(v - mx));
+      const s = exp.reduce((a,b)=>a+b,0);
+      h = exp.map(v => v/s);
+      acts.push(h);
+    }
+  }
+  return {activations: acts, probs: h};
+}
+
+function drawBrain(activations, probs, flashColor) {
+  const cw = brainCanvas.width, ch = brainCanvas.height;
+  bCtx.clearRect(0, 0, cw, ch);
+  bCtx.fillStyle = '#050810';
+  bCtx.fillRect(0, 0, cw, ch);
+
+  const nodeR = 5;
+
+  // Draw connections
+  for(let l = 0; l < LAYERS.length - 1; l++) {
+    for(let i = 0; i < LAYERS[l]; i++) {
+      for(let j = 0; j < LAYERS[l+1]; j++) {
+        const p1 = getNodePos(l, i, cw, ch);
+        const p2 = getNodePos(l+1, j, cw, ch);
+        const act = (activations[l][i] + activations[l+1][j]) / 2;
+        const alpha = 0.05 + act * 0.4;
+        const w = NN_MODEL.weights[l];
+        const weight = w[j] ? w[j][i] || 0 : 0;
+        const isPos = weight >= 0;
+        bCtx.strokeStyle = isPos
+          ? `rgba(0,170,255,${alpha})`
+          : `rgba(255,60,60,${alpha})`;
+        bCtx.lineWidth = 0.5 + act * 1.5;
+        bCtx.beginPath();
+        bCtx.moveTo(p1.x, p1.y);
+        bCtx.lineTo(p2.x, p2.y);
+        bCtx.stroke();
+      }
+    }
+  }
+
+  // Draw pulses
+  brainPulses = brainPulses.filter(p => p.progress < 1);
+  brainPulses.forEach(p => {
+    p.progress += 0.04;
+    const x = p.x1 + (p.x2-p.x1)*p.progress;
+    const y = p.y1 + (p.y2-p.y1)*p.progress;
+    bCtx.beginPath();
+    bCtx.arc(x, y, 3, 0, Math.PI*2);
+    bCtx.fillStyle = p.color;
+    bCtx.fill();
+  });
+
+  // Draw nodes
+  for(let l = 0; l < LAYERS.length; l++) {
+    for(let n = 0; n < LAYERS[l]; n++) {
+      const pos = getNodePos(l, n, cw, ch);
+      const act = activations[l] ? activations[l][n] : 0;
+
+      // Output layer special colors
+      let nodeColor;
+      if(l === LAYERS.length - 1) {
+        nodeColor = n===2 ? `rgba(0,255,0,${0.3+act*0.7})`
+                  : n===0 ? `rgba(255,60,60,${0.3+act*0.7})`
+                  : `rgba(255,150,0,${0.3+act*0.7})`;
+      } else {
+        const v = Math.floor(act * 255);
+        nodeColor = `rgba(${v},${Math.floor(v*0.7+80)},255,${0.4+act*0.5})`;
+      }
+
+      // Glow for active nodes
+      if(act > 0.5) {
+        bCtx.shadowColor = nodeColor;
+        bCtx.shadowBlur = 8;
+      }
+      bCtx.beginPath();
+      bCtx.arc(pos.x, pos.y, nodeR + act*2, 0, Math.PI*2);
+      bCtx.fillStyle = nodeColor;
+      bCtx.fill();
+      bCtx.shadowBlur = 0;
+
+      // Input/output labels
+      if(l === 0 && LAYER_LABELS[0]) {
+        bCtx.fillStyle = 'rgba(100,150,200,0.8)';
+        bCtx.font = '8px Arial';
+        bCtx.textAlign = 'right';
+        bCtx.fillText(LAYER_LABELS[0][n], pos.x - nodeR - 2, pos.y + 3);
+      }
+      if(l === LAYERS.length-1) {
+        const lbl = ['BAD','FALSE','GOOD'][n];
+        const col = n===2?'#0f0':n===0?'#f44':'#f90';
+        bCtx.fillStyle = col;
+        bCtx.font = 'bold 8px Arial';
+        bCtx.textAlign = 'left';
+        bCtx.fillText(lbl, pos.x + nodeR + 2, pos.y + 3);
+      }
+    }
+  }
+  bCtx.textAlign = 'left';
+}
+
+function triggerPulse(fromLayer, color) {
+  for(let i = 0; i < LAYERS[fromLayer]; i++) {
+    for(let j = 0; j < LAYERS[fromLayer+1]; j++) {
+      if(Math.random() < 0.3) {
+        const p1 = getNodePos(fromLayer, i, brainCanvas.width, brainCanvas.height);
+        const p2 = getNodePos(fromLayer+1, j, brainCanvas.width, brainCanvas.height);
+        brainPulses.push({...p1, x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y, progress:0, color});
+      }
+    }
+  }
+}
+
+function updateBrain(minAngle, rom, stdAngle, durationS, avgAngle) {
+  if(!NN_MODEL) return;
+  try {
+    const {activations, probs} = forwardPassWithActivations(minAngle, rom, stdAngle, durationS, avgAngle);
+    brainActivations = activations;
+
+    const pGood  = probs[2], pBad = probs[0], pFalse = probs[1];
+    const best   = pGood > pBad && pGood > pFalse ? 'good' : pBad > pFalse ? 'bad' : 'false';
+
+    // Update prob bars
+    document.getElementById('pb-good').style.width  = Math.round(pGood*100)+'%';
+    document.getElementById('pb-bad').style.width   = Math.round(pBad*100)+'%';
+    document.getElementById('pb-false').style.width = Math.round(pFalse*100)+'%';
+    document.getElementById('pv-good').textContent  = Math.round(pGood*100)+'%';
+    document.getElementById('pv-bad').textContent   = Math.round(pBad*100)+'%';
+    document.getElementById('pv-false').textContent = Math.round(pFalse*100)+'%';
+
+    const verdict = document.getElementById('nn-verdict');
+    if(best==='good') { verdict.textContent='✅ GOOD REP'; verdict.style.cssText='background:#0f021a;color:#0f0;border:1px solid #0f0;'; }
+    else if(best==='bad') { verdict.textContent='⚠ BAD REP'; verdict.style.cssText='background:#1a0000;color:#f44;border:1px solid #f44;'; }
+    else { verdict.textContent='⚡ FALSE MOVEMENT'; verdict.style.cssText='background:#1a1000;color:#f90;border:1px solid #f90;'; }
+
+    drawBrain(activations, probs);
+  } catch(e) {}
+}
+
+function resizeBrainCanvas() {
+  brainCanvas.width  = brainCanvas.clientWidth;
+  brainCanvas.height = 220;
+}
+resizeBrainCanvas();
+window.addEventListener('resize', resizeBrainCanvas);
+
+// Animate pulses continuously
+function animateBrain() {
+  if(brainPulses.length > 0) drawBrain(brainActivations, null);
+  requestAnimationFrame(animateBrain);
+}
+animateBrain();
 
 // ─── Startup ──────────────────────────────────────────────────────────────────
 const TRAINING_URL = 'https://raw.githubusercontent.com/XLDonkey/XLFitness_pose-estimation/main/machine_configs/nautilus_nitro_lat_pulldown_training.json';
