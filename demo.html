@@ -2,165 +2,541 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XLFitness – AI Rep Counter Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title>XL Fitness — Lat Pulldown</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{background:#07090f;color:#fff;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;}
+    :root{
+      --xl-purple:#7c3aed;
+      --xl-purple-light:#a855f7;
+      --xl-purple-dim:rgba(124,58,237,0.18);
+      --xl-bg:#06040f;
+      --xl-card:#0e0a1a;
+      --xl-border:#1e1430;
+      --xl-text:#e8e0ff;
+      --xl-muted:#5a4f72;
+      --green:#22c55e;
+      --amber:#f59e0b;
+      --red:#ef4444;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;overflow:hidden;background:var(--xl-bg);color:var(--xl-text);font-family:'Segoe UI',system-ui,Arial,sans-serif;}
 
-    nav{padding:16px 32px;display:flex;align-items:center;gap:14px;border-bottom:1px solid #141e2e;}
-    .logo{font-size:1.1rem;font-weight:900;color:#00aaff;letter-spacing:3px;}
-    .nav-sub{color:#334;font-size:.75rem;letter-spacing:1px;}
-    .nav-tag{margin-left:auto;background:#00aaff15;border:1px solid #00aaff44;color:#00aaff;padding:4px 14px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:1px;}
+    /* ══ Screens ══ */
+    .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:var(--xl-bg);z-index:50;transition:opacity .3s;}
+    .screen.gone{display:none;}
 
-    /* Hero */
-    .hero{padding:70px 32px 60px;text-align:center;max-width:700px;margin:0 auto;}
-    .hero-tag{display:inline-block;background:#0f022a;border:1px solid #6600ff44;color:#9966ff;padding:5px 18px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:2px;margin-bottom:22px;}
-    .hero h1{font-size:clamp(2rem,6vw,3.2rem);font-weight:900;line-height:1.15;margin-bottom:16px;}
-    .hero h1 span{color:#00aaff;}
-    .hero p{color:#556;font-size:1rem;line-height:1.7;margin-bottom:32px;}
-    .hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
-    .btn-primary{padding:14px 30px;background:#00aaff;color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;text-decoration:none;letter-spacing:.5px;}
-    .btn-primary:hover{background:#0090ee;}
-    .btn-secondary{padding:14px 30px;background:none;color:#00aaff;border:2px solid #00aaff44;border-radius:10px;font-size:.95rem;font-weight:700;text-decoration:none;}
-    .btn-secondary:hover{border-color:#00aaff;}
+    .xl-logo{font-size:1rem;font-weight:900;letter-spacing:6px;color:var(--xl-purple-light);margin-bottom:3px;}
+    .xl-sub{font-size:.6rem;letter-spacing:3px;color:var(--xl-muted);margin-bottom:28px;text-transform:uppercase;}
 
-    /* Stats */
-    .stats{display:flex;justify-content:center;flex-wrap:wrap;gap:0;border-top:1px solid #141e2e;border-bottom:1px solid #141e2e;background:#0b0f18;padding:24px 32px;}
-    .stat{padding:12px 32px;text-align:center;border-right:1px solid #141e2e;}
-    .stat:last-child{border-right:none;}
-    .stat-n{font-size:1.8rem;font-weight:900;color:#00aaff;}
-    .stat-l{font-size:.65rem;text-transform:uppercase;letter-spacing:2px;color:#445;margin-top:3px;}
+    /* ── Boot ── */
+    #s-boot .loader{display:flex;flex-direction:column;align-items:center;gap:10px;}
+    .bar-wrap{width:200px;height:4px;background:#1a0f2e;border-radius:2px;overflow:hidden;}
+    .bar{height:100%;background:linear-gradient(90deg,var(--xl-purple),var(--xl-purple-light));width:0%;transition:width .4s ease;}
+    #boot-msg{font-size:.72rem;color:var(--xl-muted);letter-spacing:1px;min-height:1.1em;}
+    #boot-err{color:var(--red);font-size:.72rem;text-align:center;max-width:280px;display:none;line-height:1.7;margin-bottom:10px;}
 
-    /* Features */
-    .section{padding:60px 32px;max-width:1000px;margin:0 auto;}
-    .section-label{font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:#445;margin-bottom:10px;}
-    .section h2{font-size:1.7rem;font-weight:900;margin-bottom:32px;}
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
-    .card{background:#0b0f18;border:1px solid #141e2e;border-radius:12px;padding:22px;}
-    .card-icon{font-size:1.8rem;margin-bottom:12px;}
-    .card h3{font-size:.95rem;font-weight:800;margin-bottom:8px;}
-    .card p{font-size:.8rem;color:#556;line-height:1.6;}
+    /* ── Login ── */
+    #s-login .card{background:var(--xl-card);border:1px solid var(--xl-border);border-radius:16px;padding:28px 24px;width:100%;max-width:320px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+    .nfc-icon{font-size:3rem;animation:pulse 2s infinite alternate;}
+    @keyframes pulse{to{filter:drop-shadow(0 0 16px var(--xl-purple));transform:scale(1.08);}}
+    #s-login h2{font-size:1.1rem;font-weight:800;}
+    #s-login p{font-size:.72rem;color:var(--xl-muted);text-align:center;line-height:1.5;}
+    #member-in{width:100%;background:#0a0615;border:1px solid var(--xl-border);color:var(--xl-text);padding:12px 16px;border-radius:10px;font-size:.95rem;text-align:center;outline:none;}
+    #member-in:focus{border-color:var(--xl-purple);}
+    .xl-btn{width:100%;padding:14px;border-radius:11px;font-size:.9rem;font-weight:800;cursor:pointer;border:none;letter-spacing:.5px;transition:opacity .15s,transform .1s;}
+    .xl-btn:active{opacity:.85;transform:scale(.98);}
+    .btn-primary{background:linear-gradient(135deg,var(--xl-purple),var(--xl-purple-light));color:#fff;}
+    .btn-secondary{background:transparent;border:1px solid var(--xl-border);color:var(--xl-muted);}
+    .btn-green{background:linear-gradient(135deg,#15803d,var(--green));color:#fff;}
 
-    /* How it works */
-    .steps{display:flex;flex-direction:column;gap:10px;max-width:560px;}
-    .step-row{display:flex;align-items:flex-start;gap:16px;padding:16px 20px;background:#0b0f18;border:1px solid #141e2e;border-radius:10px;}
-    .step-n{width:32px;height:32px;border-radius:50%;background:#00aaff15;border:2px solid #00aaff44;display:flex;align-items:center;justify-content:center;font-weight:900;color:#00aaff;font-size:.85rem;flex-shrink:0;}
-    .step-row h4{font-size:.88rem;font-weight:800;margin-bottom:4px;}
-    .step-row p{font-size:.77rem;color:#556;line-height:1.5;}
+    /* ── Weight select ── */
+    #s-weight{justify-content:flex-start;padding-top:32px;overflow-y:auto;}
+    #s-weight .inner{width:100%;max-width:380px;}
+    .welcome-hd{text-align:center;margin-bottom:22px;}
+    .member-greet{font-size:1.15rem;font-weight:900;margin-bottom:2px;}
+    .machine-tag{font-size:.62rem;color:var(--xl-muted);letter-spacing:2px;text-transform:uppercase;}
+    .sec-hd{font-size:.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--xl-muted);margin-bottom:8px;margin-top:16px;}
+    .ex-sel{width:100%;background:var(--xl-card);border:1px solid var(--xl-border);color:var(--xl-text);padding:11px 14px;border-radius:9px;font-size:.85rem;outline:none;}
+    .wgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:4px;}
+    .wbtn{padding:11px 4px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;border:1px solid var(--xl-border);background:var(--xl-card);color:var(--xl-muted);text-align:center;transition:all .15s;}
+    .wbtn.sel{background:var(--xl-purple-dim);border-color:var(--xl-purple-light);color:var(--xl-purple-light);}
+    .addon-row{display:flex;align-items:center;gap:10px;}
+    .adbtn{width:38px;height:38px;border-radius:8px;font-size:1.1rem;font-weight:700;cursor:pointer;border:1px solid var(--xl-border);background:var(--xl-card);color:var(--xl-muted);}
+    #addon-v{font-size:.88rem;font-weight:700;color:var(--xl-purple-light);width:56px;text-align:center;}
+    #start-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--xl-purple),var(--xl-purple-light));border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:900;cursor:pointer;margin-top:18px;margin-bottom:8px;transition:opacity .2s;}
+    #start-btn:disabled{background:#1a0f2e;color:var(--xl-muted);cursor:not-allowed;}
 
-    /* Roadmap */
-    .phases{display:flex;flex-direction:column;gap:8px;max-width:560px;}
-    .phase{display:flex;align-items:center;gap:14px;padding:14px 18px;background:#0b0f18;border:1px solid #141e2e;border-radius:10px;}
-    .phase.done{border-color:#0f044433;}
-    .phase.active{border-color:#00aaff33;}
-    .badge{padding:3px 12px;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:1px;border:1px solid;flex-shrink:0;}
-    .badge.done{background:#0f02102a;color:#0f0;border-color:#0f0;}
-    .badge.active{background:#00aaff15;color:#00aaff;border-color:#00aaff;}
-    .badge.soon{background:#1a1a1a;color:#556;border-color:#333;}
-    .phase-txt{font-size:.82rem;color:#aaa;line-height:1.5;}
+    /* ── Active set (camera) ── */
+    #s-active{display:none;position:fixed;inset:0;background:#000;z-index:40;}
+    #video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
+    #cvs{position:fixed;top:0;left:0;pointer-events:none;z-index:41;}
 
-    /* CTA */
-    .cta{background:#0b0f18;border-top:1px solid #141e2e;border-bottom:1px solid #141e2e;padding:60px 32px;text-align:center;}
-    .cta h2{font-size:1.6rem;font-weight:900;margin-bottom:10px;}
-    .cta p{color:#556;margin-bottom:28px;font-size:.9rem;}
+    /* topbar */
+    #topbar{position:absolute;top:0;left:0;right:0;z-index:45;padding:10px 14px 20px;background:linear-gradient(rgba(6,4,15,.9),transparent);display:flex;align-items:center;gap:8px;}
+    .t-logo{font-size:.82rem;font-weight:900;letter-spacing:4px;color:var(--xl-purple-light);}
+    #t-member{font-size:.68rem;color:rgba(255,255,255,.4);margin-left:6px;}
+    #t-dot{width:8px;height:8px;border-radius:50%;background:#1a0f2e;margin-left:auto;transition:all .3s;}
+    #t-dot.live{background:var(--green);box-shadow:0 0 10px var(--green);animation:glw 1.2s infinite alternate;}
+    @keyframes glw{to{box-shadow:0 0 20px var(--green);}}
+    #t-status{font-size:.6rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--xl-muted);}
+    #t-status.live{color:var(--green);}
 
-    footer{padding:24px 32px;text-align:center;color:#223;font-size:.75rem;border-top:1px solid #0f141e;}
+    /* phase pill */
+    #phase{position:absolute;top:52px;left:50%;transform:translateX(-50%);z-index:45;padding:6px 20px;border-radius:20px;font-size:.68rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;background:rgba(6,4,15,.8);border:1px solid var(--xl-border);color:var(--xl-muted);white-space:nowrap;transition:all .25s;}
+    #phase.pull{background:rgba(34,197,94,.12);border-color:var(--green);color:var(--green);}
+    #phase.release{background:rgba(124,58,237,.18);border-color:var(--xl-purple-light);color:var(--xl-purple-light);}
+
+    /* weight badge */
+    #wbadge{position:absolute;top:50px;right:14px;z-index:45;background:rgba(6,4,15,.8);border:1px solid var(--xl-border);border-radius:10px;padding:7px 13px;text-align:right;}
+    #wb-kg{font-size:1.15rem;font-weight:900;}
+    #wb-lb{font-size:.55rem;color:var(--xl-muted);letter-spacing:1px;text-transform:uppercase;}
+
+    /* rep counter */
+    #rep-block{position:absolute;bottom:76px;left:16px;z-index:45;}
+    #rep-lbl{font-size:.52rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.32);}
+    #rep-n{font-size:min(22vw,110px);font-weight:900;line-height:1;text-shadow:0 6px 40px rgba(0,0,0,.95);transition:color .12s,transform .12s;}
+    #rep-n.pop{color:var(--green);transform:scale(1.1);}
+    #rep-verdict{font-size:.75rem;font-weight:700;color:rgba(255,255,255,.38);min-height:1.1em;margin-top:3px;}
+
+    /* form score */
+    #form-block{position:absolute;bottom:76px;right:16px;z-index:45;text-align:right;}
+    #form-n{font-size:2.4rem;font-weight:900;color:var(--xl-purple-light);line-height:1;}
+    #form-lbl{font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.32);}
+    #form-bar-wrap{width:56px;height:4px;background:#1a0f2e;border-radius:2px;overflow:hidden;margin-top:4px;margin-left:auto;}
+    #form-bar{height:100%;border-radius:2px;transition:width .4s,background .4s;}
+
+    /* controls */
+    #controls{position:absolute;bottom:10px;left:0;right:0;z-index:45;display:flex;justify-content:center;gap:8px;}
+    .cbtn{padding:9px 20px;border-radius:9px;font-size:.72rem;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(6,4,15,.8);color:rgba(255,255,255,.4);backdrop-filter:blur(6px);}
+    #end-btn{border-color:rgba(124,58,237,.4);color:var(--xl-purple-light);padding:9px 30px;}
+
+    /* ── Submit ── */
+    #s-submit .card{background:var(--xl-card);border:1px solid var(--xl-border);border-radius:16px;padding:22px 20px;width:100%;max-width:340px;margin-bottom:20px;}
+    .s-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #0f0a1a;}
+    .s-row:last-child{border:none;}
+    .s-lbl{font-size:.7rem;color:var(--xl-muted);}
+    .s-val{font-size:.88rem;font-weight:800;}
+    #s-vol{font-size:1.5rem;font-weight:900;color:var(--xl-purple-light);}
+    .act-row{display:flex;gap:10px;width:100%;max-width:340px;}
+    .act-row .xl-btn{flex:1;}
+
+    /* ── Success ── */
+    #s-success .icon{font-size:4rem;animation:pop 0.4s cubic-bezier(.2,1.5,.4,1);}
+    @keyframes pop{from{transform:scale(0);}to{transform:scale(1);}}
+    #s-success h2{font-size:1.3rem;font-weight:900;margin:12px 0 6px;}
+    #s-success p{font-size:.8rem;color:var(--xl-muted);text-align:center;line-height:1.6;max-width:260px;}
+    #s-success .next-btn{margin-top:24px;}
   </style>
 </head>
 <body>
 
-<nav>
-  <span class="logo">XLFITNESS</span>
-  <span class="nav-sub">AI Rep Counter</span>
-  <span class="nav-tag">DEMO BUILD</span>
-</nav>
-
-<div class="hero">
-  <div class="hero-tag">PROOF OF CONCEPT · MARCH 2026</div>
-  <h1>AI-Powered Rep Counting<br/>for <span>120+ Machines</span></h1>
-  <p>Real-time pose estimation, neural network form classification, and occupancy detection — running entirely in the browser, zero infrastructure cost.</p>
-  <div class="hero-btns">
-    <a class="btn-primary" href="scripts/lat_pulldown_counter.html">▶ Launch Live Demo</a>
-    <a class="btn-secondary" href="https://github.com/XLDonkey/XLFitness_pose-estimation" target="_blank">View on GitHub</a>
+<!-- BOOT -->
+<div id="s-boot" class="screen">
+  <div class="xl-logo">XL FITNESS</div>
+  <div class="xl-sub">AI REP COUNTER · LAT PULLDOWN</div>
+  <div class="loader">
+    <div class="bar-wrap"><div class="bar" id="boot-bar"></div></div>
+    <div id="boot-msg">Starting…</div>
+    <div id="boot-err"></div>
+    <button class="xl-btn btn-primary" id="retry-btn" style="display:none;max-width:180px" onclick="boot()">↺ Retry</button>
   </div>
 </div>
 
-<div class="stats">
-  <div class="stat"><div class="stat-n">120+</div><div class="stat-l">Target Machines</div></div>
-  <div class="stat"><div class="stat-n">91%</div><div class="stat-l">NN Accuracy</div></div>
-  <div class="stat"><div class="stat-n">34</div><div class="stat-l">Training Samples</div></div>
-  <div class="stat"><div class="stat-n">$0</div><div class="stat-l">Hosting Cost</div></div>
-</div>
-
-<div class="section">
-  <div class="section-label">What it does</div>
-  <h2>Built for the gym floor</h2>
-  <div class="cards">
-    <div class="card">
-      <div class="card-icon">🔢</div>
-      <h3>Rep Counting</h3>
-      <p>Detects each rep using elbow angle tracking with smoothing and anti-false-rep guards.</p>
-    </div>
-    <div class="card">
-      <div class="card-icon">🧠</div>
-      <h3>Neural Network</h3>
-      <p>MLP classifier trained on recorded reps — distinguishes good reps, bad reps, and false movements in real time.</p>
-    </div>
-    <div class="card">
-      <div class="card-icon">👤</div>
-      <h3>Occupancy Detection</h3>
-      <p>Automatically detects when someone sits at the machine and starts a session — no buttons needed.</p>
-    </div>
-    <div class="card">
-      <div class="card-icon">📱</div>
-      <h3>Zero Infrastructure</h3>
-      <p>Pure browser app. Runs on any phone or tablet. No server, no app install, no backend costs.</p>
-    </div>
+<!-- LOGIN -->
+<div id="s-login" class="screen gone">
+  <div class="xl-logo">XL FITNESS</div>
+  <div class="xl-sub">NAUTILUS NITRO · LAT PULLDOWN</div>
+  <div class="card">
+    <div class="nfc-icon">📳</div>
+    <h2>Tap Your Card</h2>
+    <p>Or type your name / member ID below</p>
+    <input id="member-in" type="text" placeholder="Gamer tag or member ID" autocorrect="off" autocomplete="off"/>
+    <button class="xl-btn btn-primary" onclick="login()">Login →</button>
   </div>
 </div>
 
-<div class="section">
-  <div class="section-label">How it works</div>
-  <h2>From camera to counted rep</h2>
-  <div class="steps">
-    <div class="step-row">
-      <div class="step-n">1</div>
-      <div><h4>Camera captures the person</h4><p>Phone or tablet pointed at the machine. Works on any modern browser — Chrome recommended.</p></div>
+<!-- WEIGHT SELECT -->
+<div id="s-weight" class="screen gone">
+  <div class="inner">
+    <div class="welcome-hd">
+      <div class="xl-logo">XL FITNESS</div>
+      <div class="member-greet" id="w-greet">—</div>
+      <div class="machine-tag">Nautilus Nitro · Lat Pulldown</div>
     </div>
-    <div class="step-row">
-      <div class="step-n">2</div>
-      <div><h4>MoveNet detects 17 keypoints</h4><p>Google's MoveNet Lightning model identifies joints in real time at 30fps — shoulders, elbows, wrists, hips, knees.</p></div>
+
+    <div class="sec-hd">Exercise</div>
+    <select class="ex-sel" id="ex-sel">
+      <option>Lat Pulldown</option>
+      <option>Close Grip Lat Pulldown</option>
+      <option>Wide Grip Lat Pulldown</option>
+      <option>Reverse Grip Lat Pulldown</option>
+    </select>
+
+    <div class="sec-hd">Weight Stack</div>
+    <div class="wgrid" id="wgrid"></div>
+
+    <div class="sec-hd">Add-On Weight (kg)</div>
+    <div class="addon-row">
+      <button class="adbtn" onclick="addon(-2.5)">−</button>
+      <div id="addon-v">+0 kg</div>
+      <button class="adbtn" onclick="addon(2.5)">+</button>
     </div>
-    <div class="step-row">
-      <div class="step-n">3</div>
-      <div><h4>Elbow angle drives rep detection</h4><p>Shoulder → Elbow → Wrist angle is tracked frame by frame. A rep is counted when the angle cycles from extended to contracted and back.</p></div>
-    </div>
-    <div class="step-row">
-      <div class="step-n">4</div>
-      <div><h4>Neural network classifies the rep</h4><p>A 5→12→8→3 MLP trained on 34 recorded sequences scores each rep: Good, Bad, or False Movement.</p></div>
-    </div>
+
+    <button id="start-btn" disabled onclick="startSet()">Select a weight to start</button>
+    <button class="xl-btn btn-secondary" onclick="logout()">← Log Out</button>
   </div>
 </div>
 
-<div class="section">
-  <div class="section-label">Roadmap</div>
-  <h2>Where we're going</h2>
-  <div class="phases">
-    <div class="phase done"><span class="badge done">DONE</span><span class="phase-txt">Rep counting · Occupancy detection · Form scoring · Neural network classifier · Live brain visualiser</span></div>
-    <div class="phase active"><span class="badge active">NOW</span><span class="phase-txt">Training data collection · Model accuracy improvement · Multi-person testing</span></div>
-    <div class="phase"><span class="badge soon">NEXT</span><span class="phase-txt">Back arch / posture analysis · Per-machine calibration · Session history dashboard</span></div>
-    <div class="phase"><span class="badge soon">PHASE 2</span><span class="phase-txt">120-machine rollout · Tablet mounting solution · Member-facing rep history</span></div>
+<!-- ACTIVE SET -->
+<div id="s-active">
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="cvs"></canvas>
+
+  <div id="topbar">
+    <span class="t-logo">XL</span>
+    <span id="t-member"></span>
+    <div id="t-dot"></div>
+    <span id="t-status">Ready</span>
+  </div>
+
+  <div id="phase">Get in position</div>
+
+  <div id="wbadge">
+    <div id="wb-kg">—</div>
+    <div id="wb-lb">kg</div>
+  </div>
+
+  <div id="rep-block">
+    <div id="rep-lbl">REPS</div>
+    <div id="rep-n">0</div>
+    <div id="rep-verdict"></div>
+  </div>
+
+  <div id="form-block">
+    <div id="form-n">—</div>
+    <div id="form-lbl">Form</div>
+    <div id="form-bar-wrap"><div id="form-bar" style="width:0%"></div></div>
+  </div>
+
+  <div id="controls">
+    <button class="cbtn" id="end-btn" onclick="endSet()">✓ End Set</button>
+    <button class="cbtn" onclick="flipCam()">🔄 Flip</button>
   </div>
 </div>
 
-<div class="cta">
-  <h2>See it in action</h2>
-  <p>Open on your phone, point at the Nautilus Nitro Lat Pulldown and start pulling.</p>
-  <a class="btn-primary" href="scripts/lat_pulldown_counter.html">▶ Launch Demo</a>
+<!-- SUBMIT REVIEW -->
+<div id="s-submit" class="screen gone">
+  <div class="xl-logo">XL FITNESS</div>
+  <div class="xl-sub">SET COMPLETE</div>
+  <div class="card">
+    <div class="s-row"><span class="s-lbl">Member</span><span class="s-val" id="r-member">—</span></div>
+    <div class="s-row"><span class="s-lbl">Exercise</span><span class="s-val" id="r-exercise">—</span></div>
+    <div class="s-row"><span class="s-lbl">Weight</span><span class="s-val" id="r-weight">—</span></div>
+    <div class="s-row"><span class="s-lbl">Reps <span style="color:var(--xl-purple-light);font-size:.65rem">AI COUNTED</span></span><span class="s-val" style="color:var(--green)" id="r-reps">—</span></div>
+    <div class="s-row"><span class="s-lbl">Form Score</span><span class="s-val" id="r-form" style="color:var(--xl-purple-light)">—</span></div>
+    <div class="s-row"><span class="s-lbl">Volume</span><span id="s-vol">—</span></div>
+  </div>
+  <div class="act-row">
+    <button class="xl-btn btn-green" onclick="submitSet()">Submit to Leaderboard →</button>
+    <button class="xl-btn btn-secondary" style="flex:0 0 auto;padding:14px 18px" onclick="redo()">↺</button>
+  </div>
 </div>
 
-<footer>XLFitness AI Rep Counter · Proof of Concept · March 2026 · Built by XLDonkey</footer>
+<!-- SUCCESS -->
+<div id="s-success" class="screen gone">
+  <div class="icon">🏆</div>
+  <h2>Leaderboard Updated!</h2>
+  <p id="success-msg">Set submitted successfully.</p>
+  <button class="xl-btn btn-primary next-btn" style="max-width:240px" onclick="nextSet()">Do Another Set →</button>
+  <button class="xl-btn btn-secondary" style="max-width:240px;margin-top:8px" onclick="logout()">Finish Session</button>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const MACHINE = 'Nautilus Nitro Lat Pulldown';
+const STACK_KG = [10,15,20,25,30,35,40,45,50,55,60,65,70,75,80];
+const WEBHOOK = ''; // Paste Power Automate URL here when ready
+
+// ── NN ────────────────────────────────────────────────────────────────────────
+const M={"classes":["bad_rep","false_movement","good_rep"],"scaler_mean":[38.550971,122.443689,42.687864,1.98767,101.224757],"scaler_scale":[38.422092,49.200083,20.189907,0.760348,28.570596],"weights":[[[0.7355531381494981,-0.08228008981670798,-1.3177177642463553,2.589510105204825,2.534997603814582],[0.07686866948569239,-0.31889217098614625,-0.6271088689195394,-2.407704711912489,-0.5514028434750671],[0.9745054123669095,-3.228590682565643,-0.6259770082049722,-2.659013552884485,-0.5608121962535999],[-0.9056161557363716,0.4727063898108313,0.7661776670307123,-1.2783008301564034,-0.3851920813162615],[-0.39143443584413384,0.6866224223647953,-0.736726943525139,-14.686247908548392,-0.1146414437268569],[1.583432297763515,-3.2905841041932917,-2.0584460922659047,-1.3586360951083787,0.3129721293951833],[-1.0219457501645834,2.1278146920654564,0.31056710561003104,-1.1007382774358418,-2.6417746523390373],[0.7399137189078976,-3.8348124304075264,-3.0874813109276915,-0.22255417423585835,-1.9362109671704837],[0.15387920010914263,-0.3274528733498624,-2.172009467121197,0.6081292777796296,-2.3370255747161273],[1.3661467875559905,-1.9282426483663861,-0.922850507235714,-0.2489337115115764,0.8961735613342964],[-1.9166788281009934,-0.13082896675032019,2.0195694820403167,5.4043789802152,-1.2604221539000366],[1.1731846428829522,-0.5495701867419385,-0.005301847051712842,0.8606762336552408,0.35459429843411816]],[[-0.840215668842268,2.041281186127967,1.5497861308819116,1.4898545615450678,6.579658645946109,0.4711913949903742,0.29620584630458974,-1.1779763623676838,1.0095405013403749,-0.7058208100424563,-1.5817373214744233,0.4789563869333899],[0.8959753961206475,0.12833937467146192,0.2026164316590598,0.035254264226767126,-6.82062245494127,-0.8473021518197674,2.2573412995432447,1.8397982886022322,0.03059756126383972,1.7872327272963089,-2.0000711792980894,0.7299457721975057],[-0.10349390077805481,-0.44205569584620147,-0.3985967839669308,-0.5196170929198589,-0.36317821419381113,0.10863917522597753,-1.1986919339197382,-0.03942720869324422,-0.24880523541897473,-0.685369174293107,-0.919507854310577,0.14619714128619496],[-0.18102311663426865,-0.5652201958768401,0.5118689821037379,-0.689201458278113,2.022024756768973,0.10212344211422081,-1.3374218781096028,0.02532074752539694,-0.21732633545924826,0.5610084384949602,-0.053751050714289955,-0.006614757452609679],[-0.8848418116850513,-0.20381670580524328,-0.012038067967352883,-0.6683585325315717,-0.5635756366540103,-0.21307263143895527,-0.7147391737413827,-1.5532997802162454,3.403586943199426,-0.697188989294392,1.512803765907451,-0.8778780580409755],[-1.2300548544601242,-0.2134379821553661,-0.16534082751521484,0.14845494143054888,-1.003976048398359,-0.4645302886260406,-1.6245263112836412,-0.3303548962400715,0.99335294815477,-0.0023112145337818185,1.3521959702650226,-0.04254471140904132],[-0.11022119203347,-3.386193098118284,1.2578678619681962,-1.109201063327187,-5.541761307336385,0.6961548728059379,-0.9602352345535559,-1.0850185715888458,0.4865053591370835,0.8013277535625423,-3.201697943555057,-0.8652711248307443],[-0.44711347738181256,0.2522164846142357,-0.020837454244849316,-0.01246397634079747,-0.3586144840314752,0.029341319373769086,0.8753842816108969,-0.8470789655346468,0.27739974278327706,-0.3551752601720058,-0.5635997542667498,-0.36587623439154127]],[[3.229261761942651,-0.39465155385968476,0.4376905859182338,0.38285688072517743,1.5125500155945246,2.1036511922151684,0.5317044427574403,0.9764201881203034],[-5.747842050046475,4.3372447047559,0.22977929615296436,0.24534449863054894,-4.196658298091416,-2.035220157283878,2.924317285738913,-0.02247549771868596],[3.2780023017514854,-5.2829992235938565,0.15923015152876585,0.15780022338200397,1.7460647680655303,1.305629291763246,-3.582697044926651,0.6169632567416055]]],"biases":[[-0.7983328423624827,-0.7459439746438443,-0.9830856928645555,-1.5434930611942956,-0.3987283638337163,-0.5840160412940504,0.701621509211516,0.704308695468621,0.3847751569251879,-2.237881009852468,-0.29155718814174697,-0.695193712545157],[-1.1623671867967063,1.6796765731043957,-0.9383270422154014,0.4886132218483841,0.33618036057780226,0.929999794029703,-0.2693988901207702,-0.5406464262695223],[0.10856555103036028,-1.955889126267632,0.9430447263238027]],"features":["min_angle","rom","std_angle","duration_s","avg_angle"],"trained_on":{"good_rep":55,"bad_rep":61,"false_movement":90,"total":206},"cv_accuracy":76.7};
+function relu(x){return x.map(v=>Math.max(0,v));}
+function softmax(x){const m=Math.max(...x),e=x.map(v=>Math.exp(v-m)),s=e.reduce((a,b)=>a+b,0);return e.map(v=>v/s);}
+function mv(W,x){return W.map(r=>r.reduce((s,w,i)=>s+w*x[i],0));}
+function nnRun(min,rom,std,dur,avg){
+  let h=[min,rom,std,dur,avg].map((v,i)=>(v-M.scaler_mean[i])/M.scaler_scale[i]);
+  for(let i=0;i<M.weights.length;i++){
+    const n=mv(M.weights[i],h).map((v,j)=>v+M.biases[i][j]);
+    h=i<M.weights.length-1?relu(n):softmax(n);
+  }
+  return h; // [bad,false,good]
+}
+
+// ── Pose ──────────────────────────────────────────────────────────────────────
+const SKEL=[[5,7],[7,9],[6,8],[8,10],[5,6],[5,11],[6,12],[11,12]];
+const MIN_CONF=0.2;
+const video=document.getElementById('video');
+const cvs=document.getElementById('cvs');
+const ctx=cvs.getContext('2d');
+function syncCvs(){cvs.width=window.innerWidth;cvs.height=window.innerHeight;}
+window.addEventListener('resize',syncCvs);
+window.addEventListener('orientationchange',()=>setTimeout(syncCvs,300));
+function kp(pose,i){const p=pose.keypoints[i];return p?.score>=MIN_CONF?p:null;}
+function angle3(a,b,c){
+  const ab={x:a.x-b.x,y:a.y-b.y},cb={x:c.x-b.x,y:c.y-b.y};
+  const d=ab.x*cb.x+ab.y*cb.y,m=Math.sqrt((ab.x**2+ab.y**2)*(cb.x**2+cb.y**2));
+  return m?Math.acos(Math.min(1,Math.max(-1,d/m)))*180/Math.PI:null;
+}
+function bestArm(pose){
+  const arms=[];
+  for(const[si,ei,wi]of[[5,7,9],[6,8,10]]){
+    const s=kp(pose,si),e=kp(pose,ei),w=kp(pose,wi);
+    if(s&&e&&w){const a=angle3(s,e,w);if(a!=null)arms.push({angle:a,conf:(s.score+e.score+w.score)/3,sN:s,eN:e,wN:w});}
+  }
+  return arms.sort((a,b)=>b.conf-a.conf)[0]||null;
+}
+function project(){
+  const cw=cvs.width,ch=cvs.height,vw=video.videoWidth||640,vh=video.videoHeight||480;
+  const s=Math.min(cw/vw,ch/vh);return{s,ox:(cw-vw*s)/2,oy:(ch-vh*s)/2};
+}
+function drawPose(pose,arm){
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  if(!cvs.width||!video.videoWidth)return;
+  const{s,ox,oy}=project();
+  const px=k=>({x:k.x*s+ox,y:k.y*s+oy});
+  // skeleton lines
+  ctx.strokeStyle='rgba(168,85,247,.75)';ctx.lineWidth=3;
+  for(const[a,b]of SKEL){
+    const pa=pose.keypoints[a],pb=pose.keypoints[b];
+    if(pa?.score>=MIN_CONF&&pb?.score>=MIN_CONF){
+      const p1=px(pa),p2=px(pb);ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();
+    }
+  }
+  // dots
+  for(const p of pose.keypoints){
+    if(p.score>=MIN_CONF){
+      const pp=px(p);ctx.beginPath();ctx.arc(pp.x,pp.y,5,0,Math.PI*2);
+      ctx.fillStyle='#fff';ctx.fill();
+      ctx.strokeStyle='rgba(168,85,247,.9)';ctx.lineWidth=2;ctx.stroke();
+    }
+  }
+  // angle arc
+  if(arm){
+    const ep=px(arm.eN),sp=px(arm.sN),wp=px(arm.wN);
+    const a1=Math.atan2(sp.y-ep.y,sp.x-ep.x),a2=Math.atan2(wp.y-ep.y,wp.x-ep.x);
+    ctx.beginPath();ctx.arc(ep.x,ep.y,26,a1,a2,false);
+    ctx.strokeStyle=arm.angle<90?'rgba(34,197,94,.9)':'rgba(168,85,247,.9)';ctx.lineWidth=3;ctx.stroke();
+    const mid=(a1+a2)/2;
+    ctx.fillStyle='#fff';ctx.font='bold 15px Arial';ctx.textAlign='center';
+    ctx.shadowColor='#000';ctx.shadowBlur=6;
+    ctx.fillText(Math.round(arm.angle)+'°',ep.x+Math.cos(mid)*42,ep.y+Math.sin(mid)*42);
+    ctx.shadowBlur=0;ctx.textAlign='left';
+  }
+}
+
+// ── Form scoring (rule-based) ─────────────────────────────────────────────────
+function calcFormScore(repMin,rom,dur,swingPct){
+  let score=100;
+  if(rom<80)score-=30;else if(rom<100)score-=15;else if(rom>160)score-=5;
+  if(repMin>80)score-=25;else if(repMin>65)score-=10;
+  if(dur<0.8)score-=20;else if(dur<1.2)score-=8;else if(dur>12)score-=10;
+  if(swingPct>0.3)score-=20;else if(swingPct>0.15)score-=8;
+  return Math.max(0,Math.min(100,Math.round(score)));
+}
+
+// ── Rep detection ─────────────────────────────────────────────────────────────
+const TOP=125,BOT=95,MIN_MS=400,MAX_MS=15000;
+function makeEMA(a){let v=null;return{u(x){if(x==null)return v;v=v==null?x:a*x+(1-a)*v;return v;},r(){v=null;}};}
+const ema=makeEMA(0.3);
+let phase='up',repStart=null,repMin=999,repMax=0,buf=[],lastArm=null;
+let repCount=0,formScores=[];
+
+const repNEl=document.getElementById('rep-n');
+const verdictEl=document.getElementById('rep-verdict');
+const phaseEl=document.getElementById('phase');
+const tDot=document.getElementById('t-dot');
+const tStatus=document.getElementById('t-status');
+const formN=document.getElementById('form-n');
+const formBar=document.getElementById('form-bar');
+
+function setFormDisplay(score){
+  formN.textContent=score;
+  const pct=score+'%';
+  formBar.style.width=pct;
+  formBar.style.background=score>=80?'var(--green)':score>=55?'var(--amber)':'var(--red)';
+}
+
+function processAngle(raw){
+  if(raw==null)return;
+  const ea=ema.u(raw);if(ea==null)return;
+  buf.push(ea);if(buf.length>300)buf.shift();
+  if(phase==='up'){
+    repMax=Math.max(repMax,ea);
+    phaseEl.textContent='↓ Pull bar down';phaseEl.className='release';
+    if(ea<BOT&&(!lastArm||lastArm.wN.y<lastArm.sN.y+0.22)){
+      phase='down';repMin=ea;repStart=Date.now();
+      phaseEl.textContent='↑ Release back up';phaseEl.className='pull';
+    }
+  }else{
+    repMin=Math.min(repMin,ea);
+    const dur=repStart?Date.now()-repStart:0;
+    if(dur>MAX_MS){phase='up';repMax=ea;repMin=999;ema.r();return;}
+    if(ea>TOP&&dur>=MIN_MS){
+      const rom=Math.round(repMax-repMin);
+      const sl=buf.slice(-Math.max(10,Math.round(dur/33)));
+      const avg=sl.reduce((a,b)=>a+b,0)/sl.length;
+      const std=Math.sqrt(sl.reduce((s,v)=>s+(v-avg)**2,0)/sl.length);
+      const durS=dur/1000;
+      const probs=nnRun(repMin,rom,std,durS,avg);
+      const cls=probs[2]>probs[0]&&probs[2]>probs[1]?'good':probs[0]>probs[1]?'bad':'false';
+      if(cls==='false'){
+        verdictEl.style.color='var(--amber)';verdictEl.textContent='⚡ False movement';
+      }else if(cls==='bad'){
+        verdictEl.style.color='var(--red)';verdictEl.textContent='⚠ Bad form — not counted';
+      }else{
+        repCount++;
+        const fs=calcFormScore(repMin,rom,durS,std/rom);
+        formScores.push(fs);setFormDisplay(fs);
+        repNEl.textContent=repCount;
+        verdictEl.style.color='var(--green)';verdictEl.textContent='✅ Good rep!';
+        repNEl.classList.add('pop');setTimeout(()=>repNEl.classList.remove('pop'),400);
+        tDot.className='live';tStatus.textContent='Counting';tStatus.className='live';
+      }
+      phase='up';repMax=ea;repMin=999;phaseEl.textContent='↓ Pull bar down';phaseEl.className='release';
+    }
+  }
+}
+
+// ── Loop ──────────────────────────────────────────────────────────────────────
+let detector=null,running=false;
+async function loop(){
+  if(!running)return;
+  if(video.readyState>=2&&detector){
+    const poses=await detector.estimatePoses(video);
+    if(poses.length){const arm=bestArm(poses[0]);if(arm)lastArm=arm;drawPose(poses[0],arm);processAngle(arm?.angle??null);}
+    else{ctx.clearRect(0,0,cvs.width,cvs.height);ema.r();}
+  }
+  requestAnimationFrame(loop);
+}
+
+// ── Session state ─────────────────────────────────────────────────────────────
+let member='',weightKg=0,addonKg=0,exercise='';
+
+// ── Screens ───────────────────────────────────────────────────────────────────
+function show(id){
+  ['s-boot','s-login','s-weight','s-active','s-submit','s-success'].forEach(s=>{
+    const el=document.getElementById(s);if(!el)return;
+    el.style.display=s===id?(s==='s-active'?'block':'flex'):'none';
+  });
+  if(id==='s-active'){syncCvs();}
+}
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+function login(){
+  const v=document.getElementById('member-in').value.trim();
+  if(!v)return;
+  member=v;buildGrid();
+  document.getElementById('w-greet').textContent='👋 Welcome, '+member+'!';
+  show('s-weight');
+}
+document.getElementById('member-in').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+function logout(){member='';document.getElementById('member-in').value='';show('s-login');}
+
+// ── Weight grid ───────────────────────────────────────────────────────────────
+function buildGrid(){
+  const g=document.getElementById('wgrid');g.innerHTML='';
+  for(const w of STACK_KG){
+    const b=document.createElement('button');b.className='wbtn';b.textContent=w+'kg';
+    b.onclick=()=>{
+      document.querySelectorAll('.wbtn').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');weightKg=w;
+      document.getElementById('start-btn').disabled=false;
+      document.getElementById('start-btn').textContent='▶ Start Set @ '+(w+addonKg)+'kg';
+    };g.appendChild(b);
+  }
+}
+let _addon=0;
+function addon(d){
+  _addon=Math.max(0,_addon+d);addonKg=_addon;
+  document.getElementById('addon-v').textContent='+'+_addon+' kg';
+  if(weightKg)document.getElementById('start-btn').textContent='▶ Start Set @ '+(weightKg+_addon)+'kg';
+}
+
+// ── Set controls ──────────────────────────────────────────────────────────────
+let stream=null,facing='environment';
+async function startCam(f){
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:f,width:{ideal:1280},height:{ideal:720}},audio:false});}
+  catch(e){stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});}
+  video.srcObject=stream;await video.play();
+}
+function flipCam(){facing=facing==='environment'?'user':'environment';startCam(facing);}
+
+function startSet(){
+  if(!weightKg)return;
+  exercise=document.getElementById('ex-sel').value;
+  const total=weightKg+addonKg;
+  repCount=0;formScores=[];phase='up';repMax=0;repMin=999;repStart=null;buf=[];ema.r();lastArm=null;
+  repNEl.textContent='0';repNEl.className='';verdictEl.textContent='';
+  document.getElementById('t-member').textContent=member;
+  document.getElementById('wb-kg').textContent=total;
+  phaseEl.textContent='Get in position';phaseEl.className='';
+  formN.textContent='—';formBar.style.width='0%';
+  tDot.className='';tStatus.textContent='Ready';tStatus.className='';
+  running=true;show('s-active');loop();
+}
+
+function endSet(){
+  running=false;ctx.clearRect(0,0,cvs.width,cvs.height);
+  const total=weightKg+addonKg;
+  const avgForm=formScores.length?Math.round(formScores.reduce((a,b)=>a+b,0)/formScores.length):null;
+  document.getElementById('r-member').textContent=member;
+  document.getElementById('r-exercise').textContent=exercise;
+  document.getElementById('r-weight').textContent=total+'kg';
+  document.getElementById('r-reps').textContent=repCount;
+  document.getElementById('r-form').textContent=avgForm!=null?avgForm+'/100':'—';
+  document.getElementById('s-vol').textContent=(repCount*total).toLocaleString()+' kg';
+  show('s-submit');
+}
+
+async function submitSet(){
+  const total=weightKg+addonKg;
+  const avgForm=formScores.length?Math.round(formScores.reduce((a,b)=>a+b,0)/formScores.length):null;
+  const payload={timestamp:new Date().toISOString(),member,machine:MACHINE,exercise,weight_kg:total,reps:repCount,volume:repCount*total,form_score:avgForm,source:'AI_auto_counted'};
+  if(WEBHOOK){try{await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch(e){console.warn('Webhook:',e);}}
+  document.getElementById('success-msg').textContent=`${repCount} reps @ ${total}kg = ${(repCount*total).toLocaleString()} kg added to the leaderboard.`;
+  show('s-success');
+}
+
+function redo(){running=true;startSet();}
+function nextSet(){running=true;show('s-weight');}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+async function boot(){
+  show('s-boot');
+  const msg=document.getElementById('boot-msg');
+  const bar=document.getElementById('boot-bar');
+  const err=document.getElementById('boot-err');
+  const retry=document.getElementById('retry-btn');
+  err.style.display='none';retry.style.display='none';
+  const step=(w,t)=>{bar.style.width=w+'%';msg.textContent=t;};
+  try{
+    step(10,'Starting camera…');
+    await startCam(facing);
+    step(30,'Loading AI model…');
+    detector=await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING});
+    step(100,'Ready ✓');
+    await new Promise(r=>setTimeout(r,350));
+    running=true;loop();
+    show('s-login');
+  }catch(e){
+    msg.textContent='';err.style.display='block';
+    err.innerHTML='❌ '+e.message+'<br/><br/>Use Chrome and allow camera access.';
+    retry.style.display='block';
+  }
+}
+window.addEventListener('load',boot);
+</script>
 </body>
 </html>
