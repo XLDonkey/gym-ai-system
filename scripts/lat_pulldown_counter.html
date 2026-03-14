@@ -53,12 +53,11 @@
     #rep-n.fp{color:#f90;transform:scale(1.07);}
     #rep-sub{font-size:.72rem;color:rgba(255,255,255,.5);margin-top:2px;text-shadow:0 1px 6px #000;min-height:1em;}
 
-    /* Calibration notice */
-    #cal-notice{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:20;background:rgba(0,0,0,.85);border:1px solid #00aaff44;border-radius:12px;padding:20px 28px;text-align:center;display:none;}
-    #cal-notice h3{color:#00aaff;margin-bottom:6px;font-size:.95rem;}
-    #cal-notice p{color:#556;font-size:.78rem;}
-    #cal-bar-wrap{width:200px;height:6px;background:#141e2e;border-radius:3px;margin:10px auto 0;overflow:hidden;}
-    #cal-bar{height:100%;background:#00aaff;width:0%;transition:width .4s;}
+    /* Phase indicator */
+    #phase-banner{position:absolute;top:50px;left:0;right:0;text-align:center;z-index:10;pointer-events:none;}
+    #phase-txt{display:inline-block;padding:6px 20px;border-radius:20px;font-size:.75rem;font-weight:800;letter-spacing:2px;background:rgba(0,0,0,.65);border:1px solid #333;color:#556;transition:all .2s;}
+    #phase-txt.pulling{background:rgba(0,200,0,.2);border-color:#0f0;color:#0f0;}
+    #phase-txt.releasing{background:rgba(0,100,255,.2);border-color:#0af;color:#0af;}
 
     /* Debug HUD */
     #hud{position:absolute;bottom:68px;right:14px;z-index:10;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:6px 10px;font-size:.63rem;line-height:1.9;}
@@ -80,9 +79,6 @@
     /* Controls */
     #controls{position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:10;}
     .cbtn{padding:9px 18px;border-radius:9px;font-size:.76rem;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.72);color:rgba(255,255,255,.55);backdrop-filter:blur(4px);}
-    #manual-btn{border-color:rgba(0,170,255,.4);color:#00aaff;}
-    #manual-btn.on{border-color:#0f0;color:#0f0;}
-    #recal-btn{border-color:rgba(255,170,0,.3);color:#fa0;}
     #flip-btn{border-color:rgba(255,255,255,.15);}
   </style>
 </head>
@@ -124,11 +120,7 @@
     <div id="rep-sub">Tap Start or sit at machine</div>
   </div>
 
-  <div id="cal-notice">
-    <h3>🎯 Auto-Calibrating</h3>
-    <p>Do <b id="cal-reps-needed">3</b> full reps to set thresholds</p>
-    <div id="cal-bar-wrap"><div id="cal-bar"></div></div>
-  </div>
+  <div id="phase-banner"><span id="phase-txt">Waiting…</span></div>
 
   <div id="hud">
     <span class="hl">Elbow </span><b id="d-elbow" style="color:#0af">—</b>
@@ -149,8 +141,6 @@
   </div>
 
   <div id="controls">
-    <button class="cbtn" id="manual-btn">▶ Start Session</button>
-    <button class="cbtn" id="recal-btn">🎯 Recalibrate</button>
     <button class="cbtn" id="reset-btn">↺ Reset</button>
     <button class="cbtn" id="flip-btn">🔄 Flip</button>
   </div>
@@ -362,128 +352,79 @@ function makeEMA(alpha){
   };
 }
 
-// ── Auto-calibration ──────────────────────────────────────────────────────────
-// Watches first N reps to auto-set TOP/BOT thresholds
-const CAL_REPS=3;
-let calibrated=false;
-let calPeaks=[],calValleys=[];
+// ── Rep detection — simple hysteresis, no calibration ────────────────────────
+// TOP: angle above this = arm extended (bar released)
+// BOT: angle below this = arm contracted (bar pulled to chest)
+// A rep = crossing BOT then back above TOP, with MIN_MS between
+const TOP=125, BOT=95, MIN_MS=400, MAX_MS=15000;
 
-function updateCalibration(repMax,repMin){
-  calPeaks.push(repMax);calValleys.push(repMin);
-  if(calPeaks.length>=CAL_REPS){
-    const avgPeak=calPeaks.reduce((a,b)=>a+b,0)/calPeaks.length;
-    const avgValley=calValleys.reduce((a,b)=>a+b,0)/calValleys.length;
-    TOP=Math.round(avgPeak*0.90);  // 90% of avg peak = new TOP
-    BOT=Math.round(avgValley+Math.min(15,(avgPeak-avgValley)*0.12)); // valley + small buffer
-    calibrated=true;
-    document.getElementById('cal-notice').style.display='none';
-    document.getElementById('cal-badge').style.display='inline-block';
-    console.log(`Auto-calibrated: TOP=${TOP}° BOT=${BOT}°`);
-  }else{
-    const pct=(calPeaks.length/CAL_REPS)*100;
-    document.getElementById('cal-bar').style.width=pct+'%';
-    document.getElementById('cal-reps-needed').textContent=CAL_REPS-calPeaks.length;
-  }
-}
-
-function startCalibration(){
-  calibrated=false;calPeaks=[];calValleys=[];
-  TOP=138;BOT=78; // defaults
-  document.getElementById('cal-notice').style.display='block';
-  document.getElementById('cal-bar').style.width='0%';
-  document.getElementById('cal-reps-needed').textContent=CAL_REPS;
-  document.getElementById('cal-badge').style.display='none';
-}
-
-// ── Rep detection state ────────────────────────────────────────────────────────
-let TOP=138,BOT=78;
-const MIN_DROP=30,MIN_CF=4,MIN_EF=3,MIN_MS=700,MAX_MS=12000;
-
-const emaAngle=makeEMA(0.35); // 0.35 = responsive but smooth
-let phase='up',repMax=0,repMin=999,repStart=null;
-let contractedF=0,extendedF=0;
-let repBuf=[],repCount=0;
-let frameN=0;
-
-// Velocity tracking — detect if movement is actually happening
-let prevAngle=null,angleVelocity=0;
-
-// App state
-let appState='loading',seatedF=0,unseatedF=0,manualSession=false;
+const emaAngle=makeEMA(0.3);
+let phase='up'; // 'up' = waiting for pull, 'down' = bar pulled, waiting for release
+let repStart=null, repMin=999, repMax=0;
+let repBuf=[], repCount=0, frameN=0;
 
 const repNEl=document.getElementById('rep-n');
 const repSubEl=document.getElementById('rep-sub');
 const sdot=document.getElementById('sdot');
 const stxt=document.getElementById('stxt');
+const phaseTxt=document.getElementById('phase-txt');
 
 function setState(s){
-  appState=s;sdot.className=s;stxt.className=s;
-  if(s==='waiting'){stxt.textContent='Machine Ready';}
-  else if(s==='seated'){stxt.textContent='Person Detected';}
-  else if(s==='active'){stxt.textContent='Set in Progress';}
+  sdot.className=s;stxt.className=s;
+  if(s==='waiting')stxt.textContent='Ready';
+  else if(s==='active')stxt.textContent='Counting';
 }
 
 function processAngle(rawAngle){
   if(rawAngle===null)return;
-
-  // EMA smoothing — much better than rolling average
   const ea=emaAngle.update(rawAngle);
   if(ea===null)return;
 
-  // Velocity (degrees per frame)
-  if(prevAngle!==null)angleVelocity=angleVelocity*0.7+(ea-prevAngle)*0.3;
-  prevAngle=ea;
+  repBuf.push(ea);if(repBuf.length>300)repBuf.shift();
 
-  repBuf.push(ea);if(repBuf.length>250)repBuf.shift();
-
-  // Update debug HUD
+  // HUD
   document.getElementById('d-elbow').textContent=Math.round(ea)+'°';
-  document.getElementById('d-phase').textContent=phase;
+  document.getElementById('d-phase').textContent=phase==='up'?'releasing':'PULLING';
   document.getElementById('d-top').textContent=TOP+'°';
   document.getElementById('d-bot').textContent=BOT+'°';
 
   if(phase==='up'){
+    // Waiting for bar to be pulled down (angle drops below BOT)
     repMax=Math.max(repMax,ea);
-    if(ea>TOP)extendedF++;else extendedF=0;
-    // Transition to down: angle dropped below BOT, was extended, dropped significantly
-    if(ea<BOT&&extendedF>=MIN_EF&&(repMax-ea)>=MIN_DROP){
-      phase='down';repMin=ea;repStart=Date.now();contractedF=0;
+    phaseTxt.textContent='↓ Pull the bar down';
+    phaseTxt.className='releasing';
+    if(ea<BOT){
+      phase='down';repMin=ea;repStart=Date.now();
+      phaseTxt.textContent='↑ Release back up';
+      phaseTxt.className='pulling';
     }
   }else{
+    // Bar pulled — waiting for release back up (angle rises above TOP)
     repMin=Math.min(repMin,ea);
-    if(ea<BOT)contractedF++;else contractedF=0;
     const dur=repStart?Date.now()-repStart:0;
+    // Safety reset if stuck too long
+    if(dur>MAX_MS){phase='up';repMax=ea;repMin=999;emaAngle.reset();return;}
 
-    // Safety: if stuck in down phase too long, reset
-    if(dur>MAX_MS){phase='up';repMax=ea;repMin=999;extendedF=0;contractedF=0;return;}
-
-    // Count rep: angle came back up, was contracted long enough, took enough time
-    if(ea>TOP&&contractedF>=MIN_CF&&dur>=MIN_MS){
+    if(ea>TOP&&dur>=MIN_MS){
+      // ✅ Rep counted
       const rom=Math.round(repMax-repMin);
-      const a=repBuf.slice(-Math.round(dur/33));
-      const avg=a.length?a.reduce((x,y)=>x+y,0)/a.length:100;
-      const std=a.length>1?Math.sqrt(a.reduce((s,v)=>s+(v-avg)**2,0)/a.length):20;
+      const slice=repBuf.slice(-Math.max(10,Math.round(dur/33)));
+      const avg=slice.reduce((a,b)=>a+b,0)/slice.length;
+      const std=Math.sqrt(slice.reduce((s,v)=>s+(v-avg)**2,0)/slice.length);
+      updateBrain(repMin,rom,std,dur/1000,avg);
 
-      // Auto-calibrate from this rep
-      if(!calibrated)updateCalibration(repMax,repMin);
-
-      // NN classification (display only)
-      const nnBest=updateBrain(repMin,rom,std,dur/1000,avg);
-
-      // Rule-based good/partial: use calibrated thresholds
-      const goodThreshold=BOT+15;
-      const isGood=repMin<goodThreshold&&rom>=Math.min(80,TOP-BOT-20);
-
+      const isGood=rom>=40&&repMin<BOT+10;
       repCount++;
       repNEl.textContent=repCount;
-      repSubEl.textContent=isGood?'✓ Good rep':'Partial — pull deeper';
+      repSubEl.textContent=isGood?'✓ Good rep!':'Rep counted';
       repNEl.className=isGood?'fg':'fp';
-      setTimeout(()=>{repNEl.className='';},600);
-      firePulse(isGood?'#0f0':'#f44');
+      setTimeout(()=>{repNEl.className='';},500);
+      firePulse('#0f0');
+      setState('active');
 
-      // Reset for next rep
-      phase='up';repMax=ea;repMin=999;extendedF=0;contractedF=0;repBuf=[];
-      if(appState==='seated'||appState==='waiting')setState('active');
+      phase='up';repMax=ea;repMin=999;
+      phaseTxt.textContent='↓ Pull the bar down';
+      phaseTxt.className='releasing';
     }
   }
 }
@@ -497,24 +438,12 @@ async function loop(){
       const pose=poses[0];
       const{sx,sy,ox,oy}=getSXSY();
       const arm=getBestArm(pose,sx,sy);
-      const color=appState==='active'?'rgba(0,255,100,.85)':'rgba(0,170,255,.75)';
+      const color=sdot.className==='active'?'rgba(0,255,100,.85)':'rgba(0,170,255,.75)';
       drawPose(pose,arm,color);
+      // Always process angle — no gating
+      processAngle(arm?arm.angle:null);
 
-      // Seated detection
-      const ls=gkp(pose,5),rs=gkp(pose,6),lh=gkp(pose,11),rh=gkp(pose,12);
-      let seated=manualSession;
-      if(!manualSession&&(ls||rs)){
-        if(lh||rh){const hy=(lh&&rh?(lh.y+rh.y)/2:(lh||rh).y),sy2=(ls&&rs?(ls.y+rs.y)/2:(ls||rs).y);seated=hy>0.3&&sy2<hy+0.05;}
-        else seated=true;
-      }
-      if(seated){seatedF++;unseatedF=0;}else{unseatedF++;seatedF=0;}
-      if(appState==='waiting'&&seatedF>12)setState('seated');
-      if((appState==='seated'||appState==='active')&&!manualSession&&unseatedF>90){
-        setState('waiting');resetRep();repCount=0;repNEl.textContent='0';repSubEl.textContent='Tap Start or sit at machine';
-      }
-      if(appState!=='waiting')processAngle(arm?arm.angle:null);
-
-      // Brain live update every 8 frames
+      // Brain live update every 10 frames
       if(frameN++%8===0&&repBuf.length>=5){
         const a=repBuf.slice(-50),avg=a.reduce((x,y)=>x+y,0)/a.length;
         const std=Math.sqrt(a.reduce((s,v)=>s+(v-avg)**2,0)/a.length);
@@ -537,30 +466,18 @@ async function loop(){
 
 // ── Controls ──────────────────────────────────────────────────────────────────
 function resetRep(){
-  phase='up';repMax=0;repMin=999;repStart=null;
-  contractedF=0;extendedF=0;repBuf=[];
-  emaAngle.reset();prevAngle=null;angleVelocity=0;
+  phase='up';repMax=0;repMin=999;repStart=null;repBuf=[];
+  emaAngle.reset();
+  phaseTxt.textContent='↓ Pull the bar down';
+  phaseTxt.className='releasing';
 }
 
-document.getElementById('manual-btn').addEventListener('click',()=>{
-  manualSession=true;seatedF=99;setState('seated');
-  startCalibration();
-  const b=document.getElementById('manual-btn');
-  b.textContent='✓ Active';b.classList.add('on');
-});
-document.getElementById('recal-btn').addEventListener('click',startCalibration);
 document.getElementById('reset-btn').addEventListener('click',()=>{
-  manualSession=false;seatedF=0;unseatedF=0;
   repCount=0;resetRep();
   repNEl.textContent='0';repNEl.className='';
-  repSubEl.textContent='Tap Start or sit at machine';
+  repSubEl.textContent='Counting automatically';
   document.getElementById('nn-verdict').textContent='Waiting…';
   document.getElementById('nn-verdict').style.cssText='';
-  document.getElementById('manual-btn').textContent='▶ Start Session';
-  document.getElementById('manual-btn').classList.remove('on');
-  document.getElementById('cal-notice').style.display='none';
-  document.getElementById('cal-badge').style.display='none';
-  calibrated=false;
   setState('waiting');
 });
 
@@ -609,6 +526,7 @@ document.getElementById('start-btn').addEventListener('click',async()=>{
     document.getElementById('app').style.display='block';
     // Must size canvas AFTER app is visible — requestAnimationFrame ensures layout is done
     requestAnimationFrame(()=>{syncCanvas();resizeBrain();});
+    repSubEl.textContent='Counting automatically';
     setState('waiting');
     loop();
   }catch(e){
