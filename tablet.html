@@ -3,456 +3,645 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>XLFitness AI — Stakeholder Demo</title>
+  <title>XL Fitness — Lat Pulldown</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{background:#07090f;color:#fff;font-family:'Segoe UI',Arial,sans-serif;height:100dvh;overflow:hidden;display:flex;flex-direction:column;}
+    :root{
+      --bg:#06040f;--card:#0d0a18;--border:#1c1530;
+      --purple:#7c3aed;--purpleL:#a855f7;--purpleDim:rgba(124,58,237,.16);
+      --green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+      --txt:#e8e0ff;--muted:#5a4f72;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,Arial,sans-serif;}
+
+    /* ══ Overlay screens (login, weight, submit, success) ══ */
+    .ov{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+    .ov.off{display:none;}
+    .logo{font-size:.95rem;font-weight:900;letter-spacing:5px;color:var(--purpleL);}
+    .sub{font-size:.58rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:2px;margin-bottom:24px;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px 20px;width:100%;max-width:340px;}
+    .sec{font-size:.55rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;margin-top:14px;}
+    .xl-btn{width:100%;padding:14px;border-radius:11px;font-size:.88rem;font-weight:800;cursor:pointer;border:none;letter-spacing:.5px;transition:opacity .15s,transform .1s;margin-top:10px;}
+    .xl-btn:active{opacity:.85;transform:scale(.98);}
+    .btn-p{background:linear-gradient(135deg,var(--purple),var(--purpleL));color:#fff;}
+    .btn-g{background:linear-gradient(135deg,#15803d,var(--green));color:#fff;}
+    .btn-out{background:transparent;border:1px solid var(--border)!important;color:var(--muted);}
 
     /* ── Boot ── */
-    #boot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:32px;background:#07090f;}
-    .boot-logo{font-size:2rem;font-weight:900;color:#00aaff;letter-spacing:6px;}
-    .boot-sub{color:#334;font-size:.85rem;letter-spacing:2px;}
-    #start-btn{padding:18px 56px;background:#00aaff;color:#fff;border:none;border-radius:14px;font-size:1.1rem;font-weight:900;cursor:pointer;letter-spacing:1px;}
-    #boot-status{font-size:.8rem;color:#445;min-height:1.2em;letter-spacing:1px;}
-    #boot-bar-wrap{width:280px;height:6px;background:#141e2e;border-radius:3px;overflow:hidden;display:none;}
-    #boot-bar{height:100%;background:linear-gradient(90deg,#0055cc,#00aaff);width:0%;transition:width .4s;}
-    #boot-err{color:#f44;font-size:.78rem;text-align:center;max-width:300px;display:none;}
+    #s-boot .bar-wrap{width:200px;height:4px;background:#160e2a;border-radius:2px;overflow:hidden;margin-bottom:8px;}
+    #s-boot .bar{height:100%;background:linear-gradient(90deg,var(--purple),var(--purpleL));width:0;transition:width .4s;}
+    #boot-msg{font-size:.72rem;color:var(--muted);letter-spacing:1px;}
+    #boot-err{color:var(--red);font-size:.72rem;text-align:center;max-width:280px;line-height:1.7;display:none;margin-bottom:8px;}
 
-    /* ── App layout — two panel ── */
-    #app{display:none;flex:1;flex-direction:row;}
+    /* ── Login ── */
+    #s-login .nfc{font-size:3rem;animation:pls 2s infinite alternate;display:block;text-align:center;margin-bottom:16px;}
+    @keyframes pls{to{filter:drop-shadow(0 0 14px var(--purple));transform:scale(1.07);}}
+    #s-login h2{font-size:1.05rem;font-weight:900;text-align:center;margin-bottom:4px;}
+    #s-login p{font-size:.72rem;color:var(--muted);text-align:center;line-height:1.5;margin-bottom:14px;}
+    #mem-in{width:100%;background:#08040f;border:1px solid var(--border);color:var(--txt);padding:12px 16px;border-radius:10px;font-size:.95rem;text-align:center;outline:none;}
+    #mem-in:focus{border-color:var(--purple);}
+
+    /* ── Weight ── */
+    #s-weight{justify-content:flex-start;padding-top:28px;}
+    #s-weight .inner{width:100%;max-width:380px;}
+    .greet{font-size:1.1rem;font-weight:900;text-align:center;margin-bottom:2px;}
+    .mach{font-size:.6rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:20px;}
+    .ex-sel{width:100%;background:var(--card);border:1px solid var(--border);color:var(--txt);padding:11px 14px;border-radius:9px;font-size:.84rem;outline:none;}
+    .wgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+    .wbtn{padding:11px 4px;border-radius:8px;font-size:.76rem;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);text-align:center;transition:all .15s;}
+    .wbtn.sel{background:var(--purpleDim);border-color:var(--purpleL);color:var(--purpleL);}
+    .addon-row{display:flex;align-items:center;gap:10px;}
+    .adbtn{width:36px;height:36px;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);}
+    #addon-v{font-size:.88rem;font-weight:700;color:var(--purpleL);width:58px;text-align:center;}
+    #start-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--purple),var(--purpleL));border:none;border-radius:12px;color:#fff;font-size:.95rem;font-weight:900;cursor:pointer;margin-top:16px;margin-bottom:6px;}
+    #start-btn:disabled{background:#160e2a;color:var(--muted);cursor:not-allowed;}
+
+    /* ══ Active set (two-panel) ══ */
+    #s-active{display:none;position:fixed;inset:0;z-index:60;flex-direction:row;}
+    #s-active.on{display:flex;}
 
     /* Left: camera */
-    #cam-panel{flex:1;position:relative;background:#000;overflow:hidden;}
+    #cam{flex:1;position:relative;background:#000;overflow:hidden;min-width:0;}
     #video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
-    #pose-canvas{position:fixed;top:0;left:0;pointer-events:none;z-index:2;}
+    #cvs{position:fixed;top:0;left:0;pointer-events:none;z-index:61;}
 
-    /* Overlaid rep counter on camera panel */
-    #rep-overlay{position:absolute;bottom:24px;left:24px;z-index:5;}
-    #rep-lbl{font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.4);}
-    #rep-n{font-size:8rem;font-weight:900;line-height:1;text-shadow:0 4px 40px rgba(0,0,0,.9);transition:color .15s,transform .15s;}
-    #rep-n.fg{color:#0f0;transform:scale(1.08);}
-    #rep-n.fp{color:#f90;transform:scale(1.05);}
-    #rep-verdict{font-size:.9rem;font-weight:700;color:rgba(255,255,255,.5);margin-top:4px;min-height:1.2em;}
+    /* topbar */
+    #topbar{position:absolute;top:0;left:0;right:0;z-index:65;padding:9px 12px 18px;background:linear-gradient(rgba(6,4,15,.9),transparent);display:flex;align-items:center;gap:7px;}
+    .tl{font-size:.82rem;font-weight:900;letter-spacing:4px;color:var(--purpleL);}
+    #t-mem{font-size:.67rem;color:rgba(255,255,255,.38);margin-left:6px;}
+    #tdot{width:8px;height:8px;border-radius:50%;background:#160e2a;margin-left:auto;transition:all .3s;}
+    #tdot.live{background:var(--green);box-shadow:0 0 10px var(--green);animation:glw 1.2s infinite alternate;}
+    @keyframes glw{to{box-shadow:0 0 20px var(--green);}}
+    #tstatus{font-size:.6rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+    #tstatus.live{color:var(--green);}
 
-    /* Phase indicator */
-    #phase-pill{position:absolute;bottom:24px;right:16px;z-index:5;padding:8px 20px;border-radius:20px;font-size:.72rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;background:rgba(0,0,0,.7);border:1px solid #333;color:#445;transition:all .25s;}
-    #phase-pill.pulling{background:rgba(0,200,0,.18);border-color:#0f0;color:#0f0;}
-    #phase-pill.releasing{background:rgba(0,120,255,.18);border-color:#0af;color:#0af;}
+    /* phase */
+    #phase{position:absolute;top:48px;left:50%;transform:translateX(-50%);z-index:65;padding:5px 18px;border-radius:20px;font-size:.67rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;background:rgba(6,4,15,.8);border:1px solid var(--border);color:var(--muted);white-space:nowrap;transition:all .25s;}
+    #phase.pull{background:rgba(34,197,94,.12);border-color:var(--green);color:var(--green);}
+    #phase.rel{background:var(--purpleDim);border-color:var(--purpleL);color:var(--purpleL);}
+
+    /* rep counter */
+    #rblock{position:absolute;bottom:70px;left:14px;z-index:65;}
+    #rlbl{font-size:.52rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);}
+    #rn{font-size:min(20vw,96px);font-weight:900;line-height:1;text-shadow:0 6px 40px rgba(0,0,0,.95);transition:color .12s,transform .12s;}
+    #rn.pop{color:var(--green);transform:scale(1.1);}
+    #rverdict{font-size:.73rem;font-weight:700;color:rgba(255,255,255,.38);min-height:1.1em;margin-top:2px;}
+
+    /* weight badge */
+    #wbadge{position:absolute;top:46px;right:10px;z-index:65;background:rgba(6,4,15,.8);border:1px solid var(--border);border-radius:9px;padding:6px 12px;text-align:right;}
+    #wbkg{font-size:1.1rem;font-weight:900;}
+    #wblbl{font-size:.52rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+
+    /* end set btn */
+    #controls{position:absolute;bottom:10px;left:0;right:0;z-index:65;display:flex;justify-content:center;gap:8px;}
+    .cbtn{padding:8px 18px;border-radius:9px;font-size:.7rem;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(6,4,15,.82);color:rgba(255,255,255,.4);backdrop-filter:blur(6px);}
+    #end-btn{border-color:rgba(124,58,237,.45);color:var(--purpleL);padding:8px 28px;}
 
     /* Right: stats panel */
-    #stats-panel{width:300px;background:#0b0f18;border-left:1px solid #141e2e;display:flex;flex-direction:column;padding:20px 16px;gap:16px;overflow-y:auto;}
-    
-    .brand{text-align:center;padding-bottom:12px;border-bottom:1px solid #141e2e;}
-    .brand h1{font-size:1rem;font-weight:900;color:#00aaff;letter-spacing:4px;}
-    .brand p{font-size:.62rem;color:#334;letter-spacing:1px;margin-top:2px;}
+    #stats{width:min(42vw,220px);background:#09060f;border-left:1px solid var(--border);display:flex;flex-direction:column;padding:14px 12px;gap:12px;overflow-y:auto;flex-shrink:0;}
 
-    /* Status */
-    .status-row{display:flex;align-items:center;gap:8px;}
-    #sdot{width:9px;height:9px;border-radius:50%;background:#1a2030;transition:all .3s;flex-shrink:0;}
-    #sdot.active{background:#0f0;box-shadow:0 0 10px #0f0;animation:glow 1s infinite alternate;}
-    #sdot.seated{background:#f90;box-shadow:0 0 8px #f90;}
-    @keyframes glow{to{box-shadow:0 0 18px #0f0;}}
-    #stxt{font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#334;}
-    #stxt.active{color:#0f0;} #stxt.seated{color:#f90;}
+    .brand{text-align:center;padding-bottom:10px;border-bottom:1px solid var(--border);}
+    .brand-n{font-size:.85rem;font-weight:900;color:var(--purpleL);letter-spacing:3px;}
+    .brand-m{font-size:.55rem;color:var(--muted);letter-spacing:1px;margin-top:2px;}
 
-    /* NN Brain */
-    .section-label{font-size:.55rem;letter-spacing:3px;text-transform:uppercase;color:#1a2a3a;margin-bottom:8px;}
-    #brain-cv{width:100%;height:120px;display:block;background:#050810;border-radius:8px;border:1px solid #0f141e;}
-    
-    .prob-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
-    .prob-lbl{font-size:.65rem;color:#556;width:52px;flex-shrink:0;}
-    .prob-track{flex:1;height:6px;background:#0f141e;border-radius:3px;overflow:hidden;}
-    .prob-fill{height:100%;border-radius:3px;transition:width .25s;}
-    .prob-val{font-size:.65rem;font-weight:800;width:30px;text-align:right;}
+    .stat-hd{font-size:.52rem;letter-spacing:3px;text-transform:uppercase;color:#2a1f40;margin-bottom:6px;}
 
-    #nn-verdict{text-align:center;font-size:.8rem;font-weight:900;padding:8px;border-radius:8px;border:1px solid #1a2a3a;color:#334;letter-spacing:1px;margin-top:4px;}
+    /* angle */
+    .gauge{text-align:center;}
+    #aval{font-size:2rem;font-weight:900;color:var(--purpleL);line-height:1;}
+    #asub{font-size:.52rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:1px;}
+    #abar-w{width:100%;height:5px;background:#160e2a;border-radius:3px;overflow:hidden;margin-top:6px;}
+    #abar{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--amber),var(--red));width:50%;transition:width .15s;}
 
-    /* Elbow angle gauge */
-    .gauge-wrap{text-align:center;}
-    #angle-val{font-size:2.2rem;font-weight:900;color:#00aaff;line-height:1;}
-    #angle-sub{font-size:.6rem;color:#334;letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
-    #angle-bar-wrap{width:100%;height:6px;background:#0f141e;border-radius:3px;overflow:hidden;margin-top:8px;}
-    #angle-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#0f0,#fa0,#f44);width:50%;}
+    /* form score */
+    .fscore{text-align:center;}
+    #fsn{font-size:2rem;font-weight:900;line-height:1;}
+    #fslbl{font-size:.52rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:1px;}
+    #fsbar-w{width:100%;height:5px;background:#160e2a;border-radius:3px;overflow:hidden;margin-top:6px;}
+    #fsbar{height:100%;border-radius:3px;transition:width .4s,background .4s;width:0;}
 
-    /* Controls */
-    .btn-row{display:flex;gap:8px;margin-top:auto;}
-    .cbtn{flex:1;padding:10px;border-radius:9px;font-size:.72rem;font-weight:700;cursor:pointer;border:1px solid #1a2a3a;background:#0f141e;color:#445;}
-    .cbtn:hover{border-color:#00aaff44;color:#00aaff;}
-    #reset-btn{border-color:rgba(255,100,100,.3);color:#f44;}
+    /* NN */
+    #brain-cv{width:100%;height:90px;display:block;background:#040208;border-radius:7px;border:1px solid #120e1e;}
+    .prob-row{display:flex;align-items:center;gap:5px;margin-bottom:4px;}
+    .pl{font-size:.6rem;color:var(--muted);width:46px;flex-shrink:0;}
+    .pt{flex:1;height:5px;background:#160e2a;border-radius:3px;overflow:hidden;}
+    .pf{height:100%;border-radius:3px;transition:width .25s;}
+    .pv{font-size:.6rem;font-weight:800;width:26px;text-align:right;}
+    #nn-v{text-align:center;font-size:.72rem;font-weight:900;padding:7px;border-radius:7px;border:1px solid var(--border);color:var(--muted);letter-spacing:1px;margin-top:3px;}
+
+    /* btn row */
+    .btn-row{display:flex;gap:6px;margin-top:auto;padding-top:8px;}
+    .sbtn{flex:1;padding:9px 4px;border-radius:8px;font-size:.68rem;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);}
+
+    /* ── Submit ── */
+    #s-submit .card .sr{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #0c0816;}
+    #s-submit .card .sr:last-child{border:none;}
+    .sl{font-size:.68rem;color:var(--muted);}
+    .sv{font-size:.85rem;font-weight:800;}
+    #s-vol{font-size:1.4rem;font-weight:900;color:var(--purpleL);}
+    .act-row{display:flex;gap:10px;width:100%;max-width:340px;}
+    .act-row .xl-btn{flex:1;}
+
+    /* ── Success ── */
+    #s-success .ico{font-size:3.5rem;animation:pop .4s cubic-bezier(.2,1.5,.4,1);display:block;text-align:center;}
+    @keyframes pop{from{transform:scale(0);}to{transform:scale(1);}}
+    #s-success h2{font-size:1.1rem;font-weight:900;margin:12px 0 5px;text-align:center;}
+    #s-success p{font-size:.75rem;color:var(--muted);text-align:center;line-height:1.6;max-width:260px;}
   </style>
 </head>
 <body>
 
-<!-- Boot -->
-<div id="boot">
-  <div class="boot-logo">XLFITNESS</div>
-  <div class="boot-sub">AI REP COUNTER · STAKEHOLDER DEMO</div>
-  <button id="start-btn" onclick="boot()">▶ START DEMO</button>
-  <div id="boot-bar-wrap"><div id="boot-bar"></div></div>
-  <div id="boot-status"></div>
+<!-- BOOT -->
+<div id="s-boot" class="ov">
+  <div class="logo">XL FITNESS</div>
+  <div class="sub">AI REP COUNTER · LAT PULLDOWN</div>
+  <div class="bar-wrap"><div class="bar" id="boot-bar"></div></div>
+  <div id="boot-msg">Starting…</div>
   <div id="boot-err"></div>
+  <button class="xl-btn btn-p" id="retry-btn" style="display:none;max-width:180px" onclick="boot()">↺ Retry</button>
 </div>
 
-<!-- App -->
-<div id="app">
+<!-- LOGIN -->
+<div id="s-login" class="ov off">
+  <div class="logo">XL FITNESS</div>
+  <div class="sub">NAUTILUS NITRO · LAT PULLDOWN</div>
+  <div class="card">
+    <span class="nfc">📳</span>
+    <h2>Tap Your Card</h2>
+    <p>Or type your gamer tag / member ID</p>
+    <input id="mem-in" type="text" placeholder="Gamer tag or member ID" autocorrect="off" autocomplete="off"/>
+    <button class="xl-btn btn-p" onclick="login()">Login →</button>
+  </div>
+</div>
 
-  <!-- Left: camera -->
-  <div id="cam-panel">
-    <video id="video" autoplay playsinline muted></video>
+<!-- WEIGHT SELECT -->
+<div id="s-weight" class="ov off">
+  <div class="inner">
+    <div class="logo" style="text-align:center">XL FITNESS</div>
+    <div class="greet" id="w-greet">—</div>
+    <div class="mach">Nautilus Nitro · Lat Pulldown</div>
 
-    <div id="rep-overlay">
-      <div id="rep-lbl">REPS</div>
-      <div id="rep-n">0</div>
-      <div id="rep-verdict">Counting automatically…</div>
+    <div class="sec">Exercise</div>
+    <select class="ex-sel" id="ex-sel">
+      <option>Lat Pulldown</option>
+      <option>Close Grip Lat Pulldown</option>
+      <option>Wide Grip Lat Pulldown</option>
+      <option>Reverse Grip Lat Pulldown</option>
+    </select>
+
+    <div class="sec">Weight Stack</div>
+    <div class="wgrid" id="wgrid"></div>
+
+    <div class="sec">Add-On Weight (kg)</div>
+    <div class="addon-row">
+      <button class="adbtn" onclick="addon(-2.5)">−</button>
+      <div id="addon-v">+0 kg</div>
+      <button class="adbtn" onclick="addon(2.5)">+</button>
     </div>
 
-    <div id="phase-pill">Ready</div>
+    <button id="start-btn" disabled onclick="startSet()">Select a weight to start</button>
+    <button class="xl-btn btn-out" onclick="logout()">← Log Out</button>
+  </div>
+</div>
+
+<!-- ACTIVE SET (two-panel) -->
+<div id="s-active">
+  <!-- Camera panel (left) -->
+  <div id="cam">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="cvs"></canvas>
+
+    <div id="topbar">
+      <span class="tl">XL</span>
+      <span id="t-mem"></span>
+      <div id="tdot"></div>
+      <span id="tstatus">Ready</span>
+    </div>
+
+    <div id="phase">Get in position</div>
+
+    <div id="wbadge">
+      <div id="wbkg">—</div>
+      <div id="wblbl">kg</div>
+    </div>
+
+    <div id="rblock">
+      <div id="rlbl">REPS</div>
+      <div id="rn">0</div>
+      <div id="rverdict"></div>
+    </div>
+
+    <div id="controls">
+      <button class="cbtn" id="end-btn" onclick="endSet()">✓ End Set</button>
+      <button class="cbtn" onclick="flipCam()">🔄 Flip</button>
+    </div>
   </div>
 
-  <!-- Right: stats -->
-  <div id="stats-panel">
+  <!-- Stats panel (right) -->
+  <div id="stats">
     <div class="brand">
-      <h1>XLFITNESS AI</h1>
-      <p>Nautilus Nitro · Lat Pulldown</p>
+      <div class="brand-n">XLFITNESS</div>
+      <div class="brand-m" id="s-mach-lbl">Lat Pulldown</div>
     </div>
 
-    <div class="status-row">
-      <div id="sdot"></div>
-      <span id="stxt">Initialising…</span>
-    </div>
-
-    <!-- Angle gauge -->
-    <div class="gauge-wrap">
-      <div class="section-label">Elbow Angle</div>
-      <div id="angle-val">—</div>
-      <div id="angle-sub">degrees</div>
-      <div id="angle-bar-wrap"><div id="angle-bar" style="width:50%"></div></div>
-    </div>
-
-    <!-- NN Brain -->
+    <!-- Angle -->
     <div>
-      <div class="section-label">Neural Network</div>
-      <canvas id="brain-cv"></canvas>
-      <div style="margin-top:8px;">
-        <div class="prob-row">
-          <span class="prob-lbl">Good Rep</span>
-          <div class="prob-track"><div class="prob-fill" id="pb-good" style="background:#0f0;width:0%"></div></div>
-          <span class="prob-val" id="pv-good" style="color:#0f0">0%</span>
-        </div>
-        <div class="prob-row">
-          <span class="prob-lbl">Bad Rep</span>
-          <div class="prob-track"><div class="prob-fill" id="pb-bad" style="background:#f44;width:0%"></div></div>
-          <span class="prob-val" id="pv-bad" style="color:#f44">0%</span>
-        </div>
-        <div class="prob-row">
-          <span class="prob-lbl">False Move</span>
-          <div class="prob-track"><div class="prob-fill" id="pb-false" style="background:#f90;width:0%"></div></div>
-          <span class="prob-val" id="pv-false" style="color:#f90">0%</span>
-        </div>
-        <div id="nn-verdict">Waiting…</div>
+      <div class="stat-hd">Elbow Angle</div>
+      <div class="gauge">
+        <div id="aval">—</div>
+        <div id="asub">degrees</div>
+        <div id="abar-w"><div id="abar"></div></div>
       </div>
     </div>
 
-    <!-- Controls -->
+    <!-- Form score -->
+    <div>
+      <div class="stat-hd">Form Score</div>
+      <div class="fscore">
+        <div id="fsn" style="color:var(--purpleL)">—</div>
+        <div id="fslbl">/100</div>
+        <div id="fsbar-w"><div id="fsbar"></div></div>
+      </div>
+    </div>
+
+    <!-- NN brain -->
+    <div>
+      <div class="stat-hd">Neural Network</div>
+      <canvas id="brain-cv"></canvas>
+      <div style="margin-top:6px">
+        <div class="prob-row">
+          <span class="pl">Good</span>
+          <div class="pt"><div class="pf" id="pb-g" style="background:var(--green);width:0%"></div></div>
+          <span class="pv" id="pv-g" style="color:var(--green)">0%</span>
+        </div>
+        <div class="prob-row">
+          <span class="pl">Bad</span>
+          <div class="pt"><div class="pf" id="pb-b" style="background:var(--red);width:0%"></div></div>
+          <span class="pv" id="pv-b" style="color:var(--red)">0%</span>
+        </div>
+        <div class="prob-row">
+          <span class="pl">False</span>
+          <div class="pt"><div class="pf" id="pb-f" style="background:var(--amber);width:0%"></div></div>
+          <span class="pv" id="pv-f" style="color:var(--amber)">0%</span>
+        </div>
+        <div id="nn-v">Waiting…</div>
+      </div>
+    </div>
+
     <div class="btn-row">
-      <button class="cbtn" id="reset-btn">↺ Reset</button>
-      <button class="cbtn" id="flip-btn">🔄 Flip</button>
+      <button class="sbtn" onclick="resetReps()">↺ Reset</button>
     </div>
   </div>
-
 </div>
 
-<!-- Hidden canvas for pose -->
-<canvas id="pose-canvas"></canvas>
+<!-- SUBMIT -->
+<div id="s-submit" class="ov off">
+  <div class="logo">XL FITNESS</div>
+  <div class="sub">SET COMPLETE</div>
+  <div class="card">
+    <div class="sr"><span class="sl">Member</span><span class="sv" id="r-mem">—</span></div>
+    <div class="sr"><span class="sl">Exercise</span><span class="sv" id="r-ex">—</span></div>
+    <div class="sr"><span class="sl">Weight</span><span class="sv" id="r-wt">—</span></div>
+    <div class="sr"><span class="sl">Reps <span style="color:var(--purpleL);font-size:.6rem">AI COUNTED</span></span><span class="sv" style="color:var(--green)" id="r-reps">—</span></div>
+    <div class="sr"><span class="sl">Avg Form</span><span class="sv" id="r-form" style="color:var(--purpleL)">—</span></div>
+    <div class="sr"><span class="sl">Volume</span><span id="s-vol">—</span></div>
+  </div>
+  <div class="act-row" style="margin-top:16px">
+    <button class="xl-btn btn-g" onclick="submitSet()">Submit to Leaderboard →</button>
+    <button class="xl-btn btn-out" style="flex:0 0 auto;padding:14px 16px" onclick="redoSet()">↺</button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="s-success" class="ov off">
+  <span class="ico">🏆</span>
+  <h2>Leaderboard Updated!</h2>
+  <p id="succ-msg"></p>
+  <button class="xl-btn btn-p" style="max-width:240px;margin-top:20px" onclick="nextSet()">Do Another Set →</button>
+  <button class="xl-btn btn-out" style="max-width:240px" onclick="logout()">Finish Session</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
 <script>
-// ── NN Model ──────────────────────────────────────────────────────────────────
+// ── Config ────────────────────────────────────────────────────────────────────
+const MACHINE='Nautilus Nitro Lat Pulldown';
+const STACK=[10,15,20,25,30,35,40,45,50,55,60,65,70,75,80];
+const WEBHOOK=''; // Paste Power Automate URL here
+
+// ── NN ────────────────────────────────────────────────────────────────────────
 const M={"classes":["bad_rep","false_movement","good_rep"],"scaler_mean":[38.550971,122.443689,42.687864,1.98767,101.224757],"scaler_scale":[38.422092,49.200083,20.189907,0.760348,28.570596],"weights":[[[0.7355531381494981,-0.08228008981670798,-1.3177177642463553,2.589510105204825,2.534997603814582],[0.07686866948569239,-0.31889217098614625,-0.6271088689195394,-2.407704711912489,-0.5514028434750671],[0.9745054123669095,-3.228590682565643,-0.6259770082049722,-2.659013552884485,-0.5608121962535999],[-0.9056161557363716,0.4727063898108313,0.7661776670307123,-1.2783008301564034,-0.3851920813162615],[-0.39143443584413384,0.6866224223647953,-0.736726943525139,-14.686247908548392,-0.1146414437268569],[1.583432297763515,-3.2905841041932917,-2.0584460922659047,-1.3586360951083787,0.3129721293951833],[-1.0219457501645834,2.1278146920654564,0.31056710561003104,-1.1007382774358418,-2.6417746523390373],[0.7399137189078976,-3.8348124304075264,-3.0874813109276915,-0.22255417423585835,-1.9362109671704837],[0.15387920010914263,-0.3274528733498624,-2.172009467121197,0.6081292777796296,-2.3370255747161273],[1.3661467875559905,-1.9282426483663861,-0.922850507235714,-0.2489337115115764,0.8961735613342964],[-1.9166788281009934,-0.13082896675032019,2.0195694820403167,5.4043789802152,-1.2604221539000366],[1.1731846428829522,-0.5495701867419385,-0.005301847051712842,0.8606762336552408,0.35459429843411816]],[[-0.840215668842268,2.041281186127967,1.5497861308819116,1.4898545615450678,6.579658645946109,0.4711913949903742,0.29620584630458974,-1.1779763623676838,1.0095405013403749,-0.7058208100424563,-1.5817373214744233,0.4789563869333899],[0.8959753961206475,0.12833937467146192,0.2026164316590598,0.035254264226767126,-6.82062245494127,-0.8473021518197674,2.2573412995432447,1.8397982886022322,0.03059756126383972,1.7872327272963089,-2.0000711792980894,0.7299457721975057],[-0.10349390077805481,-0.44205569584620147,-0.3985967839669308,-0.5196170929198589,-0.36317821419381113,0.10863917522597753,-1.1986919339197382,-0.03942720869324422,-0.24880523541897473,-0.685369174293107,-0.919507854310577,0.14619714128619496],[-0.18102311663426865,-0.5652201958768401,0.5118689821037379,-0.689201458278113,2.022024756768973,0.10212344211422081,-1.3374218781096028,0.02532074752539694,-0.21732633545924826,0.5610084384949602,-0.053751050714289955,-0.006614757452609679],[-0.8848418116850513,-0.20381670580524328,-0.012038067967352883,-0.6683585325315717,-0.5635756366540103,-0.21307263143895527,-0.7147391737413827,-1.5532997802162454,3.403586943199426,-0.697188989294392,1.512803765907451,-0.8778780580409755],[-1.2300548544601242,-0.2134379821553661,-0.16534082751521484,0.14845494143054888,-1.003976048398359,-0.4645302886260406,-1.6245263112836412,-0.3303548962400715,0.99335294815477,-0.0023112145337818185,1.3521959702650226,-0.04254471140904132],[-0.11022119203347,-3.386193098118284,1.2578678619681962,-1.109201063327187,-5.541761307336385,0.6961548728059379,-0.9602352345535559,-1.0850185715888458,0.4865053591370835,0.8013277535625423,-3.201697943555057,-0.8652711248307443],[-0.44711347738181256,0.2522164846142357,-0.020837454244849316,-0.01246397634079747,-0.3586144840314752,0.029341319373769086,0.8753842816108969,-0.8470789655346468,0.27739974278327706,-0.3551752601720058,-0.5635997542667498,-0.36587623439154127]],[[3.229261761942651,-0.39465155385968476,0.4376905859182338,0.38285688072517743,1.5125500155945246,2.1036511922151684,0.5317044427574403,0.9764201881203034],[-5.747842050046475,4.3372447047559,0.22977929615296436,0.24534449863054894,-4.196658298091416,-2.035220157283878,2.924317285738913,-0.02247549771868596],[3.2780023017514854,-5.2829992235938565,0.15923015152876585,0.15780022338200397,1.7460647680655303,1.305629291763246,-3.582697044926651,0.6169632567416055]]],"biases":[[-0.7983328423624827,-0.7459439746438443,-0.9830856928645555,-1.5434930611942956,-0.3987283638337163,-0.5840160412940504,0.701621509211516,0.704308695468621,0.3847751569251879,-2.237881009852468,-0.29155718814174697,-0.695193712545157],[-1.1623671867967063,1.6796765731043957,-0.9383270422154014,0.4886132218483841,0.33618036057780226,0.929999794029703,-0.2693988901207702,-0.5406464262695223],[0.10856555103036028,-1.955889126267632,0.9430447263238027]],"features":["min_angle","rom","std_angle","duration_s","avg_angle"],"trained_on":{"good_rep":55,"bad_rep":61,"false_movement":90,"total":206},"cv_accuracy":76.7};
 function relu(x){return x.map(v=>Math.max(0,v));}
 function softmax(x){const m=Math.max(...x),e=x.map(v=>Math.exp(v-m)),s=e.reduce((a,b)=>a+b,0);return e.map(v=>v/s);}
 function mv(W,x){return W.map(r=>r.reduce((s,w,i)=>s+w*x[i],0));}
-function nnRun(minA,rom,std,durS,avg){
-  let h=([minA,rom,std,durS,avg]).map((v,i)=>(v-M.scaler_mean[i])/M.scaler_scale[i]);
+function nnRun(min,rom,std,dur,avg){
+  let h=[min,rom,std,dur,avg].map((v,i)=>(v-M.scaler_mean[i])/M.scaler_scale[i]);
   const acts=[h.map(v=>Math.min(1,Math.max(0,(v+2)/4)))];
   for(let i=0;i<M.weights.length;i++){
-    const next=mv(M.weights[i],h).map((v,j)=>v+M.biases[i][j]);
-    if(i<M.weights.length-1){h=relu(next);const mx=Math.max(...h.map(Math.abs))||1;acts.push(h.map(v=>Math.min(1,Math.max(0,v/mx))));}
-    else{h=softmax(next);acts.push(h);}
+    const n=mv(M.weights[i],h).map((v,j)=>v+M.biases[i][j]);
+    if(i<M.weights.length-1){h=relu(n);const mx=Math.max(...h.map(Math.abs))||1;acts.push(h.map(v=>Math.min(1,Math.max(0,v/mx))));}
+    else{h=softmax(n);acts.push(h);}
   }
   return{acts,probs:h};
 }
 
-// ── Brain canvas ──────────────────────────────────────────────────────────────
+// ── NN Brain canvas ───────────────────────────────────────────────────────────
 const LAYERS=[5,12,8,3];
 let bActs=LAYERS.map(n=>new Array(n).fill(0));
 let pulses=[];
 const bCv=document.getElementById('brain-cv');
 const bCtx=bCv.getContext('2d');
-function nPos(l,n,cw,ch){const x=(l+0.5)/LAYERS.length*cw,c=LAYERS[l],g=Math.min(ch/(c+1),13);return{x,y:(ch-(c-1)*g)/2+n*g};}
+function nPos(l,n,cw,ch){const x=(l+.5)/LAYERS.length*cw,c=LAYERS[l],g=Math.min(ch/(c+1),11);return{x,y:(ch-(c-1)*g)/2+n*g};}
 function drawBrain(){
-  const cw=bCv.width||268,ch=bCv.height||120;
-  bCtx.fillStyle='#050810';bCtx.fillRect(0,0,cw,ch);
+  const cw=bCv.width||180,ch=90;
+  bCtx.fillStyle='#040208';bCtx.fillRect(0,0,cw,ch);
   for(let l=0;l<LAYERS.length-1;l++)for(let i=0;i<LAYERS[l];i++)for(let j=0;j<LAYERS[l+1];j++){
     const p1=nPos(l,i,cw,ch),p2=nPos(l+1,j,cw,ch),act=(bActs[l][i]+bActs[l+1][j])/2;
     const w=M.weights[l][j]?M.weights[l][j][i]||0:0;
-    bCtx.strokeStyle=w>=0?`rgba(0,170,255,${.04+act*.35})`:`rgba(255,60,60,${.04+act*.35})`;
-    bCtx.lineWidth=.4+act*1.2;bCtx.beginPath();bCtx.moveTo(p1.x,p1.y);bCtx.lineTo(p2.x,p2.y);bCtx.stroke();
+    bCtx.strokeStyle=w>=0?`rgba(124,58,237,${.04+act*.32})`:`rgba(239,68,68,${.04+act*.32})`;
+    bCtx.lineWidth=.4+act*1;bCtx.beginPath();bCtx.moveTo(p1.x,p1.y);bCtx.lineTo(p2.x,p2.y);bCtx.stroke();
   }
   pulses=pulses.filter(p=>p.t<1);
-  pulses.forEach(p=>{p.t+=.05;const x=p.x1+(p.x2-p.x1)*p.t,y=p.y1+(p.y2-p.y1)*p.t;bCtx.beginPath();bCtx.arc(x,y,2.5,0,Math.PI*2);bCtx.fillStyle=p.c;bCtx.fill();});
+  pulses.forEach(p=>{p.t+=.05;const x=p.x1+(p.x2-p.x1)*p.t,y=p.y1+(p.y2-p.y1)*p.t;bCtx.beginPath();bCtx.arc(x,y,2,0,Math.PI*2);bCtx.fillStyle=p.c;bCtx.fill();});
   for(let l=0;l<LAYERS.length;l++)for(let n=0;n<LAYERS[l];n++){
     const pos=nPos(l,n,cw,ch),act=bActs[l]?bActs[l][n]:0;
-    const nc=l===LAYERS.length-1?(n===2?`rgba(0,255,0,${.3+act*.7})`:n===0?`rgba(255,60,60,${.3+act*.7})`:`rgba(255,150,0,${.3+act*.7})`):`rgba(${Math.floor(act*255)},${Math.floor(act*160+80)},255,${.4+act*.5})`;
-    if(act>.5){bCtx.shadowColor=nc;bCtx.shadowBlur=8;}
-    bCtx.beginPath();bCtx.arc(pos.x,pos.y,3+act*2.5,0,Math.PI*2);bCtx.fillStyle=nc;bCtx.fill();bCtx.shadowBlur=0;
-    if(l===0){bCtx.fillStyle='rgba(80,130,180,.6)';bCtx.font='5.5px Arial';bCtx.textAlign='right';bCtx.fillText(['min°','ROM','std','dur','avg'][n],pos.x-5,pos.y+2);}
-    if(l===LAYERS.length-1){bCtx.fillStyle=['#f44','#f90','#0f0'][n];bCtx.font='bold 6px Arial';bCtx.textAlign='left';bCtx.fillText(['BAD','FALSE','GOOD'][n],pos.x+5,pos.y+2);}
+    const nc=l===LAYERS.length-1?(n===2?`rgba(34,197,94,${.4+act*.6})`:n===0?`rgba(239,68,68,${.4+act*.6})`:`rgba(245,158,11,${.4+act*.6})`):`rgba(${Math.floor(act*180+60)},${Math.floor(act*100+40)},255,${.4+act*.5})`;
+    if(act>.5){bCtx.shadowColor=nc;bCtx.shadowBlur=6;}
+    bCtx.beginPath();bCtx.arc(pos.x,pos.y,2.5+act*2,0,Math.PI*2);bCtx.fillStyle=nc;bCtx.fill();bCtx.shadowBlur=0;
+    if(l===0){bCtx.fillStyle='rgba(80,60,120,.7)';bCtx.font='5px Arial';bCtx.textAlign='right';bCtx.fillText(['min°','ROM','std','dur','avg'][n],pos.x-4,pos.y+2);}
+    if(l===LAYERS.length-1){bCtx.fillStyle=['#ef4444','#f59e0b','#22c55e'][n];bCtx.font='bold 5.5px Arial';bCtx.textAlign='left';bCtx.fillText(['BAD','FALSE','GOOD'][n],pos.x+4,pos.y+2);}
   }
   bCtx.textAlign='left';
 }
 (function ab(){drawBrain();requestAnimationFrame(ab);})();
-function firePulse(c){for(let l=0;l<LAYERS.length-1;l++)for(let i=0;i<LAYERS[l];i++)for(let j=0;j<LAYERS[l+1];j++)if(Math.random()<.18){const p1=nPos(l,i,bCv.width,bCv.height),p2=nPos(l+1,j,bCv.width,bCv.height);pulses.push({x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y,t:0,c});}}
-function resizeBrain(){bCv.width=bCv.clientWidth||268;bCv.height=120;}
-
-function updateBrain(minA,rom,std,durS,avg){
+function firePulse(c){for(let l=0;l<LAYERS.length-1;l++)for(let i=0;i<LAYERS[l];i++)for(let j=0;j<LAYERS[l+1];j++)if(Math.random()<.15){const p1=nPos(l,i,bCv.width,90),p2=nPos(l+1,j,bCv.width,90);pulses.push({x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y,t:0,c});}}
+function resizeBrain(){bCv.width=bCv.clientWidth||180;}
+function updateNN(min,rom,std,dur,avg){
   try{
-    const{acts,probs}=nnRun(minA,rom,std,durS,avg);
+    const{acts,probs}=nnRun(min,rom,std,dur,avg);
     bActs=acts;
     const[pb,pf,pg]=[probs[0],probs[1],probs[2]];
-    document.getElementById('pb-good').style.width=Math.round(pg*100)+'%';
-    document.getElementById('pb-bad').style.width=Math.round(pb*100)+'%';
-    document.getElementById('pb-false').style.width=Math.round(pf*100)+'%';
-    document.getElementById('pv-good').textContent=Math.round(pg*100)+'%';
-    document.getElementById('pv-bad').textContent=Math.round(pb*100)+'%';
-    document.getElementById('pv-false').textContent=Math.round(pf*100)+'%';
+    document.getElementById('pb-g').style.width=Math.round(pg*100)+'%';
+    document.getElementById('pb-b').style.width=Math.round(pb*100)+'%';
+    document.getElementById('pb-f').style.width=Math.round(pf*100)+'%';
+    document.getElementById('pv-g').textContent=Math.round(pg*100)+'%';
+    document.getElementById('pv-b').textContent=Math.round(pb*100)+'%';
+    document.getElementById('pv-f').textContent=Math.round(pf*100)+'%';
     const best=pg>pb&&pg>pf?'good':pb>pf?'bad':'false';
-    const v=document.getElementById('nn-verdict');
-    if(best==='good'){v.textContent='✅ GOOD REP';v.style.cssText='border-color:#0f0;color:#0f0;background:rgba(0,255,0,.06);';}
-    else if(best==='bad'){v.textContent='⚠ BAD FORM';v.style.cssText='border-color:#f44;color:#f44;background:rgba(255,60,60,.06);';}
-    else{v.textContent='⚡ FALSE MOVE';v.style.cssText='border-color:#f90;color:#f90;background:rgba(255,150,0,.06);';}
+    const v=document.getElementById('nn-v');
+    if(best==='good'){v.textContent='✅ GOOD REP';v.style.cssText='border-color:var(--green);color:var(--green);background:rgba(34,197,94,.07)';}
+    else if(best==='bad'){v.textContent='⚠ BAD FORM';v.style.cssText='border-color:var(--red);color:var(--red);background:rgba(239,68,68,.07)';}
+    else{v.textContent='⚡ FALSE MOVE';v.style.cssText='border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.07)';}
     return best;
   }catch(e){return'good';}
 }
 
 // ── Pose ──────────────────────────────────────────────────────────────────────
-const SKEL=[[5,7],[7,9],[6,8],[8,10],[5,6],[5,11],[6,12],[11,12],[11,13],[13,15],[12,14],[14,16]];
+const SKEL=[[5,7],[7,9],[6,8],[8,10],[5,6],[5,11],[6,12],[11,12]];
 const CONF=0.2;
-const KP_COLORS=['#ff6','#ff6','#ff6','#ff6','#ff6','#0f0','#0af','#0f0','#0af','#0f0','#0af','#fa0','#fa0','#fa0','#fa0','#fa0','#fa0'];
-
-function gkp(pose,i){const p=pose.keypoints[i];return p&&p.score>=CONF?p:null;}
-function calcAngle(a,b,c){
+const video=document.getElementById('video');
+const cvs=document.getElementById('cvs');
+const ctx=cvs.getContext('2d');
+function syncCvs(){cvs.width=window.innerWidth;cvs.height=window.innerHeight;}
+window.addEventListener('resize',()=>{syncCvs();resizeBrain();});
+window.addEventListener('orientationchange',()=>setTimeout(()=>{syncCvs();resizeBrain();},300));
+function kp(pose,i){const p=pose.keypoints[i];return p?.score>=CONF?p:null;}
+function ang3(a,b,c){
   const ab={x:a.x-b.x,y:a.y-b.y},cb={x:c.x-b.x,y:c.y-b.y};
   const d=ab.x*cb.x+ab.y*cb.y,m=Math.sqrt((ab.x**2+ab.y**2)*(cb.x**2+cb.y**2));
-  return m>0?Math.acos(Math.min(1,Math.max(-1,d/m)))*180/Math.PI:null;
+  return m?Math.acos(Math.min(1,Math.max(-1,d/m)))*180/Math.PI:null;
 }
-function getBestArm(pose){
+function bestArm(pose){
   const arms=[];
   for(const[si,ei,wi]of[[5,7,9],[6,8,10]]){
-    const s=gkp(pose,si),e=gkp(pose,ei),w=gkp(pose,wi);
-    if(s&&e&&w){const a=calcAngle(s,e,w);if(a!==null)arms.push({angle:a,conf:(s.score+e.score+w.score)/3,wN:{x:w.x,y:w.y},sN:{x:s.x,y:s.y},eN:{x:e.x,y:e.y}});}
+    const s=kp(pose,si),e=kp(pose,ei),w=kp(pose,wi);
+    if(s&&e&&w){const a=ang3(s,e,w);if(a!=null)arms.push({angle:a,conf:(s.score+e.score+w.score)/3,sN:s,eN:e,wN:w});}
   }
-  if(!arms.length)return null;
-  arms.sort((a,b)=>b.conf-a.conf);
-  return arms[0];
+  return arms.sort((a,b)=>b.conf-a.conf)[0]||null;
 }
-
-// ── Canvas ────────────────────────────────────────────────────────────────────
-const video=document.getElementById('video');
-const pCv=document.getElementById('pose-canvas');
-const pCtx=pCv.getContext('2d');
-
-function syncCanvas(){pCv.width=window.innerWidth;pCv.height=window.innerHeight;}
-window.addEventListener('resize',()=>{syncCanvas();resizeBrain();});
-window.addEventListener('orientationchange',()=>setTimeout(()=>{syncCanvas();resizeBrain();},300));
-
-function getTransform(){
-  // Camera panel is left side — width = total - 300px stats panel
-  const cw=window.innerWidth-300,ch=window.innerHeight;
+function proj(){
+  // Camera panel width = total - stats panel width
+  const sw=document.getElementById('stats').offsetWidth||180;
+  const cw=window.innerWidth-sw,ch=window.innerHeight;
   const vw=video.videoWidth||640,vh=video.videoHeight||480;
-  const scale=Math.min(cw/vw,ch/vh);
-  return{cw,ch,scale,ox:(cw-vw*scale)/2,oy:(ch-vh*scale)/2};
+  const s=Math.min(cw/vw,ch/vh);return{s,ox:(cw-vw*s)/2,oy:(ch-vh*s)/2};
 }
-
 function drawPose(pose,arm){
-  pCtx.clearRect(0,0,pCv.width,pCv.height);
-  if(!pCv.width||!video.videoWidth)return;
-  const{scale:sc,ox,oy}=getTransform();
-  const px=kp=>({x:kp.x*sc+ox,y:kp.y*sc+oy});
-
-  // Skeleton
-  pCtx.strokeStyle='rgba(0,255,120,.85)';pCtx.lineWidth=3;
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  if(!cvs.width||!video.videoWidth)return;
+  const{s,ox,oy}=proj();
+  const px=k=>({x:k.x*s+ox,y:k.y*s+oy});
+  ctx.strokeStyle='rgba(168,85,247,.8)';ctx.lineWidth=3;
   for(const[a,b]of SKEL){
     const pa=pose.keypoints[a],pb=pose.keypoints[b];
-    if(pa?.score>=CONF&&pb?.score>=CONF){
-      const p1=px(pa),p2=px(pb);
-      pCtx.beginPath();pCtx.moveTo(p1.x,p1.y);pCtx.lineTo(p2.x,p2.y);pCtx.stroke();
-    }
+    if(pa?.score>=CONF&&pb?.score>=CONF){const p1=px(pa),p2=px(pb);ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();}
   }
-  // Joints
-  for(let i=0;i<pose.keypoints.length;i++){
-    const kp=pose.keypoints[i];
-    if(kp.score>=CONF){
-      const p=px(kp);
-      pCtx.beginPath();pCtx.arc(p.x,p.y,6,0,Math.PI*2);
-      pCtx.fillStyle=KP_COLORS[i]||'#fff';pCtx.fill();
-      pCtx.strokeStyle='rgba(0,0,0,.6)';pCtx.lineWidth=1.5;pCtx.stroke();
-    }
+  for(const p of pose.keypoints){
+    if(p.score>=CONF){const pp=px(p);ctx.beginPath();ctx.arc(pp.x,pp.y,5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='rgba(168,85,247,.9)';ctx.lineWidth=2;ctx.stroke();}
   }
-  // Angle arc + label at elbow
   if(arm){
-    const ep={x:arm.eN.x*sc+ox,y:arm.eN.y*sc+oy};
-    const sp={x:arm.sN.x*sc+ox,y:arm.sN.y*sc+oy};
-    const wp={x:arm.wN.x*sc+ox,y:arm.wN.y*sc+oy};
-    const a1=Math.atan2(sp.y-ep.y,sp.x-ep.x);
-    const a2=Math.atan2(wp.y-ep.y,wp.x-ep.x);
-    pCtx.beginPath();pCtx.arc(ep.x,ep.y,30,a1,a2,false);
-    pCtx.strokeStyle=arm.angle<90?'rgba(0,255,100,.9)':'rgba(0,170,255,.7)';
-    pCtx.lineWidth=3;pCtx.stroke();
-    pCtx.fillStyle='#fff';pCtx.font='bold 16px Arial';pCtx.textAlign='center';
-    const midA=(a1+a2)/2;
-    pCtx.shadowColor='rgba(0,0,0,.9)';pCtx.shadowBlur=5;
-    pCtx.fillText(Math.round(arm.angle)+'°',ep.x+Math.cos(midA)*48,ep.y+Math.sin(midA)*48);
-    pCtx.shadowBlur=0;pCtx.textAlign='left';
+    const ep=px(arm.eN),sp=px(arm.sN),wp=px(arm.wN);
+    const a1=Math.atan2(sp.y-ep.y,sp.x-ep.x),a2=Math.atan2(wp.y-ep.y,wp.x-ep.x);
+    ctx.beginPath();ctx.arc(ep.x,ep.y,26,a1,a2,false);
+    ctx.strokeStyle=arm.angle<90?'rgba(34,197,94,.9)':'rgba(168,85,247,.9)';ctx.lineWidth=3;ctx.stroke();
+    const mid=(a1+a2)/2;ctx.fillStyle='#fff';ctx.font='bold 15px Arial';ctx.textAlign='center';
+    ctx.shadowColor='#000';ctx.shadowBlur=6;
+    ctx.fillText(Math.round(arm.angle)+'°',ep.x+Math.cos(mid)*42,ep.y+Math.sin(mid)*42);
+    ctx.shadowBlur=0;ctx.textAlign='left';
   }
 }
 
-// ── EMA ───────────────────────────────────────────────────────────────────────
-function makeEMA(a){let v=null;return{update(x){if(x===null)return v;v=v===null?x:a*x+(1-a)*v;return v;},reset(){v=null;}};}
+// ── Form score ────────────────────────────────────────────────────────────────
+function formScore(min,rom,dur){
+  let s=100;
+  if(rom<80)s-=30;else if(rom<100)s-=15;
+  if(min>80)s-=25;else if(min>65)s-=10;
+  if(dur<0.8)s-=20;else if(dur<1.2)s-=8;else if(dur>12)s-=10;
+  return Math.max(0,Math.min(100,Math.round(s)));
+}
+function setFormDisplay(v){
+  const fsn=document.getElementById('fsn'),fsbar=document.getElementById('fsbar');
+  if(v==null){fsn.textContent='—';fsbar.style.width='0%';return;}
+  fsn.textContent=v;fsbar.style.width=v+'%';
+  fsbar.style.background=v>=80?'var(--green)':v>=55?'var(--amber)':'var(--red)';
+  fsn.style.color=v>=80?'var(--green)':v>=55?'var(--amber)':'var(--red)';
+}
 
 // ── Rep detection ─────────────────────────────────────────────────────────────
 const TOP=125,BOT=95,MIN_MS=400,MAX_MS=15000;
+function makeEMA(a){let v=null;return{u(x){if(x==null)return v;v=v==null?x:a*x+(1-a)*v;return v;},r(){v=null;}};}
 const ema=makeEMA(0.3);
-let phase='up',repStart=null,repMin=999,repMax=0,repBuf=[],repCount=0,lastArm=null,frameN=0;
-
-const repNEl=document.getElementById('rep-n');
-const repVerdictEl=document.getElementById('rep-verdict');
-const phasePill=document.getElementById('phase-pill');
-const sdot=document.getElementById('sdot');
-const stxt=document.getElementById('stxt');
-
-function setState(s){sdot.className=s;stxt.className=s;stxt.textContent=s==='active'?'Counting Reps':s==='seated'?'Person Detected':'Ready';}
+let phase='up',repStart=null,repMin=999,repMax=0,buf=[],lastArm=null,frame=0;
+let repCount=0,formScores=[];
 
 function processAngle(raw){
-  if(raw===null)return;
-  const ea=ema.update(raw);if(ea===null)return;
-  repBuf.push(ea);if(repBuf.length>300)repBuf.shift();
-
-  // Angle gauge
-  document.getElementById('angle-val').textContent=Math.round(ea)+'°';
-  document.getElementById('angle-bar').style.width=Math.min(100,Math.max(0,ea/180*100))+'%';
-
+  if(raw==null)return;
+  const ea=ema.u(raw);if(ea==null)return;
+  buf.push(ea);if(buf.length>300)buf.shift();
+  document.getElementById('aval').textContent=Math.round(ea)+'°';
+  document.getElementById('abar').style.width=Math.min(100,ea/180*100)+'%';
+  // idle NN update every 10 frames
+  if(frame++%10===0&&buf.length>=5){
+    const sl=buf.slice(-50),avg=sl.reduce((a,b)=>a+b,0)/sl.length,std=Math.sqrt(sl.reduce((s,v)=>s+(v-avg)**2,0)/sl.length);
+    updateNN(repMin<900?repMin:80,Math.max(repMax-repMin,40),std,2.5,avg);
+  }
+  const rn=document.getElementById('rn'),rv=document.getElementById('rverdict');
+  const ph=document.getElementById('phase');
   if(phase==='up'){
     repMax=Math.max(repMax,ea);
-    phasePill.textContent='↓ Pull bar down';phasePill.className='releasing';
-    if(ea<BOT){
-      let wristOk=true;
-      if(lastArm){wristOk=lastArm.wN.y<lastArm.sN.y+0.20;}
-      if(wristOk){phase='down';repMin=ea;repStart=Date.now();phasePill.textContent='↑ Release up';phasePill.className='pulling';}
+    ph.textContent='↓ Pull bar down';ph.className='rel';
+    if(ea<BOT&&(!lastArm||lastArm.wN.y<lastArm.sN.y+0.22)){
+      phase='down';repMin=ea;repStart=Date.now();ph.textContent='↑ Release back up';ph.className='pull';
     }
   }else{
     repMin=Math.min(repMin,ea);
     const dur=repStart?Date.now()-repStart:0;
-    if(dur>MAX_MS){phase='up';repMax=ea;repMin=999;ema.reset();return;}
+    if(dur>MAX_MS){phase='up';repMax=ea;repMin=999;ema.r();return;}
     if(ea>TOP&&dur>=MIN_MS){
       const rom=Math.round(repMax-repMin);
-      const sl=repBuf.slice(-Math.max(10,Math.round(dur/33)));
-      const avg=sl.reduce((a,b)=>a+b,0)/sl.length;
-      const std=Math.sqrt(sl.reduce((s,v)=>s+(v-avg)**2,0)/sl.length);
-      const nn=updateBrain(repMin,rom,std,dur/1000,avg);
-      if(nn==='false'||nn==='bad'){
-        repVerdictEl.textContent=nn==='bad'?'⚠ Bad form — fix and try again':'⚡ False movement — not counted';
-        phase='up';repMax=ea;repMin=999;phasePill.textContent='↓ Pull bar down';phasePill.className='releasing';
-        return;
+      const sl=buf.slice(-Math.max(10,Math.round(dur/33)));
+      const avg=sl.reduce((a,b)=>a+b,0)/sl.length,std=Math.sqrt(sl.reduce((s,v)=>s+(v-avg)**2,0)/sl.length);
+      const durS=dur/1000;
+      const nn=updateNN(repMin,rom,std,durS,avg);
+      if(nn==='false'){rv.style.color='var(--amber)';rv.textContent='⚡ False movement';firePulse('var(--amber)');}
+      else if(nn==='bad'){rv.style.color='var(--red)';rv.textContent='⚠ Bad form — not counted';firePulse('var(--red)');}
+      else{
+        const fs=formScore(repMin,rom,durS);
+        formScores.push(fs);setFormDisplay(fs);
+        repCount++;rn.textContent=repCount;
+        rv.style.color='var(--green)';rv.textContent='✅ Good rep!';
+        rn.classList.add('pop');setTimeout(()=>rn.classList.remove('pop'),400);
+        document.getElementById('tdot').className='live';document.getElementById('tstatus').textContent='Counting';document.getElementById('tstatus').className='live';
+        firePulse('rgba(34,197,94,.8)');
       }
-      const isGood=nn==='good'&&rom>=40&&repMin<BOT+10;
-      repCount++;repNEl.textContent=repCount;
-      repVerdictEl.textContent=isGood?'✅ Great rep!':'Rep counted';
-      repNEl.className=isGood?'fg':'fp';
-      setTimeout(()=>repNEl.className='',500);
-      firePulse(isGood?'#0f0':'#fa0');
-      setState('active');
-      phase='up';repMax=ea;repMin=999;phasePill.textContent='↓ Pull bar down';phasePill.className='releasing';
+      phase='up';repMax=ea;repMin=999;ph.textContent='↓ Pull bar down';ph.className='rel';
     }
   }
 }
 
-// ── Main loop ─────────────────────────────────────────────────────────────────
-let detector=null;
+// ── Loop ──────────────────────────────────────────────────────────────────────
+let detector=null,running=false;
 async function loop(){
+  if(!running)return;
   if(video.readyState>=2&&detector){
     const poses=await detector.estimatePoses(video);
-    if(poses.length>0){
-      const pose=poses[0];
-      const arm=getBestArm(pose);
-      if(arm)lastArm=arm;
-      drawPose(pose,arm);
-      processAngle(arm?arm.angle:null);
-      if(frameN++%10===0&&repBuf.length>=5){
-        const sl=repBuf.slice(-50),avg=sl.reduce((a,b)=>a+b,0)/sl.length;
-        const std=Math.sqrt(sl.reduce((s,v)=>s+(v-avg)**2,0)/sl.length);
-        updateBrain(repMin<900?repMin:80,Math.max(repMax-repMin,40),std,2.5,avg);
-      }
-      if(sdot.className===''){setState('seated');}
-    }else{
-      pCtx.clearRect(0,0,pCv.width,pCv.height);
-      ema.reset();
-      document.getElementById('angle-val').textContent='—';
-    }
+    if(poses.length){const arm=bestArm(poses[0]);if(arm)lastArm=arm;drawPose(poses[0],arm);processAngle(arm?.angle??null);}
+    else{ctx.clearRect(0,0,cvs.width,cvs.height);ema.r();document.getElementById('aval').textContent='—';}
   }
   requestAnimationFrame(loop);
 }
 
-// ── Controls ──────────────────────────────────────────────────────────────────
-document.getElementById('reset-btn').addEventListener('click',()=>{
-  repCount=0;phase='up';repMax=0;repMin=999;repStart=null;repBuf=[];ema.reset();
-  repNEl.textContent='0';repNEl.className='';
-  repVerdictEl.textContent='Counting automatically…';
-  phasePill.textContent='Ready';phasePill.className='';
-  setState('');
-});
+// ── Screens ───────────────────────────────────────────────────────────────────
+function show(id){
+  ['s-boot','s-login','s-weight','s-active','s-submit','s-success'].forEach(s=>{
+    const el=document.getElementById(s);if(!el)return;
+    if(s==='s-active'){el.classList.toggle('on',s===id);el.style.display=s===id?'flex':'none';}
+    else{el.classList.toggle('off',s!==id);}
+  });
+  if(id==='s-active'){setTimeout(()=>{syncCvs();resizeBrain();},50);}
+}
 
-let stream=null,facing='user';
+// ── State ─────────────────────────────────────────────────────────────────────
+let member='',wtKg=0,addonKg=0,exercise='';
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+function login(){
+  const v=document.getElementById('mem-in').value.trim();
+  if(!v)return;
+  member=v;buildGrid();
+  document.getElementById('w-greet').textContent='👋 Welcome, '+v+'!';
+  show('s-weight');
+}
+document.getElementById('mem-in').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+function logout(){member='';document.getElementById('mem-in').value='';running=false;show('s-login');}
+
+// ── Weight ────────────────────────────────────────────────────────────────────
+function buildGrid(){
+  const g=document.getElementById('wgrid');g.innerHTML='';
+  for(const w of STACK){
+    const b=document.createElement('button');b.className='wbtn';b.textContent=w+'kg';
+    b.onclick=()=>{document.querySelectorAll('.wbtn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');wtKg=w;document.getElementById('start-btn').disabled=false;document.getElementById('start-btn').textContent='▶ Start Set @ '+(w+addonKg)+'kg';};
+    g.appendChild(b);
+  }
+}
+let _addon=0;
+function addon(d){_addon=Math.max(0,_addon+d);addonKg=_addon;document.getElementById('addon-v').textContent='+'+_addon+' kg';if(wtKg)document.getElementById('start-btn').textContent='▶ Start Set @ '+(wtKg+_addon)+'kg';}
+
+// ── Set controls ──────────────────────────────────────────────────────────────
+let stream=null,facing='environment';
 async function startCam(f){
   if(stream)stream.getTracks().forEach(t=>t.stop());
   try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:f,width:{ideal:1280},height:{ideal:720}},audio:false});}
   catch(e){stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});}
   video.srcObject=stream;await video.play();
 }
-document.getElementById('flip-btn').addEventListener('click',async()=>{
-  facing=facing==='user'?'environment':'user';await startCam(facing);
-});
+function flipCam(){facing=facing==='environment'?'user':'environment';startCam(facing);}
+
+function startSet(){
+  if(!wtKg)return;
+  exercise=document.getElementById('ex-sel').value;
+  const total=wtKg+addonKg;
+  repCount=0;formScores=[];phase='up';repMax=0;repMin=999;repStart=null;buf=[];ema.r();lastArm=null;frame=0;
+  document.getElementById('rn').textContent='0';document.getElementById('rn').className='';
+  document.getElementById('rverdict').textContent='';
+  document.getElementById('t-mem').textContent=member;
+  document.getElementById('wbkg').textContent=total;
+  document.getElementById('s-mach-lbl').textContent=exercise;
+  document.getElementById('phase').textContent='Get in position';document.getElementById('phase').className='';
+  setFormDisplay(null);
+  document.getElementById('tdot').className='';document.getElementById('tstatus').textContent='Ready';document.getElementById('tstatus').className='';
+  running=true;show('s-active');loop();
+}
+
+function resetReps(){
+  repCount=0;formScores=[];phase='up';repMax=0;repMin=999;repStart=null;buf=[];ema.r();lastArm=null;
+  document.getElementById('rn').textContent='0';document.getElementById('rn').className='';
+  document.getElementById('rverdict').textContent='';
+  setFormDisplay(null);
+}
+
+function endSet(){
+  running=false;ctx.clearRect(0,0,cvs.width,cvs.height);
+  const total=wtKg+addonKg,avgFs=formScores.length?Math.round(formScores.reduce((a,b)=>a+b,0)/formScores.length):null;
+  document.getElementById('r-mem').textContent=member;
+  document.getElementById('r-ex').textContent=exercise;
+  document.getElementById('r-wt').textContent=total+'kg';
+  document.getElementById('r-reps').textContent=repCount;
+  document.getElementById('r-form').textContent=avgFs!=null?avgFs+'/100':'—';
+  document.getElementById('s-vol').textContent=(repCount*total).toLocaleString()+' kg';
+  show('s-submit');
+}
+
+async function submitSet(){
+  const total=wtKg+addonKg,avgFs=formScores.length?Math.round(formScores.reduce((a,b)=>a+b,0)/formScores.length):null;
+  const payload={timestamp:new Date().toISOString(),member,machine:MACHINE,exercise,weight_kg:total,reps:repCount,volume:repCount*total,form_score:avgFs,source:'AI_auto_counted'};
+  if(WEBHOOK){try{await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch(e){console.warn(e);}}
+  document.getElementById('succ-msg').textContent=`${repCount} reps @ ${total}kg = ${(repCount*total).toLocaleString()} kg volume added to your leaderboard.`;
+  show('s-success');
+}
+
+function redoSet(){running=true;startSet();}
+function nextSet(){running=true;show('s-weight');}
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 async function boot(){
-  const btn=document.getElementById('start-btn');
-  const status=document.getElementById('boot-status');
-  const barWrap=document.getElementById('boot-bar-wrap');
-  const bar=document.getElementById('boot-bar');
-  const errEl=document.getElementById('boot-err');
-  btn.style.display='none';barWrap.style.display='block';
-  const prog=(p,t)=>{bar.style.width=p+'%';status.textContent=t;};
+  show('s-boot');
+  const msg=document.getElementById('boot-msg'),bar=document.getElementById('boot-bar'),err=document.getElementById('boot-err'),retry=document.getElementById('retry-btn');
+  err.style.display='none';retry.style.display='none';
+  const step=(w,t)=>{bar.style.width=w+'%';msg.textContent=t;};
   try{
-    prog(5,'Starting camera…');
-    await startCam(facing);
-    prog(30,'Camera ready ✓');
-    prog(35,'Loading AI model… (~15–20s on tablet)');
+    step(10,'Starting camera…');await startCam(facing);
+    step(30,'Loading AI model…');
     detector=await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING});
-    prog(95,'AI ready ✓');resizeBrain();syncCanvas();
-    await new Promise(r=>setTimeout(r,300));
-    prog(100,'Go!');
-    await new Promise(r=>setTimeout(r,300));
-    document.getElementById('boot').style.display='none';
-    document.getElementById('app').style.display='flex';
-    syncCanvas();resizeBrain();
-    setState('');
-    loop();
+    step(100,'Ready ✓');await new Promise(r=>setTimeout(r,350));
+    running=true;loop();show('s-login');
   }catch(e){
-    btn.style.display='block';barWrap.style.display='none';
-    errEl.style.display='block';errEl.textContent='❌ '+e.message+' — use Chrome & allow camera';
+    msg.textContent='';err.style.display='block';
+    err.innerHTML='❌ '+e.message+'<br/>Use Chrome and allow camera access.';
+    retry.style.display='block';
   }
 }
+window.addEventListener('load',boot);
 </script>
 </body>
 </html>
