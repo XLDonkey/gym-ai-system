@@ -341,16 +341,18 @@ function makeEMA(alpha){
   };
 }
 
-// ── Rep detection — simple hysteresis, no calibration ────────────────────────
+// ── Rep detection — simple hysteresis, wrist-position gated ──────────────────
 // TOP: angle above this = arm extended (bar released)
 // BOT: angle below this = arm contracted (bar pulled to chest)
 // A rep = crossing BOT then back above TOP, with MIN_MS between
+// GATE: wrists must be near/above shoulders when rep starts (real lat pulldown position)
 const TOP=125, BOT=95, MIN_MS=400, MAX_MS=15000;
 
 const emaAngle=makeEMA(0.3);
 let phase='up'; // 'up' = waiting for pull, 'down' = bar pulled, waiting for release
 let repStart=null, repMin=999, repMax=0;
 let repBuf=[], repCount=0, frameN=0;
+let lastArm=null; // updated each frame from main loop
 
 const repNEl=document.getElementById('rep-n');
 const repSubEl=document.getElementById('rep-sub');
@@ -383,9 +385,19 @@ function processAngle(rawAngle){
     phaseTxt.textContent='↓ Pull the bar down';
     phaseTxt.className='releasing';
     if(ea<BOT){
-      phase='down';repMin=ea;repStart=Date.now();
-      phaseTxt.textContent='↑ Release back up';
-      phaseTxt.className='pulling';
+      // Gate: check wrists are near/above shoulders (real lat pulldown grip position)
+      // In image coords Y increases downward, so wrist above shoulder = wrist.y < shoulder.y
+      let wristOk=true;
+      if(lastArm){
+        const wy=lastArm.wN.y, sy2=lastArm.sN.y;
+        // Allow wrist up to 20% of frame BELOW shoulder (generous tolerance)
+        wristOk = wy < sy2 + 0.20;
+      }
+      if(wristOk){
+        phase='down';repMin=ea;repStart=Date.now();
+        phaseTxt.textContent='↑ Release back up';
+        phaseTxt.className='pulling';
+      }
     }
   }else{
     // Bar pulled — waiting for release back up (angle rises above TOP)
@@ -427,6 +439,7 @@ async function loop(){
       const pose=poses[0];
       const{sx,sy,ox,oy}=getSXSY();
       const arm=getBestArm(pose,sx,sy);
+      if(arm)lastArm=arm; // keep latest arm data for wrist gate check
       const color=sdot.className==='active'?'rgba(0,255,100,.85)':'rgba(0,170,255,.75)';
       drawPose(pose,arm,color);
       // Always process angle — no gating
