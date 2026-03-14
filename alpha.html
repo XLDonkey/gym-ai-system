@@ -152,6 +152,7 @@
     </div>
 
     <button id="reset" onclick="doReset()">↺ Reset</button>
+    <button id="reset" onclick="flipCam()" style="margin-top:6px">🔄 Flip Camera</button>
   </div>
 </div>
 
@@ -306,7 +307,8 @@ function doReset(){
   document.getElementById('aval').textContent='—';
 }
 
-let detector=null,stream=null;
+let detector=null,stream=null,facing='user';
+async function flipCam(){facing=facing==='user'?'environment':'user';if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720}},audio:false}).catch(()=>navigator.mediaDevices.getUserMedia({video:true,audio:false}));video.srcObject=stream;await video.play();}
 async function loop(){
   if(video.readyState>=2&&detector){
     const poses=await detector.estimatePoses(video);
@@ -322,7 +324,7 @@ async function boot(){
   const step=(w,t)=>{bar.style.width=w+'%';msg.textContent=t;};
   try{
     step(10,'Starting camera…');
-    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false}).catch(()=>navigator.mediaDevices.getUserMedia({video:true,audio:false}));
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}},audio:false}).catch(()=>navigator.mediaDevices.getUserMedia({video:true,audio:false}));
     video.srcObject=stream;await video.play();
     step(35,'Loading AI…');
     detector=await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING});
