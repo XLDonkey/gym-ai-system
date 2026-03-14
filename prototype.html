@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title>XLFitness — Lat Pulldown</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:#07090f;color:#fff;font-family:'Segoe UI',Arial,sans-serif;height:100dvh;overflow:hidden;display:flex;flex-direction:column;}
+
+    /* ── Shared ── */
+    .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:#07090f;z-index:50;}
+    .screen.hidden{display:none;}
+    .logo{font-size:1.1rem;font-weight:900;color:#00aaff;letter-spacing:4px;margin-bottom:4px;}
+    .machine-lbl{font-size:.65rem;color:#334;letter-spacing:2px;margin-bottom:32px;}
+    .big-btn{padding:16px 48px;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;border:none;letter-spacing:.5px;}
+    .btn-blue{background:#00aaff;color:#fff;}
+    .btn-green{background:#00aa44;color:#fff;}
+    .btn-outline{background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);padding:10px 24px;border-radius:9px;font-size:.78rem;font-weight:700;cursor:pointer;}
+
+    /* ── 1. Boot ── */
+    #screen-boot .spin{width:36px;height:36px;border:3px solid #141e2e;border-top-color:#00aaff;border-radius:50%;animation:rot .8s linear infinite;margin-bottom:8px;}
+    @keyframes rot{to{transform:rotate(360deg);}}
+    #boot-status{font-size:.78rem;color:#334;letter-spacing:1px;}
+    #boot-err{color:#f44;font-size:.75rem;text-align:center;max-width:280px;display:none;line-height:1.6;margin-bottom:8px;}
+
+    /* ── 2. Login ── */
+    #screen-login .nfc-ring{width:120px;height:120px;border-radius:50%;border:3px solid #00aaff33;display:flex;align-items:center;justify-content:center;font-size:3rem;margin:0 auto 24px;animation:ring 2s infinite alternate;}
+    @keyframes ring{to{border-color:#00aaff;box-shadow:0 0 24px #00aaff44;}}
+    #screen-login h2{font-size:1.2rem;font-weight:900;margin-bottom:6px;}
+    #screen-login p{font-size:.78rem;color:#445;margin-bottom:24px;}
+    #member-input{background:#0f141e;border:1px solid #1a2a3a;color:#fff;padding:12px 18px;border-radius:10px;font-size:1rem;width:240px;text-align:center;margin-bottom:12px;outline:none;}
+    #member-input:focus{border-color:#00aaff66;}
+    #login-hint{font-size:.65rem;color:#223;margin-top:8px;}
+
+    /* ── 3. Weight select ── */
+    #screen-weight{justify-content:flex-start;padding-top:40px;}
+    #screen-weight .inner{width:100%;max-width:420px;}
+    .welcome-bar{text-align:center;margin-bottom:24px;}
+    .welcome-bar .member-name{font-size:1.3rem;font-weight:900;}
+    .welcome-bar .welcome-sub{font-size:.72rem;color:#445;margin-top:2px;}
+    .section-hd{font-size:.58rem;letter-spacing:3px;text-transform:uppercase;color:#334;margin-bottom:10px;}
+    .exercise-select{width:100%;background:#0f141e;border:1px solid #1a2a3a;color:#fff;padding:11px 14px;border-radius:9px;font-size:.85rem;margin-bottom:20px;outline:none;}
+    .weight-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+    .wbtn{padding:10px 4px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;border:1px solid #1a2a3a;background:#0f141e;color:#556;text-align:center;}
+    .wbtn.selected{background:#00aaff18;border-color:#00aaff;color:#00aaff;}
+    .start-set-btn{width:100%;padding:16px;background:#00aaff;border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:900;cursor:pointer;letter-spacing:.5px;}
+    .start-set-btn:disabled{background:#1a2a3a;color:#334;cursor:not-allowed;}
+    #addon-row{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+    .addon-btn{width:36px;height:36px;border-radius:8px;font-size:1.1rem;font-weight:700;cursor:pointer;border:1px solid #1a2a3a;background:#0f141e;color:#556;}
+    #addon-val{font-size:.9rem;font-weight:700;color:#00aaff;width:60px;text-align:center;}
+
+    /* ── 4. Active set ── */
+    #app{display:none;flex:1;position:relative;background:#000;overflow:hidden;}
+    #video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
+    #pose-canvas{position:fixed;top:0;left:0;pointer-events:none;z-index:2;}
+    #topbar{position:absolute;top:0;left:0;right:0;z-index:5;padding:10px 14px;background:linear-gradient(rgba(0,0,0,.85),transparent);display:flex;align-items:center;gap:8px;}
+    .tlogo{font-size:.85rem;font-weight:900;color:#00aaff;letter-spacing:3px;}
+    #t-member{font-size:.72rem;color:rgba(255,255,255,.5);margin-left:6px;}
+    #sdot{width:8px;height:8px;border-radius:50%;background:#1a2030;margin-left:auto;transition:all .3s;}
+    #sdot.active{background:#0f0;box-shadow:0 0 10px #0f0;animation:glow 1s infinite alternate;}
+    @keyframes glow{to{box-shadow:0 0 18px #0f0;}}
+    #stxt{font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#334;}
+    #stxt.active{color:#0f0;}
+    #phase-pill{position:absolute;top:50px;left:50%;transform:translateX(-50%);z-index:5;padding:6px 20px;border-radius:20px;font-size:.7rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;background:rgba(0,0,0,.7);border:1px solid #222;color:#334;transition:all .25s;white-space:nowrap;}
+    #phase-pill.pulling{background:rgba(0,200,0,.18);border-color:#0f0;color:#0f0;}
+    #phase-pill.releasing{background:rgba(0,120,255,.18);border-color:#0af;color:#0af;}
+    #rep-wrap{position:absolute;bottom:80px;left:18px;z-index:5;}
+    #rep-lbl{font-size:.55rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.38);}
+    #rep-n{font-size:7rem;font-weight:900;line-height:1;text-shadow:0 4px 40px rgba(0,0,0,.9);transition:color .15s,transform .15s;}
+    #rep-n.fg{color:#0f0;transform:scale(1.08);}
+    #rep-quality{font-size:.78rem;font-weight:700;color:rgba(255,255,255,.4);margin-top:2px;min-height:1.2em;}
+    #weight-badge{position:absolute;top:50px;right:14px;z-index:5;background:rgba(0,0,0,.75);border:1px solid #1a2a3a;border-radius:10px;padding:8px 14px;text-align:right;}
+    #wb-weight{font-size:1.2rem;font-weight:900;color:#fff;}
+    #wb-lbl{font-size:.55rem;color:#334;letter-spacing:1px;text-transform:uppercase;}
+    #controls{position:absolute;bottom:12px;left:0;right:0;z-index:5;display:flex;justify-content:center;gap:8px;}
+    .cbtn{padding:9px 18px;border-radius:9px;font-size:.72rem;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.75);color:rgba(255,255,255,.45);backdrop-filter:blur(4px);}
+    #end-set-btn{border-color:rgba(0,170,255,.4);color:#00aaff;padding:9px 28px;}
+    #flip-btn{}
+
+    /* ── 5. Submit screen ── */
+    #screen-submit .summary-card{background:#0b0f18;border:1px solid #141e2e;border-radius:14px;padding:24px;width:100%;max-width:340px;margin-bottom:24px;}
+    .sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #0f141e;}
+    .sum-row:last-child{border-bottom:none;}
+    .sum-lbl{font-size:.72rem;color:#445;}
+    .sum-val{font-size:.9rem;font-weight:800;}
+    .sum-vol{font-size:1.4rem;font-weight:900;color:#00aaff;}
+    .submit-actions{display:flex;gap:10px;width:100%;max-width:340px;}
+  </style>
+</head>
+<body>
+
+<!-- 1. Boot -->
+<div id="screen-boot" class="screen">
+  <div class="logo">XLFITNESS</div>
+  <div class="machine-lbl">AI REP COUNTER · LAT PULLDOWN</div>
+  <div class="spin"></div>
+  <div id="boot-status">Loading AI…</div>
+  <div id="boot-err"></div>
+  <button class="big-btn btn-blue" id="retry-btn" style="display:none" onclick="bootApp()">↺ Retry</button>
+</div>
+
+<!-- 2. Login -->
+<div id="screen-login" class="screen hidden">
+  <div class="logo">XLFITNESS</div>
+  <div class="machine-lbl">NAUTILUS NITRO · LAT PULLDOWN</div>
+  <div class="nfc-ring">📳</div>
+  <h2>Tap Your Card</h2>
+  <p>Or enter your member ID below</p>
+  <input id="member-input" type="text" placeholder="Member ID / Gamer Tag" autocomplete="off" autocorrect="off"/>
+  <button class="big-btn btn-blue" onclick="doLogin()">Login →</button>
+  <div id="login-hint">NFC tap support coming soon</div>
+</div>
+
+<!-- 3. Weight select -->
+<div id="screen-weight" class="screen hidden">
+  <div class="inner">
+    <div class="welcome-bar">
+      <div class="logo">XLFITNESS</div>
+      <div class="member-name" id="w-member-name">—</div>
+      <div class="welcome-sub">Nautilus Nitro · Lat Pulldown</div>
+    </div>
+
+    <div class="section-hd">Exercise</div>
+    <select class="exercise-select" id="exercise-sel">
+      <option>Lat Pulldown</option>
+      <option>Close Grip Lat Pulldown</option>
+      <option>Wide Grip Lat Pulldown</option>
+      <option>Reverse Grip Lat Pulldown</option>
+    </select>
+
+    <div class="section-hd">Weight Stack (kg)</div>
+    <div class="weight-grid" id="weight-grid"></div>
+
+    <div class="section-hd">Add-On Weight (kg)</div>
+    <div id="addon-row">
+      <button class="addon-btn" onclick="changeAddon(-2.5)">−</button>
+      <div id="addon-val">+0</div>
+      <button class="addon-btn" onclick="changeAddon(2.5)">+</button>
+    </div>
+
+    <button class="start-set-btn" id="start-set-btn" onclick="startSet()" disabled>Select weight to start</button>
+    <br/><br/>
+    <button class="btn-outline" onclick="doLogout()">← Log Out</button>
+  </div>
+</div>
+
+<!-- 4. Active set (camera) -->
+<div id="app">
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="pose-canvas"></canvas>
+  <div id="topbar">
+    <span class="tlogo">XLFITNESS</span>
+    <span id="t-member"></span>
+    <div id="sdot"></div>
+    <span id="stxt">Ready</span>
+  </div>
+  <div id="phase-pill">Get in position</div>
+  <div id="weight-badge">
+    <div id="wb-weight">—</div>
+    <div id="wb-lbl">kg</div>
+  </div>
+  <div id="rep-wrap">
+    <div id="rep-lbl">REPS</div>
+    <div id="rep-n">0</div>
+    <div id="rep-quality"></div>
+  </div>
+  <div id="controls">
+    <button class="cbtn" id="end-set-btn" onclick="endSet()">✓ End Set</button>
+    <button class="cbtn" id="flip-btn">🔄 Flip</button>
+  </div>
+</div>
+
+<!-- 5. Submit -->
+<div id="screen-submit" class="screen hidden">
+  <div class="logo">XLFITNESS</div>
+  <div class="machine-lbl">SET COMPLETE</div>
+  <div class="summary-card">
+    <div class="sum-row"><span class="sum-lbl">Member</span><span class="sum-val" id="s-member">—</span></div>
+    <div class="sum-row"><span class="sum-lbl">Exercise</span><span class="sum-val" id="s-exercise">—</span></div>
+    <div class="sum-row"><span class="sum-lbl">Weight</span><span class="sum-val" id="s-weight">—</span></div>
+    <div class="sum-row"><span class="sum-lbl">Reps (AI counted)</span><span class="sum-val" id="s-reps" style="color:#0f0">—</span></div>
+    <div class="sum-row"><span class="sum-lbl">Volume</span><span class="sum-vol" id="s-vol">—</span></div>
+  </div>
+  <div class="submit-actions">
+    <button class="big-btn btn-green" style="flex:2" onclick="submitSet()">Submit to Leaderboard →</button>
+    <button class="btn-outline" style="flex:1" onclick="discardSet()">Redo</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+<script>
+// ── Config — edit these for your gym ──────────────────────────────────────────
+const MACHINE_NAME = 'Nautilus Nitro Lat Pulldown';
+const WEIGHT_STACK = [10,15,20,25,30,35,40,45,50,55,60,65,70,75,80];
+// Webhook URL — paste your Power Automate / API endpoint here:
+const WEBHOOK_URL = '';  // leave empty for demo mode
+
+// ── NN ────────────────────────────────────────────────────────────────────────
+const M={"classes":["bad_rep","false_movement","good_rep"],"scaler_mean":[38.550971,122.443689,42.687864,1.98767,101.224757],"scaler_scale":[38.422092,49.200083,20.189907,0.760348,28.570596],"weights":[[[0.7355531381494981,-0.08228008981670798,-1.3177177642463553,2.589510105204825,2.534997603814582],[0.07686866948569239,-0.31889217098614625,-0.6271088689195394,-2.407704711912489,-0.5514028434750671],[0.9745054123669095,-3.228590682565643,-0.6259770082049722,-2.659013552884485,-0.5608121962535999],[-0.9056161557363716,0.4727063898108313,0.7661776670307123,-1.2783008301564034,-0.3851920813162615],[-0.39143443584413384,0.6866224223647953,-0.736726943525139,-14.686247908548392,-0.1146414437268569],[1.583432297763515,-3.2905841041932917,-2.0584460922659047,-1.3586360951083787,0.3129721293951833],[-1.0219457501645834,2.1278146920654564,0.31056710561003104,-1.1007382774358418,-2.6417746523390373],[0.7399137189078976,-3.8348124304075264,-3.0874813109276915,-0.22255417423585835,-1.9362109671704837],[0.15387920010914263,-0.3274528733498624,-2.172009467121197,0.6081292777796296,-2.3370255747161273],[1.3661467875559905,-1.9282426483663861,-0.922850507235714,-0.2489337115115764,0.8961735613342964],[-1.9166788281009934,-0.13082896675032019,2.0195694820403167,5.4043789802152,-1.2604221539000366],[1.1731846428829522,-0.5495701867419385,-0.005301847051712842,0.8606762336552408,0.35459429843411816]],[[-0.840215668842268,2.041281186127967,1.5497861308819116,1.4898545615450678,6.579658645946109,0.4711913949903742,0.29620584630458974,-1.1779763623676838,1.0095405013403749,-0.7058208100424563,-1.5817373214744233,0.4789563869333899],[0.8959753961206475,0.12833937467146192,0.2026164316590598,0.035254264226767126,-6.82062245494127,-0.8473021518197674,2.2573412995432447,1.8397982886022322,0.03059756126383972,1.7872327272963089,-2.0000711792980894,0.7299457721975057],[-0.10349390077805481,-0.44205569584620147,-0.3985967839669308,-0.5196170929198589,-0.36317821419381113,0.10863917522597753,-1.1986919339197382,-0.03942720869324422,-0.24880523541897473,-0.685369174293107,-0.919507854310577,0.14619714128619496],[-0.18102311663426865,-0.5652201958768401,0.5118689821037379,-0.689201458278113,2.022024756768973,0.10212344211422081,-1.3374218781096028,0.02532074752539694,-0.21732633545924826,0.5610084384949602,-0.053751050714289955,-0.006614757452609679],[-0.8848418116850513,-0.20381670580524328,-0.012038067967352883,-0.6683585325315717,-0.5635756366540103,-0.21307263143895527,-0.7147391737413827,-1.5532997802162454,3.403586943199426,-0.697188989294392,1.512803765907451,-0.8778780580409755],[-1.2300548544601242,-0.2134379821553661,-0.16534082751521484,0.14845494143054888,-1.003976048398359,-0.4645302886260406,-1.6245263112836412,-0.3303548962400715,0.99335294815477,-0.0023112145337818185,1.3521959702650226,-0.04254471140904132],[-0.11022119203347,-3.386193098118284,1.2578678619681962,-1.109201063327187,-5.541761307336385,0.6961548728059379,-0.9602352345535559,-1.0850185715888458,0.4865053591370835,0.8013277535625423,-3.201697943555057,-0.8652711248307443],[-0.44711347738181256,0.2522164846142357,-0.020837454244849316,-0.01246397634079747,-0.3586144840314752,0.029341319373769086,0.8753842816108969,-0.8470789655346468,0.27739974278327706,-0.3551752601720058,-0.5635997542667498,-0.36587623439154127]],[[3.229261761942651,-0.39465155385968476,0.4376905859182338,0.38285688072517743,1.5125500155945246,2.1036511922151684,0.5317044427574403,0.9764201881203034],[-5.747842050046475,4.3372447047559,0.22977929615296436,0.24534449863054894,-4.196658298091416,-2.035220157283878,2.924317285738913,-0.02247549771868596],[3.2780023017514854,-5.2829992235938565,0.15923015152876585,0.15780022338200397,1.7460647680655303,1.305629291763246,-3.582697044926651,0.6169632567416055]]],"biases":[[-0.7983328423624827,-0.7459439746438443,-0.9830856928645555,-1.5434930611942956,-0.3987283638337163,-0.5840160412940504,0.701621509211516,0.704308695468621,0.3847751569251879,-2.237881009852468,-0.29155718814174697,-0.695193712545157],[-1.1623671867967063,1.6796765731043957,-0.9383270422154014,0.4886132218483841,0.33618036057780226,0.929999794029703,-0.2693988901207702,-0.5406464262695223],[0.10856555103036028,-1.955889126267632,0.9430447263238027]],"features":["min_angle","rom","std_angle","duration_s","avg_angle"],"trained_on":{"good_rep":55,"bad_rep":61,"false_movement":90,"total":206},"cv_accuracy":76.7};
+function relu(x){return x.map(v=>Math.max(0,v));}
+function softmax(x){const m=Math.max(...x),e=x.map(v=>Math.exp(v-m)),s=e.reduce((a,b)=>a+b,0);return e.map(v=>v/s);}
+function mv(W,x){return W.map(r=>r.reduce((s,w,i)=>s+w*x[i],0));}
+function nnRun(minA,rom,std,durS,avg){
+  let h=([minA,rom,std,durS,avg]).map((v,i)=>(v-M.scaler_mean[i])/M.scaler_scale[i]);
+  for(let i=0;i<M.weights.length;i++){
+    const n=mv(M.weights[i],h).map((v,j)=>v+M.biases[i][j]);
+    h=i<M.weights.length-1?relu(n):softmax(n);
+  }
+  return h;
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let currentMember='',selectedWeight=0,addonWeight=0,currentExercise='';
+let repCount=0,setData=[];
+
+// ── Screens ───────────────────────────────────────────────────────────────────
+function show(id){
+  ['screen-boot','screen-login','screen-weight','app','screen-submit']
+    .forEach(s=>{
+      const el=document.getElementById(s);
+      if(el)el.style.display=s===id?(s==='app'?'block':'flex'):'none';
+    });
+}
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+function doLogin(){
+  const val=document.getElementById('member-input').value.trim();
+  if(!val)return;
+  currentMember=val;
+  document.getElementById('w-member-name').textContent='👋 '+val;
+  buildWeightGrid();
+  show('screen-weight');
+}
+document.getElementById('member-input').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+function doLogout(){currentMember='';document.getElementById('member-input').value='';show('screen-login');}
+
+// ── Weight select ─────────────────────────────────────────────────────────────
+function buildWeightGrid(){
+  const grid=document.getElementById('weight-grid');
+  grid.innerHTML='';
+  for(const w of WEIGHT_STACK){
+    const b=document.createElement('button');
+    b.className='wbtn';b.textContent=w+'kg';
+    b.onclick=()=>{
+      document.querySelectorAll('.wbtn').forEach(x=>x.classList.remove('selected'));
+      b.classList.add('selected');selectedWeight=w;
+      document.getElementById('start-set-btn').disabled=false;
+      document.getElementById('start-set-btn').textContent='▶ Start Set @ '+(w+addonWeight)+'kg';
+    };
+    grid.appendChild(b);
+  }
+}
+function changeAddon(d){
+  addonWeight=Math.max(0,addonWeight+d);
+  document.getElementById('addon-val').textContent='+'+(addonWeight||0);
+  if(selectedWeight){
+    document.getElementById('start-set-btn').textContent='▶ Start Set @ '+(selectedWeight+addonWeight)+'kg';
+  }
+}
+
+// ── Pose ──────────────────────────────────────────────────────────────────────
+const SKEL=[[5,7],[7,9],[6,8],[8,10],[5,6],[5,11],[6,12],[11,12]];
+const CONF=0.2;
+function gkp(pose,i){const p=pose.keypoints[i];return p&&p.score>=CONF?p:null;}
+function calcAngle(a,b,c){
+  const ab={x:a.x-b.x,y:a.y-b.y},cb={x:c.x-b.x,y:c.y-b.y};
+  const d=ab.x*cb.x+ab.y*cb.y,m=Math.sqrt((ab.x**2+ab.y**2)*(cb.x**2+cb.y**2));
+  return m>0?Math.acos(Math.min(1,Math.max(-1,d/m)))*180/Math.PI:null;
+}
+function getBestArm(pose){
+  const arms=[];
+  for(const[si,ei,wi]of[[5,7,9],[6,8,10]]){
+    const s=gkp(pose,si),e=gkp(pose,ei),w=gkp(pose,wi);
+    if(s&&e&&w){const a=calcAngle(s,e,w);if(a!==null)arms.push({angle:a,conf:(s.score+e.score+w.score)/3,wN:{x:w.x,y:w.y},sN:{x:s.x,y:s.y},eN:{x:e.x,y:e.y}});}
+  }
+  if(!arms.length)return null;arms.sort((a,b)=>b.conf-a.conf);return arms[0];
+}
+const video=document.getElementById('video');
+const pCv=document.getElementById('pose-canvas');
+const pCtx=pCv.getContext('2d');
+function syncCanvas(){pCv.width=window.innerWidth;pCv.height=window.innerHeight;}
+window.addEventListener('resize',syncCanvas);
+window.addEventListener('orientationchange',()=>setTimeout(syncCanvas,300));
+function getSXSY(){
+  const cw=window.innerWidth,ch=window.innerHeight,vw=video.videoWidth||640,vh=video.videoHeight||480;
+  const s=Math.min(cw/vw,ch/vh);return{s,ox:(cw-vw*s)/2,oy:(ch-vh*s)/2};
+}
+function drawPose(pose,arm){
+  pCtx.clearRect(0,0,pCv.width,pCv.height);
+  if(!pCv.width||!video.videoWidth)return;
+  const{s,ox,oy}=getSXSY();
+  const px=k=>({x:k.x*s+ox,y:k.y*s+oy});
+  pCtx.strokeStyle='rgba(0,255,120,.8)';pCtx.lineWidth=3;
+  for(const[a,b]of SKEL){
+    const pa=pose.keypoints[a],pb=pose.keypoints[b];
+    if(pa?.score>=CONF&&pb?.score>=CONF){const p1=px(pa),p2=px(pb);pCtx.beginPath();pCtx.moveTo(p1.x,p1.y);pCtx.lineTo(p2.x,p2.y);pCtx.stroke();}
+  }
+  for(const p of pose.keypoints){
+    if(p.score>=CONF){const pp=px(p);pCtx.beginPath();pCtx.arc(pp.x,pp.y,6,0,Math.PI*2);pCtx.fillStyle='#fff';pCtx.fill();pCtx.strokeStyle='#0f4';pCtx.lineWidth=2;pCtx.stroke();}
+  }
+  if(arm){
+    const ep=px({x:arm.eN.x,y:arm.eN.y}),sp=px({x:arm.sN.x,y:arm.sN.y}),wp=px({x:arm.wN.x,y:arm.wN.y});
+    const a1=Math.atan2(sp.y-ep.y,sp.x-ep.x),a2=Math.atan2(wp.y-ep.y,wp.x-ep.x);
+    pCtx.beginPath();pCtx.arc(ep.x,ep.y,28,a1,a2,false);
+    pCtx.strokeStyle=arm.angle<90?'#0f0':'#0af';pCtx.lineWidth=3;pCtx.stroke();
+    pCtx.fillStyle='#fff';pCtx.font='bold 16px Arial';pCtx.textAlign='center';
+    const midA=(a1+a2)/2;pCtx.shadowColor='#000';pCtx.shadowBlur=5;
+    pCtx.fillText(Math.round(arm.angle)+'°',ep.x+Math.cos(midA)*44,ep.y+Math.sin(midA)*44);
+    pCtx.shadowBlur=0;pCtx.textAlign='left';
+  }
+}
+
+// ── Rep detection ─────────────────────────────────────────────────────────────
+const TOP=125,BOT=95,MIN_MS=400,MAX_MS=15000;
+function makeEMA(a){let v=null;return{update(x){if(x===null)return v;v=v===null?x:a*x+(1-a)*v;return v;},reset(){v=null;}};}
+const ema=makeEMA(0.3);
+let phase='up',repStart=null,repMin=999,repMax=0,repBuf=[],lastArm=null;
+const repNEl=document.getElementById('rep-n');
+const repQEl=document.getElementById('rep-quality');
+const phasePill=document.getElementById('phase-pill');
+const sdot=document.getElementById('sdot');
+const stxt=document.getElementById('stxt');
+
+function processAngle(raw){
+  if(raw===null)return;
+  const ea=ema.update(raw);if(ea===null)return;
+  repBuf.push(ea);if(repBuf.length>300)repBuf.shift();
+  if(phase==='up'){
+    repMax=Math.max(repMax,ea);
+    phasePill.textContent='↓ Pull bar down';phasePill.className='releasing';
+    if(ea<BOT){
+      const wristOk=!lastArm||lastArm.wN.y<lastArm.sN.y+0.22;
+      if(wristOk){phase='down';repMin=ea;repStart=Date.now();phasePill.textContent='↑ Release back up';phasePill.className='pulling';}
+    }
+  }else{
+    repMin=Math.min(repMin,ea);
+    const dur=repStart?Date.now()-repStart:0;
+    if(dur>MAX_MS){phase='up';repMax=ea;repMin=999;ema.reset();return;}
+    if(ea>TOP&&dur>=MIN_MS){
+      const rom=Math.round(repMax-repMin);
+      const sl=repBuf.slice(-Math.max(10,Math.round(dur/33)));
+      const avg=sl.reduce((a,b)=>a+b,0)/sl.length;
+      const std=Math.sqrt(sl.reduce((s,v)=>s+(v-avg)**2,0)/sl.length);
+      const probs=nnRun(repMin,rom,std,dur/1000,avg);
+      const[pb,pf,pg]=[probs[0],probs[1],probs[2]];
+      const cls=pg>pb&&pg>pf?'good':pb>pf?'bad':'false';
+      if(cls==='false'){repQEl.textContent='⚡ False movement';}
+      else if(cls==='bad'){repQEl.textContent='⚠ Bad form — not counted';}
+      else{
+        repCount++;repNEl.textContent=repCount;
+        setData.push({t:new Date().toISOString(),reps:1,quality:'good',duration_s:Math.round(dur/100)/10});
+        repQEl.textContent='✅ Good rep!';
+        repNEl.className='fg';setTimeout(()=>repNEl.className='',500);
+        sdot.className='active';stxt.textContent='Counting';stxt.className='active';
+      }
+      phase='up';repMax=ea;repMin=999;phasePill.textContent='↓ Pull bar down';phasePill.className='releasing';
+    }
+  }
+}
+
+// ── Main loop ─────────────────────────────────────────────────────────────────
+let detector=null,loopRunning=false;
+async function loop(){
+  if(!loopRunning)return;
+  if(video.readyState>=2&&detector){
+    const poses=await detector.estimatePoses(video);
+    if(poses.length>0){
+      const pose=poses[0],arm=getBestArm(pose);
+      if(arm)lastArm=arm;
+      drawPose(pose,arm);processAngle(arm?arm.angle:null);
+    }else{pCtx.clearRect(0,0,pCv.width,pCv.height);ema.reset();}
+  }
+  requestAnimationFrame(loop);
+}
+
+// ── Set controls ──────────────────────────────────────────────────────────────
+let stream=null,facing='environment';
+async function startCam(f){
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:f,width:{ideal:1280},height:{ideal:720}},audio:false});}
+  catch(e){stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});}
+  video.srcObject=stream;await video.play();
+}
+
+function startSet(){
+  if(!selectedWeight)return;
+  currentExercise=document.getElementById('exercise-sel').value;
+  const totalWeight=selectedWeight+addonWeight;
+  repCount=0;setData=[];phase='up';repMax=0;repMin=999;repStart=null;repBuf=[];ema.reset();lastArm=null;
+  repNEl.textContent='0';repNEl.className='';repQEl.textContent='';
+  document.getElementById('t-member').textContent=currentMember;
+  document.getElementById('wb-weight').textContent=totalWeight;
+  phasePill.textContent='Get in position';phasePill.className='';
+  sdot.className='';stxt.textContent='Ready';stxt.className='';
+  show('app');syncCanvas();
+  loopRunning=true;
+  if(!loopRunning||!detector)loop();else loop();
+}
+
+function endSet(){
+  loopRunning=false;pCtx.clearRect(0,0,pCv.width,pCv.height);
+  const totalWeight=selectedWeight+addonWeight;
+  const vol=repCount*totalWeight;
+  document.getElementById('s-member').textContent=currentMember;
+  document.getElementById('s-exercise').textContent=currentExercise;
+  document.getElementById('s-weight').textContent=totalWeight+'kg';
+  document.getElementById('s-reps').textContent=repCount;
+  document.getElementById('s-vol').textContent=vol.toLocaleString()+' kg';
+  show('screen-submit');
+}
+
+async function submitSet(){
+  const totalWeight=selectedWeight+addonWeight;
+  const payload={
+    timestamp:new Date().toISOString(),
+    member:currentMember,
+    machine:MACHINE_NAME,
+    exercise:currentExercise,
+    weight_kg:totalWeight,
+    reps:repCount,
+    volume:repCount*totalWeight,
+    source:'AI_auto_counted'
+  };
+  if(WEBHOOK_URL){
+    try{await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
+    catch(e){console.warn('Webhook failed:',e);}
+  }
+  // Return to weight screen for next set
+  repCount=0;setData=[];loopRunning=true;
+  show('screen-weight');
+  loop();
+}
+
+function discardSet(){
+  repCount=0;setData=[];loopRunning=true;
+  startSet();
+}
+
+document.getElementById('flip-btn').addEventListener('click',async()=>{
+  facing=facing==='environment'?'user':'environment';
+  try{await startCam(facing);}catch(e){}
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+async function bootApp(){
+  const status=document.getElementById('boot-status');
+  const bar_dummy=p=>status.textContent=p;
+  const errEl=document.getElementById('boot-err');
+  const retryBtn=document.getElementById('retry-btn');
+  errEl.style.display='none';retryBtn.style.display='none';
+  show('screen-boot');
+  try{
+    bar_dummy('Starting camera…');
+    await startCam(facing);
+    bar_dummy('Loading AI model… (~15s on mobile)');
+    detector=await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING});
+    bar_dummy('Ready ✓');
+    await new Promise(r=>setTimeout(r,400));
+    show('screen-login');
+    loopRunning=true;loop();
+  }catch(e){
+    errEl.style.display='block';
+    errEl.textContent='❌ '+e.message+'\nUse Chrome and allow camera access.';
+    retryBtn.style.display='block';
+  }
+}
+window.addEventListener('load',bootApp);
+</script>
+</body>
+</html>
