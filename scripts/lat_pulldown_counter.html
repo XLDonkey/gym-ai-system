@@ -30,9 +30,8 @@
 
     /* App */
     #app{display:none;flex:1;position:relative;overflow:hidden;background:#000;}
-    /* Video is hidden — canvas draws the frames directly (avoids all overlay bugs) */
-    #video{display:none;}
-    #pose-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+    #video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
+    #pose-canvas{position:fixed;top:0;left:0;pointer-events:none;z-index:2;}
 
     /* Top bar */
     #topbar{position:absolute;top:0;left:0;right:0;z-index:10;padding:10px 14px;display:flex;align-items:center;gap:8px;background:linear-gradient(rgba(0,0,0,.75),transparent);}
@@ -262,34 +261,24 @@ const pCv=document.getElementById('pose-canvas');
 const pCtx=pCv.getContext('2d');
 
 function getSXSY(){
-  const cw=pCv.width,ch=pCv.height,vw=video.videoWidth||640,vh=video.videoHeight||480;
+  const cw=window.innerWidth,ch=window.innerHeight;
+  const vw=video.videoWidth||640,vh=video.videoHeight||480;
   const scale=Math.min(cw/vw,ch/vh);
   return{sx:scale,sy:scale,ox:(cw-vw*scale)/2,oy:(ch-vh*scale)/2};
 }
 
 function syncCanvas(){
-  // Use app container size (canvas fills it via inset:0)
-  const app=document.getElementById('app');
-  const w=app.clientWidth||window.innerWidth;
-  const h=app.clientHeight||window.innerHeight;
-  if(w>0&&h>0){pCv.width=w;pCv.height=h;return true;}
-  return false;
+  // Use window dimensions — canvas is position:fixed covering full viewport
+  pCv.width=window.innerWidth;
+  pCv.height=window.innerHeight;
 }
-function syncRetry(n){if(!syncCanvas()&&n>0)setTimeout(()=>syncRetry(n-1),150);}
 window.addEventListener('resize',()=>{syncCanvas();resizeBrain();});
 window.addEventListener('orientationchange',()=>setTimeout(()=>{syncCanvas();resizeBrain();},300));
-// ResizeObserver for reliable sizing on any layout change
-if(window.ResizeObserver){
-  new ResizeObserver(()=>{syncCanvas();resizeBrain();}).observe(document.getElementById('app'));
-}
 
 function drawPose(pose,arm,color){
+  pCtx.clearRect(0,0,pCv.width,pCv.height);
   if(!pCv.width||!video.videoWidth)return;
   const {sx,sy,ox,oy}=getSXSY();
-  // Draw black fill + video frame onto canvas first
-  pCtx.fillStyle='#000';
-  pCtx.fillRect(0,0,pCv.width,pCv.height);
-  pCtx.drawImage(video,ox,oy,video.videoWidth*sx,video.videoHeight*sy);
   const px=(kp)=>({x:kp.x*sx+ox,y:kp.y*sy+oy});
 
   // Skeleton
@@ -450,15 +439,9 @@ async function loop(){
         updateBrain(repMin<900?repMin:80,repMax-repMin>0?repMax-repMin:40,std,2.5,avg);
       }
     }else{
-      // No pose — still draw video frame so screen isn't blank
-      if(video.videoWidth>0&&pCv.width>0){
-        const{sx,sy,ox,oy}=getSXSY();
-        pCtx.fillStyle='#000';pCtx.fillRect(0,0,pCv.width,pCv.height);
-        pCtx.drawImage(video,ox,oy,video.videoWidth*sx,video.videoHeight*sy);
-      }
-      if(!manualSession){unseatedF++;seatedF=0;}
+      pCtx.clearRect(0,0,pCv.width,pCv.height);
       document.getElementById('d-elbow').textContent='—';
-      emaAngle.reset();prevAngle=null;
+      emaAngle.reset();
     }
   }
   requestAnimationFrame(loop);
@@ -525,7 +508,7 @@ document.getElementById('start-btn').addEventListener('click',async()=>{
     document.getElementById('boot').style.display='none';
     document.getElementById('app').style.display='block';
     // Must size canvas AFTER app is visible — requestAnimationFrame ensures layout is done
-    requestAnimationFrame(()=>{syncCanvas();resizeBrain();});
+    syncCanvas();resizeBrain();
     repSubEl.textContent='Counting automatically';
     setState('waiting');
     loop();
