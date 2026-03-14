@@ -118,10 +118,15 @@
     <div class="divider"></div>
 
     <div class="section-label">Elbow Angle</div>
-    <div style="text-align:center;margin-bottom:4px;">
-      <span id="aval" style="font-size:2.4rem;font-weight:900;color:#8b5cf6;font-family:'Space Grotesk',sans-serif;line-height:1;">—</span>
-      <span style="font-size:.7rem;color:#9ca3af;letter-spacing:1px;display:block;margin-top:2px;">DEGREES</span>
+    <!-- Dynamic angle V-shape visual -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:4px;height:48px;margin-bottom:6px;position:relative;">
+      <div id="arm-left" style="width:44px;height:9px;background:#6366f1;border-radius:3px;transform-origin:right center;transform:rotate(-30deg);transition:transform .1s;"></div>
+      <div id="arm-right" style="width:44px;height:9px;background:#6366f1;border-radius:3px;transform-origin:left center;transform:rotate(30deg);transition:transform .1s;"></div>
     </div>
+    <div style="text-align:center;margin-bottom:6px;">
+      <span id="aval" style="font-size:2.2rem;font-weight:900;color:#8b5cf6;font-family:'Space Grotesk',sans-serif;line-height:1;">—</span>
+    </div>
+    <div class="section-label">Degrees</div>
     <div style="width:100%;height:6px;background:#1e2235;border-radius:3px;overflow:hidden;margin-bottom:16px;">
       <div id="abar" style="height:100%;border-radius:3px;background:linear-gradient(90deg,#22c55e,#eab308,#ef4444);width:50%;transition:width .1s;"></div>
     </div>
@@ -136,18 +141,18 @@
 
     <div class="prob-row">
       <span class="pl">Good</span>
-      <div class="pt"><div class="pf" id="pbg" style="background:#22c55e;width:33%"></div></div>
-      <span class="pv" id="pvg" style="color:#22c55e">—</span>
+      <div class="pt"><div class="pf" id="pbg" style="background:#22c55e;width:0%"></div></div>
+      <span class="pv" id="pvg" style="color:#22c55e">0%</span>
     </div>
     <div class="prob-row">
       <span class="pl">Bad</span>
-      <div class="pt"><div class="pf" id="pbb" style="background:#ef4444;width:33%"></div></div>
-      <span class="pv" id="pvb" style="color:#ef4444">—</span>
+      <div class="pt"><div class="pf" id="pbb" style="background:#ef4444;width:0%"></div></div>
+      <span class="pv" id="pvb" style="color:#ef4444">0%</span>
     </div>
     <div class="prob-row">
       <span class="pl">False</span>
-      <div class="pt"><div class="pf" id="pbf" style="background:#f59e0b;width:33%"></div></div>
-      <span class="pv" id="pvf" style="color:#f59e0b">—</span>
+      <div class="pt"><div class="pf" id="pbf" style="background:#f59e0b;width:0%"></div></div>
+      <span class="pv" id="pvf" style="color:#f59e0b">0%</span>
     </div>
 
     <div id="nn-status">⚡ FALSE MOVE</div>
@@ -312,6 +317,14 @@ function processAngle(raw){
   // Update live angle display
   document.getElementById('aval').textContent=Math.round(ea)+'°';
   document.getElementById('abar').style.width=Math.min(100,ea/180*100)+'%';
+  // Animate V-shape arms: small angle = narrow V, large angle = flat/wide
+  const armDeg=Math.min(80,Math.max(5,(180-ea)/2));
+  document.getElementById('arm-left').style.transform=`rotate(-${armDeg}deg)`;
+  document.getElementById('arm-right').style.transform=`rotate(${armDeg}deg)`;
+  // Colour the arms: green when pulled down, purple otherwise
+  const armCol=ea<90?'#22c55e':'#6366f1';
+  document.getElementById('arm-left').style.background=armCol;
+  document.getElementById('arm-right').style.background=armCol;
 
   // Update debug
   document.getElementById('dbg-phase').textContent=phase;
