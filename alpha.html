@@ -309,10 +309,42 @@ function doReset(){
 
 let detector=null,stream=null,facing='user';
 async function flipCam(){facing=facing==='user'?'environment':'user';if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720}},audio:false}).catch(()=>navigator.mediaDevices.getUserMedia({video:true,audio:false}));video.srcObject=stream;await video.play();}
+// Pick the person most likely sitting at the lat pulldown machine:
+// Scores each detected person on 3 signals:
+//   1. Wrists above shoulders  → gripping the overhead bar  (strongest signal)
+//   2. Bounding box area       → larger = closer = at the machine
+//   3. Horizontal center       → camera is aimed at the machine
+function selectTarget(poses){
+  if(!poses.length)return null;
+  const vw=video.videoWidth||640,vh=video.videoHeight||480;
+  const scored=poses.map(pose=>{
+    const kps=pose.keypoints;
+    let score=0;
+    // 1. Wrists above shoulders (each side worth 40 pts)
+    const ls=kps[5],rs=kps[6],lw=kps[9],rw=kps[10];
+    if(ls?.score>=CONF&&lw?.score>=CONF&&lw.y<ls.y)score+=40;
+    if(rs?.score>=CONF&&rw?.score>=CONF&&rw.y<rs.y)score+=40;
+    // 2. Bounding box area (bigger = closer = subject)
+    const vis=kps.filter(k=>k?.score>=CONF);
+    if(vis.length>3){
+      const xs=vis.map(k=>k.x),ys=vis.map(k=>k.y);
+      const area=(Math.max(...xs)-Math.min(...xs))*(Math.max(...ys)-Math.min(...ys));
+      score+=(area/(vw*vh))*30;
+    }
+    // 3. Horizontal center (camera aimed at machine)
+    const nose=kps[0];
+    if(nose?.score>=CONF)score+=(1-Math.abs(nose.x/vw-0.5))*15;
+    return{pose,score};
+  });
+  scored.sort((a,b)=>b.score-a.score);
+  return scored[0].pose;
+}
+
 async function loop(){
   if(video.readyState>=2&&detector){
     const poses=await detector.estimatePoses(video);
-    if(poses.length){const arm=bestArm(poses[0]);if(arm)lastArm=arm;drawPose(poses[0],arm);processAngle(arm?.angle??null);}
+    const target=selectTarget(poses);
+    if(target){const arm=bestArm(target);if(arm)lastArm=arm;drawPose(target,arm);processAngle(arm?.angle??null);}
     else{ctx.clearRect(0,0,cvs.width,cvs.height);ema.r();document.getElementById('aval').textContent='—';}
   }
   requestAnimationFrame(loop);
@@ -327,7 +359,7 @@ async function boot(){
     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}},audio:false}).catch(()=>navigator.mediaDevices.getUserMedia({video:true,audio:false}));
     video.srcObject=stream;await video.play();
     step(35,'Loading AI…');
-    detector=await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{modelType:poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING});
+    detector=await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet,{modelType:poseDetection.movenet.modelType.MULTIPOSE_LIGHTNING,enableTracking:true,trackerType:'boundingBox'});
     step(100,'Ready');await new Promise(r=>setTimeout(r,300));
     document.getElementById('boot').style.display='none';
     const app=document.getElementById('app');app.style.display='flex';
