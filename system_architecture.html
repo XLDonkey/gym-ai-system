@@ -213,3 +213,54 @@
 
 </body>
 </html>
+
+
+  <h2>7. End Vision: The AI Gym Floor</h2>
+  <p>The ultimate goal is to create a single, unified AI system that perceives the entire gym floor as a human would. This goes beyond discrete per-machine tracking and moves towards a holistic, ambient intelligence. In this vision, the network of cameras (potentially 30-40 across the gym) acts as a single set of eyes, feeding into a central AI brain.</p>
+
+  <div class="diagram">
+    <h3>Conceptual Diagram: Unified AI Brain</h3>
+    <pre>
+[Camera 1] [Camera 2] ... [Camera N]
+       |       |              |
+       +-------+--------------+
+               |
+               v
++------------------------------------+
+|      Unified AI Brain (Server)     |
+|------------------------------------|
+|                                    |
+|  +------------------------------+  |
+|  |   Scene Understanding Model  |  |
+|  | (Multi-camera fusion)        |  |
+|  +------------------------------+  |
+|               |                  |
+|               v                  |
+|  - Who is where? (Tracking)      |
+|  - What machine is in use?       |
+|  - How many reps? (Pose)         |
+|  - How much weight? (Detection)  |
+|  - Is form correct? (Analysis)   |
+|  - Is someone waiting? (Queue)   |
+|                                    |
++------------------------------------+
+               |
+               v
++------------------------------------+
+|        Real-time Database          |
+|      (Supabase / Local)            |
++------------------------------------+
+    </pre>
+  </div>
+
+  <p>This "AI Brain" would not just count reps on one machine, but understand the entire context of the gym floor. It would know:</p>
+  <ul>
+    <li><strong>Member Journeys:</strong> Tracking a member from the entrance, to the locker room, to their first machine, and through their entire workout circuit.</li>
+    <li><strong>Machine Occupancy & Queues:</strong> Identifying not just that a machine is in use, but who is using it and who might be waiting nearby.</li>
+    <li><strong>Cross-Machine Insights:</strong> Understanding that a member just finished a set of bench press and is now moving to the lat pulldown, allowing for intelligent workout recommendations.</li>
+    <li><strong>Safety & Security:</strong> Detecting falls, incorrect machine usage, or unauthorized access.</li>
+  </ul>
+  <p>This end vision moves from a collection of individual trackers to a true <span class="key-point">ambient intelligence platform</span> for the entire fitness facility, providing unparalleled data and insights for both members and gym owners. The multi-camera-per-machine architecture is the foundational first step towards this ultimate goal.</p>
+
+</body>
+</html>
