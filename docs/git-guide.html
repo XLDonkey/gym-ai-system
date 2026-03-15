@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>XL Fitness — GitHub Guide</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Space+Grotesk:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#fff;color:#111;font-size:14px;line-height:1.6;}
+    .page{max-width:800px;margin:0 auto;padding:48px 40px;}
+
+    /* Cover */
+    .cover{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:80px 40px;background:#06040f;color:#fff;page-break-after:always;}
+    .cover-logo{font-family:'Space Grotesk',sans-serif;font-size:2.4rem;font-weight:900;letter-spacing:6px;color:#8b5cf6;margin-bottom:8px;}
+    .cover-title{font-size:1.6rem;font-weight:700;color:#fff;margin-bottom:12px;}
+    .cover-sub{font-size:1rem;color:#6b7280;margin-bottom:48px;}
+    .cover-divider{height:2px;width:80px;background:#8b5cf6;margin-bottom:48px;}
+    .cover-meta{font-size:.85rem;color:#374151;}
+    .cover-meta span{color:#8b5cf6;font-weight:700;}
+
+    /* Sections */
+    h1{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;color:#06040f;margin:48px 0 8px;padding-bottom:10px;border-bottom:2px solid #8b5cf6;}
+    h2{font-size:1.1rem;font-weight:700;color:#1f2937;margin:28px 0 8px;}
+    h3{font-size:.9rem;font-weight:700;color:#374151;margin:18px 0 6px;text-transform:uppercase;letter-spacing:1px;}
+    p{margin-bottom:12px;color:#374151;}
+    ul,ol{margin:0 0 14px 20px;color:#374151;}
+    li{margin-bottom:5px;}
+    strong{color:#111;}
+
+    /* Code */
+    code{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:#f3f4f6;padding:2px 6px;border-radius:3px;color:#7c3aed;}
+    pre{background:#06040f;color:#e5e7eb;padding:18px 20px;border-radius:8px;margin:12px 0 18px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.7;}
+    pre .c{color:#6b7280;}
+    pre .p{color:#a855f7;}
+    pre .g{color:#22c55e;}
+    pre .y{color:#f59e0b;}
+    pre .r{color:#ef4444;}
+    pre .b{color:#60a5fa;}
+
+    /* Callout boxes */
+    .box{border-radius:8px;padding:16px 18px;margin:16px 0;}
+    .box-purple{background:#f5f3ff;border-left:4px solid #8b5cf6;}
+    .box-green{background:#f0fdf4;border-left:4px solid #22c55e;}
+    .box-amber{background:#fffbeb;border-left:4px solid #f59e0b;}
+    .box-red{background:#fef2f2;border-left:4px solid #ef4444;}
+    .box-title{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+    .box-purple .box-title{color:#7c3aed;}
+    .box-green .box-title{color:#16a34a;}
+    .box-amber .box-title{color:#d97706;}
+    .box-red .box-title{color:#dc2626;}
+
+    /* Tables */
+    table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:.88rem;}
+    th{background:#06040f;color:#fff;padding:10px 14px;text-align:left;font-weight:600;}
+    td{padding:9px 14px;border-bottom:1px solid #e5e7eb;color:#374151;}
+    tr:nth-child(even) td{background:#f9fafb;}
+
+    /* URL chips */
+    .url{display:inline-block;background:#f5f3ff;color:#7c3aed;padding:4px 12px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;margin:4px 0;}
+
+    /* Tree */
+    .tree{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:18px 20px;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:2;margin:12px 0 20px;}
+    .tree .dir{color:#7c3aed;font-weight:600;}
+    .tree .file{color:#374151;}
+    .tree .note{color:#9ca3af;font-style:italic;}
+
+    /* Flow diagram */
+    .flow{display:flex;align-items:center;gap:0;margin:16px 0 20px;flex-wrap:wrap;}
+    .flow-step{background:#06040f;color:#fff;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:700;text-align:center;min-width:100px;}
+    .flow-step.green{background:#16a34a;}
+    .flow-step.purple{background:#7c3aed;}
+    .flow-step.amber{background:#d97706;}
+    .flow-arrow{font-size:1.2rem;color:#9ca3af;padding:0 8px;}
+
+    /* Page break */
+    .break{page-break-before:always;padding-top:48px;}
+
+    /* Footer */
+    .footer{margin-top:60px;padding-top:20px;border-top:1px solid #e5e7eb;font-size:.78rem;color:#9ca3af;display:flex;justify-content:space-between;}
+  </style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="cover-logo">XLFITNESS</div>
+  <div style="height:3px;width:60px;background:#8b5cf6;margin:12px 0 32px;"></div>
+  <div class="cover-title">GitHub Guide</div>
+  <div class="cover-sub">How our code is organised, how to navigate it,<br/>and how it scales as the system grows.</div>
+  <div class="cover-divider"></div>
+  <div class="cover-meta">
+    Prepared by <span>Donkey 🫏</span> &nbsp;·&nbsp; XL Fitness AI System &nbsp;·&nbsp; March 2026
+  </div>
+</div>
+
+<div class="page">
+
+<!-- SECTION 1 -->
+<h1>1. What Is GitHub?</h1>
+<p>GitHub is where we store and version-control all our code. Think of it like Google Drive for code — every change is tracked, nothing is ever permanently lost, and multiple people can work on it without overwriting each other.</p>
+
+<div class="box box-purple">
+  <div class="box-title">Our GitHub Account</div>
+  <div class="url">github.com/XLDonkey</div>
+  <p style="margin-top:8px;margin-bottom:0;">This is the XL Fitness developer account. All our repos (projects) live here.</p>
+</div>
+
+<h2>Key Concepts</h2>
+<table>
+  <tr><th>Term</th><th>What it means</th></tr>
+  <tr><td><strong>Repo</strong></td><td>A project folder. We'll have one per system (pose tracking, face tracking, etc.)</td></tr>
+  <tr><td><strong>Commit</strong></td><td>A saved snapshot. Every time Donkey makes a change, it's committed with a message explaining what changed.</td></tr>
+  <tr><td><strong>Branch</strong></td><td>A parallel version of the code. We develop on <code>dev</code>, and only move to <code>main</code> when it works.</td></tr>
+  <tr><td><strong>Push</strong></td><td>Uploading commits from the Mac to GitHub.</td></tr>
+  <tr><td><strong>GitHub Pages</strong></td><td>Free hosting — anything on <code>main</code> is automatically live at our URL.</td></tr>
+</table>
+
+<!-- SECTION 2 -->
+<h1 class="break">2. Current Repo — Pose Tracking</h1>
+
+<p>This is our first and currently only active repo. It contains the AI rep counter for the lat pulldown.</p>
+
+<div class="box box-green">
+  <div class="box-title">Live Demo URL</div>
+  <div class="url">xldonkey.github.io/XLFitness_pose-estimation/alpha.html</div>
+</div>
+
+<h2>Folder Structure</h2>
+<div class="tree">
+  <span class="dir">xlf-pose-tracking/</span><br/>
+  ├── <span class="file">alpha.html</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← THE demo. Always works. Never break this.</span><br/>
+  ├── <span class="file">index.html</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← GitHub Pages landing page</span><br/>
+  ├── <span class="file">README.md</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← What this repo is (shown on GitHub)</span><br/>
+  ├── <span class="dir">docs/</span><br/>
+  │&nbsp;&nbsp; ├── <span class="file">PRODUCT_VISION.md</span> &nbsp;<span class="note">← Full product vision</span><br/>
+  │&nbsp;&nbsp; ├── <span class="file">INFRASTRUCTURE.md</span> &nbsp;<span class="note">← Infra plan + costs</span><br/>
+  │&nbsp;&nbsp; └── <span class="file">PROTOTYPE_SETUP.md</span> <span class="note">← Physical setup guide</span><br/>
+  ├── <span class="dir">training-data/</span><br/>
+  │&nbsp;&nbsp; └── <span class="file">nautilus_nitro_lat_pulldown.json</span> &nbsp;<span class="note">← Machine config</span><br/>
+  ├── <span class="dir">office/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← Internal dashboard</span><br/>
+  └── <span class="dir">archive/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← Old versions (kept for reference)</span>
+</div>
+
+<h2>The Golden Rule</h2>
+<div class="box box-red">
+  <div class="box-title">⚠ Never break main</div>
+  <p style="margin-bottom:0;"><strong>main = live demo.</strong> Whatever is on <code>main</code> is what stakeholders see. All development happens on <code>dev</code> first. Only merge to <code>main</code> when it's tested and working.</p>
+</div>
+
+<!-- SECTION 3 -->
+<h1 class="break">3. Branch Strategy</h1>
+
+<p>Branches let us develop new features without breaking what's already working.</p>
+
+<div class="flow">
+  <div class="flow-step amber">feature/xxx<br/><span style="font-size:.7rem;font-weight:400;">New feature</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step purple">dev<br/><span style="font-size:.7rem;font-weight:400;">Test here</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step green">main<br/><span style="font-size:.7rem;font-weight:400;">Live demo</span></div>
+</div>
+
+<table>
+  <tr><th>Branch</th><th>Purpose</th><th>Who touches it</th></tr>
+  <tr><td><code>main</code></td><td>Always working, always demo-ready. GitHub Pages serves from here.</td><td>Donkey (merges only)</td></tr>
+  <tr><td><code>dev</code></td><td>Active development. This is where Donkey works day to day.</td><td>Donkey</td></tr>
+  <tr><td><code>feature/form-scoring</code></td><td>A specific feature being built. Merged into dev when done.</td><td>Donkey</td></tr>
+  <tr><td><code>feature/face-id</code></td><td>Future face tracking work — isolated until ready.</td><td>Donkey</td></tr>
+</table>
+
+<h2>Example Flow — Adding Form Scoring</h2>
+<pre>
+<span class="c"># 1. Create a feature branch</span>
+<span class="g">git checkout -b feature/form-scoring</span>
+
+<span class="c"># 2. Donkey builds and tests it</span>
+<span class="y">... commits happen here ...</span>
+
+<span class="c"># 3. Merge to dev for testing</span>
+<span class="g">git checkout dev</span>
+<span class="g">git merge feature/form-scoring</span>
+
+<span class="c"># 4. Matt confirms it works — merge to main</span>
+<span class="g">git checkout main</span>
+<span class="g">git merge dev</span>
+<span class="g">git push origin main</span>
+<span class="c"># → Demo is now updated live</span>
+</pre>
+
+<!-- SECTION 4 -->
+<h1 class="break">4. Long-Term Repo Structure</h1>
+
+<p>Right now we have one repo. As the system grows, each major component gets its own repo. This keeps things clean and lets different parts move at different speeds.</p>
+
+<table>
+  <tr><th>Repo</th><th>What it does</th><th>Status</th></tr>
+  <tr><td><code>xlf-pose-tracking</code></td><td>Rep counting, form scoring, exercise detection</td><td>✅ Active</td></tr>
+  <tr><td><code>xlf-face-tracking</code></td><td>Face ID, member recognition, occupancy detection</td><td>🔜 Phase 3</td></tr>
+  <tr><td><code>xlf-weight-tracking</code></td><td>Weight stack reading, plate detection via camera</td><td>🔜 Phase 4</td></tr>
+  <tr><td><code>xlf-member-data</code></td><td>Member profiles, session history, API layer</td><td>🔜 Phase 3</td></tr>
+  <tr><td><code>xlf-demo</code></td><td>Stakeholder demo site — pulls from other repos</td><td>🔜 Phase 2</td></tr>
+  <tr><td><code>xlf-infra</code></td><td>Infrastructure configs, deployment scripts, network setup</td><td>🔜 Phase 3</td></tr>
+</table>
+
+<div class="box box-purple">
+  <div class="box-title">Why separate repos?</div>
+  <p style="margin-bottom:0;">If face tracking is broken, it doesn't affect the rep counter. Each repo deploys independently. Each has its own demo URL, its own training data, its own README. Clean separation = less risk.</p>
+</div>
+
+<!-- SECTION 5 -->
+<h1 class="break">5. How GitHub Pages Works</h1>
+
+<p>GitHub Pages is free hosting. Any HTML file we push to <code>main</code> is automatically available at our URL within ~2 minutes.</p>
+
+<div class="flow">
+  <div class="flow-step">Donkey<br/>writes code</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step purple">git push<br/>to main</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step green">Live at<br/>GitHub Pages</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step amber">Matt opens<br/>on phone</div>
+</div>
+
+<table>
+  <tr><th>File</th><th>Live URL</th></tr>
+  <tr><td><code>alpha.html</code></td><td><code>xldonkey.github.io/XLFitness_pose-estimation/alpha.html</code></td></tr>
+  <tr><td><code>index.html</code></td><td><code>xldonkey.github.io/XLFitness_pose-estimation/</code></td></tr>
+  <tr><td><code>docs/git-guide.html</code></td><td><code>xldonkey.github.io/XLFitness_pose-estimation/docs/git-guide.html</code></td></tr>
+</table>
+
+<div class="box box-amber">
+  <div class="box-title">Caching</div>
+  <p style="margin-bottom:0;">If you push a change and don't see it, hold the reload button in Chrome → <strong>Hard Reload</strong>. The browser caches files aggressively.</p>
+</div>
+
+<!-- SECTION 6 -->
+<h1 class="break">6. Training Data Management</h1>
+
+<p>The neural network improves with more data. Here's how training data flows through the system:</p>
+
+<div class="flow">
+  <div class="flow-step amber">Matt films<br/>3 videos</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">Google Drive<br/>upload</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step purple">Donkey runs<br/>MoveNet</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step green">New NN<br/>deployed</div>
+</div>
+
+<table>
+  <tr><th>Category</th><th>What to film</th><th>Target length</th></tr>
+  <tr><td>✅ Good reps</td><td>Full ROM, controlled, proper form</td><td>10 min</td></tr>
+  <tr><td>⚠ Bad reps</td><td>Partial ROM, swinging, too fast, leaning</td><td>10 min</td></tr>
+  <tr><td>⚡ False moves</td><td>Sitting at machine, adjusting, not pulling</td><td>10 min</td></tr>
+</table>
+
+<p><strong>Current model:</strong> v4 — 445 sequences, 75.1% accuracy. Target: 85%+ with 10-min videos from multiple people.</p>
+
+<div class="box box-green">
+  <div class="box-title">Training data location</div>
+  <p style="margin-bottom:0;">Raw sequences live in <code>training-data/</code> in this repo. Trained model weights are embedded directly in <code>alpha.html</code> — no server needed.</p>
+</div>
+
+<!-- SECTION 7 -->
+<h1 class="break">7. Day-to-Day Workflow</h1>
+
+<h2>Matt's Role</h2>
+<ul>
+  <li>Test the demo at the gym — report what works and what doesn't</li>
+  <li>Film training videos — upload to Google Drive, send Donkey the link</li>
+  <li>Define what needs building next — Donkey handles everything else</li>
+  <li>Share Canva/Figma designs — Donkey builds the UI to match</li>
+</ul>
+
+<h2>Donkey's Role</h2>
+<ul>
+  <li>All code, all commits, all deployments</li>
+  <li>Process training videos → retrain NN → deploy</li>
+  <li>Keep <code>main</code> clean and demo-ready at all times</li>
+  <li>Document everything in <code>docs/</code></li>
+</ul>
+
+<h2>Communication</h2>
+<ul>
+  <li>Telegram for requests, feedback, links</li>
+  <li>GitHub commits for code changes (Donkey narrates each one)</li>
+  <li>This guide for reference</li>
+</ul>
+
+<!-- SECTION 8 -->
+<h1 class="break">8. Quick Reference</h1>
+
+<h2>Important URLs</h2>
+<table>
+  <tr><th>What</th><th>URL</th></tr>
+  <tr><td>GitHub account</td><td><code>github.com/XLDonkey</code></td></tr>
+  <tr><td>Current repo</td><td><code>github.com/XLDonkey/XLFitness_pose-estimation</code></td></tr>
+  <tr><td>Live demo</td><td><code>xldonkey.github.io/XLFitness_pose-estimation/alpha.html</code></td></tr>
+  <tr><td>This guide</td><td><code>xldonkey.github.io/XLFitness_pose-estimation/docs/git-guide.html</code></td></tr>
+</table>
+
+<h2>If Something Breaks</h2>
+<ol>
+  <li>Hard refresh Chrome first (hold reload → Hard Reload)</li>
+  <li>Check you're on the right URL (<code>alpha.html</code> not an old link)</li>
+  <li>Message Donkey — I can roll back to any previous working version instantly</li>
+  <li>Nothing is ever permanently lost — every change is saved in git history</li>
+</ol>
+
+<h2>Repo Rules Summary</h2>
+<div class="box box-red">
+  <div class="box-title">The 3 Rules</div>
+  <ol style="margin:0 0 0 18px;">
+    <li><strong>main = live.</strong> Only working code goes here.</li>
+    <li><strong>dev = work in progress.</strong> This is where things get built and tested.</li>
+    <li><strong>alpha.html = the demo.</strong> Don't rename it, don't delete it, don't move it.</li>
+  </ol>
+</div>
+
+<div class="footer">
+  <span>XL Fitness AI System — GitHub Guide</span>
+  <span>Prepared by Donkey 🫏 · March 2026</span>
+</div>
+
+</div>
+</body>
+</html>
