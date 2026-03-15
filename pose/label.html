@@ -156,17 +156,36 @@
 
       <!-- Label buttons -->
       <div class="label-section">
-        <div class="label-title">Label current moment — keyboard: G / B / F</div>
+        <div class="label-title">
+          Quick label at current time — keyboard: <strong style="color:#e5e7eb">G</strong> Good &nbsp;
+          <strong style="color:#e5e7eb">B</strong> Bad &nbsp;
+          <strong style="color:#e5e7eb">F</strong> False &nbsp;
+          <strong style="color:#e5e7eb">Space</strong> Play/Pause
+        </div>
         <div class="label-row">
           <button class="lbtn lbtn-good" onclick="addAnnotation('good')">✅ Good Rep</button>
           <button class="lbtn lbtn-bad" onclick="addAnnotation('bad')">⚠ Bad Rep</button>
           <button class="lbtn lbtn-false" onclick="addAnnotation('false_movement')">⚡ False Move</button>
           <div class="rep-input-wrap">
-            <label>Reps:</label>
+            <label>Reps in clip:</label>
             <input type="number" id="rep-count" value="1" min="1" max="20"/>
           </div>
         </div>
-        <input class="note-input" id="note-input" placeholder="Optional note (e.g. 'leaning back', 'good depth')…"/>
+        <input class="note-input" id="note-input" placeholder="Optional note (e.g. 'leaning back', 'good depth', 'swinging')…"/>
+
+        <!-- Mark start/end for precision bracketing -->
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #2d3348;">
+          <div class="label-title" style="margin-bottom:8px;">Or bracket an exact rep: Mark Start → play through rep → Label it</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button class="pbtn pbtn-step" id="mark-start-btn" onclick="markStart()" style="background:#1f2937;border:1px solid #8b5cf6;color:#8b5cf6;">
+              ⬥ Mark Start
+            </button>
+            <span id="mark-status" style="font-size:.72rem;color:#6b7280;font-family:'JetBrains Mono',monospace;">No start marked</span>
+            <button class="lbtn lbtn-good" id="bracket-good" onclick="addBracketed('good')" disabled style="opacity:.4;font-size:.75rem;padding:7px 14px;">✅ Good</button>
+            <button class="lbtn lbtn-bad" id="bracket-bad" onclick="addBracketed('bad')" disabled style="opacity:.4;font-size:.75rem;padding:7px 14px;">⚠ Bad</button>
+            <button class="lbtn lbtn-false" id="bracket-false" onclick="addBracketed('false_movement')" disabled style="opacity:.4;font-size:.75rem;padding:7px 14px;">⚡ False</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -272,7 +291,7 @@ document.addEventListener('keydown', e => {
   if(e.key === ' '){ e.preventDefault(); togglePlay(); }
 });
 
-// ── Add annotation ────────────────────────────────────────────────────────────
+// ── Add annotation (quick — at current time) ──────────────────────────────────
 function addAnnotation(label){
   if(!vid.src || vid.readyState < 1){ toast('Load a video first'); return; }
   vid.pause(); playBtn.textContent = '▶ Play';
@@ -288,17 +307,71 @@ function addAnnotation(label){
     label,
     reps,
     note,
-    window_start: Math.max(0, t - reps * 4),   // ~4s per rep buffer before
-    window_end: t + 3                            // 3s buffer after
+    window_start: parseFloat(Math.max(0, t - reps * 4).toFixed(3)),
+    window_end: parseFloat((t + 3).toFixed(3)),
+    method: 'quick'
   };
 
   annotations.push(ann);
   annotations.sort((a,b) => a.timestamp - b.timestamp);
-
   document.getElementById('note-input').value = '';
   renderAnnotations();
   updateStats();
   toast(label === 'good' ? '✅ Good rep marked' : label === 'bad' ? '⚠ Bad rep marked' : '⚡ False move marked');
+}
+
+// ── Bracket annotation (mark start → play → label end) ───────────────────────
+let bracketStart = null;
+
+function markStart(){
+  if(!vid.src || vid.readyState < 1){ toast('Load a video first'); return; }
+  bracketStart = vid.currentTime;
+  document.getElementById('mark-status').textContent = `Start: ${fmt(bracketStart)} — now play through the rep…`;
+  document.getElementById('mark-status').style.color = '#8b5cf6';
+  ['bracket-good','bracket-bad','bracket-false'].forEach(id => {
+    const el = document.getElementById(id);
+    el.disabled = false; el.style.opacity = '1';
+  });
+  toast(`Start marked at ${fmt(bracketStart)}`);
+}
+
+function addBracketed(label){
+  if(bracketStart === null){ toast('Mark a start first'); return; }
+  vid.pause(); playBtn.textContent = '▶ Play';
+  const end = vid.currentTime;
+  const start = bracketStart;
+  if(end <= start){ toast('End must be after start — play through the rep first'); return; }
+
+  const note = document.getElementById('note-input').value.trim();
+  const reps = parseInt(document.getElementById('rep-count').value) || 1;
+  const mid = (start + end) / 2;
+
+  const ann = {
+    id: Date.now(),
+    timestamp: parseFloat(mid.toFixed(3)),
+    timestamp_fmt: fmt(mid),
+    label,
+    reps,
+    note,
+    window_start: parseFloat(start.toFixed(3)),
+    window_end: parseFloat(end.toFixed(3)),
+    duration_s: parseFloat((end - start).toFixed(2)),
+    method: 'bracketed'
+  };
+
+  annotations.push(ann);
+  annotations.sort((a,b) => a.timestamp - b.timestamp);
+  document.getElementById('note-input').value = '';
+  bracketStart = null;
+  document.getElementById('mark-status').textContent = 'No start marked';
+  document.getElementById('mark-status').style.color = '#6b7280';
+  ['bracket-good','bracket-bad','bracket-false'].forEach(id => {
+    const el = document.getElementById(id);
+    el.disabled = true; el.style.opacity = '.4';
+  });
+  renderAnnotations();
+  updateStats();
+  toast(`Bracketed ${label.replace('_',' ')} — ${(end-start).toFixed(1)}s`);
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
@@ -317,7 +390,7 @@ function renderAnnotations(){
         <span class="ann-label ${a.label}">${a.label === 'good' ? '✅ Good' : a.label === 'bad' ? '⚠ Bad' : '⚡ False'}</span>
         <span class="ann-del" onclick="deleteAnn(${i})">✕</span>
       </div>
-      <div class="ann-reps">${a.reps} rep${a.reps>1?'s':''} · window: ${fmt(a.window_start)} → ${fmt(a.window_end)}</div>
+      <div class="ann-reps">${a.reps} rep${a.reps>1?'s':''} · ${fmt(a.window_start)} → ${fmt(a.window_end)}${a.duration_s ? ` · ${a.duration_s}s` : ''} ${a.method==='bracketed'?'<span style="color:#8b5cf6;font-size:.65rem">bracketed</span>':''}</div>
       ${a.note ? `<div class="ann-note">"${a.note}"</div>` : ''}
     </div>
   `).join('');
