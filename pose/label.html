@@ -121,7 +121,7 @@
 <div class="hdr">
   <div class="hdr-logo">XLFITNESS</div>
   <div class="hdr-title">Training Data Labeler</div>
-  <div class="hdr-tip">S = Mark Start &nbsp;·&nbsp; G = Good &nbsp;·&nbsp; B = Bad &nbsp;·&nbsp; F = False &nbsp;·&nbsp; Space = Play/Pause</div>
+  <div class="hdr-tip">S = Start &nbsp;·&nbsp; G = Good &nbsp;·&nbsp; B = Bad &nbsp;·&nbsp; F = False &nbsp;·&nbsp; E = Seated &nbsp;·&nbsp; N = Empty &nbsp;·&nbsp; Space = Play/Pause</div>
 </div>
 
 <div class="body">
@@ -181,9 +181,11 @@
           </div>
           <input class="note-in" id="note-in" placeholder="Optional note — e.g. 'full ROM', 'leaning back', 'swinging'…"/>
           <div class="label-btns">
-            <button class="lbtn lbtn-g" onclick="endSection('good')">✅ Good Reps &nbsp;<kbd style="font-size:.65rem;opacity:.7">G</kbd></button>
-            <button class="lbtn lbtn-b" onclick="endSection('bad')">⚠ Bad Form &nbsp;<kbd style="font-size:.65rem;opacity:.7">B</kbd></button>
+            <button class="lbtn lbtn-g" onclick="endSection('good_rep')">✅ Good Rep &nbsp;<kbd style="font-size:.65rem;opacity:.7">G</kbd></button>
+            <button class="lbtn lbtn-b" onclick="endSection('bad_rep')">⚠ Bad Form &nbsp;<kbd style="font-size:.65rem;opacity:.7">B</kbd></button>
             <button class="lbtn lbtn-f" onclick="endSection('false_movement')">⚡ False Move &nbsp;<kbd style="font-size:.65rem;opacity:.7">F</kbd></button>
+            <button class="lbtn" onclick="endSection('user_seated_engaged')" style="background:rgba(99,102,241,.12);border-color:#6366f1;color:#6366f1;">🪑 Seated &nbsp;<kbd style="font-size:.65rem;opacity:.7">E</kbd></button>
+            <button class="lbtn" onclick="endSection('no_user_present')" style="background:rgba(107,114,128,.12);border-color:#6b7280;color:#6b7280;">⬜ Empty &nbsp;<kbd style="font-size:.65rem;opacity:.7">N</kbd></button>
             <button class="cancel-btn" onclick="cancelSection()">✕ Cancel</button>
           </div>
         </div>
@@ -283,9 +285,11 @@ document.addEventListener('keydown', e => {
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.key === ' '){ e.preventDefault(); togglePlay(); }
   if(e.key === 's' || e.key === 'S') markStart();
-  if(e.key === 'g' || e.key === 'G') endSection('good');
-  if(e.key === 'b' || e.key === 'B') endSection('bad');
+  if(e.key === 'g' || e.key === 'G') endSection('good_rep');
+  if(e.key === 'b' || e.key === 'B') endSection('bad_rep');
   if(e.key === 'f' || e.key === 'F') endSection('false_movement');
+  if(e.key === 'e' || e.key === 'E') endSection('user_seated_engaged');
+  if(e.key === 'n' || e.key === 'N') endSection('no_user_present');
   if(e.key === 'Escape') cancelSection();
 });
 

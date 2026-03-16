@@ -1,0 +1,55 @@
+{
+  "machine_id": "lat_pulldown_01",
+  "machine_name": "Nautilus Nitro Lat Pulldown",
+  "exercise": "Lat Pulldown",
+  "version": "1.0",
+
+  "camera": {
+    "placement": "side-on",
+    "angle_deg": 90,
+    "height_m": 1.4,
+    "distance_m": 2.5,
+    "resolution": "1080p",
+    "fps": 30,
+    "facing": "environment"
+  },
+
+  "pose": {
+    "primary_joint": "elbow",
+    "joints_tracked": ["shoulder", "elbow", "wrist", "hip"],
+    "keypoint_indices": {
+      "left_shoulder": 5, "right_shoulder": 6,
+      "left_elbow": 7,    "right_elbow": 8,
+      "left_wrist": 9,    "right_wrist": 10,
+      "left_hip": 11,     "right_hip": 12
+    },
+    "min_confidence": 0.15
+  },
+
+  "rep_detection": {
+    "angle_top_threshold": 130,
+    "angle_bottom_threshold": 90,
+    "min_rep_duration_ms": 300,
+    "max_rep_duration_ms": 12000,
+    "min_rom_degrees": 40
+  },
+
+  "weight_stack_kg": [10,15,20,25,30,35,40,45,50,55,60,65,70,75,80],
+
+  "server": {
+    "endpoint": "",
+    "machine_id": "lat_pulldown_01",
+    "post_events": ["rep_completed", "session_start", "session_end", "bad_rep", "user_seated"]
+  },
+
+  "labels": {
+    "good_rep": "Full ROM, controlled form",
+    "bad_rep": "Poor form — partial ROM, swinging, rushing",
+    "false_movement": "Not a rep — adjusting, stretching, gesturing",
+    "no_user_present": "Machine empty",
+    "user_present_not_engaged": "Person near machine but not using it",
+    "user_seated_engaged": "Seated and gripping — ready to start"
+  },
+
+  "notes": "Nautilus Nitro at XL Fitness. Primary prototype machine."
+}
