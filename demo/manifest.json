@@ -1,0 +1,18 @@
+{
+  "name": "XL Fitness AI",
+  "short_name": "XL Fitness",
+  "description": "AI Rep Counter — Lat Pulldown",
+  "start_url": "./alpha.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#06040f",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "https://www.xlfitness.com.au/cdn/shop/files/XL_LOGO_WHITE.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

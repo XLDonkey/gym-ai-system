@@ -4,6 +4,12 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>XL Fitness — AI Rep Counter</title>
+  <!-- PWA / Kiosk -->
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="screen-orientation" content="landscape"/>
+  <link rel="manifest" href="manifest.json"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     html,body{height:100%;overflow:hidden;background:#0d1117;color:#fff;font-family:'Inter',system-ui,sans-serif;}
@@ -419,6 +425,65 @@ async function boot(){
   }
 }
 window.addEventListener('load',boot);
+
+// ── Kiosk mode ────────────────────────────────────────────────────────────────
+(function(){
+  // Force fullscreen on load and on any click (required for Android)
+  function goFullscreen(){
+    const el = document.documentElement;
+    if(!document.fullscreenElement){
+      (el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullscreen||el.msRequestFullscreen||function(){}).call(el);
+    }
+  }
+  document.addEventListener('click', goFullscreen, {once:true});
+  setTimeout(goFullscreen, 500);
+
+  // Lock to landscape
+  if(screen.orientation && screen.orientation.lock){
+    screen.orientation.lock('landscape').catch(()=>{});
+  }
+
+  // Prevent back/forward navigation
+  history.pushState(null, '', window.location.href);
+  window.addEventListener('popstate', ()=>{
+    history.pushState(null, '', window.location.href);
+  });
+
+  // Prevent context menu and text selection
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('selectstart', e => e.preventDefault());
+
+  // Secret exit — tap bottom-right corner 5 times within 3 seconds
+  let tapCount = 0, tapTimer = null;
+  document.addEventListener('touchend', function(e){
+    const t = e.changedTouches[0];
+    const inCorner = t.clientX > window.innerWidth * 0.85 && t.clientY > window.innerHeight * 0.85;
+    if(!inCorner) return;
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(()=>{ tapCount = 0; }, 3000);
+    if(tapCount >= 5){
+      tapCount = 0;
+      // Show exit prompt
+      if(confirm('Exit kiosk mode?')){
+        if(document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+  });
+
+  // Keep screen awake (Wake Lock API)
+  async function requestWakeLock(){
+    try{
+      if('wakeLock' in navigator){
+        await navigator.wakeLock.request('screen');
+      }
+    }catch(e){}
+  }
+  requestWakeLock();
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.visibilityState === 'visible') requestWakeLock();
+  });
+})();
 </script>
 </body>
 </html>
