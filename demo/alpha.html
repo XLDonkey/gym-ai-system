@@ -426,6 +426,11 @@ async function boot(){
 }
 window.addEventListener('load',boot);
 
+// Register service worker for offline support
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
 // ── Kiosk mode ────────────────────────────────────────────────────────────────
 (function(){
   // Force fullscreen on load and on any click (required for Android)
