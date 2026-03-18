@@ -1,0 +1,31 @@
+# Training data — never commit large files or sensitive data
+*.mp4
+*.mov
+*.MOV
+*.avi
+*.mkv
+
+# Raw training sequences — store in Desktop/Training Data instead
+training_angles.json
+*_sequences.json
+*_angles.json
+
+# Model files — store in Desktop/Training Data instead
+model_v*.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node / build artifacts
+node_modules/
+dist/
+.env
+*.env
+
+# Credentials — never ever
+*.pem
+*.key
+*.token
+secrets.json
+credentials.json
