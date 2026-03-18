@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>XL Fitness — Camera & Infrastructure Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Space+Grotesk:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a2e;font-size:14px;line-height:1.65;}
+
+  /* Cover */
+  .cover{min-height:100vh;background:linear-gradient(135deg,#0a0014 0%,#1a0035 50%,#0d001a 100%);color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:60px;page-break-after:always;position:relative;overflow:hidden;}
+  .cover::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%237c3aed' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+  .cover-badge{font-size:.65rem;letter-spacing:4px;text-transform:uppercase;color:#a855f7;margin-bottom:16px;font-weight:600;}
+  .cover-logo{font-family:'Space Grotesk',sans-serif;font-size:3rem;font-weight:900;letter-spacing:6px;color:#a855f7;margin-bottom:8px;}
+  .cover-title{font-size:1.8rem;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.3;}
+  .cover-sub{font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:48px;}
+  .cover-line{height:3px;width:80px;background:linear-gradient(90deg,#7c3aed,#a855f7);margin-bottom:32px;}
+  .cover-meta{font-size:.78rem;color:rgba(255,255,255,.35);display:flex;gap:32px;}
+  .cover-glow{position:absolute;top:20%;right:10%;width:400px;height:400px;background:radial-gradient(circle,rgba(124,58,237,.25) 0%,transparent 70%);pointer-events:none;}
+
+  /* Page */
+  .page{max-width:820px;margin:0 auto;padding:60px 48px;}
+  @media print{.page{padding:40px 32px;}.cover{padding:48px;}.break{page-break-before:always;padding-top:48px;}}
+
+  /* Typography */
+  h1{font-family:'Space Grotesk',sans-serif;font-size:1.7rem;font-weight:900;color:#1a1a2e;margin:48px 0 8px;padding-bottom:12px;border-bottom:3px solid #7c3aed;}
+  h2{font-size:1.05rem;font-weight:700;color:#1a1a2e;margin:28px 0 8px;}
+  h3{font-size:.85rem;font-weight:700;color:#4b5563;margin:18px 0 6px;text-transform:uppercase;letter-spacing:1px;}
+  p{margin-bottom:12px;color:#374151;}
+  ul,ol{margin:0 0 14px 20px;color:#374151;}
+  li{margin-bottom:5px;}
+  strong{color:#1a1a2e;}
+
+  /* Callout boxes */
+  .box{border-radius:10px;padding:16px 18px;margin:16px 0;}
+  .box-purple{background:#f5f3ff;border-left:4px solid #7c3aed;}
+  .box-green{background:#f0fdf4;border-left:4px solid #22c55e;}
+  .box-amber{background:#fffbeb;border-left:4px solid #f59e0b;}
+  .box-red{background:#fef2f2;border-left:4px solid #ef4444;}
+  .box-title{font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+  .box-purple .box-title{color:#7c3aed;}
+  .box-green .box-title{color:#16a34a;}
+  .box-amber .box-title{color:#d97706;}
+  .box-red .box-title{color:#dc2626;}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:.88rem;}
+  th{background:#1a1a2e;color:#fff;padding:10px 14px;text-align:left;font-weight:600;}
+  td{padding:9px 14px;border-bottom:1px solid #e5e7eb;color:#374151;vertical-align:top;}
+  tr:nth-child(even) td{background:#f9fafb;}
+
+  /* Camera cards */
+  .cam-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:20px 0;}
+  .cam-card{border:2px solid #e5e7eb;border-radius:12px;padding:18px;position:relative;}
+  .cam-card.primary{border-color:#7c3aed;}
+  .cam-num{position:absolute;top:-12px;left:16px;background:#7c3aed;color:#fff;font-size:.72rem;font-weight:800;padding:3px 12px;border-radius:20px;letter-spacing:1px;}
+  .cam-num.green{background:#22c55e;}
+  .cam-num.blue{background:#3b82f6;}
+  .cam-job{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:6px;margin-top:8px;}
+  .cam-name{font-size:.95rem;font-weight:800;color:#1a1a2e;margin-bottom:8px;}
+  .cam-spec{font-size:.72rem;color:#6b7280;line-height:1.7;}
+  .cam-price{font-size:.9rem;font-weight:700;color:#7c3aed;margin-top:10px;}
+
+  /* Challenge badge */
+  .challenge{display:inline-block;background:#fef2f2;color:#dc2626;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px;margin:2px;}
+  .solution{display:inline-block;background:#f0fdf4;color:#16a34a;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px;margin:2px;}
+
+  /* Phase timeline */
+  .phases{display:flex;gap:0;margin:20px 0;}
+  .phase{flex:1;padding:16px 12px;border-right:1px solid #e5e7eb;text-align:center;}
+  .phase:last-child{border-right:none;}
+  .phase-num{font-size:1.5rem;font-weight:900;color:#7c3aed;line-height:1;}
+  .phase-label{font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;margin:4px 0;}
+  .phase-machines{font-size:.78rem;font-weight:700;color:#1a1a2e;}
+  .phase-cost{font-size:.72rem;color:#6b7280;margin-top:4px;}
+
+  /* Floor plan note */
+  .floor-note{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px;margin:20px 0;font-size:.82rem;color:#475569;line-height:1.8;}
+
+  /* Footer */
+  .footer{margin-top:60px;padding-top:20px;border-top:1px solid #e5e7eb;font-size:.75rem;color:#9ca3af;display:flex;justify-content:space-between;}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-glow"></div>
+  <div class="cover-badge">Confidential — Internal Document</div>
+  <div class="cover-logo">XLFITNESS</div>
+  <div class="cover-title">Camera & Physical Infrastructure<br/>Planning Report</div>
+  <div class="cover-sub">AI Overseer System — End-Game Deployment Strategy</div>
+  <div class="cover-line"></div>
+  <div class="cover-meta">
+    <span>Prepared by Donkey 🫏</span>
+    <span>March 2026</span>
+    <span>Version 1.0</span>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- SECTION 1 — GYM OBSERVATIONS -->
+<h1>1. Gym Assessment</h1>
+<p>Based on on-site photography, XL Fitness is a premium, design-led gym with a distinctive black-and-neon aesthetic. The following observations directly inform camera selection and placement strategy.</p>
+
+<h2>What We're Working With</h2>
+
+<table>
+  <tr><th>Factor</th><th>Observation</th><th>Impact on Cameras</th></tr>
+  <tr><td><strong>Ceiling height</strong></td><td>~3.2–3.5m throughout</td><td>Good overhead camera height — wide field of view</td></tr>
+  <tr><td><strong>Ceiling type</strong></td><td>Suspended T-bar grid, black acoustic tiles (600×600mm)</td><td>Tiles can't hold cameras alone — need reinforced mounts or independent brackets above the grid</td></tr>
+  <tr><td><strong>Existing ceiling infrastructure</strong></td><td>Recessed downlights, smoke detectors, large decorative LED halo rings, perimeter LED strip lighting</td><td>Route cables through plenum (space above tiles) — already done for lighting, straightforward</td></tr>
+  <tr><td><strong>Structural columns</strong></td><td>Purple-finished structural columns at window junctions (~300–400mm wide)</td><td>✅ Excellent camera mount points — solid, commanding field of view, already accept fixings (exit signs mounted)</td></tr>
+  <tr><td><strong>Backlight from windows</strong></td><td>Floor-to-ceiling glazing on multiple sides — severe HDR challenge during daylight</td><td>🔴 Critical — cameras aimed toward windows will be blinded. Must use WDR cameras or mount on the window wall shooting inward</td></tr>
+  <tr><td><strong>Ambient lighting</strong></td><td>Very dark interior — black ceiling, dark floor, equipment. Neon accents (purple, pink, cyan)</td><td>Cameras need excellent low-light performance. Neon colour cast manageable with modern sensors</td></tr>
+  <tr><td><strong>Machine density</strong></td><td>High — particularly selectorised zone. 0.6–1.2m between machines</td><td>Tall machines will occlude overhead cameras — side-on cameras are essential, not optional</td></tr>
+</table>
+
+<div class="box box-amber">
+  <div class="box-title">⚠ Critical Insight — The Window Problem</div>
+  <p>XL Fitness has floor-to-ceiling glazing on multiple walls. Any camera aimed <em>toward</em> a window during daylight will be severely backlit — the user will appear as a silhouette. The solution: <strong>mount cameras on or near the window wall, shooting inward</strong>. The light becomes your friend instead of your enemy. For machines in the centre of the floor, use WDR cameras rated at 120dB+.</p>
+</div>
+
+<!-- SECTION 2 — THE THREE-CAMERA SYSTEM -->
+<h1 class="break">2. The Three-Camera System</h1>
+<p>Each machine requires three cameras, each doing exactly one job. This separation of concerns means each camera can be optimised for its specific task and upgraded independently as technology improves.</p>
+
+<div class="cam-grid">
+  <div class="cam-card">
+    <div class="cam-num">CAM 1</div>
+    <div class="cam-job">Ceiling — Identity</div>
+    <div class="cam-name">Face ID + Occupancy</div>
+    <div class="cam-spec">
+      Resolution: 4MP (2688×1520)<br/>
+      Frame rate: 5–15fps<br/>
+      Field of view: 90–110°<br/>
+      Mount: Ceiling, overhead<br/>
+      Distance: 1–2m above user<br/>
+      IR range: 10m<br/>
+      WDR: 120dB minimum
+    </div>
+    <div class="cam-price">~$180–250 AUD</div>
+  </div>
+  <div class="cam-card primary">
+    <div class="cam-num green">CAM 2</div>
+    <div class="cam-job">Side-on — Rep Counter</div>
+    <div class="cam-name">Rep Counting + Form</div>
+    <div class="cam-spec">
+      Resolution: 2MP (1920×1080)<br/>
+      Frame rate: 30fps minimum<br/>
+      Field of view: 60–80°<br/>
+      Mount: Wall/column, 45° angle<br/>
+      Distance: 2–3m from user<br/>
+      Height: 1.2–1.5m (shoulder level)<br/>
+      WDR: 120dB minimum
+    </div>
+    <div class="cam-price">~$120–160 AUD</div>
+  </div>
+  <div class="cam-card">
+    <div class="cam-num blue">CAM 3</div>
+    <div class="cam-job">Stack-facing — Weight</div>
+    <div class="cam-name">Weight Detection</div>
+    <div class="cam-spec">
+      Resolution: 2MP (1920×1080)<br/>
+      Frame rate: 1–5fps<br/>
+      Field of view: 40–60° (tight)<br/>
+      Mount: Fixed, aimed at stack<br/>
+      Distance: 0.5–1m from stack<br/>
+      Lens: 4mm (tight framing)<br/>
+      IR: Yes (stack is often in shadow)
+    </div>
+    <div class="cam-price">~$120–150 AUD</div>
+  </div>
+</div>
+
+<div class="box box-purple">
+  <div class="box-title">📐 Camera 2 Placement — Critical for XL Fitness</div>
+  <p>Given the window backlight problem, Camera 2 (rep counter) should be mounted on or near the window wall, shooting <strong>inward across the machine</strong>. This means the camera has the bright windows behind it — excellent illumination of the user from the front, no backlight issues. The structural columns at window junctions are the ideal mount points.</p>
+</div>
+
+<!-- SECTION 3 — RECOMMENDED CAMERAS -->
+<h1>3. Recommended Camera Models</h1>
+<p>After researching options for the XL Fitness environment — specifically addressing the backlight challenge, dark interior, and premium aesthetic requirements:</p>
+
+<h2>Camera 1 — Face ID / Occupancy</h2>
+<table>
+  <tr><th>Model</th><th>Hikvision DS-2CD2147G2H-LI (AcuSense)</th></tr>
+  <tr><td>Resolution</td><td>4MP — 2688×1520</td></tr>
+  <tr><td>WDR</td><td>130dB — handles extreme window backlight</td></tr>
+  <tr><td>Low light</td><td>ColorVu — colour imaging at 0.0005 lux (near total darkness)</td></tr>
+  <tr><td>AI built-in</td><td>Human/vehicle detection on-chip</td></tr>
+  <tr><td>Form factor</td><td>Small dome — discreet, premium appearance</td></tr>
+  <tr><td>Power</td><td>PoE (IEEE 802.3af)</td></tr>
+  <tr><td>Est. price AUD</td><td>~$180–220 each</td></tr>
+</table>
+
+<h2>Camera 2 — Rep Counter / Form Scoring</h2>
+<table>
+  <tr><th>Model</th><th>Hikvision DS-2CD2T23G2-2I (AcuSense)</th></tr>
+  <tr><td>Resolution</td><td>2MP — 1920×1080 @ 30fps</td></tr>
+  <tr><td>WDR</td><td>120dB</td></tr>
+  <tr><td>Lens</td><td>2.8mm (wide, covers full user profile at 2–3m)</td></tr>
+  <tr><td>IR range</td><td>60m (overkill for indoor, but excellent low-light)</td></tr>
+  <tr><td>Form factor</td><td>Mini bullet — small, aimed precisely</td></tr>
+  <tr><td>Power</td><td>PoE</td></tr>
+  <tr><td>Est. price AUD</td><td>~$120–150 each</td></tr>
+</table>
+
+<h2>Camera 3 — Weight Stack Detection</h2>
+<table>
+  <tr><th>Model</th><th>Hikvision DS-2CD2T23G2-4I (same range, 4mm lens)</th></tr>
+  <tr><td>Resolution</td><td>2MP — 1920×1080</td></tr>
+  <tr><td>Lens</td><td>4mm (tighter framing for close-range weight stack)</td></tr>
+  <tr><td>Frame rate</td><td>25fps (1–5fps used in practice — weight doesn't move fast)</td></tr>
+  <tr><td>IR</td><td>Yes — weight stacks are often in shadow between machines</td></tr>
+  <tr><td>Power</td><td>PoE</td></tr>
+  <tr><td>Est. price AUD</td><td>~$120–145 each</td></tr>
+</table>
+
+<div class="box box-green">
+  <div class="box-title">✅ Why Hikvision</div>
+  <p>Hikvision is the world's largest CCTV manufacturer, with a strong Australian distribution network (available through Security Wholesalers AU, CCTV Guru, and major IT distributors). The AcuSense range offers the WDR performance needed for XL Fitness's challenging lighting environment. They also have an Australian warranty and local technical support. Dahua is a comparable alternative if preferred.</p>
+</div>
+
+<!-- SECTION 4 — MOUNTING STRATEGY FOR XL FITNESS -->
+<h1 class="break">4. Mounting Strategy — XL Fitness Specific</h1>
+
+<h2>Using the Structural Columns (Best Option)</h2>
+<p>The purple structural columns at the window wall junctions are the ideal mount points for Camera 2. They are:</p>
+<ul>
+  <li>Solid structural concrete/steel — will hold any camera bracket</li>
+  <li>Already have fixings (exit signs, signage)</li>
+  <li>Positioned at the window wall — cameras shoot inward, eliminating backlight</li>
+  <li>Corner positioning gives diagonal view across multiple machines</li>
+  <li>300–400mm width accommodates standard camera brackets</li>
+</ul>
+
+<h2>Ceiling Mounting for Camera 1</h2>
+<p>The suspended T-bar ceiling tiles cannot support camera weight. Three options:</p>
+<ol>
+  <li><strong>Tile replacement plates</strong> — swap a 600×600mm tile for a steel plate with camera mount. Standard installation method. Electrician anchors to the structural slab above.</li>
+  <li><strong>Span brackets</strong> — a bracket that bridges two T-bar rails, distributing load. No ceiling tile removed. Camera hangs between tiles.</li>
+  <li><strong>Threaded rod drop mounts</strong> — anchor to structural slab above, drop threaded rod to camera mount. Most secure, invisible from below. Matches the existing halo light installation method.</li>
+</ol>
+<p><strong>Recommendation: Option 3</strong> — same method used for the decorative halo lights. Clean, matches the existing aesthetic, electrician already familiar with the plenum space.</p>
+
+<h2>Cable Routing</h2>
+<ul>
+  <li>All cables run through the plenum (above suspended ceiling tiles) — fully hidden</li>
+  <li>Black CAT6A cable — matches ceiling aesthetic for any exposed runs</li>
+  <li>Each camera needs ONE cable — PoE carries both power and data</li>
+  <li>Route to a central point in each zone where a PoE switch can be located</li>
+  <li>PoE switches can sit in the plenum space or in a small comms cabinet</li>
+</ul>
+
+<div class="box box-amber">
+  <div class="box-title">🎨 Aesthetic Consideration</div>
+  <p>XL Fitness is a premium, design-led space. Camera housings should be black mini-domes or black bullet cameras — these virtually disappear against the black ceiling and dark walls. Avoid white or grey cameras. All cabling must be fully concealed in the plenum. The goal: members should barely notice the cameras are there.</p>
+</div>
+
+<!-- SECTION 5 — NETWORK INFRASTRUCTURE -->
+<h1>5. Network Infrastructure</h1>
+
+<h2>How PoE Works</h2>
+<p>Power over Ethernet (PoE) means a single CAT6 cable to each camera carries both data AND power. No separate power cable needed. This dramatically simplifies installation — one trade (IT/data cabling) installs everything.</p>
+
+<h2>Recommended Network Stack</h2>
+<table>
+  <tr><th>Component</th><th>Recommended Product</th><th>Purpose</th><th>Est. Cost</th></tr>
+  <tr><td>Core Switch</td><td>Ubiquiti UniFi USW-Pro-Max-24</td><td>Central managed switch, connects all zone switches</td><td>~$2,500</td></tr>
+  <tr><td>Zone Switch (per zone)</td><td>Ubiquiti UniFi USW-Pro-24-PoE</td><td>Powers cameras in each gym zone (24 ports = 8 machines)</td><td>~$1,350 each</td></tr>
+  <tr><td>WiFi Access Points</td><td>Ubiquiti UniFi U7 Pro</td><td>Tablet connectivity for kiosk displays</td><td>~$350 each</td></tr>
+  <tr><td>Edge Server</td><td>Apple Mac Mini M4 Pro (32GB)</td><td>Runs all AI inference locally, stores session data</td><td>~$3,500</td></tr>
+  <tr><td>Backup Server</td><td>Apple Mac Mini M4 (16GB)</td><td>Redundancy — failover if primary fails</td><td>~$2,200</td></tr>
+  <tr><td>NAS Storage</td><td>Synology DS923+ (16TB)</td><td>Camera footage archive, training data</td><td>~$1,800</td></tr>
+</table>
+
+<h2>Network Layout</h2>
+<div class="floor-note">
+<strong>Data flow:</strong><br/><br/>
+📷 Cameras (360 total for full gym)<br/>
+↓ CAT6A PoE cable (max 100m run)<br/>
+🔌 Zone PoE Switch (one per zone, ~8 machines per zone)<br/>
+↓ Fibre or CAT6A uplink<br/>
+🔀 Core Switch (central comms room)<br/>
+↓ 10Gbps<br/>
+💻 Mac Mini M4 Pro (Edge Server) — runs all AI models<br/>
+↓ LAN<br/>
+☁️ Supabase Cloud DB — session data, leaderboard, member profiles<br/>
+↓<br/>
+📱 Tablets (member display), Leaderboard TVs, Management Dashboard
+</div>
+
+<!-- SECTION 6 — PHASE 1 PROTOTYPE -->
+<h1 class="break">6. Phase 1 — Prototype Setup (Right Now)</h1>
+<p>Before spending on the full infrastructure, the prototype at one lat pulldown machine proves the concept. Here's exactly what to buy and where to put it:</p>
+
+<h2>Hardware Needed</h2>
+<table>
+  <tr><th>Item</th><th>Option A (Budget)</th><th>Option B (Recommended)</th><th>Cost</th></tr>
+  <tr><td>Camera 2 (Rep Counter)</td><td>Existing Samsung tablet</td><td>DJI Osmo Action 4</td><td>$0 / ~$380</td></tr>
+  <tr><td>Mount</td><td>$20 phone clamp + tripod</td><td>SmallRig magic arm + C-clamp</td><td>$20 / ~$60</td></tr>
+  <tr><td>Power</td><td>Tablet battery</td><td>Anker 737 power bank (26,800mAh)</td><td>$0 / ~$150</td></tr>
+</table>
+
+<h2>Camera Placement for Lat Pulldown</h2>
+<div class="floor-note">
+<strong>Ideal position for Camera 2 (rep counter):</strong><br/><br/>
+• Mount on the structural purple column nearest the lat pulldown machine<br/>
+• Height: 1.2–1.5m (shoulder height of a seated user)<br/>
+• Angle: 90° side-on to the machine — looking directly at the user's profile<br/>
+• Distance: 2–3m from the user<br/>
+• Camera should be facing <strong>inward/away from the windows</strong> — use the window light behind the camera to illuminate the user<br/><br/>
+<strong>What this gives us:</strong><br/>
+• Clean elbow angle tracking — side profile is optimal for MoveNet<br/>
+• Good lighting — window behind camera illuminates the user naturally<br/>
+• No backlight issues<br/>
+• Full body visible from head to hips
+</div>
+
+<div class="box box-red">
+  <div class="box-title">🚫 Do NOT do this</div>
+  <p>Do not mount the camera on the same side as the windows with the camera aimed toward the windows. The user will be a silhouette and MoveNet will fail to detect keypoints reliably. Always position Camera 2 so the windows are <em>behind</em> the camera.</p>
+</div>
+
+<!-- SECTION 7 — FULL DEPLOYMENT COSTS -->
+<h1>7. Full Deployment Costs — 120 Machines</h1>
+
+<div class="phases">
+  <div class="phase">
+    <div class="phase-num">1</div>
+    <div class="phase-label">Phase 1</div>
+    <div class="phase-machines">1 machine</div>
+    <div class="phase-cost">~$500–900</div>
+  </div>
+  <div class="phase">
+    <div class="phase-num">2</div>
+    <div class="phase-label">Phase 2</div>
+    <div class="phase-machines">5 machines</div>
+    <div class="phase-cost">~$8,000</div>
+  </div>
+  <div class="phase">
+    <div class="phase-num">3</div>
+    <div class="phase-label">Phase 3</div>
+    <div class="phase-machines">30 machines</div>
+    <div class="phase-cost">~$35,000</div>
+  </div>
+  <div class="phase">
+    <div class="phase-num">4</div>
+    <div class="phase-label">Phase 4</div>
+    <div class="phase-machines">120 machines</div>
+    <div class="phase-cost">~$120,000</div>
+  </div>
+</div>
+
+<h2>Full Gym Cost Breakdown</h2>
+<table>
+  <tr><th>Category</th><th>Item</th><th>Qty</th><th>Unit</th><th>Total</th></tr>
+  <tr><td rowspan="3"><strong>Cameras</strong></td><td>Camera 1 — Face ID (4MP dome)</td><td>120</td><td>$220</td><td>$26,400</td></tr>
+  <tr><td>Camera 2 — Rep counter (2MP bullet)</td><td>120</td><td>$140</td><td>$16,800</td></tr>
+  <tr><td>Camera 3 — Weight stack (2MP tight)</td><td>120</td><td>$135</td><td>$16,200</td></tr>
+  <tr><td rowspan="3"><strong>Network</strong></td><td>UniFi Zone PoE Switch (24 port)</td><td>15</td><td>$1,350</td><td>$20,250</td></tr>
+  <tr><td>UniFi Core Switch</td><td>1</td><td>$2,500</td><td>$2,500</td></tr>
+  <tr><td>CAT6A cabling + installation</td><td>—</td><td>—</td><td>$15,000</td></tr>
+  <tr><td rowspan="3"><strong>Compute</strong></td><td>Mac Mini M4 Pro 32GB (primary)</td><td>2</td><td>$3,500</td><td>$7,000</td></tr>
+  <tr><td>NAS Storage 16TB</td><td>1</td><td>$1,800</td><td>$1,800</td></tr>
+  <tr><td>UniFi WiFi APs (for tablets)</td><td>8</td><td>$350</td><td>$2,800</td></tr>
+  <tr><td rowspan="3"><strong>Installation</strong></td><td>Electrician (ceiling mounts + power)</td><td>—</td><td>—</td><td>$6,000</td></tr>
+  <tr><td>IT/data cabling contractor</td><td>—</td><td>—</td><td>$8,000</td></tr>
+  <tr><td>Camera mounting + commissioning</td><td>—</td><td>—</td><td>$5,000</td></tr>
+  <tr><td colspan="4"><strong>TOTAL</strong></td><td><strong>~$127,750</strong></td></tr>
+</table>
+
+<div class="box box-green">
+  <div class="box-title">💡 Revenue Context</div>
+  <p>At 230+ foundation members paying $32/week = ~$382,000/year recurring revenue. The full infrastructure investment of ~$128K represents approximately <strong>4 months of membership revenue</strong> and pays for itself through retention improvements, premium positioning, and licensing potential to other gyms.</p>
+</div>
+
+<!-- SECTION 8 — NEXT STEPS -->
+<h1 class="break">8. Immediate Next Steps</h1>
+
+<table>
+  <tr><th>Priority</th><th>Action</th><th>Owner</th><th>Timeline</th></tr>
+  <tr><td>🔴 Now</td><td>Mount prototype camera at lat pulldown (column-mounted, side-on, facing inward)</td><td>Matt</td><td>This week</td></tr>
+  <tr><td>🔴 Now</td><td>Film training data — 1hr+ session, use labeler to annotate</td><td>Matt</td><td>This week</td></tr>
+  <tr><td>🔴 Now</td><td>Retrain LSTM with labeled data</td><td>Donkey</td><td>When data arrives</td></tr>
+  <tr><td>🟡 Soon</td><td>Get electrician quote for ceiling camera mounts (5 machine test zone)</td><td>Matt</td><td>Next 2 weeks</td></tr>
+  <tr><td>🟡 Soon</td><td>Order cameras for Phase 2 (5 machines = 15 cameras)</td><td>Matt</td><td>After Phase 1 validated</td></tr>
+  <tr><td>🟡 Soon</td><td>Confirm with other dev: webhook endpoint for rep count → tablet system</td><td>Matt</td><td>Next 2 weeks</td></tr>
+  <tr><td>🟢 Later</td><td>Full network design (switch placement, cable runs)</td><td>Donkey + IT contractor</td><td>Phase 2 planning</td></tr>
+  <tr><td>🟢 Later</td><td>Face ID implementation</td><td>Manus + Donkey</td><td>Phase 3</td></tr>
+</table>
+
+<div class="footer">
+  <span>XL Fitness — Camera & Infrastructure Report</span>
+  <span>Confidential · Donkey 🫏 · March 2026</span>
+</div>
+
+</div>
+</body>
+</html>
