@@ -1426,6 +1426,12 @@ ol.styled li::before {
       <a class="nav-item" href="#data">12 — Data Strategy</a>
       <a class="nav-item" href="#server-security">12b — Server & Security
       <a class="nav-item" href="#status">13 — Status</a>
+
+      <div class="nav-section-label">Deep Dives</div>
+      <a class="nav-item" href="#camera-options">14 — Camera Options</a>
+      <a class="nav-item" href="#server-options">15 — Server Architecture</a>
+      <a class="nav-item" href="#scaling">16 — Scaling</a>
+      <a class="nav-item" href="#member-journey">17 — Member Journey</a>
     </div>
 
     <div class="sidebar-footer">
@@ -3903,6 +3909,1528 @@ CREATE TABLE sets (
         captured here. If it's not in this document, it doesn't exist.
       </div>
     </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════ SECTION 14 -->
+    <section id="camera-options" class="section">
+      <div class="section-eyebrow">Section 14</div>
+      <h2 class="section-title">Camera Options — Full Comparison</h2>
+      <p class="section-desc">
+        A comprehensive guide to every camera type we might use across the XL Fitness AI system.
+        Each type is evaluated for image quality, gym suitability, pricing, and which of our three
+        camera roles it serves: Camera 1 (occupancy/face ID), Camera 2 (rep counter), Camera 3 (weight stack).
+      </p>
+
+      <!-- ── Camera Type 1: Turret/Eyeball ── -->
+      <h3>Camera Type 1: Turret / Eyeball Camera</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <p>
+            A <strong>turret camera</strong> (also called an eyeball camera) uses a ball-joint mechanism that
+            rotates freely in any direction during installation, then locks in place once aimed. The compact
+            dome shell mounts flush to ceiling or wall; the inner ball swivels up to 360° horizontally and
+            ~75° vertically before the grub screw is tightened.
+          </p>
+          <p style="margin-top:12px;">
+            This is the most popular camera type for AI computer vision deployments because the image sensor
+            sits inside a protective dome, the form factor is small and discreet, and the lens is fixed at a
+            precise angle — no moving parts to wear out after installation.
+          </p>
+          <p style="margin-top:12px;">
+            <strong>Our primary choice for Camera 2 (rep counter) and Camera 3 (weight stack).</strong>
+            The side-on arm mount positions the camera at shoulder height, 2–3m from the machine —
+            exactly what this camera type excels at.
+          </p>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--green);margin-bottom:10px;">✅ Pros</h4>
+          <ul class="styled">
+            <li>Compact and discreet — barely visible on a gym ceiling or arm mount</li>
+            <li>Highly adjustable during install — aim precisely then lock</li>
+            <li>Excellent image quality — wide aperture lenses available (F1.0)</li>
+            <li>No moving parts after install — zero mechanical wear</li>
+            <li>PoE compatible — one cable does power and data</li>
+            <li>Wide WDR support — handles bright windows vs dark interiors</li>
+          </ul>
+          <h4 style="color:var(--red);margin-top:16px;margin-bottom:10px;">❌ Cons</h4>
+          <ul class="styled">
+            <li>Fixed after install — wrong angle requires physical re-aiming</li>
+            <li>Not a true 360° view — covers ~110–120° field of view</li>
+            <li>Requires precise initial placement planning</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="margin-top:24px;">Recommended Models — Turret</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Resolution</th>
+              <th>Key Feature</th>
+              <th>Low Light</th>
+              <th>WDR</th>
+              <th>Price (AUD)</th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hikvision DS-2CD2347G2-LU</strong></td>
+              <td>4MP</td>
+              <td>ColorVu — full colour in near darkness</td>
+              <td>0.0005 lux (F1.0 lens)</td>
+              <td>130dB</td>
+              <td>$185–$220</td>
+              <td>Camera 2, Camera 3 ⭐</td>
+            </tr>
+            <tr>
+              <td><strong>Hikvision DS-2CD2T47G2-L</strong></td>
+              <td>4MP</td>
+              <td>ColorVu bullet-turret hybrid</td>
+              <td>0.001 lux</td>
+              <td>120dB</td>
+              <td>$160–$190</td>
+              <td>Camera 2, Camera 3</td>
+            </tr>
+            <tr>
+              <td><strong>Dahua IPC-HDW2849H-S-IL</strong></td>
+              <td>8MP (4K)</td>
+              <td>Smart Dual Light — auto IR/white switch</td>
+              <td>0.001 lux</td>
+              <td>120dB</td>
+              <td>$140–$170</td>
+              <td>Camera 2 (budget 4K option)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout green" style="margin-top:16px;">
+        <strong>Our top pick:</strong> Hikvision DS-2CD2347G2-LU — the F1.0 lens and 130dB WDR makes it
+        the best performer for XL Fitness's challenging mixed lighting environment (neon interior + bright
+        window light). Full colour in near-darkness means the AI model always gets a clean, high-contrast image.
+      </div>
+
+      <!-- ── Camera Type 2: Fisheye ── -->
+      <h3 style="margin-top:40px;">Camera Type 2: Fisheye 360° Camera</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <p>
+            A <strong>fisheye camera</strong> uses an ultra-wide-angle lens (typically 1.0–1.8mm focal length)
+            to capture a full 180° hemisphere in a single frame. Mounted on the ceiling, it sees the entire
+            floor beneath it — including every person, machine, and walkway — in one image.
+          </p>
+          <p style="margin-top:12px;">
+            The raw fisheye image is heavily distorted (like looking into a crystal ball), but
+            <strong>de-warping software</strong> mathematically corrects the distortion to produce flat,
+            rectangular "virtual camera" views that pan and tilt digitally with no moving parts.
+          </p>
+          <p style="margin-top:12px;">
+            <strong>Ideal for Camera 1 (occupancy / face ID).</strong> One fisheye camera at ceiling height
+            can cover 4–6 machines simultaneously, detecting when someone sits down, identifying their face,
+            and tracking their movement across the zone.
+          </p>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--green);margin-bottom:10px;">✅ Pros</h4>
+          <ul class="styled">
+            <li>One camera covers what 4–6 regular cameras would cover</li>
+            <li>Zero blind spots within the coverage circle</li>
+            <li>Single cable run to the ceiling — simpler install</li>
+            <li>Software de-warping enables multiple virtual cameras from one feed</li>
+            <li>Excellent for occupancy heat-mapping and flow analysis</li>
+            <li>Long lifespan — no moving parts</li>
+          </ul>
+          <h4 style="color:var(--red);margin-top:16px;margin-bottom:10px;">❌ Cons</h4>
+          <ul class="styled">
+            <li>Edge distortion — faces at the outer ring are stretched and harder for face ID</li>
+            <li>Less pixel density per subject (resolution spread across huge area)</li>
+            <li>De-warping software adds processing overhead</li>
+            <li>Higher upfront cost than a single turret camera</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="margin-top:24px;">Recommended Models — Fisheye</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Resolution</th>
+              <th>Key Feature</th>
+              <th>Coverage</th>
+              <th>Price (AUD)</th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hikvision DS-2CD63C5G1-IVS</strong></td>
+              <td>6MP</td>
+              <td>Onboard heat-mapping, 360° panoramic, IVS analytics</td>
+              <td>4–6 machines</td>
+              <td>$450–$600</td>
+              <td>Camera 1 — Zone occupancy ⭐</td>
+            </tr>
+            <tr>
+              <td><strong>Hikvision DS-2CD2955FWD-I</strong></td>
+              <td>5MP</td>
+              <td>1.05mm lens, IR night vision, compact</td>
+              <td>3–4 machines</td>
+              <td>$250–$320</td>
+              <td>Camera 1 — Budget option</td>
+            </tr>
+            <tr>
+              <td><strong>Dahua IPC-EBW81242</strong></td>
+              <td>12MP</td>
+              <td>AI features onboard, excellent detail in de-warped view</td>
+              <td>5–8 machines</td>
+              <td>$380–$480</td>
+              <td>Camera 1 — Large zone coverage</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Camera Type 3: PTZ ── -->
+      <h3 style="margin-top:40px;">Camera Type 3: PTZ (Pan-Tilt-Zoom)</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <p>
+            A <strong>PTZ camera</strong> uses motorised pan, tilt, and optical zoom mechanisms controlled
+            remotely by software or a joystick. The camera physically rotates and zooms in on whatever
+            direction is commanded.
+          </p>
+          <p style="margin-top:12px;">
+            <strong>NOT suitable for per-machine AI rep tracking.</strong> The fundamental problem is that
+            a PTZ can only look in one direction at a time. If it's tracking Matt on the lat pulldown,
+            it's blind to every other machine. Real-time rep counting requires a dedicated, always-on camera
+            per machine.
+          </p>
+          <p style="margin-top:12px;">
+            Good use cases: general gym security, entrance monitoring, VIP oversight, and manager dashboards
+            where a human is actively watching and controlling the camera.
+          </p>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--green);margin-bottom:10px;">✅ Pros</h4>
+          <ul class="styled">
+            <li>Covers huge area when actively controlled</li>
+            <li>Optical zoom gives extreme detail when needed</li>
+            <li>Auto-tracking models follow a subject automatically</li>
+            <li>Great for security patrols and incident review</li>
+          </ul>
+          <h4 style="color:var(--red);margin-top:16px;margin-bottom:10px;">❌ Cons</h4>
+          <ul class="styled">
+            <li><strong>Useless for real-time AI per machine</strong> — can't watch multiple machines simultaneously</li>
+            <li>Expensive — $600–$850 per camera</li>
+            <li>Moving parts wear out — motors, belts, bearings</li>
+            <li>Higher maintenance requirement</li>
+            <li>Adds latency vs fixed cameras</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="margin-top:24px;">Recommended Models — PTZ</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Model</th><th>Resolution</th><th>Zoom</th><th>AI Feature</th><th>Price (AUD)</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hikvision DS-2DE4A425IWG-E</strong></td>
+              <td>4MP</td>
+              <td>25× optical</td>
+              <td>AI auto-tracking</td>
+              <td>$650–$850</td>
+              <td>Security overview, entrance</td>
+            </tr>
+            <tr>
+              <td><strong>Dahua SD49425XB-HNR</strong></td>
+              <td>4MP</td>
+              <td>25× optical</td>
+              <td>AI auto-tracking, WizMind</td>
+              <td>$580–$750</td>
+              <td>Security overview, entrance</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Camera Type 4: Bullet ── -->
+      <h3 style="margin-top:40px;">Camera Type 4: Bullet Camera</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <p>
+            A <strong>bullet camera</strong> is a cylindrical fixed-direction camera designed for long-range
+            coverage in a single direction. The elongated body houses a larger lens and more powerful IR
+            illuminator, enabling clear images at 40–80m.
+          </p>
+          <p style="margin-top:12px;">
+            Best suited for perimeter and access control: entrances, exits, carparks, corridors, and stairwells.
+            The visible form factor also acts as a deterrent.
+          </p>
+          <p style="margin-top:12px;">
+            <strong>Not recommended for machine-level AI tracking</strong> — too bulky for arm mounts,
+            fixed angle limits close-range coverage, and the long IR throw is wasted at 2–3m distance.
+          </p>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--green);margin-bottom:10px;">✅ Pros</h4>
+          <ul class="styled">
+            <li>Long-range IR or white-light illumination (40–80m)</li>
+            <li>Highly visible — deterrent effect at entrances</li>
+            <li>Weatherproof (IP67) — suitable for outdoor areas</li>
+            <li>Excellent image quality for access points</li>
+          </ul>
+          <h4 style="color:var(--red);margin-top:16px;margin-bottom:10px;">❌ Cons</h4>
+          <ul class="styled">
+            <li>Fixed angle — can't adjust field of view after install</li>
+            <li>Bulky — looks out of place on a gym floor arm mount</li>
+            <li>Poor at close-range machine tracking (2–3m)</li>
+            <li>Long IR throw wastes energy indoors</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="margin-top:24px;">Recommended Models — Bullet</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Model</th><th>Resolution</th><th>Key Feature</th><th>IR Range</th><th>Price (AUD)</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hikvision DS-2CD2T47G2-L</strong></td>
+              <td>4MP</td>
+              <td>ColorVu full colour, 60m white light</td>
+              <td>60m</td>
+              <td>$160–$195</td>
+              <td>Entrance, carpark</td>
+            </tr>
+            <tr>
+              <td><strong>Hikvision DS-2CD2T85G1-I8</strong></td>
+              <td>8MP</td>
+              <td>AcuSense — person/vehicle classification</td>
+              <td>80m</td>
+              <td>$180–$220</td>
+              <td>Entrance, corridor</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Camera Type 5: Mini Dome ── -->
+      <h3 style="margin-top:40px;">Camera Type 5: Mini Dome</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <p>
+            A <strong>mini dome camera</strong> is the most discreet fixed-camera form factor. The camera
+            recesses into a small dome housing that flush-mounts to the ceiling, making it nearly invisible
+            from floor level. Common in retail, hospitality, and premium interior spaces where aesthetics matter.
+          </p>
+          <p style="margin-top:12px;">
+            Suitable for close-range indoor coverage where the camera needs to blend into the environment.
+            Could work for Camera 1 in zones with low ceilings where the fisheye option would be too close.
+          </p>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--green);margin-bottom:10px;">✅ Pros</h4>
+          <ul class="styled">
+            <li>Extremely discreet — barely noticeable on a ceiling tile</li>
+            <li>Professional, premium aesthetic — fits a high-end gym brand</li>
+            <li>Ceiling flush-mount — no dangling hardware</li>
+            <li>Vandal-resistant models available (IK10)</li>
+          </ul>
+          <h4 style="color:var(--red);margin-top:16px;margin-bottom:10px;">❌ Cons</h4>
+          <ul class="styled">
+            <li>Usually fixed focal length lens — can't adjust zoom</li>
+            <li>Shorter IR illumination range than bullet cameras</li>
+            <li>Fixed angle after installation</li>
+            <li>Harder to re-aim than a turret</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="margin-top:24px;">Recommended Models — Mini Dome</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Model</th><th>Resolution</th><th>Key Feature</th><th>Price (AUD)</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hikvision DS-2CD2143G2-I</strong></td>
+              <td>4MP</td>
+              <td>AcuSense — deep learning false alarm filter</td>
+              <td>$120–$150</td>
+              <td>Low-ceiling zone, aesthetics</td>
+            </tr>
+            <tr>
+              <td><strong>Hanwha QNV-8080R</strong></td>
+              <td>5MP</td>
+              <td>IR, vandal-resistant (IK10), corridor mode</td>
+              <td>$200–$250</td>
+              <td>Premium look, high-traffic zone</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Camera Type 6: AI-Native ── -->
+      <h3 style="margin-top:40px;">Camera Type 6: AI-Native Edge Cameras (Future Option)</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <p>
+            <strong>AI-native cameras</strong> embed a neural processing chip directly on the camera board,
+            allowing the camera to run full AI inference locally — no server required for initial processing.
+            Rather than streaming raw video to a server, these cameras stream processed data (pose keypoints,
+            bounding boxes, classification results).
+          </p>
+          <p style="margin-top:12px;">
+            <strong>Luxonis OAK-D</strong> is the flagship example: a stereo depth camera with an Intel
+            Myriad X VPU onboard, supporting OpenVINO and custom neural network deployment via USB or PoE.
+            It can run MoveNet pose estimation directly on the camera, streaming only the 17 keypoint
+            coordinates to the server — not the raw video.
+          </p>
+          <p style="margin-top:12px;">
+            <strong>This is not our current approach</strong> — we centralise inference on the Mac Mini
+            for flexibility and easier model updates. But OAK-D is worth monitoring for Phase 4 where
+            120-camera bandwidth could become a consideration.
+          </p>
+        </div>
+        <div class="card">
+          <h4>Luxonis OAK-D Specs</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li><strong>Sensor:</strong> 12MP colour + stereo depth</li>
+            <li><strong>AI chip:</strong> Intel Myriad X — 4 TOPS</li>
+            <li><strong>Frameworks:</strong> OpenVINO, ONNX, TensorFlow Lite</li>
+            <li><strong>Interface:</strong> USB-C or PoE variant</li>
+            <li><strong>Price:</strong> ~$300–$450 AUD</li>
+            <li><strong>Key advantage:</strong> Depth sensing — can estimate 3D joint positions</li>
+          </ul>
+          <div class="callout amber" style="margin-top:12px;padding:10px 12px;">
+            <strong>Future consideration:</strong> At 120 machines × 3 cameras = 360 streams, AI-native
+            cameras could significantly reduce Mac Mini CPU load by pre-processing at the camera. Worth
+            evaluating in Phase 4 budget planning.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Comparison Table ── -->
+      <h3 style="margin-top:40px;">Camera Type vs Role — Full Comparison</h3>
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Camera Type</th>
+              <th>📷 Cam 1<br><small>Occupancy / Face ID</small></th>
+              <th>🏋️ Cam 2<br><small>Rep Counter</small></th>
+              <th>⚖️ Cam 3<br><small>Weight Stack</small></th>
+              <th>Security</th>
+              <th>Cost Tier</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Turret / Eyeball</strong></td>
+              <td style="text-align:center;"><span class="badge badge-amber">⚠ OK</span></td>
+              <td style="text-align:center;"><span class="badge badge-green">✅ Best</span></td>
+              <td style="text-align:center;"><span class="badge badge-green">✅ Best</span></td>
+              <td style="text-align:center;"><span class="badge badge-amber">⚠ OK</span></td>
+              <td>$$$</td>
+            </tr>
+            <tr>
+              <td><strong>Fisheye 360°</strong></td>
+              <td style="text-align:center;"><span class="badge badge-green">✅ Best</span></td>
+              <td style="text-align:center;"><span class="badge badge-red">❌ No</span></td>
+              <td style="text-align:center;"><span class="badge badge-red">❌ No</span></td>
+              <td style="text-align:center;"><span class="badge badge-green">✅ Yes</span></td>
+              <td>$$$$</td>
+            </tr>
+            <tr>
+              <td><strong>PTZ</strong></td>
+              <td style="text-align:center;"><span class="badge badge-amber">⚠ Partial</span></td>
+              <td style="text-align:center;"><span class="badge badge-red">❌ No</span></td>
+              <td style="text-align:center;"><span class="badge badge-red">❌ No</span></td>
+              <td style="text-align:center;"><span class="badge badge-green">✅ Best</span></td>
+              <td>$$$$$</td>
+            </tr>
+            <tr>
+              <td><strong>Bullet</strong></td>
+              <td style="text-align:center;"><span class="badge badge-red">❌ No</span></td>
+              <td style="text-align:center;"><span class="badge badge-red">❌ No</span></td>
+              <td style="text-align:center;"><span class="badge badge-red">❌ No</span></td>
+              <td style="text-align:center;"><span class="badge badge-green">✅ Best</span></td>
+              <td>$$$</td>
+            </tr>
+            <tr>
+              <td><strong>Mini Dome</strong></td>
+              <td style="text-align:center;"><span class="badge badge-amber">⚠ OK</span></td>
+              <td style="text-align:center;"><span class="badge badge-amber">⚠ OK</span></td>
+              <td style="text-align:center;"><span class="badge badge-amber">⚠ OK</span></td>
+              <td style="text-align:center;"><span class="badge badge-amber">⚠ OK</span></td>
+              <td>$$</td>
+            </tr>
+            <tr>
+              <td><strong>AI-Native (OAK-D)</strong></td>
+              <td style="text-align:center;"><span class="badge badge-amber">⚠ Future</span></td>
+              <td style="text-align:center;"><span class="badge badge-green">✅ Future</span></td>
+              <td style="text-align:center;"><span class="badge badge-amber">⚠ Future</span></td>
+              <td style="text-align:center;"><span class="badge badge-red">❌ No</span></td>
+              <td>$$$$</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── XL Fitness Specific Recommendation ── -->
+      <h3 style="margin-top:40px;">XL Fitness Specific Recommendation</h3>
+      <div class="callout red" style="margin-top:16px;">
+        <strong>⚠ The Window Backlight Problem:</strong> XL Fitness has floor-to-ceiling windows on multiple
+        walls. If Camera 2 is mounted on the machine-side of the room looking outward toward the windows,
+        the user's body is silhouetted — completely black against a blown-out white background. The AI model
+        cannot see joint positions in a silhouette.
+      </div>
+
+      <div style="margin-top:20px;">
+        <img src="docs/images/gym-floor.jpg" style="width:100%;border-radius:10px;border:1px solid var(--border);object-fit:cover;height:220px;" alt="XL Fitness gym floor showing floor-to-ceiling windows and neon lighting"/>
+        <p style="margin-top:8px;font-size:0.85rem;color:var(--textMid);text-align:center;">
+          XL Fitness gym floor — floor-to-ceiling windows (left) create severe backlight against the neon-lit
+          dark interior. Camera 2 arm must extend toward the window wall so the camera points INWARD.
+          The user is then front-lit by natural light — ideal for AI tracking.
+        </p>
+      </div>
+
+      <div class="grid-2" style="margin-top:24px;gap:20px;">
+        <div class="card">
+          <h4 style="color:var(--green);">✅ The Rule: Camera Looks Inward</h4>
+          <ul class="styled">
+            <li>Mount the arm on the <strong>window side</strong> of the machine</li>
+            <li>Camera faces <strong>away from the windows</strong> — toward the dark interior</li>
+            <li>User's body is <strong>front-lit</strong> by window light</li>
+            <li>Background is the dark gym interior — high contrast for AI</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--purple);">ColorVu Is Non-Negotiable</h4>
+          <ul class="styled">
+            <li>The neon-lit dark interior areas have <strong>very low ambient light</strong></li>
+            <li>Standard cameras switch to IR (black &amp; white) in low light</li>
+            <li>ColorVu F1.0 lens maintains full colour at 0.0005 lux</li>
+            <li>Full colour = better pose estimation accuracy (skin vs clothing vs equipment distinction)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout green" style="margin-top:24px;">
+        <strong>Final recommendation for Phase 2 order:</strong>
+        <ul style="margin:8px 0 0 16px;padding:0;">
+          <li><strong>Camera 1</strong> (per zone, ceiling): Hikvision DS-2CD63C5G1-IVS fisheye — one per 4–6 machines</li>
+          <li><strong>Camera 2</strong> (per machine, arm mount): Hikvision DS-2CD2347G2-LU turret, ColorVu — one per machine</li>
+          <li><strong>Camera 3</strong> (per machine, stack-facing): Hikvision DS-2CD2347G2-LU turret, ColorVu — one per machine</li>
+        </ul>
+      </div>
+
+    </section>
+    <!-- /SECTION 14 -->
+
+    <!-- ═══════════════════════════════════════════════════════ SECTION 15 -->
+    <section id="server-options" class="section">
+      <div class="section-eyebrow">Section 15</div>
+      <h2 class="section-title">Server Architecture — Options Compared</h2>
+      <p class="section-desc">
+        Four possible architectures for running the AI system. We've evaluated each against our requirements:
+        real-time performance (&lt;10ms latency), privacy (video stays local), cost, reliability, and
+        scalability. Our chosen approach is Option 1 (Edge-Only) with a hybrid path for multi-gym expansion.
+      </p>
+
+      <!-- ── Option 1: Edge-Only ── -->
+      <h3>Option 1: Edge-Only ✅ Our Current Approach</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <p>
+            Everything runs on a <strong>Mac Mini M4 Pro inside the gym building</strong>. Cameras connect
+            via PoE to the local network switch. The Mac Mini runs all AI inference in real-time. Only the
+            final computed results (rep counts, form scores, weight readings) are sent to Supabase in the cloud.
+            Raw video never leaves the building.
+          </p>
+          <div class="table-wrap" style="margin-top:12px;">
+            <table>
+              <tbody>
+                <tr><td><strong>Primary server</strong></td><td>Mac Mini M4 Pro 32GB — ~$3,500 AUD</td></tr>
+                <tr><td><strong>Backup server</strong></td><td>Mac Mini M4 16GB — ~$2,200 AUD</td></tr>
+                <tr><td><strong>Monthly AI cost</strong></td><td>$0 (zero cloud inference)</td></tr>
+                <tr><td><strong>Latency</strong></td><td>&lt;10ms (local network)</td></tr>
+                <tr><td><strong>Internet dependency</strong></td><td>None for real-time operation</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--green);margin-bottom:10px;">✅ Why This Wins</h4>
+          <ul class="styled">
+            <li><strong>Zero latency:</strong> Video never travels over the internet — 1ms on LAN vs 200ms+ on WAN</li>
+            <li><strong>Zero ongoing AI cost:</strong> No AWS/GCP inference bills, ever</li>
+            <li><strong>Privacy:</strong> Member video stays inside the building — GDPR/Privacy Act compliance is simple</li>
+            <li><strong>Works offline:</strong> Internet outage doesn't stop the AI system</li>
+            <li><strong>Predictable cost:</strong> Hardware is a one-time expense</li>
+          </ul>
+          <h4 style="color:var(--amber);margin-top:16px;margin-bottom:10px;">⚠ Trade-offs</h4>
+          <ul class="styled">
+            <li>Single point of failure if primary server dies (mitigated by backup Mac Mini)</li>
+            <li>On-site hardware maintenance required (Matt or contractor)</li>
+            <li>Higher upfront cost vs cloud-only</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── Option 2: Hybrid ── -->
+      <h3 style="margin-top:40px;">Option 2: Hybrid Edge + Cloud</h3>
+      <p>
+        Heavy, real-time AI runs locally on the Mac Mini. Lightweight, non-time-critical tasks
+        (leaderboard aggregation, member profiles, push notifications, analytics dashboards, multi-gym
+        data aggregation) run in the cloud.
+      </p>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div class="card">
+          <h4>What stays at the edge (Mac Mini)</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>MoveNet pose estimation — all 17 keypoints at 30fps</li>
+            <li>LSTM rep classification — real-time decision per frame</li>
+            <li>Weight plate colour detection — computer vision</li>
+            <li>Face ID matching — instant local lookup</li>
+            <li>State machine logic — no-user / engaged / resting</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>What moves to cloud (AWS / GCP)</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>Supabase (already): session storage, member profiles, leaderboard data</li>
+            <li>Analytics: weekly trends, form score history, volume progression</li>
+            <li>Multi-gym aggregation: compare XL Fitness locations</li>
+            <li>Push notifications: session summaries, PB alerts</li>
+            <li>Model updates: new model versions deployed from cloud</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout amber" style="margin-top:16px;">
+        <strong>Cost estimate:</strong> ~$200–500/month on AWS (RDS + S3 + Lambda) depending on member count
+        and data volume. Justified when expanding to 2+ gym locations — the marginal cost of adding a second
+        location is only another $3,500 Mac Mini, not doubling cloud spend.
+        <br><br>
+        <strong>When to use:</strong> Phase 3+ when scaling to multi-gym or when member app analytics become
+        a product feature.
+      </div>
+
+      <!-- ── Option 3: Cloud-Only ── -->
+      <h3 style="margin-top:40px;">Option 3: Cloud-Only ❌ Not Our Approach</h3>
+      <p>
+        All camera video streams are sent over the internet to AWS/GCP datacenters for AI processing.
+        Results are returned to the gym in real-time.
+      </p>
+      <div class="card" style="margin-top:16px;border-left:3px solid var(--red);">
+        <h4 style="color:var(--red);">Why We Rejected This</h4>
+        <div class="table-wrap" style="margin-top:8px;">
+          <table>
+            <thead>
+              <tr><th>Problem</th><th>Detail</th><th>Verdict</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Latency</strong></td>
+                <td>200–500ms round-trip. Rep counter would be 10+ frames behind. Unusable for real-time.</td>
+                <td><span class="badge badge-red">Fatal</span></td>
+              </tr>
+              <tr>
+                <td><strong>Cost</strong></td>
+                <td>360 camera streams × continuous inference = $2,000–$5,000+/month in AWS GPU instance fees.</td>
+                <td><span class="badge badge-red">Fatal</span></td>
+              </tr>
+              <tr>
+                <td><strong>Privacy</strong></td>
+                <td>Member biometric video transmitted to a US datacenter. Privacy Act compliance nightmare.</td>
+                <td><span class="badge badge-red">Fatal</span></td>
+              </tr>
+              <tr>
+                <td><strong>Reliability</strong></td>
+                <td>System goes completely offline if NBN drops. Australian ISP uptime is not guaranteed.</td>
+                <td><span class="badge badge-red">Fatal</span></td>
+              </tr>
+              <tr>
+                <td><strong>Bandwidth</strong></td>
+                <td>360 × 1080p streams = ~1.8Gbps upload required. No business NBN plan supports this.</td>
+                <td><span class="badge badge-red">Fatal</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Option 4: Distributed Edge ── -->
+      <h3 style="margin-top:40px;">Option 4: Distributed Edge (Phase 4+ Future)</h3>
+      <p>
+        Instead of one central Mac Mini, multiple Mac Minis are distributed across the gym — one per
+        physical zone. Each server handles only the cameras in its zone. A zone failure affects only
+        that zone, not the entire gym.
+      </p>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div class="card">
+          <h4>Architecture</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>5 zones × 24 machines each = 120 machines total</li>
+            <li>5× Mac Mini M4 Pro (one per zone) + 1× core Mac Mini (orchestration)</li>
+            <li>Each zone server handles 72 camera streams (24 machines × 3)</li>
+            <li>Core server aggregates results to Supabase</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Cost &amp; When</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>~$3,500 per zone server × 5 = ~$17,500 AUD in hardware</li>
+            <li>Full redundancy: any single server failure = only 24 machines offline</li>
+            <li>Use when: Phase 4 full gym deployment (120 machines)</li>
+            <li>Current Phase 1–3: single Mac Mini is sufficient</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── Hardware Comparison Table ── -->
+      <h3 style="margin-top:40px;">Server Hardware Comparison</h3>
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Hardware</th>
+              <th>Price (AUD)</th>
+              <th>AI Performance</th>
+              <th>Power Draw</th>
+              <th>Form Factor</th>
+              <th>OS</th>
+              <th>Phase</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(139,92,246,0.07);">
+              <td><strong>Mac Mini M4 Pro 32GB</strong> ⭐</td>
+              <td>~$3,500</td>
+              <td>38 TOPS Neural Engine + 20-core GPU</td>
+              <td>20–40W</td>
+              <td>127mm cube, fanless-quiet</td>
+              <td>macOS Sequoia</td>
+              <td><span class="badge badge-green">Phase 1–3</span></td>
+            </tr>
+            <tr>
+              <td><strong>Mac Mini M4 16GB</strong> (backup)</td>
+              <td>~$2,200</td>
+              <td>38 TOPS Neural Engine + 10-core GPU</td>
+              <td>15–30W</td>
+              <td>127mm cube, fanless-quiet</td>
+              <td>macOS Sequoia</td>
+              <td><span class="badge badge-green">Phase 1–3 (backup)</span></td>
+            </tr>
+            <tr>
+              <td><strong>Intel NUC 13 Pro</strong></td>
+              <td>~$1,800</td>
+              <td>~10 TOPS (Intel VPU) — insufficient for 30fps</td>
+              <td>28–65W</td>
+              <td>117mm cube</td>
+              <td>Windows / Ubuntu</td>
+              <td><span class="badge badge-red">Not recommended</span></td>
+            </tr>
+            <tr>
+              <td><strong>NVIDIA Jetson AGX Orin</strong></td>
+              <td>~$2,500</td>
+              <td>275 TOPS — overkill for Phase 1–3, excellent for Phase 4</td>
+              <td>15–60W</td>
+              <td>105×105mm board</td>
+              <td>Ubuntu (Jetpack)</td>
+              <td><span class="badge badge-amber">Phase 4+</span></td>
+            </tr>
+            <tr>
+              <td><strong>Raspberry Pi 5 8GB</strong></td>
+              <td>~$130</td>
+              <td>~2–4 TOPS — single camera only, slow</td>
+              <td>5–12W</td>
+              <td>85×56mm board</td>
+              <td>Raspberry Pi OS</td>
+              <td><span class="badge badge-red">Lab/testing only</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Why Apple Silicon ── -->
+      <h3 style="margin-top:40px;">Why Apple Silicon (M4) Wins for This Use Case</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <h4>Technical Advantages</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li><strong>Neural Engine — 38 TOPS dedicated AI:</strong> Runs MoveNet pose estimation +
+              LSTM classifier simultaneously on dedicated silicon, leaving CPU and GPU free for orchestration.
+              No context-switching, no thermal throttling.</li>
+            <li><strong>Unified Memory Architecture:</strong> GPU, CPU, and Neural Engine all share the same
+              physical memory pool. No PCIe bus transfer overhead between CPU RAM and GPU VRAM — a huge
+              advantage for video frame pipelines.</li>
+            <li><strong>TensorFlow Metal:</strong> Apple's Metal GPU acceleration is natively supported in
+              TensorFlow-macOS. Model inference runs on the GPU without conversion or compatibility layers.</li>
+            <li><strong>macOS stability:</strong> Designed for always-on consumer operation. Auto-restart on
+              crash, Time Machine backup, App Store security updates.</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Operational Advantages</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li><strong>Energy efficient:</strong> 20–40W typical draw vs 100–300W for an equivalent NVIDIA
+              GPU workstation. Over 5 years at $0.30/kWh Australian average: saves ~$500–$1,000 in electricity.</li>
+            <li><strong>Silent operation:</strong> M4 Mac Mini is essentially silent under normal load.
+              No loud GPU fans in the server cupboard, no dust cleaning required.</li>
+            <li><strong>Compact:</strong> 127mm × 127mm × 50mm — fits inside a cable tray or wall-mount bracket.
+              Takes up no floor space.</li>
+            <li><strong>Tailscale native:</strong> macOS Tailscale client is rock-solid. Donkey can SSH in
+              remotely from anywhere without VPN configuration.</li>
+            <li><strong>Familiar ecosystem:</strong> Matt and Donkey both work on Apple hardware. Same
+              tools, same terminal, no Linux ecosystem fragmentation.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── Redundancy & Failover ── -->
+      <h3 style="margin-top:40px;">Redundancy &amp; Failover Plan</h3>
+      <div class="callout" style="margin-top:16px;">
+        <strong>Scenario:</strong> Primary Mac Mini M4 Pro fails at 6am on a Monday. What happens?
+      </div>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div class="card">
+          <h4>Automatic Response (seconds)</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>Tailscale detects primary node offline within 30 seconds</li>
+            <li>Supabase continues receiving data from backup Mac Mini (it was already running in standby)</li>
+            <li>Camera streams failover to backup automatically (if backup has already been configured)</li>
+            <li>Leaderboard and tablet display continue from last Supabase data</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Manual Response (&lt;5 minutes)</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>Donkey gets alert (Tailscale node offline notification)</li>
+            <li>Donkey pings Matt: "Primary server offline — swap the Mac Mini in the cabinet"</li>
+            <li>Matt physically swaps cables: HDMI, power, ethernet from primary slot to backup slot</li>
+            <li>Backup Mac Mini powers up and assumes primary role</li>
+            <li>Donkey confirms all services online via Tailscale SSH</li>
+          </ul>
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead>
+            <tr><th>Metric</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Data loss window</strong></td><td>0 — all events already written to Supabase in real-time</td></tr>
+            <tr><td><strong>System downtime</strong></td><td>&lt;5 minutes (physical cable swap)</td></tr>
+            <tr><td><strong>Who responds</strong></td><td>Matt on-site + Donkey remote via Tailscale</td></tr>
+            <tr><td><strong>Member impact</strong></td><td>Rep counting pauses; resumes as soon as backup is live</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Storage Architecture ── -->
+      <h3 style="margin-top:40px;">Storage Architecture</h3>
+      <div style="margin-top:16px;">
+        <!-- Architecture Diagram (styled divs) -->
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:24px;font-family:'SF Mono',monospace;font-size:0.82rem;line-height:1.7;overflow-x:auto;">
+          <div style="color:var(--purpleL);margin-bottom:8px;font-weight:700;letter-spacing:0.08em;">STORAGE ARCHITECTURE</div>
+
+          <div style="display:flex;gap:32px;flex-wrap:wrap;margin-top:16px;">
+
+            <div style="flex:1;min-width:180px;">
+              <div style="color:var(--textMid);margin-bottom:6px;">📹 CAMERAS (×3 per machine)</div>
+              <div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;background:var(--card);">
+                Raw 1080p/4K video<br>
+                <span style="color:var(--textMid);">via PoE → switch</span>
+              </div>
+              <div style="text-align:center;color:var(--purpleL);font-size:1.2em;padding:4px;">↓</div>
+            </div>
+
+            <div style="flex:1;min-width:180px;">
+              <div style="color:var(--textMid);margin-bottom:6px;">🖥 MAC MINI M4 PRO</div>
+              <div style="border:1px solid var(--purpleL);border-radius:8px;padding:10px 14px;background:var(--card);">
+                AI inference engine<br>
+                FastAPI orchestrator<br>
+                <span style="color:var(--green);">Results → Supabase</span><br>
+                <span style="color:var(--amber);">Video → NAS</span>
+              </div>
+              <div style="text-align:center;color:var(--purpleL);font-size:1.2em;padding:4px;">↕</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:12px;flex:1;min-width:180px;">
+              <div>
+                <div style="color:var(--textMid);margin-bottom:6px;">💾 SYNOLOGY DS923+ NAS</div>
+                <div style="border:1px solid var(--amber);border-radius:8px;padding:10px 14px;background:var(--card);">
+                  Raw video footage<br>
+                  30-day rolling retention<br>
+                  Permanent training archive<br>
+                  <span style="color:var(--textMid);font-size:0.85em;">~8TB drives × 4</span>
+                </div>
+              </div>
+              <div>
+                <div style="color:var(--textMid);margin-bottom:6px;">☁️ SUPABASE (Cloud)</div>
+                <div style="border:1px solid var(--green);border-radius:8px;padding:10px 14px;background:var(--card);">
+                  Session records (forever)<br>
+                  Member profiles<br>
+                  Leaderboard data<br>
+                  Form score history<br>
+                  <span style="color:var(--textMid);font-size:0.85em;">PostgreSQL + Realtime</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border);">
+            <div style="color:var(--textMid);margin-bottom:8px;">RETENTION POLICY</div>
+            <div style="display:flex;gap:24px;flex-wrap:wrap;">
+              <div><span style="color:var(--amber);">●</span> Raw video: 30 days (motion-triggered), auto-deleted</div>
+              <div><span style="color:var(--green);">●</span> Training data: Permanent archive on NAS + Drive</div>
+              <div><span style="color:var(--purpleL);">●</span> Session data: Forever in Supabase</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:20px;gap:20px;">
+        <div class="card">
+          <h4>NAS — Synology DS923+</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>4-bay desktop NAS — fits in server cabinet</li>
+            <li>4× 8TB WD Red Plus HDDs = 32TB raw / ~24TB usable (RAID 5)</li>
+            <li>Surveillance Station software manages camera recordings</li>
+            <li>Motion-triggered recording reduces storage by ~70%</li>
+            <li>~$1,200 NAS + ~$800 drives = ~$2,000 AUD total</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Supabase — Cloud Database</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>PostgreSQL database with row-level security</li>
+            <li>Real-time subscriptions — leaderboard updates instantly</li>
+            <li>Free tier: 500MB database, 1GB storage — sufficient for Phase 1–2</li>
+            <li>Pro tier ($25/month): 8GB database, 100GB storage — Phase 3+</li>
+            <li>All session data, reps, form scores, member profiles stored forever</li>
+          </ul>
+        </div>
+      </div>
+
+    </section>
+    <!-- /SECTION 15 -->
+
+    <!-- ═══════════════════════════════════════════════════════ SECTION 16 -->
+    <section id="scaling" class="section">
+      <div class="section-eyebrow">Section 16</div>
+      <h2 class="section-title">How We Scale — 1 Machine to Full Gym</h2>
+      <p class="section-desc">
+        The architecture is designed from the ground up for scale. Every decision in Phase 1 — the machine
+        config system, the training data pipeline, the zone network design — was made knowing we're eventually
+        deploying across 120 machines. Here's exactly how that happens.
+      </p>
+
+      <!-- ── Transfer Learning ── -->
+      <h3>The Transfer Learning Advantage</h3>
+      <p style="margin-top:12px;">
+        Building a new AI model from scratch for every machine would be impossible at scale. Transfer learning
+        solves this: the heavy lifting (understanding human anatomy, detecting joints, recognising movement
+        patterns) is done once, and only the machine-specific fine-tuning needs new data for each addition.
+      </p>
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Transfer Rate</th>
+              <th>What This Means</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>MoveNet pose detection</strong></td>
+              <td><span class="badge badge-green">100% transfers</span></td>
+              <td>Google pre-trained on millions of human poses. Works on every machine instantly.</td>
+            </tr>
+            <tr>
+              <td><strong>Rep rhythm / cadence detection</strong></td>
+              <td><span class="badge badge-green">~90% transfers</span></td>
+              <td>All resistance machines have concentric (effort) + eccentric (return) phases. Same rhythm logic applies everywhere.</td>
+            </tr>
+            <tr>
+              <td><strong>State machine logic</strong></td>
+              <td><span class="badge badge-green">~80% transfers</span></td>
+              <td>no_user → present → engaged → resting → done applies to every machine.</td>
+            </tr>
+            <tr>
+              <td><strong>Form quality classification</strong></td>
+              <td><span class="badge badge-amber">~50% transfers</span></td>
+              <td>Good/bad rep patterns partially transfer. Machine-specific bad-rep cues (e.g. leaning back) need new labels.</td>
+            </tr>
+            <tr>
+              <td><strong>Machine-specific joint geometry</strong></td>
+              <td><span class="badge badge-red">0% — must retrain</span></td>
+              <td>Each machine has different joint angles, range of motion, and movement plane. This is what the new training data teaches.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout green" style="margin-top:16px;">
+        <strong>The compounding return:</strong>
+        Machine 1 (lat pulldown) = <strong>100% effort</strong> — we build everything from scratch.
+        Machine 2 = <strong>~30% effort</strong> — reuse 70% of Machine 1 work.
+        Machine 10 = <strong>~10% effort</strong> — essentially just a new config file and a filming session.
+        Machine 30+ = <strong>~5% effort</strong> — similar machines are near-copy of each other.
+      </div>
+
+      <!-- ── Machine Config System ── -->
+      <h3 style="margin-top:40px;">The Machine Config System</h3>
+      <p style="margin-top:12px;">
+        Every machine in the system is defined by a <strong>JSON config file</strong>. No code changes are
+        required to add a new machine — just create a new JSON file, drop in the training data, and the
+        system automatically handles it.
+      </p>
+      <pre><code>{
+  "machine_id": "lat_pulldown_01",
+  "machine_name": "Nautilus Nitro Lat Pulldown",
+  "exercise_variants": ["Lat Pulldown", "Close Grip", "Wide Grip", "Reverse Grip"],
+  "primary_joint": "elbow",
+  "joints_tracked": ["shoulder", "elbow", "wrist", "hip"],
+  "rep_detection": {
+    "angle_top_threshold": 130,
+    "angle_bottom_threshold": 90,
+    "min_rep_duration_ms": 300,
+    "max_rep_duration_ms": 12000
+  },
+  "weight_stack_kg": [10,15,20,25,30,35,40,45,50,55,60,65,70,75,80],
+  "camera_2": {
+    "placement": "side-on",
+    "height_m": 1.3,
+    "distance_m": 2.5
+  },
+  "camera_3": {
+    "placement": "stack-facing",
+    "distance_m": 0.8
+  }
+}</code></pre>
+      <p style="margin-top:12px;">
+        <strong>Adding Machine 2 = create a new JSON file + 2–3 hours of training footage. That's it.</strong>
+        The FastAPI server reads all config files at startup and automatically initialises the inference
+        pipeline for each machine.
+      </p>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div class="card">
+          <h4>Config Fields Explained</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li><code>machine_id</code> — unique identifier, matches NVR camera tag</li>
+            <li><code>primary_joint</code> — the joint angle used to detect reps</li>
+            <li><code>angle_top/bottom_threshold</code> — the ROM boundaries in degrees</li>
+            <li><code>min/max_rep_duration_ms</code> — reject movements outside plausible rep timing</li>
+            <li><code>weight_stack_kg</code> — ordered list of available weight increments</li>
+            <li><code>camera_2/3</code> — physical install parameters for that machine's cameras</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>What Happens Automatically</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>Server loads all machine configs on startup</li>
+            <li>Camera streams are mapped to machine IDs by NVR channel number</li>
+            <li>Rep detection thresholds apply automatically per machine</li>
+            <li>Weight stack values are known — no manual entry by members</li>
+            <li>Session data tagged with machine_id automatically</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── Zone Planning ── -->
+      <h3 style="margin-top:40px;">Zone Planning — 120 Machines in 15 Zones</h3>
+      <p style="margin-top:12px;">
+        The gym is divided into <strong>15 zones of 8 machines each</strong>. Each zone is a self-contained
+        network segment with its own PoE switch in the ceiling void, minimising cable runs and allowing
+        zone-by-zone deployment.
+      </p>
+
+      <!-- Zone Diagram -->
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:16px;font-family:'SF Mono',monospace;font-size:0.82rem;overflow-x:auto;">
+        <div style="color:var(--purpleL);font-weight:700;letter-spacing:0.08em;margin-bottom:16px;">ZONE LAYOUT — 8 MACHINES PER ZONE</div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
+          <div style="border:1px solid var(--green);border-radius:6px;padding:8px;text-align:center;">
+            <div style="color:var(--green);font-weight:700;">M1</div>
+            <div style="color:var(--textMid);font-size:0.8em;">3× cams</div>
+          </div>
+          <div style="border:1px solid var(--green);border-radius:6px;padding:8px;text-align:center;">
+            <div style="color:var(--green);font-weight:700;">M2</div>
+            <div style="color:var(--textMid);font-size:0.8em;">3× cams</div>
+          </div>
+          <div style="border:1px solid var(--green);border-radius:6px;padding:8px;text-align:center;">
+            <div style="color:var(--green);font-weight:700;">M3</div>
+            <div style="color:var(--textMid);font-size:0.8em;">3× cams</div>
+          </div>
+          <div style="border:1px solid var(--green);border-radius:6px;padding:8px;text-align:center;">
+            <div style="color:var(--green);font-weight:700;">M4</div>
+            <div style="color:var(--textMid);font-size:0.8em;">3× cams</div>
+          </div>
+          <div style="border:1px solid var(--blue);border-radius:6px;padding:8px;text-align:center;">
+            <div style="color:var(--blue);font-weight:700;">M5</div>
+            <div style="color:var(--textMid);font-size:0.8em;">3× cams</div>
+          </div>
+          <div style="border:1px solid var(--blue);border-radius:6px;padding:8px;text-align:center;">
+            <div style="color:var(--blue);font-weight:700;">M6</div>
+            <div style="color:var(--textMid);font-size:0.8em;">3× cams</div>
+          </div>
+          <div style="border:1px solid var(--blue);border-radius:6px;padding:8px;text-align:center;">
+            <div style="color:var(--blue);font-weight:700;">M7</div>
+            <div style="color:var(--textMid);font-size:0.8em;">3× cams</div>
+          </div>
+          <div style="border:1px solid var(--blue);border-radius:6px;padding:8px;text-align:center;">
+            <div style="color:var(--blue);font-weight:700;">M8</div>
+            <div style="color:var(--textMid);font-size:0.8em;">3× cams</div>
+          </div>
+        </div>
+
+        <div style="text-align:center;color:var(--textMid);margin-bottom:8px;">24 cameras total ↓ 3–5m Cat6 runs ↓</div>
+        <div style="border:1px solid var(--amber);border-radius:8px;padding:10px;text-align:center;margin-bottom:8px;">
+          <span style="color:var(--amber);font-weight:700;">Zone PoE Switch (24-port)</span>
+          <span style="color:var(--textMid);"> — ceiling void</span>
+        </div>
+        <div style="text-align:center;color:var(--textMid);margin-bottom:8px;">1× uplink cable (Cat6A, up to 100m) ↓</div>
+        <div style="border:1px solid var(--purpleL);border-radius:8px;padding:10px;text-align:center;">
+          <span style="color:var(--purpleL);font-weight:700;">Core Switch</span>
+          <span style="color:var(--textMid);"> → Mac Mini M4 Pro (server room)</span>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:20px;gap:20px;">
+        <div class="card">
+          <h4>Per-Zone Requirements</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>1× PoE switch — 24-port, 370W PoE budget (e.g. Ubiquiti USW-24-POE)</li>
+            <li>24× cameras (3 per machine)</li>
+            <li>24× Cat6 drops (3–5m per camera from ceiling void)</li>
+            <li>1× Cat6A uplink to core switch (up to 100m)</li>
+            <li>1× 1U patch panel in ceiling void (optional, neat cabling)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Zone Budget Estimate</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>24× cameras × $185 avg = ~$4,440</li>
+            <li>1× 24-port PoE switch = ~$600–$800</li>
+            <li>Cabling + conduit + labour = ~$1,500</li>
+            <li>Mounting hardware = ~$300</li>
+            <li><strong>Total per zone: ~$7,000–$8,000 AUD</strong></li>
+            <li><strong>Full 15-zone gym: ~$105,000–$120,000</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── Training Data Strategy ── -->
+      <h3 style="margin-top:40px;">Training Data Strategy Per New Machine</h3>
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Machine #</th>
+              <th>Sequences Needed</th>
+              <th>Filming Time</th>
+              <th>Processing Time</th>
+              <th>Total Time to Live</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(139,92,246,0.07);">
+              <td><strong>Machine 1 — Lat Pulldown</strong></td>
+              <td>500+ sequences</td>
+              <td>4–6 gym sessions</td>
+              <td>2–3 days</td>
+              <td>~2 weeks</td>
+              <td>First model — building from scratch with no transfer baseline</td>
+            </tr>
+            <tr>
+              <td><strong>Machine 2 (new)</strong></td>
+              <td>100–150 sequences</td>
+              <td>2 gym sessions</td>
+              <td>1 day</td>
+              <td>~1 week</td>
+              <td>Transfer learning provides 70% of the model for free</td>
+            </tr>
+            <tr>
+              <td><strong>Machines 3–10 (similar type)</strong></td>
+              <td>50–100 sequences</td>
+              <td>1 gym session</td>
+              <td>3–4 hours</td>
+              <td>2–3 days</td>
+              <td>Each new machine fine-tunes an existing machine of the same category</td>
+            </tr>
+            <tr>
+              <td><strong>Machines 10+ (same category)</strong></td>
+              <td>30–50 sequences</td>
+              <td>30–45 minutes</td>
+              <td>1–2 hours</td>
+              <td>Same day</td>
+              <td>Category models are mature — minimal adaptation needed</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div class="card">
+          <h4>Cross-Machine Transfer Examples</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li><strong>Lat Pulldown → Seated Cable Row</strong> — both pulling movements, both seated, both track elbow flexion. ~75% transfers.</li>
+            <li><strong>Lat Pulldown → Chest Press</strong> — pushing vs pulling, joint mechanics differ. ~50% transfers.</li>
+            <li><strong>Leg Press → Leg Extension</strong> — both leg-dominant, seated. ~60% transfers.</li>
+            <li><strong>Cable Bicep Curl → Dumbbell Curl</strong> — same joint, different equipment visual. ~80% transfers.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Matt's Filming Protocol</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>Camera position: side-on, shoulder height, 2–3m from machine</li>
+            <li>Categories: good reps, bad reps (specific faults), setup/transition poses</li>
+            <li>Minimum 10 minutes per category</li>
+            <li>Multiple body types and sizes preferred for diversity</li>
+            <li>Name file: <code>session_YYYYMMDD_machine_name.mp4</code></li>
+            <li>Upload to Google Drive → Donkey labels and processes</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── Network Growth ── -->
+      <h3 style="margin-top:40px;">How the Network Grows</h3>
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:16px;">
+
+        <div class="phase-card p1">
+          <h4>Phase 1 — 1 Machine</h4>
+          <div style="font-size:0.9rem;margin-top:8px;color:var(--textMid);">
+            1 machine × 3 cameras → 1× 8-port PoE switch → Mac Mini M4 Pro
+            <br>Cable runs: 2–5m from column clamp mount
+            <br>Bandwidth: ~12Mbps (3× 4MP streams @ 15fps)
+          </div>
+        </div>
+
+        <div class="phase-card p2">
+          <h4>Phase 2 — 5 Machines</h4>
+          <div style="font-size:0.9rem;margin-top:8px;color:var(--textMid);">
+            5 machines × 3 cameras = 15 cameras → 1× 24-port zone PoE switch → 1× uplink → Mac Mini M4 Pro
+            <br>Bandwidth: ~60Mbps (15× 4MP streams @ 15fps) — well within gigabit uplink capacity
+          </div>
+        </div>
+
+        <div class="phase-card p3">
+          <h4>Phase 3 — 30 Machines</h4>
+          <div style="font-size:0.9rem;margin-top:8px;color:var(--textMid);">
+            30 machines × 3 cameras = 90 cameras → 4× zone switches → 1× core switch (UniFi Pro 48) → Mac Mini M4 Pro
+            <br>Bandwidth: ~360Mbps — requires 10Gbps uplink from core switch to Mac Mini (use Mac Mini Thunderbolt → 10GbE adapter)
+          </div>
+        </div>
+
+        <div class="phase-card p4">
+          <h4>Phase 4 — 120 Machines (Full Gym)</h4>
+          <div style="font-size:0.9rem;margin-top:8px;color:var(--textMid);">
+            120 machines × 3 cameras = 360 cameras → 15× zone switches → 1× core switch → 2× Mac Mini M4 Pro (load balanced)
+            <br>Bandwidth: ~1.44Gbps — 10Gbps network backbone required
+            <br>Alternatively: stream at 720p for older machines — halves bandwidth requirement
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+    <!-- /SECTION 16 -->
+
+    <!-- ═══════════════════════════════════════════════════════ SECTION 17 -->
+    <section id="member-journey" class="section">
+      <div class="section-eyebrow">Section 17</div>
+      <h2 class="section-title">The Member Experience — Full Journey</h2>
+      <p class="section-desc">
+        Every touchpoint, every screen, every data point — from walking through the door to walking out.
+        This is the full vision in practice. Phase 1 delivers the core (rep counting + weight detection).
+        The complete journey is the Phase 3 vision.
+      </p>
+
+      <!-- Arrival -->
+      <h3>1. Arrival at the Gym</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <ol style="margin:0;padding-left:20px;line-height:2;">
+            <li>Member arrives at the gym entrance</li>
+            <li>Taps NFC card on GymMaster reader at the gate</li>
+            <li>Entry gate opens — GymMaster logs check-in</li>
+            <li>System logs: <code>"Matt McArdle checked in at 07:23am"</code></li>
+            <li>GymMaster fires a webhook to the AI server: member_id + timestamp</li>
+            <li>Server activates <strong>face ID watch mode</strong> — starts scanning all Camera 1 feeds for Matt's face</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h4>Data Logged at Check-In</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>member_id: <code>matt_mcArdle_001</code></li>
+            <li>checkin_time: <code>2026-03-16T07:23:14+11:00</code></li>
+            <li>entry_method: <code>NFC card</code></li>
+            <li>face_watch_active: <code>true</code></li>
+            <li>last_session: pulled from Supabase for context</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Finding a Machine -->
+      <h3 style="margin-top:40px;">2. Finding a Machine</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <ol style="margin:0;padding-left:20px;line-height:2;">
+            <li>Matt walks across the gym floor toward the lat pulldown area</li>
+            <li>Camera 1 (ceiling fisheye) detects a person entering Zone A</li>
+            <li>Face ID pipeline crops the face region and runs recognition</li>
+            <li>Match: "Matt McArdle — 97% confidence"</li>
+            <li>Server registers: <code>"matt_mcArdle_001 at lat_pulldown_01 — 07:25am"</code></li>
+            <li>Tablet at the machine <strong>wakes from standby</strong> and shows the welcome screen</li>
+          </ol>
+        </div>
+        <div class="card" style="background:var(--card2);">
+          <h4 style="color:var(--purpleL);">📱 Tablet Display — Welcome Screen</h4>
+          <div style="margin-top:12px;border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;background:var(--card);">
+            <div style="font-size:1.1rem;font-weight:700;color:var(--text);">Welcome back, Matt! 👋</div>
+            <div style="font-size:0.9rem;color:var(--textMid);margin-top:6px;">Last session: 3 × 10 reps @ 50kg</div>
+            <div style="font-size:0.9rem;color:var(--textMid);">Best set: 10 × 60kg (12 Mar)</div>
+            <div style="margin-top:12px;padding:8px;background:rgba(139,92,246,0.1);border-radius:6px;font-size:0.85rem;color:var(--purpleL);">Today's suggestion: Try 52.5kg — you're ready.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Setting Up -->
+      <h3 style="margin-top:40px;">3. Setting Up the Machine</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <ol style="margin:0;padding-left:20px;line-height:2;">
+            <li>Matt adjusts the seat height for his frame</li>
+            <li>He moves the selector pin to 50kg on the weight stack</li>
+            <li>Camera 3 (stack-facing) scans the weight stack</li>
+            <li>Computer vision reads: 2× blue plate (20kg each) + 1× yellow plate (10kg) = 50kg</li>
+            <li>Tablet confirms: <strong>"Weight detected: 50kg ✓"</strong></li>
+            <li>Matt grips the overhead bar and gets ready to start</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h4>Weight Detection Detail</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>Colour tape on each plate spine (white=5kg, yellow=10kg, blue=20kg)</li>
+            <li>Bounding box pre-configured to the stack area only</li>
+            <li>CV model counts visible plate colours above selector pin</li>
+            <li>Sums to total kg loaded</li>
+            <li>If confidence &lt;90%, tablet shows "Confirm weight?" prompt</li>
+            <li>Member can tap to confirm or manually enter if needed</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- The Set -->
+      <h3 style="margin-top:40px;">4. The Set — Rep by Rep</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <ol style="margin:0;padding-left:20px;line-height:2;">
+            <li>Camera 2 detects <code>user_seated_engaged</code> pose — rep counter activates</li>
+            <li>Matt pulls the bar down — elbow angle drops from 148° to 66°</li>
+            <li>LSTM model recognises signature: <code>good_rep in progress</code></li>
+            <li>Matt releases — elbow angle returns to 145°</li>
+            <li>Rep 1 confirmed — <strong>✅ Good rep</strong></li>
+            <li>Tablet shows: "1 rep | 50kg"</li>
+            <li>Process repeats for all 10 reps</li>
+            <li><strong>Rep 8:</strong> Matt leans back too far — torso angle exceeds threshold</li>
+            <li>LSTM flags: <code>bad_rep — torso_lean</code></li>
+            <li>Tablet shows: <strong>"⚠ Watch your form — sit more upright"</strong></li>
+            <li>Rep 10 complete — set finished</li>
+          </ol>
+        </div>
+        <div class="card" style="background:var(--card2);">
+          <h4 style="color:var(--purpleL);">📱 Tablet — Mid-Set Display</h4>
+          <div style="margin-top:12px;border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;background:var(--card);">
+            <div style="font-size:2.5rem;font-weight:800;color:var(--text);">8</div>
+            <div style="font-size:1rem;color:var(--textMid);">reps</div>
+            <div style="font-size:1.3rem;font-weight:700;color:var(--purpleL);margin-top:6px;">50 kg</div>
+            <div style="margin-top:10px;padding:8px;background:rgba(245,158,11,0.1);border-radius:6px;font-size:0.85rem;color:var(--amber);">⚠ Sit more upright — rep 8</div>
+            <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;">
+              <span style="display:inline-block;width:14px;height:14px;background:var(--green);border-radius:50%;"></span>
+              <span style="display:inline-block;width:14px;height:14px;background:var(--green);border-radius:50%;"></span>
+              <span style="display:inline-block;width:14px;height:14px;background:var(--green);border-radius:50%;"></span>
+              <span style="display:inline-block;width:14px;height:14px;background:var(--green);border-radius:50%;"></span>
+              <span style="display:inline-block;width:14px;height:14px;background:var(--green);border-radius:50%;"></span>
+              <span style="display:inline-block;width:14px;height:14px;background:var(--green);border-radius:50%;"></span>
+              <span style="display:inline-block;width:14px;height:14px;background:var(--green);border-radius:50%;"></span>
+              <span style="display:inline-block;width:14px;height:14px;background:var(--amber);border-radius:50%;"></span>
+            </div>
+            <div style="font-size:0.75rem;color:var(--textMid);margin-top:4px;">rep quality: ● good ● needs work</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rest Period -->
+      <h3 style="margin-top:40px;">5. Rest Between Sets</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <ol style="margin:0;padding-left:20px;line-height:2;">
+            <li>Matt releases the bar and sits back</li>
+            <li>Camera 2: no arm movement for 15 seconds → state transitions to <code>rest_period</code></li>
+            <li>Tablet shows: rest timer counting up — "Rest: 0:47 ↑"</li>
+            <li>Optimal rest suggestion: "Recommended: 2:00 for strength goal"</li>
+            <li>At 2:00 — tablet pulses gently: "Ready for Set 2?"</li>
+            <li>Matt grips the bar again → <code>user_seated_engaged</code> detected → Set 2 begins</li>
+          </ol>
+        </div>
+        <div class="card" style="background:var(--card2);">
+          <h4 style="color:var(--purpleL);">📱 Tablet — Rest Timer</h4>
+          <div style="margin-top:12px;border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;background:var(--card);">
+            <div style="font-size:0.85rem;color:var(--textMid);">Set 1 complete ✅</div>
+            <div style="font-size:2rem;font-weight:800;color:var(--text);margin-top:4px;">1:23</div>
+            <div style="font-size:0.85rem;color:var(--textMid);">rest time</div>
+            <div style="margin-top:8px;padding:6px;background:rgba(34,197,94,0.1);border-radius:6px;font-size:0.8rem;color:var(--green);">Target: 2:00 for strength • 1:00 for endurance</div>
+            <div style="margin-top:10px;font-size:0.85rem;color:var(--textMid);">Set 1: 10 reps • 50kg • Form: 81/100</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Session End -->
+      <h3 style="margin-top:40px;">6. Session End</h3>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <ol style="margin:0;padding-left:20px;line-height:2;">
+            <li>Matt finishes 3 sets, stands up, steps away from the machine</li>
+            <li>Camera 1: person leaving Zone A → session closes after 30-second timeout</li>
+            <li>Session summary calculated on the server</li>
+            <li>Record written to Supabase: session complete</li>
+            <li>Leaderboard update: Matt's weekly volume increases by 1,500kg</li>
+            <li>Personal best check: no new PB (last PB was 1,600kg)</li>
+            <li>Machine tablet shows idle screen — ready for next member</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h4>Session Summary — Supabase Record</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li><strong>Sets:</strong> 3 sets × 10 reps each</li>
+            <li><strong>Weight:</strong> 50kg throughout</li>
+            <li><strong>Volume:</strong> 1,500kg (30 reps × 50kg)</li>
+            <li><strong>Good reps:</strong> 28/30 (93.3%)</li>
+            <li><strong>Bad reps flagged:</strong> 2 (torso_lean on Set 1 Rep 8, Set 3 Rep 9)</li>
+            <li><strong>Form score:</strong> 81/100</li>
+            <li><strong>Rest time Set 1→2:</strong> 1:23</li>
+            <li><strong>Rest time Set 2→3:</strong> 1:47</li>
+            <li><strong>Total session duration:</strong> 12:34</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Phone Notifications -->
+      <h3 style="margin-top:40px;">7. What Matt Sees on His Phone (Phase 3+)</h3>
+      <p style="margin-top:12px;">
+        After completing the full workout and leaving the gym, the member receives an automated push
+        notification and can open the XL Fitness app to see their session breakdown.
+      </p>
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div class="card" style="background:var(--card2);">
+          <h4>Push Notification</h4>
+          <div style="margin-top:12px;border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--card);font-size:0.85rem;">
+            <div style="font-weight:700;margin-bottom:4px;">XL Fitness 🏋️</div>
+            <div style="color:var(--textMid);">Session complete · Lat Pulldown</div>
+            <div style="margin-top:6px;">3 sets · 30 reps · 1,500kg volume</div>
+            <div style="color:var(--green);margin-top:4px;">Form score: 81/100 (+7 vs last week)</div>
+          </div>
+        </div>
+        <div class="card">
+          <h4>App Data Available</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>Form score trend over time — plotted per machine</li>
+            <li>Volume progression — weekly total kg moved</li>
+            <li>Rep quality breakdown — good vs flagged</li>
+            <li>Personal bests: max reps, max weight, max single-set volume</li>
+            <li>Rest time trends — are they resting enough for their goal?</li>
+            <li>Comparison to gym average — optional, opt-in</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <h3 style="margin-top:40px;">8. The Leaderboard — AI-Verified, Not Self-Reported</h3>
+      <p style="margin-top:12px;">
+        XL Fitness already has a leaderboard TV in the gym powered by Power BI. Currently, data comes
+        from member self-reporting or manual entry. The AI system replaces this completely — every rep is
+        verified by the AI, every kg is confirmed by computer vision.
+        <strong>Members can't cheat the leaderboard anymore.</strong>
+      </p>
+
+      <div class="grid-2" style="margin-top:16px;gap:20px;">
+        <div>
+          <img src="docs/images/gym-leaderboard.jpg" style="width:100%;border-radius:10px;border:1px solid var(--border);object-fit:cover;height:220px;" alt="XL Fitness existing leaderboard TV"/>
+          <p style="margin-top:8px;font-size:0.85rem;color:var(--textMid);text-align:center;">
+            The existing leaderboard TV at XL Fitness — already in use. Phase 3 connects this to
+            AI-verified Supabase data. The screen stays the same; the data source becomes tamper-proof.
+          </p>
+        </div>
+        <div>
+          <img src="docs/images/gym-tablet.jpg" style="width:100%;border-radius:10px;border:1px solid var(--border);object-fit:cover;height:220px;" alt="Existing machine tablet UI at XL Fitness"/>
+          <p style="margin-top:8px;font-size:0.85rem;color:var(--textMid);text-align:center;">
+            The existing tablet at each machine — currently requiring manual data entry. Phase 1 fills
+            this automatically via webhook from the AI server. No member input needed.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top:24px;">
+        <strong>Leaderboard Data Pipeline:</strong>
+        <div style="margin-top:10px;font-family:'SF Mono',monospace;font-size:0.85rem;line-height:2;color:var(--textMid);">
+          AI Server (rep confirmed) → Supabase (session_events table) → Power BI (live query, 30s refresh) → Leaderboard TV
+        </div>
+        <ul style="margin:12px 0 0 16px;padding:0;font-size:0.9rem;">
+          <li>Every completed set is a Supabase event within 2 seconds of completion</li>
+          <li>Power BI queries Supabase on a 30-second polling interval</li>
+          <li>Leaderboard refreshes in near-real-time as members work out</li>
+          <li>Data is AI-verified — every rep confirmed, every kg computer-vision-confirmed</li>
+          <li><strong>Core value proposition:</strong> the gym's competitive culture is now fuelled by honest data</li>
+        </ul>
+      </div>
+
+      <div class="grid-2" style="margin-top:20px;gap:20px;">
+        <div class="card">
+          <h4 style="color:var(--green);">What the Leaderboard Shows</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>Weekly volume leaders (total kg moved across all machines)</li>
+            <li>Most consistent form scores (top form athletes)</li>
+            <li>Machine-specific records (e.g. lat pulldown single-set max)</li>
+            <li>Check-in streaks (most sessions per week)</li>
+            <li>Personal best notifications when a PB is set live</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--purple);">Why This Is The Core Value Prop</h4>
+          <ul class="styled" style="margin-top:8px;">
+            <li>No other gym in Australia has AI-verified leaderboard data</li>
+            <li>Members can compete on real effort, not inflated self-reporting</li>
+            <li>Transparency builds trust with members</li>
+            <li>Drives engagement — members come back to beat their score</li>
+            <li>Data asset for XL Fitness — forms the basis for personalised coaching</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout green" style="margin-top:24px;">
+        <strong>The vision in one sentence:</strong> A member walks in, the gym knows who they are,
+        records every rep, confirms every kilogram, coaches their form in real-time, and updates a
+        live leaderboard — all automatically, with zero friction, zero manual input, and zero self-reporting.
+        <em>That is Australia's first tech-enabled gym.</em>
+      </div>
+
+    </section>
+    <!-- /SECTION 17 -->
 
   </main>
 </div>
