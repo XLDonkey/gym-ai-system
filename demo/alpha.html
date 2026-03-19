@@ -458,15 +458,7 @@ if('serviceWorker' in navigator){
 
 // ── Kiosk mode ────────────────────────────────────────────────────────────────
 (function(){
-  // Force fullscreen on load and on any click (required for Android)
-  function goFullscreen(){
-    const el = document.documentElement;
-    if(!document.fullscreenElement){
-      (el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullscreen||el.msRequestFullscreen||function(){}).call(el);
-    }
-  }
-  document.addEventListener('click', goFullscreen, {once:true});
-  setTimeout(goFullscreen, 500);
+  // Fullscreen handled by button only — no auto trigger
 
   // Lock to landscape
   if(screen.orientation && screen.orientation.lock){
