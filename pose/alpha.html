@@ -132,6 +132,7 @@
       <div id="phase-wrap"><div id="phase">↓ PULL BAR DOWN</div></div>
       <button class="ctrl-btn" onclick="doReset()">↺ Reset</button>
       <button class="ctrl-btn" onclick="flipCam()">🔄 Flip</button>
+      <button class="ctrl-btn" id="fs-btn" style="background:#8b5cf6;color:#fff;border-color:#8b5cf6;font-weight:700;" onclick="toggleFS()">⛶ Full</button>
     </div>
   </div>
 </div>
@@ -419,6 +420,17 @@ async function boot(){
   }
 }
 window.addEventListener('load',boot);
+function toggleFS(){
+  const el=document.documentElement,btn=document.getElementById('fs-btn');
+  const isFs=!!(document.fullscreenElement||document.webkitFullscreenElement);
+  if(!isFs){
+    (el.requestFullscreen||el.webkitRequestFullscreen||function(){}).call(el);
+    if(btn)btn.textContent='✕ Exit';
+  }else{
+    (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);
+    if(btn)btn.textContent='⛶ Full';
+  }
+}
 </script>
 </body>
 </html>
