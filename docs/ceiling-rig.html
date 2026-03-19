@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XL Fitness — Ceiling Camera Rig Planning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #06040f;
+      --card:     #0d0a18;
+      --border:   #1c1530;
+      --purple:   #8b5cf6;
+      --purple-d: #6d3fd4;
+      --purple-l: #a78bfa;
+      --text:     #e2d9f3;
+      --muted:    #7c6fa0;
+      --green:    #34d399;
+      --amber:    #fbbf24;
+      --red:      #f87171;
+      --rail:     #2a2340;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      line-height: 1.25;
+    }
+
+    a { color: var(--purple-l); text-decoration: none; }
+    a:hover { color: var(--purple); text-decoration: underline; }
+
+    /* ─── Nav ───────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(6,4,15,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      height: 56px;
+      overflow-x: auto;
+    }
+
+    .nav-brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--purple);
+      white-space: nowrap;
+      margin-right: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-inner a {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--muted);
+      white-space: nowrap;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .nav-inner a:hover {
+      color: var(--text);
+      background: var(--border);
+      text-decoration: none;
+    }
+
+    /* ─── Layout ────────────────────────────────────────────────── */
+    .wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+
+    /* ─── Hero ──────────────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 3.5rem 0 2.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(139,92,246,0.15);
+      border: 1px solid rgba(139,92,246,0.35);
+      color: var(--purple-l);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 100px;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero h1 span { color: var(--purple); }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-num {
+      display: block;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--purple);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ─── Sections ──────────────────────────────────────────────── */
+    section {
+      margin-bottom: 4rem;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 0.4rem;
+    }
+
+    section > h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--purple-l);
+      margin-bottom: 0.5rem;
+    }
+
+    p { margin-bottom: 0.85rem; }
+    p:last-child { margin-bottom: 0; }
+
+    /* ─── Cards ─────────────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ─── Callout boxes ─────────────────────────────────────────── */
+    .callout {
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .callout-body { flex: 1; }
+    .callout-body strong { display: block; margin-bottom: 0.25rem; font-size: 0.9rem; }
+    .callout-body p { font-size: 0.875rem; color: var(--muted); margin: 0; }
+
+    .callout-preferred {
+      background: rgba(52,211,153,0.08);
+      border: 1px solid rgba(52,211,153,0.25);
+    }
+    .callout-preferred .callout-icon { color: var(--green); }
+    .callout-preferred strong { color: var(--green); }
+
+    .callout-info {
+      background: rgba(139,92,246,0.08);
+      border: 1px solid rgba(139,92,246,0.25);
+    }
+    .callout-info .callout-icon { color: var(--purple-l); }
+    .callout-info strong { color: var(--purple-l); }
+
+    .callout-warn {
+      background: rgba(251,191,36,0.07);
+      border: 1px solid rgba(251,191,36,0.25);
+    }
+    .callout-warn .callout-icon { color: var(--amber); }
+    .callout-warn strong { color: var(--amber); }
+
+    /* ─── Spec table ────────────────────────────────────────────── */
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .spec-table th {
+      background: rgba(139,92,246,0.12);
+      color: var(--purple-l);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.65rem 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .spec-table td {
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: top;
+    }
+
+    .spec-table tr:last-child td { border-bottom: none; }
+
+    .spec-table tr:hover td { background: rgba(139,92,246,0.04); }
+
+    .spec-table .total-row td {
+      background: rgba(139,92,246,0.1);
+      font-weight: 700;
+      color: var(--purple-l);
+      border-top: 2px solid var(--border);
+    }
+
+    /* ─── Price badge ───────────────────────────────────────────── */
+    .price-badge {
+      display: inline-block;
+      background: rgba(139,92,246,0.18);
+      color: var(--purple-l);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    /* ─── Phase cards ───────────────────────────────────────────── */
+    .phase-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .phase-tag {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.7rem;
+      border-radius: 100px;
+    }
+
+    .tag-p1 { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+    .tag-p2 { background: rgba(251,191,36,0.12); color: var(--amber); border: 1px solid rgba(251,191,36,0.3); }
+    .tag-full { background: rgba(139,92,246,0.15); color: var(--purple-l); border: 1px solid rgba(139,92,246,0.3); }
+
+    .phase-total {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .phase-total.p1 { color: var(--green); }
+    .phase-total.p2 { color: var(--amber); }
+    .phase-total.full { color: var(--purple-l); }
+
+    /* ─── CSS Diagrams ──────────────────────────────────────────── */
+    .diagram-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .diagram-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    /* ── Grid Overview Diagram ── */
+    .rig-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      position: relative;
+      min-height: 280px;
+      padding: 1rem 0;
+    }
+
+    .ceiling-bar {
+      width: 90%;
+      height: 14px;
+      background: repeating-linear-gradient(
+        90deg,
+        #2a2340 0px, #2a2340 40px,
+        #1c1530 40px, #1c1530 50px
+      );
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      position: relative;
+      margin-bottom: 0;
+    }
+
+    .ceiling-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-align: right;
+      width: 90%;
+      margin-bottom: 0.75rem;
+    }
+
+    .rig-scene {
+      width: 90%;
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      padding-top: 0;
+      position: relative;
+    }
+
+    /* Rail running horizontally behind arms */
+    .rig-scene::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 5%;
+      right: 5%;
+      height: 10px;
+      background: var(--purple-d);
+      border-radius: 3px;
+      opacity: 0.7;
+    }
+
+    .arm-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      position: relative;
+    }
+
+    .arm-clamp {
+      width: 18px;
+      height: 10px;
+      background: var(--purple);
+      border-radius: 3px;
+      z-index: 2;
+    }
+
+    .arm-tube {
+      width: 6px;
+      background: #4c3d8a;
+      border-radius: 2px;
+    }
+
+    .arm-tube.l300 { height: 40px; }
+    .arm-tube.l500 { height: 65px; }
+    .arm-tube.l800 { height: 95px; }
+
+    .arm-angled {
+      width: 65px;
+      height: 6px;
+      background: #4c3d8a;
+      border-radius: 2px;
+      transform: rotate(35deg);
+      transform-origin: left center;
+      margin-top: -3px;
+      margin-left: 6px;
+    }
+
+    .camera-head {
+      width: 22px;
+      height: 16px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      position: relative;
+    }
+
+    .cam1 { background: rgba(52,211,153,0.25); border: 1.5px solid var(--green); color: var(--green); }
+    .cam2 { background: rgba(139,92,246,0.25); border: 1.5px solid var(--purple); color: var(--purple-l); margin-top: 30px; margin-left: 50px; }
+    .cam3 { background: rgba(251,191,36,0.2); border: 1.5px solid var(--amber); color: var(--amber); }
+
+    .cam-label {
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 4px;
+      max-width: 70px;
+    }
+
+    /* Height ruler */
+    .ruler-line {
+      position: absolute;
+      right: -28px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--border);
+    }
+    .ruler-line::before, .ruler-line::after {
+      content: '';
+      position: absolute;
+      right: -3px;
+      width: 7px;
+      height: 1px;
+      background: var(--border);
+    }
+    .ruler-line::before { top: 0; }
+    .ruler-line::after { bottom: 0; }
+
+    /* ── Cross-section arm diagram ── */
+    .arm-diagram {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding: 0.5rem;
+    }
+
+    .arm-config {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      min-width: 120px;
+    }
+
+    .arm-config-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .config-rail {
+      width: 90px;
+      height: 8px;
+      background: var(--purple-d);
+      border-radius: 3px;
+      position: relative;
+    }
+
+    .config-clamp {
+      width: 16px;
+      height: 8px;
+      background: var(--purple);
+      border-radius: 2px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: -8px;
+    }
+
+    .config-arm {
+      width: 5px;
+      background: #4c3d8a;
+      border-radius: 2px;
+    }
+    .config-arm.a300 { height: 36px; }
+    .config-arm.a500 { height: 55px; }
+
+    .config-arm-side {
+      width: 55px;
+      height: 5px;
+      background: #4c3d8a;
+      border-radius: 2px;
+      transform: rotate(40deg);
+      transform-origin: left top;
+      margin-left: 3px;
+    }
+
+    .config-cam {
+      width: 20px;
+      height: 14px;
+      border-radius: 3px;
+      font-size: 0.55rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .config-detail {
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    /* ── Cable routing diagram ── */
+    .cable-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    .cable-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .cable-node {
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .node-cam { background: rgba(139,92,246,0.2); border: 1px solid var(--purple); color: var(--purple-l); }
+    .node-rail { background: rgba(76,61,138,0.3); border: 1px solid #4c3d8a; color: #9d8fd4; }
+    .node-jbox { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.4); color: var(--amber); }
+    .node-switch { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.35); color: var(--green); }
+    .node-server { background: rgba(139,92,246,0.15); border: 1px solid var(--purple); color: var(--purple-l); font-weight: 700; }
+
+    .cable-line {
+      flex: 1;
+      max-width: 60px;
+      height: 2px;
+      position: relative;
+    }
+    .cable-line::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+    }
+    .cable-line.cat6a::before { background: repeating-linear-gradient(90deg, var(--purple-d) 0px, var(--purple-d) 8px, transparent 8px, transparent 12px); }
+    .cable-line.poe::before { background: var(--purple-d); }
+
+    .cable-down {
+      width: 2px;
+      height: 28px;
+      background: repeating-linear-gradient(180deg, var(--purple-d) 0px, var(--purple-d) 8px, transparent 8px, transparent 12px);
+      margin: 0 auto;
+    }
+
+    .cable-label {
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 2px;
+    }
+
+    /* ── Grid top-down view ── */
+    .grid-view {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    .grid-cell {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.5rem;
+      font-weight: 600;
+    }
+
+    .grid-rail-h {
+      background: var(--purple-d);
+      border-radius: 2px;
+    }
+    .grid-rail-v {
+      background: rgba(76,61,138,0.5);
+      border-radius: 2px;
+    }
+    .grid-intersect {
+      background: var(--purple);
+      border-radius: 50%;
+      width: 8px;
+      height: 8px;
+      margin: auto;
+    }
+    .grid-machine {
+      background: rgba(139,92,246,0.12);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    .grid-camera {
+      background: rgba(52,211,153,0.2);
+      border: 1px solid rgba(52,211,153,0.4);
+      border-radius: 3px;
+      color: var(--green);
+    }
+
+    /* ─── Mounting options ──────────────────────────────────────── */
+    .option-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+    }
+
+    .option-badge {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .badge-a { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+    .badge-b { background: rgba(251,191,36,0.1); color: var(--amber); border: 1px solid rgba(251,191,36,0.3); }
+    .badge-c { background: rgba(139,92,246,0.12); color: var(--purple-l); border: 1px solid var(--border); }
+
+    .option-body { flex: 1; }
+    .option-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.35rem; }
+    .option-subtitle { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.65rem; }
+    .option-specs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+    .spec-chip {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    /* ─── Contractor brief ──────────────────────────────────────── */
+    .brief-box {
+      background: #080613;
+      border: 2px solid var(--purple-d);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .brief-header {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brief-row {
+      display: flex;
+      gap: 1rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(28,21,48,0.6);
+      font-size: 0.875rem;
+      align-items: flex-start;
+    }
+
+    .brief-row:last-child { border-bottom: none; }
+
+    .brief-key {
+      width: 200px;
+      flex-shrink: 0;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .brief-val { color: var(--text); }
+
+    /* ─── Next Steps ────────────────────────────────────────────── */
+    .steps-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .steps-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem 1.25rem;
+      transition: border-color 0.2s;
+    }
+
+    .steps-list li:hover { border-color: var(--purple-d); }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(139,92,246,0.18);
+      border: 1px solid var(--purple-d);
+      color: var(--purple-l);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step-text {
+      flex: 1;
+      font-size: 0.9rem;
+      padding-top: 0.2rem;
+    }
+
+    /* ─── Ul/ol ─────────────────────────────────────────────────── */
+    ul.feature-list, ol.feature-list {
+      padding-left: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    ul.feature-list li {
+      padding-left: 1.4rem;
+      position: relative;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    ul.feature-list li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--purple);
+      font-weight: 700;
+    }
+
+    /* ─── Camera spec cards ─────────────────────────────────────── */
+    .camera-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .camera-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .camera-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .cam-card-1::before { background: var(--green); }
+    .cam-card-2::before { background: var(--purple); }
+    .cam-card-3::before { background: var(--amber); }
+
+    .camera-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .cam-card-1 .camera-num { color: var(--green); }
+    .cam-card-2 .camera-num { color: var(--purple-l); }
+    .cam-card-3 .camera-num { color: var(--amber); }
+
+    .camera-purpose {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .camera-spec-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .camera-spec-row:last-child { border-bottom: none; }
+    .camera-spec-key { color: var(--muted); }
+    .camera-spec-val { color: var(--text); font-weight: 500; text-align: right; }
+
+    /* ─── Footer ────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    footer strong { color: var(--purple-l); }
+
+    /* ─── Print ─────────────────────────────────────────────────── */
+    @media print {
+      body { background: white; color: #111; font-size: 12pt; }
+      nav { display: none; }
+      .card, .camera-card, .option-card, .brief-box, .diagram-wrapper, .steps-list li {
+        background: #f8f8f8;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+      }
+      h2 { color: #4a00c8; }
+      h3 { color: #6d3fd4; }
+      .hero { background: none; border: none; }
+      :root {
+        --bg: white; --card: #f8f8f8; --border: #ddd;
+        --purple: #6d3fd4; --purple-l: #5025b0; --purple-d: #7c3aed;
+        --text: #111; --muted: #555; --green: #0c8a5a; --amber: #b35f00;
+      }
+      .spec-table th { background: #ede9fe; }
+      .spec-table .total-row td { background: #ddd6fe; }
+      section { break-inside: avoid; }
+    }
+
+    @media (max-width: 640px) {
+      .wrapper { padding: 1.5rem 1rem 4rem; }
+      .brief-row { flex-direction: column; gap: 0.25rem; }
+      .brief-key { width: auto; }
+      .option-card { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ──────────────────────── NAV ──────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">XL Fitness ⬡ Ceiling Rig</span>
+    <a href="#overview">Overview</a>
+    <a href="#cameras">Cameras</a>
+    <a href="#rails">Rail System</a>
+    <a href="#arms">Camera Arms</a>
+    <a href="#cables">Cabling</a>
+    <a href="#mounting">Mounting</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#brief">Contractor Brief</a>
+    <a href="#nextsteps">Next Steps</a>
+  </div>
+</nav>
+
+<!-- ──────────────────────── WRAPPER ─────────────────────────────── -->
+<div class="wrapper">
+
+  <!-- HERO -->
+  <div class="hero" id="top">
+    <div class="hero-badge">AI Overseer — Infrastructure Planning v1.0</div>
+    <h1>Ceiling Camera <span>Rig Design</span></h1>
+    <p>Mocap-style Unistrut rail grid with adjustable drop arms for the XL Fitness AI camera installation — contractor-ready specification.</p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">120</span><span class="stat-label">Machines</span></div>
+      <div class="stat"><span class="stat-num">360</span><span class="stat-label">Cameras</span></div>
+      <div class="stat"><span class="stat-num">3</span><span class="stat-label">Phases</span></div>
+      <div class="stat"><span class="stat-num">~$141k</span><span class="stat-label">Full Build</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 1 — OVERVIEW
+  ═══════════════════════════════════════════════════════════════════ -->
+  <section id="overview">
+    <div class="section-label">Section 01</div>
+    <h2>The Mocap-Style Rig Concept</h2>
+
+    <p>Rather than drilling cameras into walls or punching through acoustic tiles, XL Fitness will install a <strong>professional overhead rail grid</strong> — the same approach used on VR motion-capture stages, Amazon Go store ceilings, and premium retail fit-outs. Cameras mount on adjustable drop arms from a black Unistrut rail matrix, giving complete X/Y/Z repositionability without touching the existing ceiling structure.</p>
+
+    <div class="diagram-wrapper">
+      <div class="diagram-title">Rig Concept — Side Elevation View</div>
+      <div class="rig-diagram">
+
+        <div style="width:90%; display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+          <div style="flex:1; height:1px; background:var(--border);"></div>
+          <span style="font-size:0.62rem; color:var(--muted); white-space:nowrap;">Structural ceiling / plenum</span>
+          <div style="flex:1; height:1px; background:var(--border);"></div>
+        </div>
+
+        <!-- T-bar ceiling -->
+        <div class="ceiling-bar"></div>
+        <div class="ceiling-label">T-bar acoustic tile grid (3.2–3.5m AFF)</div>
+
+        <!-- Primary rail -->
+        <div style="width:90%; height:12px; background:var(--purple-d); border-radius:4px; border:1px solid var(--purple); margin-bottom:0; position:relative;">
+          <span style="position:absolute; left:50%; transform:translateX(-50%); top:50%; transform:translate(-50%,-50%); font-size:0.58rem; color:var(--purple-l); font-weight:600; white-space:nowrap;">Unistrut P1000 — Primary Rail (powder-coated black)</span>
+        </div>
+
+        <!-- Arms + cameras -->
+        <div class="rig-scene">
+
+          <!-- Cam 1 — straight down, short arm -->
+          <div class="arm-group">
+            <div class="arm-clamp"></div>
+            <div class="arm-tube l300"></div>
+            <div class="camera-head cam1">C1</div>
+            <div class="cam-label">Face ID<br>Occupancy<br>Fisheye</div>
+          </div>
+
+          <!-- Cam 2 — angled side arm -->
+          <div class="arm-group" style="align-items:flex-start;">
+            <div style="display:flex; flex-direction:column; align-items:center;">
+              <div class="arm-clamp"></div>
+              <div class="arm-tube l500"></div>
+            </div>
+            <div style="transform:translateX(4px) translateY(-18px);">
+              <div class="camera-head cam2" style="margin:0; transform:rotate(-35deg);">C2</div>
+            </div>
+            <div class="cam-label" style="margin-top:4px;">Rep Counter<br>Form Check<br>45° side view</div>
+          </div>
+
+          <!-- Cam 3 — short arm, angled tight -->
+          <div class="arm-group">
+            <div class="arm-clamp"></div>
+            <div class="arm-tube l300" style="height:50px;"></div>
+            <div class="camera-head cam3">C3</div>
+            <div class="cam-label">Weight Stack<br>Pin Detection<br>Tight angle</div>
+          </div>
+
+        </div><!-- end rig-scene -->
+
+        <!-- Floor line -->
+        <div style="width:90%; margin-top:1.25rem; border-top:2px dashed var(--border); padding-top:0.5rem; text-align:center;">
+          <span style="font-size:0.62rem; color:var(--muted);">Gym floor — ~2.7–3.0m below cameras at full extension</span>
+        </div>
+
+      </div>
+    </div><!-- end diagram-wrapper -->
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>✦ Why this approach?</h3>
+        <ul class="feature-list" style="margin-top:0.5rem;">
+          <li>No drilling into tiles, walls, or structural slab</li>
+          <li>Fully repositionable as machines are rearranged</li>
+          <li>Looks designed and intentional — not retrofitted</li>
+          <li>Camera height and angle fine-tuned per machine type</li>
+          <li>Expandable: add new machines without new infrastructure</li>
+          <li>Cables hidden inside rail channels — zero cable clutter</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>✦ Same technology as…</h3>
+        <ul class="feature-list" style="margin-top:0.5rem;">
+          <li>VR / motion-capture studio overhead rigs</li>
+          <li>Amazon Go cashierless store ceiling systems</li>
+          <li>Commercial gallery and retail track lighting</li>
+          <li>Film production overhead grip rigs</li>
+          <li>Industrial inspection camera arrays</li>
+        </ul>
+        <p style="margin-top:0.75rem; font-size:0.8rem; color:var(--muted);">Proven, load-tested hardware in demanding commercial environments.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 2 — CAMERAS
+  ═══════════════════════════════════════════════════════════════════ -->
+  <section id="cameras">
+    <div class="section-label">Section 02</div>
+    <h2>Camera System — 3 Per Machine</h2>
+
+    <p>Each of the 120 machines is covered by three purpose-specific cameras, giving the AI Overseer system complete visibility: who is using the machine, what movements they're performing, and which weight is loaded.</p>
+
+    <div class="camera-cards">
+
+      <div class="camera-card cam-card-1">
+        <div class="camera-num">Camera 1</div>
+        <div class="camera-purpose">Face ID &amp; Occupancy</div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Model</span><span class="camera-spec-val">Hikvision 4MP ColorVu Fisheye</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Lens</span><span class="camera-spec-val">Fisheye / 180° wide</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Position</span><span class="camera-spec-val">Straight down, directly above seat</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Arm length</span><span class="camera-spec-val">300mm drop</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Angle</span><span class="camera-spec-val">Nadir or slight tilt</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Unit cost</span><span class="camera-spec-val">~$200 AUD</span></div>
+      </div>
+
+      <div class="camera-card cam-card-2">
+        <div class="camera-num">Camera 2</div>
+        <div class="camera-purpose">Rep Counter &amp; Form Check</div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Model</span><span class="camera-spec-val">Hikvision 2MP AcuSense 30fps</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Lens</span><span class="camera-spec-val">Wide / varifocal</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Position</span><span class="camera-spec-val">Side-angled, ~45° down</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Arm length</span><span class="camera-spec-val">500–800mm lateral</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Angle</span><span class="camera-spec-val">~45° downward from rail</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Unit cost</span><span class="camera-spec-val">~$135 AUD</span></div>
+      </div>
+
+      <div class="camera-card cam-card-3">
+        <div class="camera-num">Camera 3</div>
+        <div class="camera-purpose">Weight Stack Detection</div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Model</span><span class="camera-spec-val">Hikvision 2MP 4mm fixed lens</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Lens</span><span class="camera-spec-val">4mm fixed (narrow, precise)</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Position</span><span class="camera-spec-val">Offset toward weight stack end</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Arm length</span><span class="camera-spec-val">300–500mm</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Angle</span><span class="camera-spec-val">Tight fixed angle, pin area</span></div>
+        <div class="camera-spec-row"><span class="camera-spec-key">Unit cost</span><span class="camera-spec-val">~$135 AUD</span></div>
+      </div>
+
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">📡</div>
+      <div class="callout-body">
+        <strong>All cameras are PoE (Power over Ethernet)</strong>
+        <p>One CAT6A cable per camera carries both power and data. No separate power runs required. Cameras are plug-in-place — simplifies installation and reduces labour cost.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 3 — RAIL SYSTEM
+  ═══════════════════════════════════════════════════════════════════ -->
+  <section id="rails">
+    <div class="section-label">Section 03</div>
+    <h2>Rail System Specification</h2>
+
+    <div class="diagram-wrapper">
+      <div class="diagram-title">Top-Down View — Rail Grid Layout (simplified zone)</div>
+      <div style="overflow-x:auto; padding:0.5rem;">
+        <div style="display:grid; grid-template-columns:repeat(9,1fr); gap:5px; max-width:500px; margin:0 auto; min-width:280px;">
+
+          <!-- Row 1: horiz rail -->
+          <div style="height:10px; background:var(--purple-d); border-radius:2px; grid-column:1/-1;"></div>
+
+          <!-- Spacer row -->
+          <div style="height:40px; background:rgba(139,92,246,0.05); border-radius:4px; border:1px dashed var(--border); grid-column:1; display:flex; align-items:center; justify-content:center;"><div style="width:6px; height:100%; background:rgba(76,61,138,0.4); border-radius:2px; margin:auto;"></div></div>
+          <div style="height:40px; grid-column:2/4; background:rgba(139,92,246,0.07); border:1px solid var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:var(--muted);">Machine zone</div>
+          <div style="height:40px; background:rgba(139,92,246,0.05); border-radius:4px; grid-column:4; display:flex; align-items:center; justify-content:center;"><div style="width:6px; height:100%; background:rgba(76,61,138,0.4); border-radius:2px; margin:auto;"></div></div>
+          <div style="height:40px; grid-column:5/7; background:rgba(139,92,246,0.07); border:1px solid var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:var(--muted);">Machine zone</div>
+          <div style="height:40px; background:rgba(139,92,246,0.05); border-radius:4px; grid-column:7; display:flex; align-items:center; justify-content:center;"><div style="width:6px; height:100%; background:rgba(76,61,138,0.4); border-radius:2px; margin:auto;"></div></div>
+          <div style="height:40px; grid-column:8/-1; background:rgba(139,92,246,0.07); border:1px solid var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:var(--muted);">Machine zone</div>
+
+          <!-- Row 2: horiz rail -->
+          <div style="height:10px; background:var(--purple-d); border-radius:2px; grid-column:1/-1; opacity:0.8;"></div>
+
+          <!-- Another spacer row -->
+          <div style="height:40px; background:rgba(139,92,246,0.05); border-radius:4px; grid-column:1; display:flex; align-items:center; justify-content:center;"><div style="width:6px; height:100%; background:rgba(76,61,138,0.4); border-radius:2px; margin:auto;"></div></div>
+          <div style="height:40px; grid-column:2/4; background:rgba(139,92,246,0.07); border:1px solid var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:var(--muted);">Machine zone</div>
+          <div style="height:40px; background:rgba(139,92,246,0.05); border-radius:4px; grid-column:4; display:flex; align-items:center; justify-content:center;"><div style="width:6px; height:100%; background:rgba(76,61,138,0.4); border-radius:2px; margin:auto;"></div></div>
+          <div style="height:40px; grid-column:5/7; background:rgba(139,92,246,0.07); border:1px solid var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:var(--muted);">Machine zone</div>
+          <div style="height:40px; background:rgba(139,92,246,0.05); border-radius:4px; grid-column:7; display:flex; align-items:center; justify-content:center;"><div style="width:6px; height:100%; background:rgba(76,61,138,0.4); border-radius:2px; margin:auto;"></div></div>
+          <div style="height:40px; grid-column:8/-1; background:rgba(139,92,246,0.07); border:1px solid var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:var(--muted);">Machine zone</div>
+
+          <!-- Row 3: horiz rail -->
+          <div style="height:10px; background:var(--purple-d); border-radius:2px; grid-column:1/-1; opacity:0.6;"></div>
+
+        </div>
+        <div style="display:flex; gap:1.5rem; justify-content:center; margin-top:1rem; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.65rem; color:var(--muted);"><div style="width:20px; height:6px; background:var(--purple-d); border-radius:2px;"></div> Primary Unistrut Rail</div>
+          <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.65rem; color:var(--muted);"><div style="width:6px; height:14px; background:rgba(76,61,138,0.6); border-radius:2px;"></div> Lateral drop-arm rail</div>
+          <div style="display:flex; align-items:center; gap:0.4rem; font-size:0.65rem; color:var(--muted);"><div style="width:16px; height:14px; background:rgba(139,92,246,0.1); border:1px solid var(--border); border-radius:3px;"></div> Machine zone</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Primary Rails — Unistrut P1000</h3>
+    <table class="spec-table" style="margin-bottom:1.5rem;">
+      <thead>
+        <tr><th>Property</th><th>Specification</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Profile</td><td>Unistrut P1000 — 41×41mm steel strut channel</td></tr>
+        <tr><td>Material</td><td>Hot-dip galvanised OR powder-coated black (preferred)</td></tr>
+        <tr><td>Spacing</td><td>1.2–1.5m between parallel rails</td></tr>
+        <tr><td>Direction</td><td>Two perpendicular grids: longitudinal + lateral, forming X-Y matrix</td></tr>
+        <tr><td>Finish</td><td>Powder-coated BLACK — nearly invisible against dark acoustic tiles</td></tr>
+        <tr><td>Standard length</td><td>3m or 6m stock lengths (cut to suit gym dimensions)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Secondary Cross Rails</h3>
+    <div class="card">
+      <ul class="feature-list">
+        <li>Material: Aluminium T-track or 80/20 extruded profile (lighter than Unistrut)</li>
+        <li>Connects to primary Unistrut at 90° using standard cross-connect fittings</li>
+        <li>Provides fine X-Y positioning of camera arms across the full grid</li>
+        <li>Allows single camera arm to be repositioned in minutes — no tools beyond an Allen key</li>
+      </ul>
+    </div>
+
+    <div class="callout callout-preferred">
+      <div class="callout-icon">✓</div>
+      <div class="callout-body">
+        <strong>Rail finish: Powder-coated BLACK throughout</strong>
+        <p>Matches the existing black acoustic tile ceiling. The rig nearly disappears against the ceiling at eye level — no "industrial plumbing" aesthetic. Cameras and rails are visible only from below when looking up.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 4 — CAMERA ARMS
+  ═══════════════════════════════════════════════════════════════════ -->
+  <section id="arms">
+    <div class="section-label">Section 04</div>
+    <h2>Camera Arm Specification</h2>
+
+    <div class="diagram-wrapper">
+      <div class="diagram-title">Three Arm Configurations — Cross-Section View</div>
+      <div class="arm-diagram">
+
+        <!-- Config 1 -->
+        <div class="arm-config">
+          <div class="arm-config-label" style="color:var(--green);">Camera 1<br>Straight Down</div>
+          <div style="display:flex; flex-direction:column; align-items:center; position:relative;">
+            <div class="config-rail">
+              <div class="config-clamp"></div>
+            </div>
+            <div style="margin-top:8px; display:flex; flex-direction:column; align-items:center;">
+              <div class="config-arm a300"></div>
+              <div class="config-cam" style="background:rgba(52,211,153,0.2); border:1.5px solid var(--green); color:var(--green);">C1</div>
+            </div>
+          </div>
+          <div class="config-detail">300mm arm<br>Ball head<br>0° / nadir</div>
+        </div>
+
+        <!-- Config 2 -->
+        <div class="arm-config">
+          <div class="arm-config-label" style="color:var(--purple-l);">Camera 2<br>Side Angled</div>
+          <div style="display:flex; flex-direction:column; align-items:center; position:relative;">
+            <div class="config-rail" style="width:90px;">
+              <div class="config-clamp" style="left:30%;"></div>
+            </div>
+            <div style="margin-top:8px; display:flex; flex-direction:column; align-items:flex-start; margin-left:27px;">
+              <div class="config-arm a500"></div>
+              <div style="display:flex; align-items:center; margin-top:2px;">
+                <div style="width:50px; height:4px; background:#4c3d8a; border-radius:2px; transform:rotate(40deg); transform-origin:left center; margin-left:3px;"></div>
+              </div>
+              <div class="config-cam" style="background:rgba(139,92,246,0.25); border:1.5px solid var(--purple); color:var(--purple-l); margin-top:28px; margin-left:32px;">C2</div>
+            </div>
+          </div>
+          <div class="config-detail">500–800mm arm<br>45° elbow bracket<br>Side-on view</div>
+        </div>
+
+        <!-- Config 3 -->
+        <div class="arm-config">
+          <div class="arm-config-label" style="color:var(--amber);">Camera 3<br>Weight Stack</div>
+          <div style="display:flex; flex-direction:column; align-items:center; position:relative;">
+            <div class="config-rail">
+              <div class="config-clamp" style="left:60%;"></div>
+            </div>
+            <div style="margin-top:8px; display:flex; flex-direction:column; align-items:center; margin-left:20px;">
+              <div class="config-arm" style="height:46px; transform:rotate(15deg); transform-origin:top center;"></div>
+              <div class="config-cam" style="background:rgba(251,191,36,0.2); border:1.5px solid var(--amber); color:var(--amber); transform:rotate(-15deg);">C3</div>
+            </div>
+          </div>
+          <div class="config-detail">300–500mm arm<br>Fixed tight angle<br>Pin area focus</div>
+        </div>
+
+      </div>
+    </div>
+
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th style="color:var(--green);">Cam 1 — Face/Occupancy</th>
+          <th style="color:var(--purple-l);">Cam 2 — Rep Counter</th>
+          <th style="color:var(--amber);">Cam 3 — Weight Stack</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Arm material</td>
+          <td colspan="3">25mm diameter steel or aluminium tube — powder-coated black</td>
+        </tr>
+        <tr>
+          <td>Arm length</td>
+          <td>300mm</td>
+          <td>500–800mm (lateral)</td>
+          <td>300–500mm</td>
+        </tr>
+        <tr>
+          <td>Camera angle</td>
+          <td>Straight down (0°) or slight tilt</td>
+          <td>~45° down from horizontal</td>
+          <td>Tight fixed angle to pin</td>
+        </tr>
+        <tr>
+          <td>Mount type</td>
+          <td>Ball head ¼"-20</td>
+          <td>45° elbow + ball head OR articulated arm</td>
+          <td>Fixed pan-tilt bracket</td>
+        </tr>
+        <tr>
+          <td>Rail clamp</td>
+          <td colspan="3">Sliding Unistrut clamp with M8 lock bolt — slides to position, tightens to lock</td>
+        </tr>
+        <tr>
+          <td>Ball head range</td>
+          <td colspan="3">±45° pan, ±45° tilt — aim precisely then lock</td>
+        </tr>
+        <tr>
+          <td>Camera height (3.2m ceiling)</td>
+          <td>~2.9m AFF</td>
+          <td>~2.6–2.7m AFF</td>
+          <td>~2.7–2.9m AFF</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>Available Arm Lengths</h3>
+        <ul class="feature-list" style="margin-top:0.5rem;">
+          <li><strong>300mm</strong> — Overhead straight-down cameras, tight zones</li>
+          <li><strong>500mm</strong> — Standard lateral arms, most side-view cameras</li>
+          <li><strong>800mm</strong> — Extended lateral reach for wider machines</li>
+        </ul>
+        <p style="margin-top:0.75rem; font-size:0.8rem; color:var(--muted);">For a 3.2–3.5m ceiling, a 500mm arm brings camera to approximately 2.7–3.0m AFF — ideal working height for all three views.</p>
+      </div>
+      <div class="card">
+        <h3>Repositioning a Camera</h3>
+        <ul class="feature-list" style="margin-top:0.5rem;">
+          <li>Loosen M8 clamp bolt with Allen key</li>
+          <li>Slide arm to new position along rail</li>
+          <li>Re-tighten bolt — takes ~60 seconds</li>
+          <li>Loosen ball head, re-aim camera, re-lock</li>
+          <li>No new cabling required (cable loops in rail)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 5 — CABLE MANAGEMENT
+  ═══════════════════════════════════════════════════════════════════ -->
+  <section id="cables">
+    <div class="section-label">Section 05</div>
+    <h2>Cable Management</h2>
+
+    <div class="diagram-wrapper">
+      <div class="diagram-title">Cable Routing Path — Camera to Server</div>
+      <div class="cable-diagram">
+
+        <!-- Cameras -->
+        <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+          <div style="display:flex; flex-direction:column; align-items:center;">
+            <div class="cable-node node-cam">📷 Cam 1 (C1)</div>
+            <div class="cable-label">PoE camera</div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center;">
+            <div class="cable-node node-cam">📷 Cam 2 (C2)</div>
+            <div class="cable-label">PoE camera</div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center;">
+            <div class="cable-node node-cam">📷 Cam 3 (C3)</div>
+            <div class="cable-label">PoE camera</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:2rem; justify-content:center;">
+          <div class="cable-down"></div>
+          <div class="cable-down"></div>
+          <div class="cable-down"></div>
+        </div>
+        <div style="text-align:center; font-size:0.65rem; color:var(--muted); margin-top:-4px; margin-bottom:4px;">Up drop arm → into rail channel</div>
+
+        <!-- Rail -->
+        <div class="cable-node node-rail" style="align-self:center;">⬡ Rail Channel (CAT6A runs inside)</div>
+        <div class="cable-down"></div>
+        <div style="text-align:center; font-size:0.65rem; color:var(--muted); margin-top:-4px; margin-bottom:4px;">Along rail to zone junction box</div>
+
+        <!-- Junction box -->
+        <div class="cable-node node-jbox" style="align-self:center;">⚡ Zone Junction Box</div>
+        <div class="cable-down"></div>
+        <div style="text-align:center; font-size:0.65rem; color:var(--muted); margin-top:-4px; margin-bottom:4px;">Short patch to PoE switch</div>
+
+        <!-- Switch -->
+        <div class="cable-node node-switch" style="align-self:center;">🔌 Zone PoE Switch (24-port)</div>
+        <div class="cable-down"></div>
+        <div style="text-align:center; font-size:0.65rem; color:var(--muted); margin-top:-4px; margin-bottom:4px;">CAT6A or fibre uplink</div>
+
+        <!-- Server -->
+        <div class="cable-node node-server" style="align-self:center;">🖥 Mac Mini M4 Pro — AI Server</div>
+
+      </div>
+    </div>
+
+    <table class="spec-table">
+      <thead>
+        <tr><th>Cable Run</th><th>Type</th><th>Max Length</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Camera → Zone switch</td>
+          <td>CAT6A (black)</td>
+          <td>100m</td>
+          <td>Carries PoE++ power + data in single cable</td>
+        </tr>
+        <tr>
+          <td>Zone switch → Mac Mini</td>
+          <td>CAT6A or OM4 fibre</td>
+          <td>100m / 550m</td>
+          <td>Use fibre if server room distance &gt;50m</td>
+        </tr>
+        <tr>
+          <td>All cables</td>
+          <td>BLACK jacket</td>
+          <td>—</td>
+          <td>Matches rail and ceiling — invisible in rig channel</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Cable Management Hardware</h3>
+    <div class="card-grid">
+      <div class="card">
+        <table class="spec-table">
+          <thead><tr><th>Item</th><th>Cost Each</th></tr></thead>
+          <tbody>
+            <tr><td>Cable saddle clips (along rails)</td><td>~$0.50</td></tr>
+            <tr><td>Velcro cable ties (on arms)</td><td>~$0.30</td></tr>
+            <tr><td>Zone junction boxes</td><td>~$15.00</td></tr>
+            <tr class="total-row"><td>Total per machine (3 cameras)</td><td>~$20 AUD</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Cabling Rules</h3>
+        <ul class="feature-list" style="margin-top:0.5rem;">
+          <li>Cable enters rail channel at arm top using entry grommet</li>
+          <li>Saddle clips every 400–600mm along rail</li>
+          <li>Loop ~500mm extra cable at camera end (for repositioning)</li>
+          <li>All cables labelled at both ends — machine ID + camera number</li>
+          <li>CAT6A must be ACMA-registered cabler installed (Australian law)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 6 — MOUNTING OPTIONS
+  ═══════════════════════════════════════════════════════════════════ -->
+  <section id="mounting">
+    <div class="section-label">Section 06</div>
+    <h2>Mounting to Existing Ceiling</h2>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">ℹ</div>
+      <div class="callout-body">
+        <strong>Ceiling type: 3.2–3.5m suspended T-bar black acoustic tile grid</strong>
+        <p>Standard commercial suspended ceiling with steel T-bar frame holding acoustic tiles. The structural plenum above contains HVAC, existing light fitting supports, and steel purlins/beams. Three mounting options are available — Option A is strongly preferred.</p>
+      </div>
+    </div>
+
+    <div class="option-card">
+      <div class="option-badge badge-a">A</div>
+      <div class="option-body">
+        <div class="option-title">T-Bar Grid Clamp — No Drilling ✓ PREFERRED</div>
+        <div class="option-subtitle">Standard T-bar suspension clips attach directly to the existing steel T-bar grid. Zero damage to tiles. Zero drilling into the structural slab. Same principle as track lighting used in galleries and retail stores.</div>
+        <ul class="feature-list">
+          <li>Clamp type: Unistrut B3106 T-bar clamp or equivalent</li>
+          <li>Load rating: 15kg per clamp — Unistrut rail + 3 cameras weighs ~3kg total</li>
+          <li>Requires: Minimum 2 clamps per rail segment (4 for longer spans)</li>
+          <li>No tiles disturbed. No trades beyond rigging required.</li>
+        </ul>
+        <div class="option-specs">
+          <span class="spec-chip">~$8–12 per clamp</span>
+          <span class="spec-chip">No structural engineer required</span>
+          <span class="spec-chip">Fully reversible</span>
+          <span class="spec-chip">Zero ceiling damage</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="option-card">
+      <div class="option-badge badge-b">B</div>
+      <div class="option-body">
+        <div class="option-title">Threaded Rod Hangers — Plenum Structure</div>
+        <div class="option-subtitle">If the T-bar grid can't carry the full rig load, threaded M10 rods hang from structural elements in the plenum: HVAC brackets, steel purlins, or existing light fitting frames. Pop a tile aside, locate steel, clamp rod, replace tile.</div>
+        <ul class="feature-list">
+          <li>Rod: M10 threaded rod, hot-dip galvanised</li>
+          <li>Anchor: Beam clamp onto steel purlin or HVAC support in plenum</li>
+          <li>Tiles: Removed and replaced — no damage if done carefully</li>
+          <li>Use when T-bar grid alone insufficient for span length</li>
+        </ul>
+        <div class="option-specs">
+          <span class="spec-chip">~$15–25 per hanger point</span>
+          <span class="spec-chip">Minimal tile disruption</span>
+          <span class="spec-chip">Higher load capacity</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="option-card">
+      <div class="option-badge badge-c">C</div>
+      <div class="option-body">
+        <div class="option-title">Wall-to-Wall Span — Near-Wall Zones</div>
+        <div class="option-subtitle">For zones within 2–3m of perimeter walls, rails can span wall-to-wall without any ceiling contact. Rail anchored directly into masonry walls at each end — zero ceiling involvement.</div>
+        <ul class="feature-list">
+          <li>Wall anchor: Masonry bolt or concrete anchor (M12 min.)</li>
+          <li>Span: Up to 8–10m for 41×41 Unistrut depending on load</li>
+          <li>Requires confirmation of wall material (masonry / concrete column)</li>
+        </ul>
+        <div class="option-specs">
+          <span class="spec-chip">~$50–100 per wall anchor</span>
+          <span class="spec-chip">Zero ceiling involvement</span>
+          <span class="spec-chip">Perimeter zones only</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>Who Installs</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h3>🔩 Structural Rigging</h3>
+        <p>Commercial rigging company or experienced commercial fit-out contractor. Responsible for rail grid installation and all mechanical mounting. Not electrical.</p>
+      </div>
+      <div class="card">
+        <h3>🔌 Data Cabling</h3>
+        <p><strong>ACMA-registered data cabler — required by Australian law</strong> for any structured CAT6 cabling installation. Confirm registration before engaging.</p>
+      </div>
+      <div class="card">
+        <h3>🖥 Camera Config</h3>
+        <p>Camera aim, IP assignment, and stream configuration can be performed remotely by Matt / Donkey once cameras are physically installed and network is live.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 7 — PRICING
+  ═══════════════════════════════════════════════════════════════════ -->
+  <section id="pricing">
+    <div class="section-label">Section 07</div>
+    <h2>Component Shopping List — All Prices AUD</h2>
+
+    <!-- Phase 1 -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="phase-header">
+        <div>
+          <span class="phase-tag tag-p1">Phase 1</span>
+          <h3 style="margin-top:0.5rem; color:var(--green);">1 Machine Prototype</h3>
+          <p style="font-size:0.82rem; color:var(--muted); margin:0;">Proof-of-concept rig — ~2m × 2m rail section over one machine</p>
+        </div>
+        <div class="phase-total p1">~$1,550</div>
+      </div>
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Unit</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Unistrut P1000 rail (3m length)</td><td>2</td><td>$35</td><td>$70</td></tr>
+          <tr><td>T-bar grid clamp brackets</td><td>4</td><td>$10</td><td>$40</td></tr>
+          <tr><td>Drop arms 500mm</td><td>2</td><td>$25</td><td>$50</td></tr>
+          <tr><td>Drop arm 300mm</td><td>1</td><td>$20</td><td>$20</td></tr>
+          <tr><td>Ball head camera mounts (¼"-20)</td><td>3</td><td>$18</td><td>$54</td></tr>
+          <tr><td>CAT6A cable (20m black)</td><td>1</td><td>$25</td><td>$25</td></tr>
+          <tr><td>TP-Link 8-port PoE switch (temp)</td><td>1</td><td>$120</td><td>$120</td></tr>
+          <tr><td>Camera 1 — Hikvision 4MP ColorVu Fisheye</td><td>1</td><td>$200</td><td>$200</td></tr>
+          <tr><td>Camera 2 — Hikvision 2MP AcuSense 30fps</td><td>1</td><td>$135</td><td>$135</td></tr>
+          <tr><td>Camera 3 — Hikvision 2MP 4mm fixed</td><td>1</td><td>$135</td><td>$135</td></tr>
+          <tr><td>Rigging labour (half day)</td><td>1</td><td>$400</td><td>$400</td></tr>
+          <tr><td>Data cabler (cable run + termination)</td><td>1</td><td>$300</td><td>$300</td></tr>
+          <tr class="total-row"><td colspan="3"><strong>Phase 1 Total</strong></td><td><strong>~$1,550</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="phase-header">
+        <div>
+          <span class="phase-tag tag-p2">Phase 2</span>
+          <h3 style="margin-top:0.5rem; color:var(--amber);">5 Machines — First Zone</h3>
+          <p style="font-size:0.82rem; color:var(--muted); margin:0;">Full zone rail grid covering 5 adjacent machines, 15 cameras</p>
+        </div>
+        <div class="phase-total p2">~$7,345</div>
+      </div>
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Unit</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Unistrut rail system (full zone)</td><td>—</td><td>—</td><td>$800</td></tr>
+          <tr><td>T-bar clamps + hangers</td><td>30</td><td>$10</td><td>$300</td></tr>
+          <tr><td>Drop arms (various lengths)</td><td>15</td><td>$25</td><td>$375</td></tr>
+          <tr><td>Ball heads + camera mounts</td><td>15</td><td>$18</td><td>$270</td></tr>
+          <tr><td>CAT6A cable (305m box, black)</td><td>1</td><td>$200</td><td>$200</td></tr>
+          <tr><td>Ubiquiti USW-Lite-16-PoE switch</td><td>1</td><td>$350</td><td>$350</td></tr>
+          <tr><td>Camera 1 — Hikvision 4MP ColorVu ×5</td><td>5</td><td>$200</td><td>$1,000</td></tr>
+          <tr><td>Camera 2 — Hikvision 2MP AcuSense ×5</td><td>5</td><td>$135</td><td>$675</td></tr>
+          <tr><td>Camera 3 — Hikvision 2MP 4mm ×5</td><td>5</td><td>$135</td><td>$675</td></tr>
+          <tr><td>Rigging labour (2 full days)</td><td>1</td><td>$1,200</td><td>$1,200</td></tr>
+          <tr><td>Data cabler (full zone, structured cabling)</td><td>1</td><td>$1,500</td><td>$1,500</td></tr>
+          <tr class="total-row"><td colspan="3"><strong>Phase 2 Total</strong></td><td><strong>~$7,345</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Full gym -->
+    <div class="card">
+      <div class="phase-header">
+        <div>
+          <span class="phase-tag tag-full">Full Build</span>
+          <h3 style="margin-top:0.5rem; color:var(--purple-l);">120 Machines — Complete Gym</h3>
+          <p style="font-size:0.82rem; color:var(--muted); margin:0;">Full AI Overseer deployment — 360 cameras, complete rail grid, production infrastructure</p>
+        </div>
+        <div class="phase-total full">~$141,000</div>
+      </div>
+      <table class="spec-table">
+        <thead>
+          <tr><th>Item</th><th>Estimated Cost</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Full rail grid system (Unistrut + secondary rails + hardware)</td><td>$18,000</td></tr>
+          <tr><td>Drop arms × 360 (various lengths)</td><td>$9,000</td></tr>
+          <tr><td>Camera 1 — Hikvision 4MP ColorVu ×120</td><td>$26,400</td></tr>
+          <tr><td>Camera 2 — Hikvision 2MP AcuSense 30fps ×120</td><td>$16,200</td></tr>
+          <tr><td>Camera 3 — Hikvision 2MP 4mm ×120</td><td>$16,200</td></tr>
+          <tr><td>PoE switches — 15× 24-port enterprise (Ubiquiti/Netgear)</td><td>$20,250</td></tr>
+          <tr><td>CAT6A structured cabling (305m boxes × multiple)</td><td>$8,000</td></tr>
+          <tr><td>Mac Mini M4 Pro servers × 2 (primary + redundant)</td><td>$7,000</td></tr>
+          <tr><td>NAS storage (QNAP or Synology — 24TB raw)</td><td>$1,800</td></tr>
+          <tr><td>Rigging + data cabling installation (full gym)</td><td>$18,000</td></tr>
+          <tr class="total-row"><td><strong>Full Gym Total (est.)</strong></td><td><strong>~$141,000 AUD</strong></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.78rem; color:var(--muted); margin-top:0.75rem;">All prices are estimates. Obtain three quotes from rigging contractors and data cablers. Volume discounts on cameras and switches expected at full-gym order quantities. AUD ex GST.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 8 — CONTRACTOR BRIEF
+  ═══════════════════════════════════════════════════════════════════ -->
+  <section id="brief">
+    <div class="section-label">Section 08</div>
+    <h2>Contractor Brief</h2>
+    <p>Hand this section directly to the rigging contractor and data cabler. Summarises all requirements for Phase 1 and provides full-gym context for quoting staged installation.</p>
+
+    <div class="brief-box">
+      <div class="brief-header">📋 XL Fitness Australia — AI Camera Rig Installation Brief</div>
+
+      <div class="brief-row"><span class="brief-key">Project name</span><span class="brief-val">AI Overseer Camera Rig — XL Fitness Australia</span></div>
+      <div class="brief-row"><span class="brief-key">Ceiling type</span><span class="brief-val">3.2–3.5m suspended T-bar acoustic tile ceiling (black tiles)</span></div>
+      <div class="brief-row"><span class="brief-key">Rig type</span><span class="brief-val">Unistrut P1000 41×41mm steel strut channel rail grid with adjustable drop arms</span></div>
+      <div class="brief-row"><span class="brief-key">Total cameras</span><span class="brief-val">3 per machine × 120 machines = 360 cameras (staged rollout)</span></div>
+      <div class="brief-row"><span class="brief-key">Phase 1 scope</span><span class="brief-val">1 machine prototype — approximately 2m × 2m rail section with 3 drop arms</span></div>
+      <div class="brief-row"><span class="brief-key">Mounting preference</span><span class="brief-val">Option A: T-bar grid clamp brackets (Unistrut B3106 or equivalent) — NO drilling into tiles or structural slab</span></div>
+      <div class="brief-row"><span class="brief-key">Mounting fallback</span><span class="brief-val">Option B: M10 threaded rod hangers from structural steel in plenum if T-bar load-rating insufficient</span></div>
+      <div class="brief-row"><span class="brief-key">Hardware finish</span><span class="brief-val">All rails, arms, clamps and hardware: powder-coated or painted MATTE BLACK throughout</span></div>
+      <div class="brief-row"><span class="brief-key">Drop arms</span><span class="brief-val">25mm tube — 300mm (×1), 500mm (×2) for Phase 1. Ball head ¼"-20 mount on each.</span></div>
+      <div class="brief-row"><span class="brief-key">Cable routing</span><span class="brief-val">All CAT6A (black jacket) routed up each drop arm and along rail channel. Exit to ceiling void at zone junction boxes.</span></div>
+      <div class="brief-row"><span class="brief-key">Data cabling</span><span class="brief-val">SEPARATE engagement: ACMA-registered data cabler required for all structured CAT6A runs (Australian legal requirement)</span></div>
+      <div class="brief-row"><span class="brief-key">Phase 1 deliverable</span><span class="brief-val">Rail section installed and level; 3 drop arms positioned and locked; cameras mounted and aimed; cables routed to temporary switch location</span></div>
+      <div class="brief-row"><span class="brief-key">Camera config</span><span class="brief-val">IP addressing and stream setup will be done remotely — contractor does not need to configure cameras</span></div>
+      <div class="brief-row"><span class="brief-key">Quote required for</span><span class="brief-val">Phase 1 only initially. Also request indicative rate for Phase 2 (5 machines) and full-gym (120 machines) to inform budget planning.</span></div>
+      <div class="brief-row"><span class="brief-key">Contact</span><span class="brief-val">Matthew McArdle — XL Fitness Australia | xlfitness.com.au</span></div>
+    </div>
+
+    <div class="callout callout-warn" style="margin-top:1.25rem;">
+      <div class="callout-icon">⚠</div>
+      <div class="callout-body">
+        <strong>Australian legal requirement: ACMA-registered cablers only</strong>
+        <p>All structured data cabling (CAT6/CAT6A) must be installed by an ACMA-registered cabler. Verify registration at acma.gov.au before engaging. Rigging contractor and data cabler can work concurrently on the same day to minimise cost.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 9 — NEXT STEPS
+  ═══════════════════════════════════════════════════════════════════ -->
+  <section id="nextsteps">
+    <div class="section-label">Section 09</div>
+    <h2>Next Steps — Priority Order</h2>
+
+    <ol class="steps-list">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <strong>Phase 1 filming — use portable tripod/column clamp</strong><br>
+          <span style="color:var(--muted); font-size:0.85rem;">No rig needed yet. Mount cameras on portable clamps or tripods at one machine. Begin filming training data immediately while rig is being planned and quoted.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <strong>Get rigging company quotes for Phase 1 rig section</strong><br>
+          <span style="color:var(--muted); font-size:0.85rem;">Print/share the Contractor Brief (Section 08). Request quotes from 2–3 commercial rigging or fit-out contractors. Ask for indicative Phase 2 + full-gym rates at same time.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <strong>Film training data during Phase 1 temporary setup</strong><br>
+          <span style="color:var(--muted); font-size:0.85rem;">AI model training doesn't need the permanent rig. Use this window to build the dataset while infrastructure is being finalised.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-text">
+          <strong>Order cameras and switches for Phase 1 rig</strong><br>
+          <span style="color:var(--muted); font-size:0.85rem;">3× Hikvision cameras + TP-Link PoE switch. Total hardware cost ~$550. Order early — allow 1–2 weeks delivery for Hikvision units.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-text">
+          <strong>Schedule rigging contractor + data cabler on same day</strong><br>
+          <span style="color:var(--muted); font-size:0.85rem;">Coordinate both trades to attend simultaneously — rigging installs rail while cabler runs CAT6A. Saves a second site visit and reduces disruption to the gym floor.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">6</div>
+        <div class="step-text">
+          <strong>Commission Phase 1 rig — test all three cameras</strong><br>
+          <span style="color:var(--muted); font-size:0.85rem;">Once rail and cables are in: mount cameras, power up via PoE switch, confirm RTSP streams on Mac Mini. Aim cameras, lock ball heads. Run AI model against live feed.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">7</div>
+        <div class="step-text">
+          <strong>Plan Phase 2 zone expansion</strong><br>
+          <span style="color:var(--muted); font-size:0.85rem;">Based on Phase 1 learnings, refine arm lengths and camera positions for Phase 2. Engage rigging company for next zone (5 machines, ~15 cameras). Repeat at scale.</span>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+</div><!-- end wrapper -->
+
+<!-- ──────────────────────── FOOTER ──────────────────────────────── -->
+<footer>
+  <p><strong>XL Fitness Australia</strong> — AI Overseer Camera Rig Planning Document</p>
+  <p style="margin-top:0.35rem;">Generated for internal use and contractor engagement · All prices AUD ex GST · Estimates only — obtain three quotes</p>
+  <p style="margin-top:0.35rem;"><a href="https://www.xlfitness.com.au/">xlfitness.com.au</a></p>
+</footer>
+
+</body>
+</html>
