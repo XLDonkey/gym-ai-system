@@ -1,0 +1,2633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XL Fitness AI Camera System — Complete Buying & Installation Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════════
+       CSS CUSTOM PROPERTIES
+    ═══════════════════════════════════════════════ */
+    :root {
+      --bg:          #06040f;
+      --bg2:         #0d0b1a;
+      --card:        #141825;
+      --card2:       #1a2035;
+      --border:      #2a2d45;
+      --purple:      #8b5cf6;
+      --purple-light:#a78bfa;
+      --purple-dark: #6d28d9;
+      --purple-glow: rgba(139,92,246,0.15);
+      --purple-glow2:rgba(139,92,246,0.25);
+      --text:        #e8e6f0;
+      --text-muted:  #8a8aab;
+      --text-dim:    #5a5a7a;
+      --green:       #10b981;
+      --red:         #ef4444;
+      --amber:       #f59e0b;
+      --cyan:        #06b6d4;
+      --nav-h:       64px;
+      --radius:      12px;
+      --radius-lg:   20px;
+    }
+
+    /* ═══════════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: calc(var(--nav-h) + 16px);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 15px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Subtle star-field background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(139,92,246,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 15%, rgba(139,92,246,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 70%, rgba(139,92,246,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 80%, rgba(139,92,246,0.15) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 60%, rgba(139,92,246,0.2) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ═══════════════════════════════════════════════
+       TYPOGRAPHY
+    ═══════════════════════════════════════════════ */
+    h1, h2, h3, h4, h5 {
+      line-height: 1.25;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    h1 { font-size: clamp(2rem, 5vw, 3.25rem); }
+    h2 { font-size: clamp(1.4rem, 3vw, 2rem); }
+    h3 { font-size: 1.2rem; }
+    h4 { font-size: 1rem; font-weight: 600; }
+
+    p { color: var(--text-muted); }
+    a { color: var(--purple-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    strong { color: var(--text); font-weight: 600; }
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.85em;
+      color: var(--purple-light);
+    }
+
+    /* ═══════════════════════════════════════════════
+       LAYOUT UTILITIES
+    ═══════════════════════════════════════════════ */
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+    @media (max-width: 900px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════════
+       STICKY NAV
+    ═══════════════════════════════════════════════ */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--nav-h);
+      background: rgba(6,4,15,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: 100%;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 24px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-inner::-webkit-scrollbar { display: none; }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      margin-right: 32px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .nav-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 4px;
+      list-style: none;
+      flex-shrink: 0;
+    }
+
+    .nav-links a {
+      display: block;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .nav-links a:hover {
+      color: var(--text);
+      background: var(--purple-glow);
+      text-decoration: none;
+    }
+    .nav-links a.active {
+      color: var(--purple-light);
+      background: var(--purple-glow);
+    }
+
+    /* ═══════════════════════════════════════════════
+       HERO SECTION
+    ═══════════════════════════════════════════════ */
+    .hero {
+      padding: 96px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Hero glow blob */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -200px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--purple-glow);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--purple-light);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      max-width: 820px;
+      background: linear-gradient(135deg, #ffffff 30%, var(--purple-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin-bottom: 48px;
+    }
+
+    /* Stat cards */
+    .hero-stats {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 28px;
+      min-width: 160px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--purple), transparent);
+    }
+    .stat-card:hover {
+      border-color: rgba(139,92,246,0.4);
+      transform: translateY(-2px);
+    }
+
+    .stat-number {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--purple-light);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Camera system diagram */
+    .hero-diagram {
+      margin-top: 56px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      display: flex;
+      gap: 24px;
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+
+    .diagram-machine {
+      flex: 1;
+      min-width: 240px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      position: relative;
+    }
+
+    .diagram-machine-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+    }
+
+    .diagram-cameras {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .diagram-cam {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* SVG-style camera icon via CSS */
+    .cam-icon {
+      width: 52px;
+      height: 40px;
+      position: relative;
+    }
+
+    .cam-body {
+      width: 40px;
+      height: 30px;
+      background: var(--card2);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      position: absolute;
+      top: 5px;
+      left: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cam-lens {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+    }
+
+    .cam-lens-inner {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      position: absolute;
+    }
+
+    .cam-mount {
+      width: 4px;
+      height: 5px;
+      background: var(--border);
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .cam-1 .cam-body { border-color: var(--cyan); }
+    .cam-1 .cam-lens { color: var(--cyan); }
+    .cam-2 .cam-body { border-color: var(--purple); }
+    .cam-2 .cam-lens { color: var(--purple); }
+    .cam-3 .cam-body { border-color: var(--green); }
+    .cam-3 .cam-lens { color: var(--green); }
+
+    .cam-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+    .cam-1 .cam-badge { background: rgba(6,182,212,0.15); color: var(--cyan); }
+    .cam-2 .cam-badge { background: var(--purple-glow); color: var(--purple-light); }
+    .cam-3 .cam-badge { background: rgba(16,185,129,0.15); color: var(--green); }
+
+    .cam-label { font-size: 0.72rem; color: var(--text-dim); }
+
+    .diagram-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--purple);
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    .diagram-legend {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg2);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .legend-text strong { font-size: 0.8rem; display: block; }
+    .legend-text span { font-size: 0.72rem; color: var(--text-dim); }
+
+    /* ═══════════════════════════════════════════════
+       SECTION WRAPPER
+    ═══════════════════════════════════════════════ */
+    .section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-header {
+      margin-bottom: 48px;
+    }
+
+    .section-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+
+    .section-title { margin-bottom: 12px; }
+
+    .section-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 640px;
+    }
+
+    /* ═══════════════════════════════════════════════
+       CAMERA TYPE CARDS
+    ═══════════════════════════════════════════════ */
+    .camera-type-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .camera-type-card:hover {
+      border-color: rgba(139,92,246,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(139,92,246,0.1);
+    }
+
+    .camera-type-card.recommended {
+      border-color: rgba(139,92,246,0.5);
+    }
+    .camera-type-card.recommended::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--purple), var(--purple-light));
+    }
+
+    .card-cam-visual {
+      width: 64px;
+      height: 64px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-recommended {
+      background: linear-gradient(90deg, var(--purple-dark), var(--purple));
+      color: white;
+    }
+    .badge-security {
+      background: rgba(245,158,11,0.15);
+      color: var(--amber);
+      border: 1px solid rgba(245,158,11,0.2);
+    }
+    .badge-optional {
+      background: rgba(16,185,129,0.1);
+      color: var(--green);
+      border: 1px solid rgba(16,185,129,0.2);
+    }
+
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .pros, .cons {
+      background: var(--bg2);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .pros { border-left: 2px solid var(--green); }
+    .cons { border-left: 2px solid var(--red); }
+
+    .pros-cons-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .pros .pros-cons-title { color: var(--green); }
+    .cons .pros-cons-title { color: var(--red); }
+
+    .pros-cons ul { list-style: none; }
+    .pros-cons li {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 3px 0;
+      padding-left: 14px;
+      position: relative;
+    }
+    .pros li::before { content: '+'; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+    .cons li::before { content: '−'; position: absolute; left: 0; color: var(--red); font-weight: 700; }
+
+    .use-case-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--purple-light);
+      background: var(--purple-glow);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 6px;
+      padding: 6px 12px;
+      margin-top: 4px;
+    }
+
+    /* ═══════════════════════════════════════════════
+       COMPARISON TABLE
+    ═══════════════════════════════════════════════ */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    thead tr {
+      background: var(--card2);
+    }
+
+    th {
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 13px 16px;
+      border-bottom: 1px solid rgba(42,45,69,0.6);
+      color: var(--text-muted);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tbody tr {
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: rgba(139,92,246,0.04); }
+
+    tbody tr.row-highlight {
+      background: rgba(139,92,246,0.06);
+    }
+
+    .check { color: var(--green); font-size: 1rem; }
+    .cross { color: var(--red); font-size: 1rem; }
+    .neutral { color: var(--amber); }
+
+    /* ═══════════════════════════════════════════════
+       PRODUCT CARDS
+    ═══════════════════════════════════════════════ */
+    .product-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 24px;
+      transition: border-color 0.2s;
+    }
+    .product-section:hover { border-color: rgba(139,92,246,0.4); }
+
+    .product-section.is-recommended {
+      border-color: rgba(139,92,246,0.5);
+    }
+    .product-section.is-recommended .product-header {
+      background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(109,40,217,0.05));
+    }
+
+    .product-header {
+      padding: 24px 28px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .product-title-group { flex: 1; }
+    .product-title-group h3 { margin-bottom: 4px; }
+    .product-model {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: var(--purple-light);
+      background: var(--purple-glow);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 4px;
+      padding: 2px 8px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .product-title-group p { font-size: 0.85rem; }
+
+    .price-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .price-amount {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--purple-light);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .price-label {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .product-body { padding: 24px 28px; }
+
+    .product-why {
+      background: var(--purple-glow);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.82rem;
+      color: var(--purple-light);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .retailers-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .retailer-tag {
+      font-size: 0.73rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 12px;
+      color: var(--text-muted);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .retailer-tag:hover {
+      border-color: var(--purple);
+      color: var(--purple-light);
+      text-decoration: none;
+    }
+
+    /* ═══════════════════════════════════════════════
+       SUPPORTING COMPONENTS
+    ═══════════════════════════════════════════════ */
+    .component-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .component-card:hover {
+      border-color: rgba(139,92,246,0.35);
+      transform: translateY(-2px);
+    }
+
+    .component-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    .component-options {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .component-option {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--bg2);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .option-name {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .option-desc {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+    .option-price {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--purple-light);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════════════
+       INSTALLATION PLAN
+    ═══════════════════════════════════════════════ */
+    .install-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .install-layout { grid-template-columns: 1fr; }
+    }
+
+    /* Floor plan diagram (CSS art) */
+    .floor-plan {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      aspect-ratio: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .floor-plan-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .floor-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      height: calc(100% - 40px);
+    }
+
+    .floor-machine {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+      padding: 8px 4px;
+      transition: border-color 0.2s;
+    }
+    .floor-machine:hover { border-color: var(--purple); }
+
+    .floor-machine-icon { font-size: 16px; }
+    .floor-machine-label { font-size: 0.6rem; color: var(--text-dim); text-align: center; line-height: 1.2; }
+
+    /* Camera dot markers */
+    .cam-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      position: absolute;
+    }
+    .cam-dot-1 { background: var(--cyan); top: 4px; left: 4px; box-shadow: 0 0 4px var(--cyan); }
+    .cam-dot-2 { background: var(--purple); top: 4px; right: 4px; box-shadow: 0 0 4px var(--purple); }
+    .cam-dot-3 { background: var(--green); bottom: 4px; left: 50%; transform: translateX(-50%); box-shadow: 0 0 4px var(--green); }
+
+    /* Column indicator */
+    .floor-column {
+      background: rgba(139,92,246,0.2);
+      border: 2px solid rgba(139,92,246,0.5);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: var(--purple-light);
+      font-weight: 700;
+      padding: 4px;
+      text-align: center;
+    }
+
+    .floor-window {
+      grid-column: 1 / -1;
+      height: 20px;
+      background: linear-gradient(90deg,
+        rgba(6,182,212,0.05) 0%,
+        rgba(6,182,212,0.15) 20%,
+        rgba(6,182,212,0.15) 80%,
+        rgba(6,182,212,0.05) 100%);
+      border: 1px solid rgba(6,182,212,0.2);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Install steps */
+    .install-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .camera-placement-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .placement-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .placement-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+    .placement-cam1 { background: rgba(6,182,212,0.15); color: var(--cyan); border: 1px solid rgba(6,182,212,0.3); }
+    .placement-cam2 { background: var(--purple-glow2); color: var(--purple-light); border: 1px solid rgba(139,92,246,0.3); }
+    .placement-cam3 { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+
+    .placement-content { flex: 1; }
+    .placement-content h4 { margin-bottom: 6px; }
+    .placement-content p { font-size: 0.82rem; }
+
+    .warning-box {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #fca5a5;
+    }
+
+    .info-box {
+      background: var(--purple-glow);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 0.82rem;
+      color: var(--purple-light);
+    }
+
+    /* Ceiling mount steps */
+    .steps-list {
+      list-style: none;
+      counter-reset: steps;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .steps-list li {
+      counter-increment: steps;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 14px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+    }
+
+    .steps-list li::before {
+      content: counter(steps);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--purple-glow);
+      border: 1px solid rgba(139,92,246,0.3);
+      color: var(--purple-light);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* DIY vs Licensed table */
+    .licensing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+    @media (max-width: 680px) {
+      .licensing-grid { grid-template-columns: 1fr; }
+    }
+
+    .license-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid var(--border);
+    }
+    .license-card-icon { font-size: 24px; margin-bottom: 10px; display: block; }
+    .license-card h4 { font-size: 0.85rem; margin-bottom: 6px; }
+    .license-card p { font-size: 0.78rem; }
+    .license-diy { border-top: 2px solid var(--green); }
+    .license-cabler { border-top: 2px solid var(--amber); }
+    .license-sparky { border-top: 2px solid var(--red); }
+
+    /* ═══════════════════════════════════════════════
+       PHASE SHOPPING LIST
+    ═══════════════════════════════════════════════ */
+    .phases-wrapper {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .phases-wrapper { grid-template-columns: 1fr; }
+    }
+
+    .phase-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .phase-card:hover {
+      border-color: rgba(139,92,246,0.4);
+      transform: translateY(-3px);
+    }
+
+    .phase-header {
+      padding: 24px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .phase-number {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 6px;
+    }
+    .phase-header h3 { margin-bottom: 4px; }
+
+    .phase-total {
+      margin-top: 16px;
+      padding: 12px;
+      background: var(--purple-glow);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .phase-total-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+    .phase-total-amount { font-size: 1.15rem; font-weight: 800; color: var(--purple-light); }
+
+    .phase-items {
+      padding: 20px;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .phase-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+    }
+
+    .phase-item-left { flex: 1; }
+    .phase-item-name { font-size: 0.8rem; font-weight: 500; color: var(--text); }
+    .phase-item-qty { font-size: 0.7rem; color: var(--text-dim); }
+    .phase-item-price { font-size: 0.82rem; font-weight: 700; color: var(--purple-light); white-space: nowrap; flex-shrink: 0; }
+
+    .phase-note {
+      padding: 0 20px 20px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    /* Phase 3 special */
+    .phase-card.phase-full { border-color: rgba(139,92,246,0.4); }
+    .phase-card.phase-full .phase-header {
+      background: linear-gradient(135deg, rgba(139,92,246,0.1), var(--bg2));
+    }
+
+    /* ═══════════════════════════════════════════════
+       FAQ
+    ═══════════════════════════════════════════════ */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .faq-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .faq-item:hover { border-color: rgba(139,92,246,0.4); }
+
+    .faq-question {
+      padding: 20px 24px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      user-select: none;
+    }
+
+    .faq-question h4 {
+      font-size: 0.9rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .faq-chevron {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--purple-glow);
+      border: 1px solid rgba(139,92,246,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 10px;
+      color: var(--purple-light);
+      transition: transform 0.25s, background 0.2s;
+    }
+    .faq-item.open .faq-chevron {
+      transform: rotate(180deg);
+      background: var(--purple-glow2);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.25s;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 600px;
+    }
+
+    .faq-answer-inner {
+      padding: 0 24px 20px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    /* ═══════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════ */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-logo {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .footer p {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    /* ═══════════════════════════════════════════════
+       MISC UTILITIES
+    ═══════════════════════════════════════════════ */
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 4px;
+      background: var(--card2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    .mt-4 { margin-top: 4px; }
+    .mt-8 { margin-top: 8px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-24 { margin-top: 24px; }
+    .mb-16 { margin-bottom: 16px; }
+    .mb-24 { margin-bottom: 24px; }
+
+    /* ═══════════════════════════════════════════════
+       PRINT STYLES
+    ═══════════════════════════════════════════════ */
+    @media print {
+      body { background: #fff; color: #111; font-size: 12px; }
+      :root {
+        --bg: #fff;
+        --bg2: #f5f5f5;
+        --card: #f5f5f5;
+        --card2: #ebebeb;
+        --border: #ddd;
+        --text: #111;
+        --text-muted: #444;
+        --text-dim: #777;
+        --purple: #6d28d9;
+        --purple-light: #7c3aed;
+        --purple-glow: rgba(109,40,217,0.08);
+        --purple-glow2: rgba(109,40,217,0.12);
+      }
+      .nav { display: none; }
+      body::before { display: none; }
+      .hero, .section { padding: 32px 0; }
+      .camera-type-card:hover, .product-section:hover, .component-card:hover { transform: none; box-shadow: none; }
+      a[href]::after { content: " (" attr(href) ")"; font-size: 0.7em; color: #888; }
+      .faq-answer { max-height: none !important; }
+      .faq-answer-inner { padding-top: 8px; }
+      h2 { page-break-before: always; }
+      h2:first-of-type { page-break-before: avoid; }
+      .phases-wrapper { grid-template-columns: 1fr; }
+      .install-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════════
+       SMOOTH TRANSITIONS
+    ═══════════════════════════════════════════════ */
+    * { transition-property: none; }
+    .camera-type-card, .product-section, .component-card, .phase-card,
+    .stat-card, .faq-item, .faq-chevron, .faq-answer, .nav-links a,
+    .retailer-tag, .floor-machine {
+      transition-property: border-color, transform, box-shadow, background, color, max-height, padding;
+      transition-duration: 0.2s;
+      transition-timing-function: ease;
+    }
+    .faq-answer { transition-duration: 0.35s; }
+    .faq-chevron { transition-duration: 0.25s; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     STICKY NAVIGATION
+═══════════════════════════════════════════════ -->
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">📷</div>
+      XL Fitness Camera Guide
+    </div>
+    <ul class="nav-links">
+      <li><a href="#hero">Overview</a></li>
+      <li><a href="#camera-types">Camera Types</a></li>
+      <li><a href="#products">Products</a></li>
+      <li><a href="#components">Components</a></li>
+      <li><a href="#installation">Installation</a></li>
+      <li><a href="#shopping-list">Shopping List</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">
+      <span>🏋️</span>
+      XL Fitness — AI Oversight System
+    </div>
+    <h1 class="hero-title">AI Camera System<br>Complete Buying &amp; Installation Guide</h1>
+    <p class="hero-subtitle">
+      A comprehensive guide to selecting, purchasing, and installing the 3-camera-per-machine AI infrastructure powering Australia's first tech-enabled gym. Every machine. Every rep. Automatically tracked.
+    </p>
+
+    <!-- Key stats -->
+    <div class="hero-stats">
+      <div class="stat-card">
+        <div class="stat-number">120</div>
+        <div class="stat-label">Target Machines</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">3</div>
+        <div class="stat-label">Cameras Per Machine</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">360</div>
+        <div class="stat-label">Total Cameras (End-Game)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">PoE</div>
+        <div class="stat-label">Single Cable — Power + Data</div>
+      </div>
+    </div>
+
+    <!-- System diagram -->
+    <div class="hero-diagram">
+      <!-- Per-machine camera diagram -->
+      <div class="diagram-machine">
+        <div class="diagram-machine-label">Per Machine — 3-Camera System</div>
+        <div class="diagram-cameras">
+          <div class="diagram-cam cam-1">
+            <div class="cam-icon">
+              <div class="cam-mount"></div>
+              <div class="cam-body">
+                <div class="cam-lens" style="position:relative;display:flex;align-items:center;justify-content:center;">
+                  <div class="cam-lens-inner"></div>
+                </div>
+              </div>
+            </div>
+            <span class="cam-badge">CAM 1</span>
+            <span class="cam-label">Occupancy<br>Zone</span>
+          </div>
+          <div class="diagram-cam cam-2">
+            <div class="cam-icon">
+              <div class="cam-mount"></div>
+              <div class="cam-body">
+                <div class="cam-lens" style="position:relative;display:flex;align-items:center;justify-content:center;">
+                  <div class="cam-lens-inner"></div>
+                </div>
+              </div>
+            </div>
+            <span class="cam-badge">CAM 2</span>
+            <span class="cam-label">Rep<br>Counter</span>
+          </div>
+          <div class="diagram-cam cam-3">
+            <div class="cam-icon">
+              <div class="cam-mount"></div>
+              <div class="cam-body">
+                <div class="cam-lens" style="position:relative;display:flex;align-items:center;justify-content:center;">
+                  <div class="cam-lens-inner"></div>
+                </div>
+              </div>
+            </div>
+            <span class="cam-badge">CAM 3</span>
+            <span class="cam-label">Weight<br>Stack</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="diagram-arrow">→</div>
+
+      <!-- Legend -->
+      <div class="diagram-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--cyan);box-shadow:0 0 6px var(--cyan);"></div>
+          <div class="legend-text">
+            <strong>Camera 1 — Zone Occupancy</strong>
+            <span>Ceiling fisheye or turret · Covers 4–6 machines · Tracks who's on which equipment</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--purple);box-shadow:0 0 6px var(--purple);"></div>
+          <div class="legend-text">
+            <strong>Camera 2 — Rep Counter</strong>
+            <span>Column-mounted turret · Full-body side view · AI pose estimation at 30fps</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--green);box-shadow:0 0 6px var(--green);"></div>
+          <div class="legend-text">
+            <strong>Camera 3 — Weight Stack</strong>
+            <span>Fixed mount · Tight framing on weight selector · Reads loaded resistance</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 2 — CAMERA TYPES COMPARISON
+═══════════════════════════════════════════════ -->
+<section class="section" id="camera-types">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Section 2</div>
+      <h2 class="section-title">Camera Types — What's Right for a Gym?</h2>
+      <p class="section-subtitle">Four fundamentally different camera form factors — each with distinct strengths. Understanding the differences is critical before you buy anything.</p>
+    </div>
+
+    <!-- 4-up type cards -->
+    <div class="grid-2 mb-24" style="gap:20px;">
+
+      <!-- Turret / Eyeball -->
+      <div class="camera-type-card recommended">
+        <div class="card-title-row">
+          <div>
+            <div class="card-cam-visual" style="margin-bottom:12px;">🎯</div>
+            <h3>Turret / Eyeball Camera</h3>
+            <p style="font-size:0.82rem;margin-top:4px;">Adjustable ball-joint design — points in any direction within a wide range</p>
+          </div>
+          <span class="badge badge-recommended">★ XL Fitness Pick</span>
+        </div>
+        <div class="pros-cons">
+          <div class="pros">
+            <div class="pros-cons-title">Pros</div>
+            <ul>
+              <li>Adjustable angle post-install</li>
+              <li>Compact &amp; discreet</li>
+              <li>Low profile, sits flush</li>
+              <li>Excellent for column mounts</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <div class="pros-cons-title">Cons</div>
+            <ul>
+              <li>Not 360° — needs aiming</li>
+              <li>Limited adjustment range</li>
+            </ul>
+          </div>
+        </div>
+        <div class="use-case-tag">
+          🏋️ <strong>Recommended for:</strong>&nbsp; Camera 2 (rep counter) — column mounts at XL Fitness
+        </div>
+      </div>
+
+      <!-- Fisheye 360 -->
+      <div class="camera-type-card recommended">
+        <div class="card-title-row">
+          <div>
+            <div class="card-cam-visual" style="margin-bottom:12px;">🔵</div>
+            <h3>Fisheye 360° Camera</h3>
+            <p style="font-size:0.82rem;margin-top:4px;">Single ultra-wide lens captures a full 360° hemisphere from ceiling</p>
+          </div>
+          <span class="badge badge-recommended">★ XL Fitness Pick</span>
+        </div>
+        <div class="pros-cons">
+          <div class="pros">
+            <div class="pros-cons-title">Pros</div>
+            <ul>
+              <li>One camera covers 4–6 machines</li>
+              <li>Zero blind spots</li>
+              <li>Built-in occupancy analytics</li>
+              <li>Virtual PTZ in software</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <div class="pros-cons-title">Cons</div>
+            <ul>
+              <li>Distorted barrel edges</li>
+              <li>Less detail per subject</li>
+              <li>Harder AI pose processing</li>
+            </ul>
+          </div>
+        </div>
+        <div class="use-case-tag">
+          🏋️ <strong>Recommended for:</strong>&nbsp; Camera 1 (zone occupancy) — ceiling mount
+        </div>
+      </div>
+
+      <!-- PTZ -->
+      <div class="camera-type-card">
+        <div class="card-title-row">
+          <div>
+            <div class="card-cam-visual" style="margin-bottom:12px;">🔄</div>
+            <h3>PTZ Camera</h3>
+            <p style="font-size:0.82rem;margin-top:4px;">Pan-Tilt-Zoom — motorised camera that moves and zooms remotely</p>
+          </div>
+          <span class="badge badge-security">Security Only</span>
+        </div>
+        <div class="pros-cons">
+          <div class="pros">
+            <div class="pros-cons-title">Pros</div>
+            <ul>
+              <li>Covers huge area</li>
+              <li>25× optical zoom</li>
+              <li>AI auto-tracking</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <div class="pros-cons-title">Cons</div>
+            <ul>
+              <li>Expensive ($800–2,000+)</li>
+              <li>One direction at a time</li>
+              <li>Moving parts = wear &amp; failure</li>
+              <li>Overkill for per-machine AI</li>
+            </ul>
+          </div>
+        </div>
+        <div class="use-case-tag" style="border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:var(--amber);">
+          🔒 <strong>Use for:</strong>&nbsp; General gym security — NOT for AI machine tracking
+        </div>
+      </div>
+
+      <!-- Bullet -->
+      <div class="camera-type-card">
+        <div class="card-title-row">
+          <div>
+            <div class="card-cam-visual" style="margin-bottom:12px;">📡</div>
+            <h3>Bullet Camera</h3>
+            <p style="font-size:0.82rem;margin-top:4px;">Cylindrical fixed-direction camera — obvious, long-range deterrent</p>
+          </div>
+          <span class="badge badge-optional">Entrance / Corridor</span>
+        </div>
+        <div class="pros-cons">
+          <div class="pros">
+            <div class="pros-cons-title">Pros</div>
+            <ul>
+              <li>Long range (up to 60–80m)</li>
+              <li>Obvious visual deterrent</li>
+              <li>IP67 weatherproof</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <div class="pros-cons-title">Cons</div>
+            <ul>
+              <li>Fixed angle — no adjust</li>
+              <li>Bulky &amp; conspicuous</li>
+              <li>Not ideal for close-range AI</li>
+            </ul>
+          </div>
+        </div>
+        <div class="use-case-tag" style="border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.08);color:var(--green);">
+          🚪 <strong>Recommended for:</strong>&nbsp; Entrances, corridors, weight room aisles
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison table -->
+    <h3 style="margin-bottom:16px;">Side-by-Side Comparison</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Turret/Eyeball</th>
+            <th>Fisheye 360°</th>
+            <th>PTZ</th>
+            <th>Bullet</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-highlight">
+            <td><strong>XL Fitness AI Use</strong></td>
+            <td><span class="badge badge-recommended" style="font-size:0.65rem;">Cam 2 Rep Counter</span></td>
+            <td><span class="badge badge-recommended" style="font-size:0.65rem;">Cam 1 Occupancy</span></td>
+            <td><span style="color:var(--text-dim);font-size:0.8rem;">Not recommended</span></td>
+            <td><span style="color:var(--text-dim);font-size:0.8rem;">Entrance only</span></td>
+          </tr>
+          <tr>
+            <td><strong>Coverage per unit</strong></td>
+            <td>1 machine (targeted)</td>
+            <td>4–6 machines</td>
+            <td>Large area (sequential)</td>
+            <td>Long corridor</td>
+          </tr>
+          <tr>
+            <td><strong>AI Pose Estimation</strong></td>
+            <td><span class="check">✓</span> Excellent</td>
+            <td><span class="neutral">⚠</span> Possible, harder</td>
+            <td><span class="cross">✗</span> Can't track multiple</td>
+            <td><span class="neutral">⚠</span> Fixed angle only</td>
+          </tr>
+          <tr>
+            <td><strong>Adjustable after install</strong></td>
+            <td><span class="check">✓</span> Ball joint</td>
+            <td><span class="cross">✗</span> Fixed (ceiling)</td>
+            <td><span class="check">✓</span> Full remote PTZ</td>
+            <td><span class="cross">✗</span> Fixed</td>
+          </tr>
+          <tr>
+            <td><strong>Backlight / WDR handling</strong></td>
+            <td><span class="check">✓</span> 120–130dB WDR</td>
+            <td><span class="neutral">⚠</span> Good</td>
+            <td><span class="check">✓</span> Good</td>
+            <td><span class="check">✓</span> Good</td>
+          </tr>
+          <tr>
+            <td><strong>Low-light performance</strong></td>
+            <td><span class="check">✓</span> ColorVu (0.0005 lux)</td>
+            <td><span class="neutral">⚠</span> IR limited (15m)</td>
+            <td><span class="check">✓</span> Good with IR</td>
+            <td><span class="check">✓</span> Strong IR (60m)</td>
+          </tr>
+          <tr>
+            <td><strong>PoE powered</strong></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="check">✓</span> (higher wattage)</td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td><strong>Typical price (AUD)</strong></td>
+            <td>$120–220</td>
+            <td>$450–600</td>
+            <td>$650–2,000+</td>
+            <td>$80–200</td>
+          </tr>
+          <tr>
+            <td><strong>Install complexity</strong></td>
+            <td>Low</td>
+            <td>Medium (ceiling)</td>
+            <td>High</td>
+            <td>Low–Medium</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 3 — PRODUCTS
+═══════════════════════════════════════════════ -->
+<section class="section" id="products">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Section 3</div>
+      <h2 class="section-title">Recommended Camera Products</h2>
+      <p class="section-subtitle">Specific models selected for XL Fitness's gym environment — dark neon interiors, severe window backlight, and AI pose estimation requirements.</p>
+    </div>
+
+    <!-- ─── PRIMARY 3-CAMERA SETUP ─── -->
+    <h3 style="margin-bottom:20px;color:var(--purple-light);">🎯 The XL Fitness 3-Camera Setup</h3>
+
+    <!-- Camera 1 -->
+    <div class="product-section is-recommended mb-24">
+      <div class="product-header">
+        <div class="product-title-group">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="badge badge-recommended">★ Camera 1 — Zone Occupancy</span>
+            <span class="badge" style="background:rgba(6,182,212,0.1);color:var(--cyan);border:1px solid rgba(6,182,212,0.2);">ColorVu</span>
+          </div>
+          <span class="product-model">Hikvision DS-2CD2347G2-LU</span>
+          <h3>4MP ColorVu Turret Camera</h3>
+          <p style="margin-top:6px;">Full-colour 24/7 imaging even in near-darkness — designed for challenging mixed-lighting gym environments</p>
+        </div>
+        <div class="price-chip">
+          <div class="price-amount">$185–220</div>
+          <div class="price-label">AUD per unit</div>
+        </div>
+      </div>
+      <div class="product-body">
+        <div class="product-why">
+          💡 <span><strong>Why this for XL Fitness:</strong> ColorVu technology delivers full-colour footage at 0.0005 lux — handles the dark neon-lit gym interior perfectly. The 130dB WDR is the best in class for managing the severe window backlight from floor-to-ceiling glazing.</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Specification</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Resolution</td><td><strong>4MP — 2560 × 1440</strong></td></tr>
+              <tr><td>Low Light</td><td><strong>ColorVu — full colour at 0.0005 lux</strong> (no greyscale night mode)</td></tr>
+              <tr><td>Wide Dynamic Range (WDR)</td><td><strong>130dB</strong> — handles extreme backlight from windows</td></tr>
+              <tr><td>Illumination Range</td><td>30m white light (coloured, not IR)</td></tr>
+              <tr><td>Power</td><td>PoE — IEEE 802.3af (12W)</td></tr>
+              <tr><td>IP Rating</td><td>IP67 weatherproof</td></tr>
+              <tr><td>Field of View</td><td>102° horizontal (2.8mm lens)</td></tr>
+              <tr><td>Frame Rate</td><td>Up to 25fps @ 4MP</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="retailers-list" style="margin-top:20px;">
+          <span style="font-size:0.75rem;color:var(--text-dim);align-self:center;">Buy from:</span>
+          <a class="retailer-tag" href="https://www.securitywholesalers.com.au" target="_blank">securitywholesalers.com.au</a>
+          <a class="retailer-tag" href="https://www.cctvguru.com.au" target="_blank">cctvguru.com.au</a>
+          <a class="retailer-tag" href="https://www.cctvmasters.com.au" target="_blank">cctvmasters.com.au</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Camera 2 -->
+    <div class="product-section is-recommended mb-24">
+      <div class="product-header">
+        <div class="product-title-group">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="badge badge-recommended">★ Camera 2 — Rep Counter</span>
+            <span class="badge" style="background:rgba(139,92,246,0.1);color:var(--purple-light);border:1px solid rgba(139,92,246,0.2);">AcuSense</span>
+          </div>
+          <span class="product-model">Hikvision DS-2CD2T23G2-2I</span>
+          <h3>2MP AcuSense Bullet Camera (2.8mm)</h3>
+          <p style="margin-top:6px;">The core rep-counting camera — 30fps full HD with 2.8mm wide lens for full-body capture at 2–3m column distance</p>
+        </div>
+        <div class="price-chip">
+          <div class="price-amount">$120–145</div>
+          <div class="price-label">AUD per unit</div>
+        </div>
+      </div>
+      <div class="product-body">
+        <div class="product-why">
+          💡 <span><strong>Why this for XL Fitness:</strong> 30fps is essential for smooth, accurate rep counting from pose keypoints. The 2.8mm lens captures a full-body view at 2–3m (typical column-to-machine distance). Compact form fits neatly on purple structural columns.</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Specification</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Resolution</td><td><strong>2MP — 1920 × 1080 @ 30fps</strong></td></tr>
+              <tr><td>Wide Dynamic Range</td><td>120dB</td></tr>
+              <tr><td>IR Range</td><td>60m (far more than the 2–3m machine distance)</td></tr>
+              <tr><td>Power</td><td>PoE — IEEE 802.3af</td></tr>
+              <tr><td>IP Rating</td><td>IP67</td></tr>
+              <tr><td>Lens</td><td>2.8mm — wide, captures full body at 2–3m</td></tr>
+              <tr><td>Form Factor</td><td>Bullet (compact, column-mountable)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="retailers-list" style="margin-top:20px;">
+          <span style="font-size:0.75rem;color:var(--text-dim);align-self:center;">Buy from:</span>
+          <a class="retailer-tag" href="https://www.securitywholesalers.com.au" target="_blank">securitywholesalers.com.au</a>
+          <a class="retailer-tag" href="https://www.cctvguru.com.au" target="_blank">cctvguru.com.au</a>
+          <a class="retailer-tag" href="https://www.jaycar.com.au" target="_blank">Jaycar (basic alts)</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Camera 3 -->
+    <div class="product-section is-recommended mb-24">
+      <div class="product-header">
+        <div class="product-title-group">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="badge badge-recommended">★ Camera 3 — Weight Stack</span>
+            <span class="badge" style="background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.2);">4mm Lens</span>
+          </div>
+          <span class="product-model">Hikvision DS-2CD2T23G2-4I</span>
+          <h3>2MP AcuSense Bullet Camera (4mm)</h3>
+          <p style="margin-top:6px;">Identical to Camera 2 but with a 4mm lens — tighter framing on the weight selector pin at close range (0.5–1m)</p>
+        </div>
+        <div class="price-chip">
+          <div class="price-amount">$120–145</div>
+          <div class="price-label">AUD per unit</div>
+        </div>
+      </div>
+      <div class="product-body">
+        <div class="product-why">
+          💡 <span><strong>Why this for XL Fitness:</strong> The 4mm lens provides tighter framing at 0.5–1m distance — perfect for reading the weight selector pin on Nautilus Nitro and similar selectorised machines. Same reliable platform as Camera 2.</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Specification</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Resolution</td><td>2MP — 1920 × 1080 @ 30fps</td></tr>
+              <tr><td>Lens</td><td><strong>4mm — tighter framing at 0.5–1m</strong></td></tr>
+              <tr><td>WDR</td><td>120dB</td></tr>
+              <tr><td>IR Range</td><td>60m</td></tr>
+              <tr><td>Power</td><td>PoE — IEEE 802.3af</td></tr>
+              <tr><td>IP Rating</td><td>IP67</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="retailers-list" style="margin-top:20px;">
+          <span style="font-size:0.75rem;color:var(--text-dim);align-self:center;">Buy from:</span>
+          <a class="retailer-tag" href="https://www.securitywholesalers.com.au" target="_blank">securitywholesalers.com.au</a>
+          <a class="retailer-tag" href="https://www.cctvguru.com.au" target="_blank">cctvguru.com.au</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ─── ALTERNATIVE OPTIONS ─── -->
+    <h3 style="margin-bottom:20px;color:var(--text-muted);">⚙️ Alternative / Upgrade Options</h3>
+
+    <!-- Fisheye Option -->
+    <div class="product-section mb-24">
+      <div class="product-header">
+        <div class="product-title-group">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="badge badge-optional">Alt: Camera 1 Upgrade</span>
+            <span class="badge" style="background:rgba(6,182,212,0.1);color:var(--cyan);border:1px solid rgba(6,182,212,0.2);">360° Fisheye</span>
+          </div>
+          <span class="product-model">Hikvision DS-2CD63C5G1-IVS</span>
+          <h3>6MP 360° Fisheye Panoramic Camera</h3>
+          <p style="margin-top:6px;">Could replace Camera 1 — single ceiling unit covers an entire 4–6 machine zone with full 360° coverage</p>
+        </div>
+        <div class="price-chip">
+          <div class="price-amount">$450–600</div>
+          <div class="price-label">AUD per unit</div>
+        </div>
+      </div>
+      <div class="product-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Specification</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Resolution</td><td><strong>6MP — 360° full panoramic</strong></td></tr>
+              <tr><td>Virtual PTZ</td><td>Digital pan/tilt/zoom in software</td></tr>
+              <tr><td>Analytics</td><td><strong>Built-in heat mapping &amp; occupancy analytics</strong></td></tr>
+              <tr><td>IR Range</td><td>15m (all directions)</td></tr>
+              <tr><td>Power</td><td>PoE — IEEE 802.3af</td></tr>
+              <tr><td>Coverage</td><td>Full hemisphere — no blind spots</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="retailers-list" style="margin-top:20px;">
+          <span style="font-size:0.75rem;color:var(--text-dim);align-self:center;">Buy from:</span>
+          <a class="retailer-tag" href="https://www.securitywholesalers.com.au" target="_blank">securitywholesalers.com.au</a>
+          <a class="retailer-tag" href="https://www.cctvguru.com.au" target="_blank">cctvguru.com.au</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PTZ Option -->
+    <div class="product-section">
+      <div class="product-header">
+        <div class="product-title-group">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="badge badge-security">Security Use Only</span>
+            <span class="badge" style="background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2);">25× Zoom</span>
+          </div>
+          <span class="product-model">Hikvision DS-2DE4A425IWG-E</span>
+          <h3>4MP PTZ Network Camera</h3>
+          <p style="margin-top:6px;">For general gym security surveillance — not recommended for AI machine-level tracking</p>
+        </div>
+        <div class="price-chip">
+          <div class="price-amount">$650–850</div>
+          <div class="price-label">AUD per unit</div>
+        </div>
+      </div>
+      <div class="product-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Specification</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Resolution</td><td>4MP</td></tr>
+              <tr><td>Optical Zoom</td><td>25× optical zoom</td></tr>
+              <tr><td>AI Tracking</td><td>AI auto-tracking (follows subjects)</td></tr>
+              <tr><td>Power</td><td>PoE+ — IEEE 802.3at (25W)</td></tr>
+              <tr><td>Best Use</td><td>General security overview, not per-machine AI</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="info-box" style="margin-top:16px;">
+          ℹ️ <span>This camera is excellent for general security but <strong>cannot simultaneously track multiple machines</strong> — it can only look in one direction at a time. Use for front-of-house security, not the AI Overseer system.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 4 — SUPPORTING COMPONENTS
+═══════════════════════════════════════════════ -->
+<section class="section" id="components">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Section 4</div>
+      <h2 class="section-title">Supporting Components</h2>
+      <p class="section-subtitle">The infrastructure behind the cameras — NVR, PoE switching, cabling, storage, and mounting hardware.</p>
+    </div>
+
+    <div class="grid-2" style="gap:20px;">
+
+      <!-- NVR -->
+      <div class="component-card">
+        <div class="component-icon" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);">🖥️</div>
+        <h3>NVR — Network Video Recorder</h3>
+        <p style="font-size:0.82rem;">Note: For the AI Overseer system, the <strong>Mac Mini M4 Pro replaces the NVR</strong> for edge processing. An NVR is optional for pure storage/playback.</p>
+        <ul class="component-options">
+          <li class="component-option">
+            <div>
+              <div class="option-name">Hikvision DS-7608NI-I2/8P</div>
+              <div class="option-desc">8 channel with built-in PoE · 4K playback · 2 HDD bays · handles 8 cameras</div>
+            </div>
+            <div class="option-price">$380–450</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- PoE Switches -->
+      <div class="component-card">
+        <div class="component-icon" style="background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);">🔌</div>
+        <h3>PoE Switches</h3>
+        <p style="font-size:0.82rem;">Power and data over a single CAT6 cable to each camera. Choose based on phase.</p>
+        <ul class="component-options">
+          <li class="component-option">
+            <div>
+              <div class="option-name">TP-Link TL-SG1008P 8-Port PoE+</div>
+              <div class="option-desc">Budget · Phase 1 · Scorptec, Umart, Amazon AU</div>
+            </div>
+            <div class="option-price">~$120</div>
+          </li>
+          <li class="component-option">
+            <div>
+              <div class="option-name">Ubiquiti UniFi USW-Lite-16-PoE</div>
+              <div class="option-desc">Mid-tier · Phase 2 · 16 ports · Ubiquiti AU resellers</div>
+            </div>
+            <div class="option-price">~$350</div>
+          </li>
+          <li class="component-option" style="border-color:rgba(139,92,246,0.3);">
+            <div>
+              <div class="option-name">Ubiquiti UniFi USW-Pro-24-PoE</div>
+              <div class="option-desc">Enterprise · Full gym · 24 ports · managed · PoE budget 400W</div>
+            </div>
+            <div class="option-price">~$1,350</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Cabling -->
+      <div class="component-card">
+        <div class="component-icon" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);">🔗</div>
+        <h3>Cabling</h3>
+        <p style="font-size:0.82rem;">CAT6A is recommended over standard CAT6 for runs in ceiling plenums — better shielding, supports 10GbE for future-proofing.</p>
+        <ul class="component-options">
+          <li class="component-option">
+            <div>
+              <div class="option-name">CAT6A 305m Bulk Box</div>
+              <div class="option-desc">4cabling.com.au · Cabac · enough for ~20 camera runs</div>
+            </div>
+            <div class="option-price">$180–220</div>
+          </li>
+          <li class="component-option">
+            <div>
+              <div class="option-name">Pre-made 5m CAT6 Patch Cables</div>
+              <div class="option-desc">Jaycar · MSY · machine-to-wall last-metre runs</div>
+            </div>
+            <div class="option-price">$8–12 ea</div>
+          </li>
+          <li class="component-option">
+            <div>
+              <div class="option-name">Cable Clips, Saddles, Conduit</div>
+              <div class="option-desc">Per zone — tidies runs along walls &amp; columns</div>
+            </div>
+            <div class="option-price">$50–100/zone</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Storage -->
+      <div class="component-card">
+        <div class="component-icon" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">💾</div>
+        <h3>Storage</h3>
+        <p style="font-size:0.82rem;">Scale storage with phases. Phase 1 can use the Mac Mini SSD; later phases need dedicated NAS.</p>
+        <ul class="component-options">
+          <li class="component-option">
+            <div>
+              <div class="option-name">Phase 1 — Mac Mini Local SSD / SD Card</div>
+              <div class="option-desc">1 machine · built-in storage, no extra hardware</div>
+            </div>
+            <div class="option-price">$0</div>
+          </li>
+          <li class="component-option">
+            <div>
+              <div class="option-name">Synology DS223 + 2× 4TB HDDs</div>
+              <div class="option-desc">Phase 2 · 5 machines · ~8TB usable RAID1</div>
+            </div>
+            <div class="option-price">~$650 total</div>
+          </li>
+          <li class="component-option" style="border-color:rgba(139,92,246,0.3);">
+            <div>
+              <div class="option-name">Synology DS923+ + 4× 8TB HDDs</div>
+              <div class="option-desc">Full gym · 120 machines · ~24TB usable</div>
+            </div>
+            <div class="option-price">~$1,800 total</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Mounting -->
+      <div class="component-card" style="grid-column: 1 / -1;">
+        <div class="component-icon" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);">🔩</div>
+        <h3>Mounting Hardware</h3>
+        <p style="font-size:0.82rem;">Specific mounting solutions for XL Fitness's suspended T-bar ceiling and purple structural columns.</p>
+        <div class="grid-4" style="gap:12px;margin-top:16px;">
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;">
+            <div style="font-size:0.75rem;font-weight:600;color:var(--text);margin-bottom:6px;">Column Mount Bracket</div>
+            <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:10px;">Adjustable wrap mount for structural columns · Hikvision DS-1604ZJ or generic</div>
+            <div style="font-weight:700;color:var(--purple-light);font-size:0.85rem;">$15–25 ea</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;">
+            <div style="font-size:0.75rem;font-weight:600;color:var(--text);margin-bottom:6px;">Ceiling T-Bar Span Bracket</div>
+            <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:10px;">Spans T-bar grid for suspended tile ceilings · simple drop-in</div>
+            <div style="font-weight:700;color:var(--purple-light);font-size:0.85rem;">$20–35 ea</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;border-color:rgba(139,92,246,0.3);">
+            <div style="font-size:0.75rem;font-weight:600;color:var(--text);margin-bottom:6px;">Threaded Rod Drop Mount ⭐</div>
+            <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:10px;">Most secure for XL Fitness ceiling · anchors to structural slab above tiles</div>
+            <div style="font-weight:700;color:var(--purple-light);font-size:0.85rem;">$25–40 ea</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;">
+            <div style="font-size:0.75rem;font-weight:600;color:var(--text);margin-bottom:6px;">Junction Boxes</div>
+            <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:10px;">Cable termination point above ceiling tile · protects RJ45 connection</div>
+            <div style="font-weight:700;color:var(--purple-light);font-size:0.85rem;">$8–12 ea</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 5 — INSTALLATION PLAN
+═══════════════════════════════════════════════ -->
+<section class="section" id="installation">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Section 5</div>
+      <h2 class="section-title">XL Fitness Installation Plan</h2>
+      <p class="section-subtitle">Specific placement strategy based on XL Fitness gym architecture — suspended T-bar ceiling, purple columns, floor-to-ceiling glazing.</p>
+    </div>
+
+    <!-- Gym environment callout -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:32px;">
+      <h4 style="margin-bottom:16px;color:var(--text-muted);font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;">XL Fitness Gym Architecture</h4>
+      <div class="grid-3" style="gap:12px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="font-size:20px;flex-shrink:0;">📏</span>
+          <div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text);">3.2–3.5m Ceiling Height</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);">Allows comfortable camera positioning</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="font-size:20px;flex-shrink:0;">⬛</span>
+          <div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text);">Suspended Black T-Bar Ceiling</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);">Acoustic tile grid — requires special mounting</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="font-size:20px;flex-shrink:0;">🟣</span>
+          <div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text);">Purple Structural Columns</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);">At window junctions — ideal Camera 2 mount points</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="font-size:20px;flex-shrink:0;">🌅</span>
+          <div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text);">Floor-to-Ceiling Glazing</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);">Severe backlight challenge — never aim toward windows</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="font-size:20px;flex-shrink:0;">🏋️</span>
+          <div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text);">Dense Machine Layout</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);">120+ machines in tight rows</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="font-size:20px;flex-shrink:0;">🌑</span>
+          <div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--text);">Dark Neon Interior</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);">Low ambient light — requires ColorVu cameras</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="install-layout">
+
+      <!-- Floor plan diagram (CSS art) -->
+      <div>
+        <div class="floor-plan">
+          <div class="floor-plan-title">Zone Layout — 4-Machine Example</div>
+          <!-- Window -->
+          <div class="floor-window">← Floor-to-Ceiling Glass →</div>
+          <div style="height:8px;"></div>
+          <!-- Grid -->
+          <div class="floor-grid">
+            <!-- Col 1: column + machine + machine -->
+            <div class="floor-column">🟣<br><span style="font-size:0.55rem;">COLUMN<br>Cam 2</span></div>
+            <div class="floor-machine">
+              <div class="cam-dot cam-dot-1" title="Cam 1: Ceiling"></div>
+              <div class="cam-dot cam-dot-2" title="Cam 2: Column"></div>
+              <div class="cam-dot cam-dot-3" title="Cam 3: Weight stack"></div>
+              <div class="floor-machine-icon">⚙️</div>
+              <div class="floor-machine-label">Machine A</div>
+            </div>
+            <div class="floor-machine">
+              <div class="cam-dot cam-dot-1"></div>
+              <div class="cam-dot cam-dot-2"></div>
+              <div class="cam-dot cam-dot-3"></div>
+              <div class="floor-machine-icon">⚙️</div>
+              <div class="floor-machine-label">Machine B</div>
+            </div>
+            <div class="floor-column">🟣<br><span style="font-size:0.55rem;">COLUMN<br>Cam 2</span></div>
+            <!-- Row 2 -->
+            <div class="floor-machine">
+              <div class="cam-dot cam-dot-2"></div>
+              <div class="cam-dot cam-dot-3"></div>
+              <div class="floor-machine-icon">⚙️</div>
+              <div class="floor-machine-label">Machine C</div>
+            </div>
+            <div class="floor-machine">
+              <div class="cam-dot cam-dot-2"></div>
+              <div class="cam-dot cam-dot-3"></div>
+              <div class="floor-machine-icon">⚙️</div>
+              <div class="floor-machine-label">Machine D</div>
+            </div>
+            <div class="floor-machine">
+              <div class="cam-dot cam-dot-2"></div>
+              <div class="cam-dot cam-dot-3"></div>
+              <div class="floor-machine-icon">⚙️</div>
+              <div class="floor-machine-label">Machine E</div>
+            </div>
+            <div class="floor-machine">
+              <div class="cam-dot cam-dot-2"></div>
+              <div class="cam-dot cam-dot-3"></div>
+              <div class="floor-machine-icon">⚙️</div>
+              <div class="floor-machine-label">Machine F</div>
+            </div>
+          </div>
+        </div>
+        <!-- Legend -->
+        <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;">
+          <div style="display:flex;gap:6px;align-items:center;font-size:0.72rem;color:var(--text-dim);">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 4px var(--cyan);"></div>
+            Cam 1 (ceiling fisheye)
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;font-size:0.72rem;color:var(--text-dim);">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--purple);box-shadow:0 0 4px var(--purple);"></div>
+            Cam 2 (column)
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;font-size:0.72rem;color:var(--text-dim);">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 4px var(--green);"></div>
+            Cam 3 (weight stack)
+          </div>
+        </div>
+      </div>
+
+      <!-- Camera placement strategy -->
+      <div>
+        <h3 style="margin-bottom:20px;">Camera Placement Strategy</h3>
+        <div class="camera-placement-cards">
+
+          <div class="placement-card">
+            <div class="placement-num placement-cam1">C1</div>
+            <div class="placement-content">
+              <h4 style="color:var(--cyan);">Camera 1 — Zone Occupancy</h4>
+              <p>Mount above machine zone using <strong>threaded rod drop mount</strong> anchored to structural slab. Position fisheye at ceiling height (3.2–3.5m). One unit covers 4–6 machines in 360° hemisphere.</p>
+            </div>
+          </div>
+
+          <div class="placement-card" style="border-color:rgba(139,92,246,0.3);">
+            <div class="placement-num placement-cam2">C2</div>
+            <div class="placement-content">
+              <h4 style="color:var(--purple-light);">Camera 2 — Rep Counter</h4>
+              <p>Mount on <strong>purple structural columns</strong>, facing INWARD (away from windows). Height: <strong>1.2–1.5m</strong>. Windows remain behind the camera = natural front lighting of the user's body.</p>
+              <div class="warning-box">
+                ⚠️ <strong>CRITICAL:</strong> Never aim Camera 2 toward windows. The 130dB WDR helps but backlight will still degrade pose estimation. Column placement naturally solves this.
+              </div>
+            </div>
+          </div>
+
+          <div class="placement-card">
+            <div class="placement-num placement-cam3">C3</div>
+            <div class="placement-content">
+              <h4 style="color:var(--green);">Camera 3 — Weight Stack</h4>
+              <p>Fixed mount on <strong>machine frame or adjacent wall</strong>, aimed tight at the weight selector pin area. Distance: <strong>0.5–1m</strong>. Use 4mm lens for precise framing at this close range.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ceiling mounting steps -->
+        <h4 style="margin-bottom:12px;">Ceiling Mount Procedure (T-Bar Ceiling)</h4>
+        <ol class="steps-list">
+          <li>Pop ceiling tile aside → locate structural slab above (concrete or steel deck)</li>
+          <li>Drill and rawl-anchor a <strong>M8 threaded rod hanger</strong> into structural slab</li>
+          <li>Drop threaded rod to desired height (camera lens at ~3m AFF)</li>
+          <li>Attach camera mounting plate to rod end</li>
+          <li>Route CAT6A cable through ceiling plenum to nearest PoE switch</li>
+          <li>Terminate CAT6A with RJ45 in junction box above tile</li>
+          <li>Replace / trim ceiling tile around rod</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Licensing requirements -->
+    <h3 style="margin-top:48px;margin-bottom:20px;">🇦🇺 Australian Licensing Requirements</h3>
+    <div class="licensing-grid">
+      <div class="license-card license-diy">
+        <span class="license-card-icon">🔧</span>
+        <h4>DIY Allowed</h4>
+        <p style="color:var(--green);font-size:0.78rem;font-weight:600;margin-bottom:8px;">No license required</p>
+        <p>Camera mounting, aiming, configuration, software setup, NVR configuration. Once cabling is in place, camera physical install is DIY-friendly.</p>
+      </div>
+      <div class="license-card license-cabler">
+        <span class="license-card-icon">📡</span>
+        <h4>Licensed Cabler Required</h4>
+        <p style="color:var(--amber);font-size:0.78rem;font-weight:600;margin-bottom:8px;">ACMA registration needed</p>
+        <p>All data cabling (CAT6/CAT6A) in Australia requires an ACMA-registered Open Cabling (Restricted) or Open Cabling cabler. This includes ceiling plenum runs and wall terminations.</p>
+      </div>
+      <div class="license-card license-sparky">
+        <span class="license-card-icon">⚡</span>
+        <h4>Licensed Electrician Required</h4>
+        <p style="color:var(--red);font-size:0.78rem;font-weight:600;margin-bottom:8px;">240V electrical work</p>
+        <p>Any 240V power connections for PoE switches, NAS units, or NVRs require a licensed electrician. PoE cameras themselves run on PoE (low voltage) via the data cable.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 6 — SHOPPING LIST BY PHASE
+═══════════════════════════════════════════════ -->
+<section class="section" id="shopping-list">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Section 6</div>
+      <h2 class="section-title">Phase-by-Phase Shopping List</h2>
+      <p class="section-subtitle">Staged rollout from proof-of-concept single machine through to the complete 120-machine gym build-out.</p>
+    </div>
+
+    <div class="phases-wrapper">
+
+      <!-- Phase 1 -->
+      <div class="phase-card">
+        <div class="phase-header">
+          <div class="phase-number">Phase 1</div>
+          <h3>1 Machine — Proof of Concept</h3>
+          <p style="font-size:0.8rem;color:var(--text-dim);margin-top:4px;">Validate the system, test AI accuracy, refine placement</p>
+          <div class="phase-total">
+            <div class="phase-total-label">Hardware Total</div>
+            <div class="phase-total-amount">~$290</div>
+          </div>
+        </div>
+        <ul class="phase-items">
+          <li class="phase-item">
+            <div class="phase-item-left">
+              <div class="phase-item-name">Camera 2 — DS-2CD2T23G2-2I</div>
+              <div class="phase-item-qty">1× rep counter · 2.8mm</div>
+            </div>
+            <div class="phase-item-price">~$140</div>
+          </li>
+          <li class="phase-item">
+            <div class="phase-item-left">
+              <div class="phase-item-name">TP-Link 8-Port PoE+ Switch</div>
+              <div class="phase-item-qty">1× TL-SG1008P</div>
+            </div>
+            <div class="phase-item-price">~$120</div>
+          </li>
+          <li class="phase-item">
+            <div class="phase-item-left">
+              <div class="phase-item-name">CAT6 Patch Cable 5m</div>
+              <div class="phase-item-qty">1× pre-made</div>
+            </div>
+            <div class="phase-item-price">~$10</div>
+          </li>
+          <li class="phase-item">
+            <div class="phase-item-left">
+              <div class="phase-item-name">Column Mount Bracket</div>
+              <div class="phase-item-qty">1× adjustable</div>
+            </div>
+            <div class="phase-item-price">~$20</div>
+          </li>
+        </ul>
+        <div class="phase-note">Plus: ACMA-registered data cabler for ceiling run ~$200–400</div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="phase-card">
+        <div class="phase-header">
+          <div class="phase-number">Phase 2</div>
+          <h3>5 Machines — Zone Rollout</h3>
+          <p style="font-size:0.8rem;color:var(--text-dim);margin-top:4px;">First zone with full 3-camera system per machine</p>
+          <div class="phase-total">
+            <div class="phase-total-label">Hardware Total</div>
+            <div class="phase-total-amount">~$3,525</div>
+          </div>
+        </div>
+        <ul class="phase-items">
+          <li class="phase-item">
+            <div class="phase-item-left">
+              <div class="phase-item-name">Camera 1 — DS-2CD2347G2-LU</div>
+              <div class="phase-item-qty">5× occupancy · ColorVu · ~$220 ea</div>
+            </div>
+            <div class="phase-item-price">~$1,100</div>
+          </li>
+          <li class="phase-item">
+            <div class="phase-item-left">
+              <div class="phase-item-name">Camera 2 — DS-2CD2T23G2-2I</div>
+              <div class="phase-item-qty">5× rep counter · 2.8mm · ~$145 ea</div>
+            </div>
+            <div class="phase-item-price">~$725</div>
+          </li>
+          <li class="phase-item">
+            <div class="phase-item-left">
+              <div class="phase-item-name">Camera 3 — DS-2CD2T23G2-4I</div>
+              <div class="phase-item-qty">5× weight stack · 4mm · ~$140 ea</div>
+            </div>
+            <div class="phase-item-price">~$700</div>
+          </li>
+          <li class="phase-item">
+            <div class="phase-item-left">
+              <div class="phase-item-name">Ubiquiti USW-Lite-16-PoE</div>
+              <div class="phase-item-qty">1× managed PoE switch</div>
+            </div>
+            <div class="phase-item-price">~$350</div>
+          </li>
+          <li class="phase-item">
+            <div class="phase-item-left">
+              <div class="phase-item-name">Synology DS223 + 2× 4TB HDDs</div>
+              <div class="phase-item-qty">1× NAS unit + drives</div>
+            </div>
+            <div class="phase-item-price">~$650</div>
+          </li>
+        </ul>
+        <div class="phase-note">Plus: Cabling &amp; licensed installation ~$1,500–2,500</div>
+      </div>
+
+      <!-- Phase 3 Full Gym -->
+      <div class="phase-card phase-full">
+        <div class="phase-header">
+          <div class="phase-number">Phase 3 — End Game</div>
+          <h3>120 Machines — Full Gym</h3>
+          <p style="font-size:0.8rem;color:var(--text-dim);margin-top:4px;">Complete 360-camera AI Overseer system</p>
+          <div class="phase-total">
+            <div class="phase-total-label">Estimated Total (hardware + install)</div>
+            <div class="phase-total-amount">$120–130k</div>
+          </div>
+        </div>
+        <ul class="phase-items">
+          <li class="phase-item" style="border-color:rgba(139,92,246,0.2);">
+            <div class="phase-item-left">
+              <div class="phase-item-name">360 Total Cameras</div>
+              <div class="phase-item-qty">120× Cam 1 + 120× Cam 2 + 120× Cam 3</div>
+            </div>
+            <div class="phase-item-price">~$56k</div>
+          </li>
+          <li class="phase-item" style="border-color:rgba(139,92,246,0.2);">
+            <div class="phase-item-left">
+              <div class="phase-item-name">PoE Switching Infrastructure</div>
+              <div class="phase-item-qty">Multiple Ubiquiti USW-Pro-24-PoE units + core switch</div>
+            </div>
+            <div class="phase-item-price">~$8k</div>
+          </li>
+          <li class="phase-item" style="border-color:rgba(139,92,246,0.2);">
+            <div class="phase-item-left">
+              <div class="phase-item-name">Storage + NAS</div>
+              <div class="phase-item-qty">Synology DS923+ + 4× 8TB HDDs</div>
+            </div>
+            <div class="phase-item-price">~$1,800</div>
+          </li>
+          <li class="phase-item" style="border-color:rgba(139,92,246,0.2);">
+            <div class="phase-item-left">
+              <div class="phase-item-name">CAT6A Cabling — Full Gym</div>
+              <div class="phase-item-qty">~360 runs × avg 15m + conduit + fittings</div>
+            </div>
+            <div class="phase-item-price">~$15k</div>
+          </li>
+          <li class="phase-item" style="border-color:rgba(139,92,246,0.2);">
+            <div class="phase-item-left">
+              <div class="phase-item-name">Mounting Hardware (360 units)</div>
+              <div class="phase-item-qty">Brackets, junction boxes, threaded rod kits</div>
+            </div>
+            <div class="phase-item-price">~$8k</div>
+          </li>
+          <li class="phase-item" style="border-color:rgba(139,92,246,0.2);">
+            <div class="phase-item-left">
+              <div class="phase-item-name">Licensed Installation Labour</div>
+              <div class="phase-item-qty">ACMA cabler + electrician + commissioning</div>
+            </div>
+            <div class="phase-item-price">~$35k</div>
+          </li>
+        </ul>
+        <div class="phase-note">See full financial report for detailed per-machine cost breakdown</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 7 — FAQ
+═══════════════════════════════════════════════ -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Section 7</div>
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <p class="section-subtitle">Common questions about gym camera installation in Australia.</p>
+    </div>
+
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Do I need planning permission to install security cameras in a gym in Australia?</h4>
+          <div class="faq-chevron">▼</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>Generally, <strong>no planning permission is required</strong> for internal CCTV cameras in a privately owned commercial premises. However, you must comply with the <strong>Privacy Act 1988</strong> (Cth) and relevant state surveillance legislation.</p>
+            <br>
+            <p>Key requirements include:</p>
+            <ul style="margin: 12px 0 12px 20px; color: var(--text-muted); font-size: 0.83rem;">
+              <li style="margin-bottom:6px;">Display clearly visible signage notifying members that CCTV is in operation</li>
+              <li style="margin-bottom:6px;">Have a documented <strong>CCTV Privacy Policy</strong> outlining what is recorded, how long it's stored, and who can access it</li>
+              <li style="margin-bottom:6px;">Cameras must not record areas where privacy is expected (e.g., change rooms, toilets)</li>
+              <li style="margin-bottom:6px;">AI biometric data collection (face recognition, gait analysis) may require additional consent</li>
+            </ul>
+            <p>For AI rep counting that captures body pose data, include specific consent in your membership agreement. Consult a privacy lawyer for your specific use case.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>What is the maximum camera run length on CAT6/CAT6A?</h4>
+          <div class="faq-chevron">▼</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>The IEEE 802.3af/at PoE standard specifies a maximum run of <strong>100 metres (328ft) of CAT6/CAT6A</strong> from switch to camera. This covers both data and power transmission.</p>
+            <br>
+            <p>In practice for XL Fitness:</p>
+            <ul style="margin: 12px 0 12px 20px; color: var(--text-muted); font-size: 0.83rem;">
+              <li style="margin-bottom:6px;">Most camera runs will be <strong>15–25m</strong> — well within limits</li>
+              <li style="margin-bottom:6px;">Use <strong>CAT6A</strong> (not standard CAT6) for better performance and PoE power delivery efficiency</li>
+              <li style="margin-bottom:6px;">If a run must exceed 90m, use a <strong>PoE extender/repeater</strong> (e.g., TP-Link TL-PoE170S) — adds another 100m</li>
+              <li style="margin-bottom:6px;">Never use pre-made cables for ceiling runs — always terminate bulk cable with proper RJ45 keystones</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>Can I do the camera installation myself?</h4>
+          <div class="faq-chevron">▼</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>Partially. Australian law has specific requirements:</p>
+            <ul style="margin: 12px 0 12px 20px; color: var(--text-muted); font-size: 0.83rem;">
+              <li style="margin-bottom:6px;"><span class="check">✓ DIY:</span> Camera mounting, aiming, and configuration once cabling is installed</li>
+              <li style="margin-bottom:6px;"><span class="cross">✗ Must be licensed:</span> All data cabling (CAT6/CAT6A runs) requires an <strong>ACMA-registered Open Cabling cabler</strong> — this is a licensed trade in Australia</li>
+              <li style="margin-bottom:6px;"><span class="cross">✗ Must be licensed:</span> Any 240V power connections for switches/NAS require a <strong>licensed electrician</strong></li>
+            </ul>
+            <p>Recommendation: <strong>hire a cabler to install all CAT6A runs and patch panels</strong>, then handle camera mounting, aiming, and software configuration yourself to save cost.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>What internet speed do I need for remote access / cloud backup?</h4>
+          <div class="faq-chevron">▼</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>For the XL Fitness AI Overseer system, internet speed requirements depend on your architecture:</p>
+            <ul style="margin: 12px 0 12px 20px; color: var(--text-muted); font-size: 0.83rem;">
+              <li style="margin-bottom:6px;"><strong>Local AI processing only (Mac Mini M4 Pro edge):</strong> Minimal internet required — AI runs locally. Only remote access/dashboard needs bandwidth (~10–25 Mbps upload)</li>
+              <li style="margin-bottom:6px;"><strong>Cloud backup of footage:</strong> At 2MP / 30fps per camera, each camera uses ~1–2 Mbps continuously. For 15 cameras: ~20–30 Mbps sustained upload. A business fibre connection of <strong>100 Mbps symmetric</strong> is ideal.</li>
+              <li style="margin-bottom:6px;"><strong>Phase 1 (1 machine):</strong> Any standard NBN business connection (25+ Mbps) is more than enough</li>
+            </ul>
+            <p>For Phase 2 and beyond, recommend a <strong>business-grade NBN 250 or Enterprise Ethernet</strong> connection to the gym.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <h4>How long does footage need to be stored legally in Australia?</h4>
+          <div class="faq-chevron">▼</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>There is <strong>no single national law</strong> specifying a minimum CCTV retention period for commercial gyms in Australia — it varies by state and context.</p>
+            <br>
+            <p>General guidance for a gym:</p>
+            <ul style="margin: 12px 0 12px 20px; color: var(--text-muted); font-size: 0.83rem;">
+              <li style="margin-bottom:6px;"><strong>Minimum recommended:</strong> 30 days — covers most incident investigation windows</li>
+              <li style="margin-bottom:6px;"><strong>Industry best practice:</strong> 90 days for commercial fitness facilities</li>
+              <li style="margin-bottom:6px;"><strong>Insurance requirements:</strong> Your insurer may specify a minimum — check your policy</li>
+              <li style="margin-bottom:6px;"><strong>Incident footage:</strong> If an incident occurs, retain the relevant footage indefinitely until resolved</li>
+              <li style="margin-bottom:6px;"><strong>AI training data:</strong> Data used for AI model training requires explicit member consent and should be anonymised where possible</li>
+            </ul>
+            <p>Document your retention policy in writing and review it with your legal advisor annually. The <strong>OAIC (Office of the Australian Information Commissioner)</strong> has guidelines on CCTV and privacy at oaic.gov.au.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-logo">
+      <div class="nav-logo-icon" style="width:28px;height:28px;font-size:14px;">📷</div>
+      XL Fitness AI Camera System
+    </div>
+    <p style="margin-top:8px;">Complete Buying &amp; Installation Guide · Version 1.0 · 2025</p>
+    <p style="margin-top:6px;">Australia's First Tech-Enabled Gym · <a href="https://www.xlfitness.com.au/" target="_blank">xlfitness.com.au</a></p>
+    <p style="margin-top:16px;font-size:0.72rem;color:var(--text-dim);">
+      Prices listed are approximate AUD estimates. Verify current pricing with retailers before purchasing.
+      All installation work involving data cabling must be performed by an ACMA-registered cabler.
+    </p>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT — FAQ Toggle + Nav Active State
+═══════════════════════════════════════════════ -->
+<script>
+  // FAQ accordion toggle
+  function toggleFaq(questionEl) {
+    const item = questionEl.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+
+    // Close all open FAQs
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+
+    // Open clicked if it wasn't already open
+    if (!isOpen) {
+      item.classList.add('open');
+    }
+  }
+
+  // Active nav link on scroll
+  const sections = document.querySelectorAll('section[id], footer');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, {
+    rootMargin: '-20% 0px -60% 0px',
+    threshold: 0
+  });
+
+  document.querySelectorAll('section[id]').forEach(section => observer.observe(section));
+
+  // Smooth open first FAQ on load for demo
+  // (disabled — better to let user discover)
+</script>
+
+</body>
+</html>
