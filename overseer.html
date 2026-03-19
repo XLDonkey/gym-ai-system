@@ -1414,6 +1414,7 @@ ol.styled li::before {
       <a class="nav-item" href="#training">05 — Training Plan</a>
 
       <div class="nav-section-label">Infrastructure</div>
+      <a class="nav-item" href="#nn-architecture">05b — NN Architecture
       <a class="nav-item" href="#rig">06 — Physical Rig</a>
       <a class="nav-item" href="#network">07 — Network</a>
       <a class="nav-item" href="#integration">08 — Integration</a>
@@ -2304,6 +2305,248 @@ session_20260320_1430_lat_pulldown.mp4</code></pre>
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- ========================================================
+         SECTION 5b: NEURAL NETWORK ARCHITECTURE
+         ======================================================== -->
+    <section id="nn-architecture">
+      <div class="section-eyebrow">Section 05b</div>
+      <h2 class="section-title">Neural Network Architecture</h2>
+      <p class="section-desc">
+        How the AI brain is structured — from raw camera pixels to "good rep" or "bad rep". 
+        This covers every layer of every model, why we chose the architecture, and how it evolves as we collect more data.
+      </p>
+
+      <!-- OVERVIEW -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">Pipeline Overview</h3>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:2;margin-bottom:28px;overflow-x:auto;">
+        <span style="color:#6b7280;">Camera frame (1920×1080) ─────────────────────────────────┐</span><br/>
+        <span style="color:#a855f7;">  ↓  MoveNet Lightning (pre-trained, frozen)</span><br/>
+        <span style="color:#6b7280;">  17 keypoints × (x, y, confidence) = 51 values</span><br/>
+        <span style="color:#a855f7;">  ↓  Feature extraction</span><br/>
+        <span style="color:#6b7280;">  [min_angle, ROM, std_angle, duration_s, avg_angle]  ← v4 MLP input</span><br/>
+        <span style="color:#6b7280;">  [angle_t0, angle_t1, ... angle_t30]                 ← v5 LSTM input</span><br/>
+        <span style="color:#a855f7;">  ↓  Classifier</span><br/>
+        <span style="color:#22c55e;">  Output: good_rep / bad_rep / false_movement</span>
+      </div>
+
+      <!-- MODEL V4 — CURRENT MLP -->
+      <h3 style="color:#22c55e;font-size:.82rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">Model v4 — Current (MLP) ✅ Live</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;">
+          <div style="font-size:.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Architecture</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:2.2;">
+            <div style="color:#a855f7;">Input Layer</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">5 features:<br/>min_angle, ROM, std_angle,<br/>duration_s, avg_angle</div>
+            <div style="color:#a855f7;margin-top:6px;">Hidden Layer 1</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">32 neurons · ReLU</div>
+            <div style="color:#a855f7;margin-top:6px;">Hidden Layer 2</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">32 neurons · ReLU</div>
+            <div style="color:#22c55e;margin-top:6px;">Output Layer</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">3 neurons · Softmax<br/>good_rep / bad_rep / false_movement</div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;">
+          <div style="font-size:.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Stats</div>
+          <table style="font-size:.82rem;width:100%;border-collapse:collapse;">
+            <tr><td style="color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border);">Accuracy</td><td style="color:#fff;text-align:right;padding:5px 0;border-bottom:1px solid var(--border);">75.1% CV</td></tr>
+            <tr><td style="color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border);">Training sequences</td><td style="color:#fff;text-align:right;padding:5px 0;border-bottom:1px solid var(--border);">445</td></tr>
+            <tr><td style="color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border);">Parameters</td><td style="color:#fff;text-align:right;padding:5px 0;border-bottom:1px solid var(--border);">~800</td></tr>
+            <tr><td style="color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border);">Solver</td><td style="color:#fff;text-align:right;padding:5px 0;border-bottom:1px solid var(--border);">Adam</td></tr>
+            <tr><td style="color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border);">Input type</td><td style="color:#fff;text-align:right;padding:5px 0;border-bottom:1px solid var(--border);">Summary stats</td></tr>
+            <tr><td style="color:var(--muted);padding:5px 0;">Status</td><td style="text-align:right;padding:5px 0;"><span style="background:rgba(34,197,94,.15);color:#22c55e;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700;">LIVE</span></td></tr>
+          </table>
+        </div>
+      </div>
+      <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:14px 18px;margin-bottom:28px;font-size:.85rem;color:#c4b5d4;">
+        <strong style="color:#f59e0b;">⚠ Limitation:</strong> The MLP squashes an entire rep down to 5 summary numbers. Two reps can have identical averages but completely different movement patterns — one smooth and controlled, one jerky and rushed. The MLP can't tell them apart because it throws away all timing information.
+      </div>
+
+      <!-- MODEL V5 — LSTM -->
+      <h3 style="color:#f59e0b;font-size:.82rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">Model v5 — Next (LSTM) 🔜 Needs 500+ sequences</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;">
+          <div style="font-size:.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Architecture</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:2.2;">
+            <div style="color:#a855f7;">Input Layer</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">Sequence of 30 frames<br/>1 angle value per frame<br/>Shape: (30, 1)</div>
+            <div style="color:#a855f7;margin-top:6px;">LSTM Layer 1</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">64 units · return_sequences=True<br/>Dropout 0.2</div>
+            <div style="color:#a855f7;margin-top:6px;">LSTM Layer 2</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">32 units · return_sequences=False<br/>Dropout 0.2</div>
+            <div style="color:#a855f7;margin-top:6px;">Dense Layer</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">16 neurons · ReLU</div>
+            <div style="color:#22c55e;margin-top:6px;">Output Layer</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">3 neurons · Softmax<br/>good_rep / bad_rep / false_movement</div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;">
+          <div style="font-size:.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Why LSTM beats MLP</div>
+          <ul style="font-size:.82rem;color:#c4b5d4;list-style:none;padding:0;line-height:2;">
+            <li>✅ Sees the full movement over time</li>
+            <li>✅ Detects momentum and velocity</li>
+            <li>✅ Catches jerky vs smooth reps</li>
+            <li>✅ Recognises timing patterns</li>
+            <li>✅ Handles variable rep duration</li>
+            <li style="margin-top:8px;color:var(--muted);">Target accuracy: 90%+</li>
+            <li style="color:var(--muted);">Unlock: 500+ labeled sequences</li>
+            <li style="color:var(--muted);">Framework: TensorFlow / Keras</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- MODEL V6 — MULTI-JOINT LSTM -->
+      <h3 style="color:#a855f7;font-size:.82rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">Model v6 — Phase 2 (Multi-Joint LSTM) 🔜 Planned</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;">
+          <div style="font-size:.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Architecture</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:2.2;">
+            <div style="color:#a855f7;">Input Layer</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">Sequence of 30 frames<br/>4 angles per frame:<br/>elbow, shoulder, hip, torso<br/>Shape: (30, 4)</div>
+            <div style="color:#a855f7;margin-top:6px;">LSTM Layer 1</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">128 units · return_sequences=True<br/>Dropout 0.3</div>
+            <div style="color:#a855f7;margin-top:6px;">LSTM Layer 2</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">64 units · return_sequences=False<br/>Dropout 0.2</div>
+            <div style="color:#a855f7;margin-top:6px;">Dense Layer 1</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">32 neurons · ReLU</div>
+            <div style="color:#22c55e;margin-top:6px;">Output Layer</div>
+            <div style="color:#6b7280;font-size:.72rem;padding-left:12px;">7 neurons · Softmax<br/>All 7 states (incl. rest, seated)</div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;">
+          <div style="font-size:.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">What it adds</div>
+          <ul style="font-size:.82rem;color:#c4b5d4;list-style:none;padding:0;line-height:2;">
+            <li>✅ Back arch detection (hip angle)</li>
+            <li>✅ Shoulder shrug detection</li>
+            <li>✅ Torso lean / swing</li>
+            <li>✅ Full form score 0–100</li>
+            <li>✅ 7 output states (not 3)</li>
+            <li style="margin-top:8px;color:var(--muted);">Target accuracy: 95%+</li>
+            <li style="color:var(--muted);">Unlock: Phase 2 multi-person data</li>
+            <li style="color:var(--muted);">Input joints: elbow + shoulder + hip + torso</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- LAYER SUMMARY TABLE -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">Layer Summary Across All Models</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:28px;">
+        <thead>
+          <tr style="background:#160e2a;">
+            <th style="padding:10px 14px;text-align:left;color:#fff;font-weight:600;">Model</th>
+            <th style="padding:10px 14px;text-align:left;color:#fff;font-weight:600;">Input</th>
+            <th style="padding:10px 14px;text-align:left;color:#fff;font-weight:600;">Hidden Layers</th>
+            <th style="padding:10px 14px;text-align:left;color:#fff;font-weight:600;">Output</th>
+            <th style="padding:10px 14px;text-align:left;color:#fff;font-weight:600;">Classes</th>
+            <th style="padding:10px 14px;text-align:left;color:#fff;font-weight:600;">Accuracy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#22c55e;font-weight:700;">v4 MLP</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">5 summary stats</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">Dense(32) → Dense(32)</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">Dense(3) Softmax</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">3</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#22c55e;">75%</td>
+          </tr>
+          <tr style="background:rgba(255,255,255,.02);">
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#f59e0b;font-weight:700;">v5 LSTM</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">30 frames × 1 angle</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">LSTM(64) → LSTM(32) → Dense(16)</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">Dense(3) Softmax</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">3</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#f59e0b;">90%+ est.</td>
+          </tr>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#a855f7;font-weight:700;">v6 Multi-Joint</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">30 frames × 4 angles</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">LSTM(128) → LSTM(64) → Dense(32)</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">Dense(7) Softmax</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">7</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#a855f7;">95%+ est.</td>
+          </tr>
+          <tr style="background:rgba(255,255,255,.02);">
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#6b7280;font-weight:700;">Weight Detector</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">Image ROI (bounding box)</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">Colour detection (HSV)</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">Weight in kg</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">N/A</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#6b7280;">TBD</td>
+          </tr>
+          <tr>
+            <td style="padding:9px 14px;color:#6b7280;font-weight:700;">Face Re-ID</td>
+            <td style="padding:9px 14px;color:#c4b5d4;">Face crop (112×112)</td>
+            <td style="padding:9px 14px;color:#c4b5d4;">ResNet50 backbone → embeddings</td>
+            <td style="padding:9px 14px;color:#c4b5d4;">Member ID + confidence</td>
+            <td style="padding:9px 14px;color:#c4b5d4;">N members</td>
+            <td style="padding:9px 14px;color:#6b7280;">TBD</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- WHY THESE NUMBERS -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">Why These Layer Sizes?</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+          <div style="color:#a855f7;font-weight:700;margin-bottom:8px;font-size:.88rem;">Input — why 5 features (v4)?</div>
+          <p style="font-size:.78rem;color:#c4b5d4;line-height:1.6;">These 5 numbers capture the most predictive aspects of a rep without needing temporal data. min_angle tells us how deep the pull was. ROM tells us range. duration_s catches rushers. std_angle catches jerky movement. avg_angle gives context.</p>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+          <div style="color:#a855f7;font-weight:700;margin-bottom:8px;font-size:.88rem;">Hidden — why 32×32?</div>
+          <p style="font-size:.78rem;color:#c4b5d4;line-height:1.6;">With only 445 training examples and 3 output classes, a larger network would overfit — memorise training data instead of learning general patterns. 32×32 is the sweet spot: complex enough to learn the task, small enough to generalise. Tested larger (64×32) — no improvement.</p>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+          <div style="color:#a855f7;font-weight:700;margin-bottom:8px;font-size:.88rem;">Output — why 3 classes?</div>
+          <p style="font-size:.78rem;color:#c4b5d4;line-height:1.6;">good_rep, bad_rep, false_movement are mutually exclusive and cover every case. Adding more classes (e.g. partial_rep) splits training data further, hurting each class. 3 classes maps cleanly to the business logic: count it / flag it / ignore it.</p>
+        </div>
+      </div>
+
+      <!-- TRAINING SEQUENCE REQUIREMENT -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">Data Requirements Per Model</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:16px;">
+        <thead>
+          <tr style="background:#160e2a;">
+            <th style="padding:10px 14px;text-align:left;color:#fff;font-weight:600;">Model</th>
+            <th style="padding:10px 14px;text-align:left;color:#fff;font-weight:600;">Min sequences</th>
+            <th style="padding:10px 14px;text-align:left;color:#fff;font-weight:600;">Currently have</th>
+            <th style="padding:10px 14px;text-align:left;color:#fff;font-weight:600;">Gap</th>
+            <th style="padding:10px 14px;text-align:left;color:#fff;font-weight:600;">Est. filming time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#22c55e;">v4 MLP (live)</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">200+</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#22c55e;">445 ✅</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#22c55e;">Done</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#6b7280;">—</td>
+          </tr>
+          <tr style="background:rgba(255,255,255,.02);">
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#f59e0b;">v5 LSTM</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">500+</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#f59e0b;">445 ⚠</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#f59e0b;">55 sequences</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">~1–2 gym sessions</td>
+          </tr>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#a855f7;">v6 Multi-Joint</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">1,000+</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#ef4444;">445 🔴</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#ef4444;">555 sequences</td>
+            <td style="padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;">~5–6 gym sessions, multiple people</td>
+          </tr>
+          <tr style="background:rgba(255,255,255,.02);">
+            <td style="padding:9px 14px;color:#6b7280;">Face Re-ID</td>
+            <td style="padding:9px 14px;color:#c4b5d4;">50+ faces × 20 images</td>
+            <td style="padding:9px 14px;color:#ef4444;">0 🔴</td>
+            <td style="padding:9px 14px;color:#ef4444;">Needs member photos</td>
+            <td style="padding:9px 14px;color:#c4b5d4;">Phase 3 onboarding flow</td>
+          </tr>
+        </tbody>
+      </table>
+
     </section>
 
     <!-- ========================================================
