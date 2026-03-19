@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>XL Fitness AI Overseer — Deep Dive</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Space+Grotesk:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#06040f;--card:#0d0a18;--border:#1c1530;--purple:#8b5cf6;--purpleL:#a855f7;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--txt:#e2d9f3;--muted:#6b7280;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7;}
+
+nav{position:sticky;top:0;z-index:99;background:rgba(6,4,15,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+nav a{padding:14px 14px;font-size:.72rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;}
+nav a:hover,nav a.active{color:var(--purpleL);border-bottom-color:var(--purpleL);}
+
+.page{max-width:900px;margin:0 auto;padding:48px 24px;}
+h1{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:900;color:#fff;margin:56px 0 8px;padding-bottom:12px;border-bottom:3px solid var(--purple);}
+h2{font-size:1.1rem;font-weight:700;color:#fff;margin:32px 0 10px;}
+h3{font-size:.88rem;font-weight:700;color:var(--purpleL);margin:22px 0 8px;text-transform:uppercase;letter-spacing:1px;}
+p{margin-bottom:14px;color:#c4b5d4;}
+ul,ol{margin:0 0 16px 20px;color:#c4b5d4;}
+li{margin-bottom:6px;}
+strong{color:#fff;}
+
+.hero{padding:64px 0 48px;text-align:center;border-bottom:1px solid var(--border);margin-bottom:0;}
+.hero-logo{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:900;letter-spacing:6px;color:var(--purpleL);margin-bottom:12px;}
+.hero-title{font-family:'Space Grotesk',sans-serif;font-size:2.4rem;font-weight:900;color:#fff;margin-bottom:8px;line-height:1.2;}
+.hero-sub{font-size:1rem;color:var(--muted);margin-bottom:32px;}
+.hero-badge{display:inline-block;background:var(--purple);color:#fff;font-size:.72rem;font-weight:700;padding:4px 14px;border-radius:20px;letter-spacing:1px;}
+
+.box{border-radius:10px;padding:16px 20px;margin:16px 0;}
+.box-purple{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);}
+.box-green{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);}
+.box-amber{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);}
+.box-red{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);}
+.box-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.box-purple .box-title{color:var(--purpleL);}
+.box-green .box-title{color:var(--green);}
+.box-amber .box-title{color:var(--amber);}
+.box-red .box-title{color:var(--red);}
+
+table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:.88rem;}
+th{background:#160e2a;color:#fff;padding:10px 14px;text-align:left;font-weight:600;}
+td{padding:9px 14px;border-bottom:1px solid var(--border);color:#c4b5d4;vertical-align:top;}
+tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+
+code,pre{font-family:'JetBrains Mono',monospace;}
+pre{background:#0a0615;border:1px solid var(--border);border-radius:8px;padding:18px 20px;overflow-x:auto;font-size:.8rem;line-height:1.7;color:#c4b5d4;margin:12px 0 20px;}
+code{background:#160e2a;padding:2px 6px;border-radius:3px;font-size:.82rem;color:var(--purpleL);}
+
+/* Camera diagram */
+.cam-diagram{background:#0a0615;border:1px solid var(--border);border-radius:10px;padding:28px;margin:20px 0;font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:1.9;overflow-x:auto;}
+.cd-title{color:var(--muted);margin-bottom:12px;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;}
+.cd-cam1{color:#a855f7;}
+.cd-cam2{color:#22c55e;}
+.cd-cam3{color:#f59e0b;}
+.cd-machine{color:#60a5fa;}
+.cd-user{color:#f472b6;}
+
+/* State cards */
+.state-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
+@media(max-width:600px){.state-grid{grid-template-columns:1fr;}}
+.state-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.state-label{font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.state-name{font-size:.95rem;font-weight:700;color:#fff;margin-bottom:8px;}
+.state-desc{font-size:.8rem;color:var(--muted);line-height:1.6;}
+
+/* Flow diagram */
+.flow{margin:20px 0;}
+.flow-step{display:flex;align-items:flex-start;gap:14px;margin-bottom:2px;}
+.flow-num{background:var(--purple);color:#fff;font-size:.72rem;font-weight:800;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.flow-line{width:2px;background:var(--border);margin:0 12px;height:24px;}
+.flow-content{flex:1;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.04);}
+.flow-title{font-size:.85rem;font-weight:700;color:#fff;margin-bottom:2px;}
+.flow-detail{font-size:.78rem;color:var(--muted);}
+
+/* Checklist */
+.checklist{list-style:none;margin:0 0 16px 0;}
+.checklist li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.88rem;color:#c4b5d4;}
+.checklist li::before{content:'□';color:var(--purple);font-size:1rem;flex-shrink:0;margin-top:1px;}
+
+.badge{display:inline-block;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;}
+.badge-green{background:rgba(34,197,94,.15);color:var(--green);}
+.badge-amber{background:rgba(245,158,11,.15);color:var(--amber);}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red);}
+.badge-purple{background:rgba(139,92,246,.15);color:var(--purpleL);}
+
+.footer{margin-top:80px;padding-top:24px;border-top:1px solid var(--border);font-size:.75rem;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+
+@media print{nav{display:none;}h1{page-break-before:always;}.hero{page-break-after:always;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#cameras">📷 Cameras</a>
+  <a href="#training">🧠 Training</a>
+  <a href="#hardware">🔌 Hardware</a>
+  <a href="#software">💻 Software</a>
+  <a href="#dataflow">📊 Data Flow</a>
+  <a href="#rest">⏱ Rest Time</a>
+  <a href="#setup">🔧 Setup</a>
+</nav>
+
+<div class="page">
+
+<div class="hero">
+  <div class="hero-logo">XLFITNESS</div>
+  <div class="hero-title">AI Overseer — Deep Dive</div>
+  <div class="hero-sub">Every component. Every connection. Every decision. Explained plainly.</div>
+  <div class="hero-badge">Technical Reference — March 2026</div>
+</div>
+
+<!-- SECTION 1: CAMERAS -->
+<h1 id="cameras">1. Camera Placement</h1>
+
+<div class="box box-amber">
+  <div class="box-title">⚠️ Key Insight Before Anything Else</div>
+  <p style="margin:0">Only <strong>1 of the 3 cameras per machine goes in or near the ceiling</strong>. The other 2 go on walls, columns, or the machine itself. Drilling into the ceiling is a Phase 2 decision — Phase 1 can be done without touching the ceiling at all.</p>
+</div>
+
+<h2>Camera 1 — Face ID / Occupancy</h2>
+<table>
+  <tr><th>Factor</th><th>Detail</th></tr>
+  <tr><td><strong>Where</strong></td><td>Ceiling or high on a wall/column (2.5m+), looking down at the machine zone</td></tr>
+  <tr><td><strong>Why ceiling?</strong></td><td>Overhead view shows the face and body clearly. One camera covers 4–6 machines.</td></tr>
+  <tr><td><strong>Phase 1 alternative</strong></td><td>Mount high on the purple column (2.5m), angled down. No ceiling required. Works fine for occupancy detection.</td></tr>
+  <tr><td><strong>Ceiling mounting</strong></td><td>Span bracket across two T-bar metal rails — NO drilling into tiles required. Cable routes through the plenum (tile void above).</td></tr>
+  <tr><td><strong>Who installs?</strong></td><td>Cable run: ACMA-registered data cabler. Bracket mounting: DIY once cable is there.</td></tr>
+</table>
+
+<h2>Camera 2 — Rep Counter / Form (THE CRITICAL ONE)</h2>
+<table>
+  <tr><th>Factor</th><th>Detail</th></tr>
+  <tr><td><strong>Where</strong></td><td>Side-on, wall/column mount. <strong>NOT the ceiling.</strong></td></tr>
+  <tr><td><strong>Why NOT ceiling?</strong></td><td>Directly overhead is the worst angle for pose estimation. Looking straight down, arms foreshorten and the elbow angle completely disappears. MoveNet needs to see the arm in profile — like a side-on photo.</td></tr>
+  <tr><td><strong>Height</strong></td><td>1.2–1.5m — shoulder height of a seated user</td></tr>
+  <tr><td><strong>Distance</strong></td><td>2–3m from the machine seat</td></tr>
+  <tr><td><strong>Mount point</strong></td><td>The purple structural columns at XL Fitness are ideal — solid, correct position, already have fixings. Magic arm clamp for Phase 1 (~$50).</td></tr>
+  <tr><td><strong>Window warning</strong></td><td>ALWAYS face INWARD, away from windows. Windows behind the camera = user is lit from front. Windows behind the user = silhouette. Silhouette = MoveNet fails.</td></tr>
+  <tr><td><strong>Who installs?</strong></td><td>Clamp mount: DIY. Cable run: Licensed cabler.</td></tr>
+</table>
+
+<h2>Camera 3 — Weight Stack</h2>
+<table>
+  <tr><th>Factor</th><th>Detail</th></tr>
+  <tr><td><strong>Where</strong></td><td>Machine frame or adjacent wall, horizontal shot at the weight stack</td></tr>
+  <tr><td><strong>Why horizontal?</strong></td><td>The weight selector pin is on the side of the stack. A horizontal shot captures which pin is selected and which plates are above it. Ceiling angle gives a confusing downward view.</td></tr>
+  <tr><td><strong>Distance</strong></td><td>0.5–1m from the weight stack</td></tr>
+  <tr><td><strong>Who installs?</strong></td><td>Mount: DIY. Cable: Licensed cabler.</td></tr>
+</table>
+
+<div class="cam-diagram">
+  <div class="cd-title">Side view of machine — camera positions</div>
+<span class="cd-cam1">📷 CAM 1 (overhead, high on column or ceiling)</span>
+         ↓
+<span class="cd-cam1">         ↓ ↓ ↓   (looking down, covers whole zone)</span>
+
+<span class="cd-cam2">📷 CAM 2 ————→</span> <span class="cd-machine">[LAT PULLDOWN MACHINE]</span> <span class="cd-cam3">←— 📷 CAM 3</span>
+<span class="cd-cam2">(side-on, 2-3m away</span>     <span class="cd-user">      👤 USER         </span>  <span class="cd-cam3">(tight, 0.5-1m)</span>
+<span class="cd-cam2"> col. mount, 1.3m high)</span>                         <span class="cd-cam3">  (weight stack)</span>
+
+<span class="cd-cam2">GREEN = Camera 2 position</span>  |  <span class="cd-cam3">AMBER = Camera 3 position</span>  |  <span class="cd-cam1">PURPLE = Camera 1 position</span>
+</div>
+
+<div class="box box-green">
+  <div class="box-title">✅ Phase 1 — No Ceiling Work Required</div>
+  <p style="margin:0">For the prototype: mount Camera 2 on the purple column with a magic arm clamp ($50). That's it. No electrician, no cabler, no ceiling work. Just a clamp and a tablet/phone. Get the system counting reps first — worry about permanent installation in Phase 2.</p>
+</div>
+
+<!-- SECTION 2: TRAINING -->
+<h1 id="training">2. What the AI Learns — Training States</h1>
+
+<p>The AI Overseer needs to recognise 7 different states. Each state needs training data — real footage of that state happening. Here's what each one is and how to film it.</p>
+
+<div class="state-grid">
+  <div class="state-card">
+    <div class="state-label" style="color:#6b7280;">State 1</div>
+    <div class="state-name">⬜ No User Present</div>
+    <div class="state-desc">Empty machine. No one in frame at all. Tells the system the machine is free. Film: just let the camera run when the machine is empty.</div>
+  </div>
+  <div class="state-card">
+    <div class="state-label" style="color:#60a5fa;">State 2</div>
+    <div class="state-name">🚶 User Present, Not Engaged</div>
+    <div class="state-desc">Someone near the machine but not using it — walking past, adjusting the seat, talking. Film: walk near the machine, stand around it without sitting.</div>
+  </div>
+  <div class="state-card">
+    <div class="state-label" style="color:#a855f7;">State 3</div>
+    <div class="state-name">🪑 Seated, Engaged</div>
+    <div class="state-desc">Person seated, gripping bar, ready to pull. This is the TRIGGER — when AI sees this it activates rep counting. Film: sit down, grip bar, hold still 3–5 seconds.</div>
+  </div>
+  <div class="state-card">
+    <div class="state-label" style="color:#22c55e;">State 4</div>
+    <div class="state-name">✅ Good Rep</div>
+    <div class="state-desc">Full pull-down, controlled return, proper form. Full range of motion (bar to chest level). Film: do proper lat pulldowns, full ROM, controlled tempo, back straight.</div>
+  </div>
+  <div class="state-card">
+    <div class="state-label" style="color:#ef4444;">State 5</div>
+    <div class="state-name">⚠️ Bad Rep</div>
+    <div class="state-desc">Partial pull, excessive swing/lean-back, rushed. Film: deliberately bad reps — lean way back and swing, only pull halfway, rush the movement.</div>
+  </div>
+  <div class="state-card">
+    <div class="state-label" style="color:#f59e0b;">State 6</div>
+    <div class="state-name">⚡ False Movement</div>
+    <div class="state-desc">Arm movements that aren't reps — adjusting grip, reaching for towel, talking with arms, scratching head. Film: sit at machine and make various non-rep arm movements.</div>
+  </div>
+</div>
+
+<div class="state-card" style="margin-bottom:16px;">
+  <div class="state-label" style="color:#94a3b8;">State 7</div>
+  <div class="state-name">⏱ Rest Between Sets</div>
+  <div class="state-desc" style="color:var(--muted);">Seated at machine, not pulling. Resting, checking phone, breathing. Tracking this gives rest time data and prevents false counting. Film: sit at machine between sets and rest naturally for 60–120 seconds.</div>
+</div>
+
+<h2>A Typical Set — Timeline</h2>
+<div class="cam-diagram">
+TIME →→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→
+
+<span class="cd-cam1">[SEATED]</span> → <span class="cd-cam2">[REP]</span><span class="cd-cam2">[REP]</span><span class="cd-cam2">[REP]</span><span class="cd-cam2">[REP]</span><span class="cd-cam2">[REP]</span><span class="cd-cam2">[REP]</span><span class="cd-cam2">[REP]</span><span class="cd-cam2">[REP]</span><span class="cd-cam2">[REP]</span><span class="cd-cam2">[REP]</span> → <span class="cd-cam3">[REST ~90s]</span> → <span class="cd-cam2">[REP×10]</span> → <span class="cd-cam3">[REST]</span> → <span class="cd-cam2">[REP×10]</span> → <span class="cd-cam1">[LEAVES]</span>
+
+<span class="cd-cam1">purple = state</span>  <span class="cd-cam2">green = good rep</span>  <span class="cd-cam3">amber = rest</span>
+</div>
+
+<!-- SECTION 3: HARDWARE -->
+<h1 id="hardware">3. Hardware — Every Component Explained</h1>
+
+<h2>The Cameras</h2>
+
+<h3>PoE — Power over Ethernet</h3>
+<p>The most important thing to understand about these cameras. <strong>One cable does two things</strong> — it carries the video data from the camera to the server, AND it carries power to the camera. You do not need a separate power outlet near each camera. One CAT6 cable to each camera = done.</p>
+
+<h3>Why 1080p and not 4K?</h3>
+<p>MoveNet (the pose AI) internally resizes every frame to 192×192 pixels before processing. Sending 4K video to get 192×192 analysis is like taking a photo with a $5,000 camera to print a thumbnail. 1080p is perfect — anything higher is wasted bandwidth and storage.</p>
+
+<h3>Why 30fps?</h3>
+<p>Rep counting requires smooth motion tracking. At 15fps, fast movements blur between frames and the elbow angle jumps around. At 30fps, the angle changes smoothly and accurately. 60fps adds no benefit for this use case.</p>
+
+<h3>WDR — Wide Dynamic Range</h3>
+<p>XL Fitness has floor-to-ceiling windows on multiple walls. The contrast between the bright outside and the dark gym interior is extreme. WDR handles this by effectively taking two exposures simultaneously — one for the bright areas, one for the dark — and combining them. Without WDR, users near windows become silhouettes. Rated in dB — we want 120dB minimum, 130dB ideal.</p>
+
+<h3>ColorVu vs IR</h3>
+<p>Standard IR cameras give black-and-white vision in low light (the red glow you see in security cameras). ColorVu cameras use a highly sensitive sensor and a white light LED to give full-colour imaging at near-total darkness (0.0005 lux). XL Fitness has a dark, neon-lit interior — ColorVu is the right choice. The neon lighting actually helps.</p>
+
+<table>
+  <tr><th>Component</th><th>Recommended</th><th>Price AUD</th><th>Where to buy</th></tr>
+  <tr><td>Camera 1 (Face ID)</td><td>Hikvision DS-2CD2347G2-LU (4MP ColorVu)</td><td>~$185–220</td><td>securitywholesalers.com.au, cctvguru.com.au</td></tr>
+  <tr><td>Camera 2 (Rep counter)</td><td>Hikvision DS-2CD2T23G2-2I (2MP AcuSense)</td><td>~$120–145</td><td>securitywholesalers.com.au, cctvguru.com.au</td></tr>
+  <tr><td>Camera 3 (Weight stack)</td><td>Hikvision DS-2CD2T23G2-4I (2MP, 4mm lens)</td><td>~$120–145</td><td>securitywholesalers.com.au, cctvguru.com.au</td></tr>
+</table>
+
+<h2>The PoE Switch</h2>
+<p>This is the box that all camera cables plug into. It does two things: gives each camera power over the cable, and routes all the video data to the server. Think of it as a power board and network hub combined into one box. Cameras plug into the front, one cable goes to the server.</p>
+
+<table>
+  <tr><th>Phase</th><th>Product</th><th>Ports</th><th>Price</th></tr>
+  <tr><td>Phase 1 (1 machine)</td><td>TP-Link TL-SG1008P</td><td>8 PoE</td><td>~$120</td></tr>
+  <tr><td>Phase 2 (5 machines)</td><td>Ubiquiti UniFi USW-Lite-16-PoE</td><td>16 PoE</td><td>~$350</td></tr>
+  <tr><td>Full gym (120 machines)</td><td>Ubiquiti UniFi USW-Pro-24-PoE ×15</td><td>24 PoE</td><td>~$1,350 each</td></tr>
+</table>
+
+<h2>The Edge Server — Mac Mini M4 Pro</h2>
+<p>This is the brain. All camera video goes into this box. It runs all the AI models simultaneously, works out what's happening at each machine, and sends results to the database. It sits in a small comms cabinet — members never see it.</p>
+
+<p><strong>Why Mac Mini and not a Windows PC?</strong></p>
+<ul>
+  <li>Apple Silicon (M4) has a dedicated Neural Engine — 38 trillion operations per second specifically designed for AI workloads</li>
+  <li>Runs completely silently — no fans in a gym environment</li>
+  <li>Compact — 197×197×35mm, fits in any comms cabinet</li>
+  <li>Extremely power efficient — 20–40W typical load vs 200–500W for equivalent PC</li>
+  <li>macOS is extremely stable for always-on server use</li>
+  <li>Runs Python, TensorFlow, FastAPI natively</li>
+</ul>
+
+<table>
+  <tr><th>Item</th><th>Spec</th><th>Price AUD</th></tr>
+  <tr><td>Primary server</td><td>Mac Mini M4 Pro, 32GB RAM, 512GB SSD</td><td>~$3,500</td></tr>
+  <tr><td>Backup server</td><td>Mac Mini M4, 16GB RAM</td><td>~$2,200</td></tr>
+  <tr><td>NAS storage</td><td>Synology DS923+ with 4×4TB HDDs</td><td>~$1,800</td></tr>
+</table>
+
+<h2>The Ceiling Void (Plenum)</h2>
+<p>The space between the black suspended tile ceiling you can see and the actual concrete slab roof above it. All cables, pipes and ducts run through here. <strong>The decorative LED halo lights at XL Fitness are already wired through this space</strong> — camera cables will do exactly the same. A cabler pops a tile, threads the cable, replaces the tile. Nothing visible.</p>
+
+<div class="box box-green">
+  <div class="box-title">✅ No Ceiling Tiles Get Drilled</div>
+  <p style="margin:0">Tiles are pushed up and slid aside to access the plenum — they are NOT drilled through. The cable runs through the space above, comes down at the camera location, and the tile sits back in place. Camera bracket clips to the metal T-bar grid rails, or mounts on a column — tiles are untouched.</p>
+</div>
+
+<!-- SECTION 4: SOFTWARE -->
+<h1 id="software">4. How the Software Works</h1>
+
+<h2>Layer 1 — The Camera Feed</h2>
+<p>Each camera streams video continuously over the local network. Think of it as a permanent live video call from each camera to the Mac Mini. The video is compressed using H.265 (the same format used by Netflix) to keep file sizes manageable without losing quality.</p>
+
+<h2>Layer 2 — The AI Models</h2>
+
+<h3>Pose Estimation (Donkey's code — gym-ai-pose)</h3>
+<ol>
+  <li>MoveNet receives each video frame from Camera 2</li>
+  <li>It identifies 17 body landmarks: nose, shoulders, elbows, wrists, hips, knees, ankles</li>
+  <li>The angle between shoulder → elbow → wrist is calculated (the elbow angle)</li>
+  <li>This happens 30 times per second</li>
+  <li>The LSTM model analyses the sequence of angles over time: "is this pattern a rep? Good or bad?"</li>
+  <li>Output: <code>rep_completed, quality: good, confidence: 0.91</code></li>
+</ol>
+
+<h3>Weight Detection (Manus's code — gym-ai-weight)</h3>
+<ol>
+  <li>Camera 3 feeds into the weight detection model</li>
+  <li>A pre-configured bounding box isolates the weight stack in the frame</li>
+  <li>Colour detection identifies tape on plate spines (White=5kg, Yellow=10kg, Blue=20kg)</li>
+  <li>Adds up all detected plates above the selector pin</li>
+  <li>Output: <code>weight_detected: 50kg</code></li>
+</ol>
+
+<h3>Face ID (Phase 3)</h3>
+<ol>
+  <li>Camera 1 captures the member as they sit at the machine</li>
+  <li>The Re-ID model compares their face/body against known member embeddings in the database</li>
+  <li>If confidence &gt; 95%: <code>member_identified: Matt McArdle</code></li>
+  <li>If confidence &lt; 95%: tablet shows "Please tap your card to begin"</li>
+  <li>Card tap = 100% certainty = that data labels the face footage for future retraining</li>
+</ol>
+
+<h2>Layer 3 — The Orchestration Server (Manus building)</h2>
+<p>This is the traffic controller. All the AI models send their results here as JSON events. The server combines everything: "Matt is at machine 7, Camera 3 says he loaded 50kg, Camera 2 says he just did a good rep." It maintains the state machine for each machine in the gym.</p>
+
+<pre>State machine per machine:
+  no_user_present
+       ↓ (face ID or card tap)
+  user_identified
+       ↓ (Camera 2 detects seated pose)
+  user_seated_engaged  ← rep counter ACTIVATES here
+       ↓ (rep detected)
+  rep_completed (×N)
+       ↓ (no movement for 30s)
+  rest_period  ← rest timer starts
+       ↓ (grips bar again)
+  user_seated_engaged
+       ↓ (user leaves frame)
+  session_complete  ← writes to database</pre>
+
+<h2>Layer 4 — The Database (Supabase)</h2>
+<p>All data lives permanently in Supabase — a cloud-hosted PostgreSQL database. Every rep, every set, every session is stored. If the internet goes down, the server buffers locally and syncs when reconnected. Members can access their data from anywhere.</p>
+
+<pre>Tables:
+  members      (id, name, gymmaster_id, face_embedding)
+  sessions     (id, member_id, machine_id, start_time, end_time)
+  sets         (id, session_id, reps, good_reps, weight_kg, form_score, rest_time_s)
+  events       (id, session_id, timestamp, event_type, payload)</pre>
+
+<h2>Layer 5 — The Outputs</h2>
+<ul>
+  <li><strong>Tablet display</strong> — receives webhook → shows rep count live → "Set complete: 10 reps @ 50kg, form 84/100"</li>
+  <li><strong>Leaderboard</strong> — Power BI (interim) or custom dashboard queries Supabase → updates live</li>
+  <li><strong>Member profile</strong> — personal bests, session history, form trends over time</li>
+  <li><strong>Notifications</strong> (future) — "New personal best! 12 reps @ 55kg"</li>
+</ul>
+
+<!-- SECTION 5: DATA FLOW -->
+<h1 id="dataflow">5. The Complete Data Flow</h1>
+<p>Here is exactly what happens when Matt walks in and does a set — every step, every system:</p>
+
+<div class="flow">
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="flow-title">Matt taps NFC card at entry</div><div class="flow-detail">GymMaster logs check-in → sends event to Mac Mini server → server registers "Matt is in the gym"</div></div></div>
+  <div class="flow-line"></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="flow-title">Matt walks to the lat pulldown</div><div class="flow-detail">Camera 1 detects a person entering the machine zone → face ID model activates</div></div></div>
+  <div class="flow-line"></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="flow-title">Face ID identifies Matt</div><div class="flow-detail">97% confidence → server logs "Matt McArdle at machine lat_pulldown_01, 10:23am"</div></div></div>
+  <div class="flow-line"></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><div class="flow-title">Matt loads 50kg and sits down</div><div class="flow-detail">Camera 3 reads weight stack: 2× blue (20kg) + 1× yellow (10kg) = 50kg → logged. Camera 2 detects seated_engaged pose → rep counter activates.</div></div></div>
+  <div class="flow-line"></div>
+  <div class="flow-step"><div class="flow-num">5</div><div class="flow-content"><div class="flow-title">Matt pulls bar down</div><div class="flow-detail">Elbow angle drops: 150° → 120° → 90° → 68°. LSTM recognises the pattern as a rep in progress.</div></div></div>
+  <div class="flow-line"></div>
+  <div class="flow-step"><div class="flow-num">6</div><div class="flow-content"><div class="flow-title">Matt releases — rep complete</div><div class="flow-detail">Elbow angle returns: 68° → 148°. LSTM confirms: "good_rep, confidence 0.91". Server increments rep count to 1. Tablet shows "1 rep".</div></div></div>
+  <div class="flow-line"></div>
+  <div class="flow-step"><div class="flow-num">7</div><div class="flow-content"><div class="flow-title">After 10 reps — rest period</div><div class="flow-detail">Server detects no arm movement for 15 seconds → switches to rest_period state → rest timer starts. Tablet shows "Rest: 0:00 ↑"</div></div></div>
+  <div class="flow-line"></div>
+  <div class="flow-step"><div class="flow-num">8</div><div class="flow-content"><div class="flow-title">Matt grips bar again after 90s</div><div class="flow-detail">Camera 2 detects seated_engaged → rep counter reactivates for Set 2. Rest time logged: 90 seconds.</div></div></div>
+  <div class="flow-line"></div>
+  <div class="flow-step"><div class="flow-num">9</div><div class="flow-content"><div class="flow-title">After 3 sets — Matt leaves</div><div class="flow-detail">Camera 1 detects person leaving the zone → server closes session.</div></div></div>
+  <div class="flow-line"></div>
+  <div class="flow-step"><div class="flow-num">10</div><div class="flow-content"><div class="flow-title">Session written to database</div><div class="flow-detail">Supabase record: Matt McArdle | lat_pulldown_01 | 3 sets | 30 reps | 50kg | avg form 84/100 | total rest 3:10</div></div></div>
+  <div class="flow-line"></div>
+  <div class="flow-step"><div class="flow-num">11</div><div class="flow-content"><div class="flow-title">Leaderboard and profile update</div><div class="flow-detail">Matt's weekly volume increases by 1,500kg (30 reps × 50kg). Leaderboard refreshes. If new PB — notification triggered.</div></div></div>
+</div>
+
+<!-- SECTION 6: REST TIME -->
+<h1 id="rest">6. Rest Time Tracking</h1>
+
+<h2>How It Works</h2>
+<p>Rest time is tracked automatically by the state machine. When the AI stops detecting active rep movement while the user remains at the machine, the rest timer starts. When they grip the bar again, rest time is logged and set 2 begins.</p>
+
+<table>
+  <tr><th>State transition</th><th>What happens</th></tr>
+  <tr><td>Rep completes → no movement for 15s</td><td>State → rest_period. Timer starts.</td></tr>
+  <tr><td>User grips bar</td><td>State → seated_engaged. Rest time logged (e.g. 92s).</td></tr>
+  <tr><td>User stands and leaves</td><td>State → session_complete. Final rest time logged.</td></tr>
+</table>
+
+<h2>Why Rest Time Matters</h2>
+<ul>
+  <li>Rest time is one of the most important training variables — but currently no gym tracks it at all</li>
+  <li>Most members have no idea how long they're actually resting between sets</li>
+  <li>Strength training research recommends 2–4 minutes for compound lifts. Most people rest 5–10 minutes.</li>
+  <li>The AI can flag: "You averaged 6:20 rest between sets. Try reducing to 3:00 for better stimulus."</li>
+  <li>Rest time data is valuable for personal trainers advising members remotely</li>
+  <li>Future: personalised rest recommendations based on exercise, weight, and member goal</li>
+</ul>
+
+<div class="box box-purple">
+  <div class="box-title">💡 Competitive Advantage</div>
+  <p style="margin:0">No gym in the world automatically tracks rest time per set. This is a genuinely novel data point that XL Fitness will own. It becomes a selling point: "We're the only gym that tracks not just your reps, but your actual rest periods — and optimises your training accordingly."</p>
+</div>
+
+<!-- SECTION 7: SETUP CHECKLIST -->
+<h1 id="setup">7. Phase 1 Physical Setup Checklist</h1>
+<p>Getting the prototype running at the lat pulldown. No ceiling work required. No electrician required. Just a clamp and a phone/tablet.</p>
+
+<h2>Before You Start</h2>
+<ul class="checklist">
+  <li>Identify the purple structural column nearest to the lat pulldown machine</li>
+  <li>Confirm it faces the machine side-on — you should be able to see the user's full profile (not front-on)</li>
+  <li>Check there are no windows directly behind where the user sits (from the camera's perspective)</li>
+  <li>Measure approximate distance: column to machine seat should be 2–3m</li>
+</ul>
+
+<h2>Get These Items (~$50–80 total)</h2>
+<ul class="checklist">
+  <li>SmallRig magic arm with C-clamp (~$50, Amazon AU) OR generic phone tripod clamp (~$20, Jaycar)</li>
+  <li>Alternatively: any portable tripod + phone/tablet mount</li>
+</ul>
+
+<h2>Mount the Camera</h2>
+<ul class="checklist">
+  <li>Clamp the arm to the purple column at approximately 1.3m height</li>
+  <li>Position the phone/tablet side-on to the machine (90° to the user)</li>
+  <li>The user's full upper body must be visible: head to hips at minimum</li>
+  <li>The elbow should be clearly visible in frame when pulling the bar</li>
+  <li>Windows should be BEHIND the camera, not behind the user</li>
+</ul>
+
+<h2>Test the System</h2>
+<ul class="checklist">
+  <li>Open Chrome on the tablet</li>
+  <li>Go to: <strong>xldonkey.github.io/gym-ai-system/pose/alpha.html</strong></li>
+  <li>Allow camera access</li>
+  <li>Sit at the machine — green skeleton should appear on your body</li>
+  <li>Check: elbow angle number changes as you move your arms</li>
+  <li>Pull the bar down fully — angle should drop below 90°</li>
+  <li>Release — angle should rise above 130°. Rep counter should increment.</li>
+  <li>If skeleton is unclear or silhouetted: move camera to opposite side so windows are behind it</li>
+</ul>
+
+<h2>Film Training Data</h2>
+<ul class="checklist">
+  <li>Use a separate device (GoPro, iPhone, second phone) on a tripod — same side-on position</li>
+  <li>Record Clip 1: Good reps — 10 minutes, proper form, full ROM</li>
+  <li>Record Clip 2: Bad reps — 5 minutes, deliberately poor form (swing, lean back, partial)</li>
+  <li>Record Clip 3: False movements — 5 minutes, sit at machine and make non-rep arm movements</li>
+  <li>Upload all 3 clips to Google Drive</li>
+  <li>Open the labeler: <strong>xldonkey.github.io/gym-ai-system/pose/label.html</strong></li>
+  <li>Load each video, label sections (S=start, G=good, B=bad, F=false, E=seated, N=empty)</li>
+  <li>Export JSON from labeler</li>
+  <li>Send Donkey: Google Drive links + JSON files → Donkey retrains → accuracy improves</li>
+</ul>
+
+<div class="box box-green">
+  <div class="box-title">✅ What Success Looks Like at Phase 1</div>
+  <p style="margin:0">A tablet clamped to the purple column, skeleton visible on the user, rep counter incrementing accurately for good reps, not incrementing for bad form or false movements. That's it. That's the Phase 1 prototype. Everything else — weight tracking, face ID, server integration — builds on top of this working foundation.</p>
+</div>
+
+<div class="footer">
+  <span>XL Fitness AI Overseer — Deep Dive Technical Reference</span>
+  <span>Donkey 🫏 · March 2026</span>
+</div>
+
+</div>
+
+<script>
+// Active nav highlighting
+const sections = document.querySelectorAll('h1[id]');
+const navLinks = document.querySelectorAll('nav a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      navLinks.forEach(a => a.classList.remove('active'));
+      const active = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+      if(active) active.classList.add('active');
+    }
+  });
+}, {rootMargin:'-20% 0px -70% 0px'});
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
