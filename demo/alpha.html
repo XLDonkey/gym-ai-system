@@ -138,7 +138,7 @@
       <div id="phase-wrap"><div id="phase">↓ PULL BAR DOWN</div></div>
       <button class="ctrl-btn" onclick="doReset()">↺ Reset</button>
       <button class="ctrl-btn" onclick="flipCam()">🔄 Flip</button>
-      <button class="ctrl-btn" id="fs-btn" style="background:#8b5cf6;color:#fff;border-color:#8b5cf6;font-weight:700;" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+      <button class="ctrl-btn" id="fs-btn" style="background:#8b5cf6;color:#fff;border-color:#8b5cf6;font-weight:700;" onclick="toggleFullscreen()">⛶ FULLSCREEN</button>
     </div>
   </div>
 </div>
@@ -439,16 +439,16 @@ function toggleFullscreen(){
   } else {
     const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
     if(exit) exit.call(document);
-    if(btn) btn.textContent = '⛶ Fullscreen';
+    if(btn) btn.textContent = '⛶ FULLSCREEN';
   }
 }
 document.addEventListener('fullscreenchange', ()=>{
   const btn = document.getElementById('fs-btn');
-  if(btn) btn.textContent = document.fullscreenElement ? '✕ Exit Full' : '⛶ Fullscreen';
+  if(btn) btn.textContent = document.fullscreenElement ? '✕ Exit Full' : '⛶ FULLSCREEN';
 });
 document.addEventListener('webkitfullscreenchange', ()=>{
   const btn = document.getElementById('fs-btn');
-  if(btn) btn.textContent = document.webkitFullscreenElement ? '✕ Exit Full' : '⛶ Fullscreen';
+  if(btn) btn.textContent = document.webkitFullscreenElement ? '✕ Exit Full' : '⛶ FULLSCREEN';
 });
 
 // Register service worker for offline support
