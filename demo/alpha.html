@@ -98,7 +98,7 @@
 <div id="app">
   <!-- LEFT PANEL -->
   <div id="stats">
-    <div class="xl-logo" onclick="toggleFullscreen()" style="cursor:pointer;user-select:none;">XLFITNESS</div>
+    <button onclick="toggleFullscreen()" style="background:none;border:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;" ontouchend="event.preventDefault();toggleFullscreen();"><span class="xl-logo">XLFITNESS</span></button>
     <div class="xl-sub">Neural Network</div>
     <div class="divider"></div>
 
@@ -427,21 +427,28 @@ async function boot(){
 }
 window.addEventListener('load',boot);
 
-// Fullscreen toggle
+// Fullscreen toggle — works on Android Chrome + iOS Safari
 function toggleFullscreen(){
   const el = document.documentElement;
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
   const btn = document.getElementById('fs-btn');
-  if(!document.fullscreenElement){
-    (el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullscreen||el.msRequestFullscreen||function(){}).call(el);
+  if(!isFs){
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullscreen || el.msRequestFullscreen;
+    if(req) req.call(el);
     if(btn) btn.textContent = '✕ Exit Full';
   } else {
-    (document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen||document.msExitFullscreen||function(){}).call(document);
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+    if(exit) exit.call(document);
     if(btn) btn.textContent = '⛶ Fullscreen';
   }
 }
 document.addEventListener('fullscreenchange', ()=>{
   const btn = document.getElementById('fs-btn');
   if(btn) btn.textContent = document.fullscreenElement ? '✕ Exit Full' : '⛶ Fullscreen';
+});
+document.addEventListener('webkitfullscreenchange', ()=>{
+  const btn = document.getElementById('fs-btn');
+  if(btn) btn.textContent = document.webkitFullscreenElement ? '✕ Exit Full' : '⛶ Fullscreen';
 });
 
 // Register service worker for offline support
