@@ -1428,6 +1428,7 @@ ol.styled li::before {
       <a class="nav-item" href="#status">13 — Status</a>
 
       <div class="nav-section-label">Deep Dives</div>
+      <a class="nav-item" href="#ai-system">18 — The AI System</a>
       <a class="nav-item" href="#camera-options">14 — Camera Options</a>
       <a class="nav-item" href="#server-options">15 — Server Architecture</a>
       <a class="nav-item" href="#scaling">16 — Scaling</a>
@@ -5432,7 +5433,403 @@ CREATE TABLE sets (
     </section>
     <!-- /SECTION 17 -->
 
-  </main>
+    <!-- ========================================================
+         SECTION 18: THE COMPLETE AI SYSTEM
+         ======================================================== -->
+    <section id="ai-system">
+      <div class="section-eyebrow">Section 18</div>
+      <h2 class="section-title">The Complete AI System — How All 4 Parts Work Together</h2>
+      <p class="section-desc">
+        The Overseer is not one AI. It is four specialist AI subsystems — each doing one job with extreme precision — 
+        combined by an orchestration layer into a single coherent intelligence. This section explains every subsystem, 
+        how it works internally, and how they connect into the complete system.
+      </p>
+
+      <!-- THE BIG PICTURE DIAGRAM -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">The Four Subsystems</h3>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px;margin-bottom:28px;overflow-x:auto;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;min-width:600px;">
+
+          <div style="background:#0a0615;border:2px solid #a855f7;border-radius:10px;padding:16px;text-align:center;">
+            <div style="font-size:1.8rem;margin-bottom:8px;">👤</div>
+            <div style="font-weight:800;color:#a855f7;font-size:.88rem;margin-bottom:6px;">SUBSYSTEM 1</div>
+            <div style="font-weight:700;color:#fff;font-size:.82rem;margin-bottom:8px;">Person Tracking<br/>& Face ID</div>
+            <div style="font-size:.7rem;color:var(--muted);line-height:1.6;">Who is this person? Where are they? Which machine are they at?</div>
+          </div>
+
+          <div style="background:#0a0615;border:2px solid #22c55e;border-radius:10px;padding:16px;text-align:center;">
+            <div style="font-size:1.8rem;margin-bottom:8px;">💪</div>
+            <div style="font-weight:800;color:#22c55e;font-size:.88rem;margin-bottom:6px;">SUBSYSTEM 2</div>
+            <div style="font-weight:700;color:#fff;font-size:.82rem;margin-bottom:8px;">Rep Tracking<br/>& Form Scoring</div>
+            <div style="font-size:.7rem;color:var(--muted);line-height:1.6;">How many reps? Good or bad form? What's the range of motion?</div>
+          </div>
+
+          <div style="background:#0a0615;border:2px solid #f59e0b;border-radius:10px;padding:16px;text-align:center;">
+            <div style="font-size:1.8rem;margin-bottom:8px;">⚖️</div>
+            <div style="font-weight:800;color:#f59e0b;font-size:.88rem;margin-bottom:6px;">SUBSYSTEM 3</div>
+            <div style="font-weight:700;color:#fff;font-size:.82rem;margin-bottom:8px;">Weight<br/>Detection</div>
+            <div style="font-size:.7rem;color:var(--muted);line-height:1.6;">How much weight is loaded? Which plates are selected?</div>
+          </div>
+
+          <div style="background:#0a0615;border:2px solid #60a5fa;border-radius:10px;padding:16px;text-align:center;">
+            <div style="font-size:1.8rem;margin-bottom:8px;">🗄️</div>
+            <div style="font-weight:800;color:#60a5fa;font-size:.88rem;margin-bottom:6px;">SUBSYSTEM 4</div>
+            <div style="font-weight:700;color:#fff;font-size:.82rem;margin-bottom:8px;">Orchestration<br/>& Data Pipeline</div>
+            <div style="font-size:.7rem;color:var(--muted);line-height:1.6;">Combine all outputs into one session record → database → outputs</div>
+          </div>
+
+        </div>
+
+        <!-- FLOW ARROWS -->
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2.4;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+          <span style="color:#a855f7;">👤 Person ID</span> <span style="color:var(--muted);">──── WHO ────→</span>
+          <span style="color:#22c55e;">💪 Rep Counter</span> <span style="color:var(--muted);">──── REPS ───→</span>
+          <span style="color:#f59e0b;">⚖️ Weight</span> <span style="color:var(--muted);">───── KG ────→</span>
+          <span style="color:#60a5fa;">🗄️ Orchestrator</span> <span style="color:var(--muted);">──→</span>
+          <span style="color:#fff;">Supabase → Leaderboard</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════ -->
+      <!-- SUBSYSTEM 1: PERSON TRACKING & FACE ID               -->
+      <!-- ══════════════════════════════════════════════════════ -->
+      <h3 style="color:#a855f7;font-size:1rem;font-weight:900;margin:32px 0 16px;padding-bottom:8px;border-bottom:2px solid #a855f7;">
+        Subsystem 1 — Person Tracking & Face ID
+      </h3>
+      <p style="color:#c4b5d4;font-size:.9rem;line-height:1.8;margin-bottom:20px;">
+        This is the identity layer of the Overseer. It answers the question: <strong style="color:#fff;">"Who is at which machine, right now?"</strong> 
+        Without this, the system can count reps but doesn't know whose reps they are. With it, every set is automatically 
+        attributed to the correct member — no card tapping, no logging in, no manual input.
+      </p>
+
+      <h4 style="color:#a855f7;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">How Person Detection Works</h4>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;">
+        <p style="font-size:.85rem;color:#c4b5d4;line-height:1.8;margin-bottom:14px;">
+          Camera 1 (the fisheye ceiling camera) captures a wide view of each machine zone. The person detection pipeline runs in 3 stages:
+        </p>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2.5;background:#0a0615;border-radius:8px;padding:16px;">
+          <span style="color:#6b7280;">Stage 1 — Detection</span><br/>
+          <span style="color:#c4b5d4;padding-left:16px;">YOLO or MobileNet scans each frame</span><br/>
+          <span style="color:#c4b5d4;padding-left:16px;">Outputs: bounding boxes around every person in frame</span><br/>
+          <span style="color:#c4b5d4;padding-left:16px;">Result: "Person detected at coordinates (x:340, y:210, w:180, h:320)"</span><br/><br/>
+          <span style="color:#6b7280;">Stage 2 — Tracking (Re-ID across frames)</span><br/>
+          <span style="color:#c4b5d4;padding-left:16px;">DeepSORT algorithm assigns each person a unique tracking ID</span><br/>
+          <span style="color:#c4b5d4;padding-left:16px;">Maintains ID across frames even as person moves</span><br/>
+          <span style="color:#c4b5d4;padding-left:16px;">Result: "Person #7 has been at machine lat_pulldown_01 for 3 minutes"</span><br/><br/>
+          <span style="color:#6b7280;">Stage 3 — Identity (Face/Body Re-ID)</span><br/>
+          <span style="color:#c4b5d4;padding-left:16px;">Face embedding model (InsightFace/ArcFace) extracts 512-dim face vector</span><br/>
+          <span style="color:#c4b5d4;padding-left:16px;">Compared against member database using cosine similarity</span><br/>
+          <span style="color:#c4b5d4;padding-left:16px;">If similarity > 0.95: identified. Below: card tap prompt.</span><br/>
+          <span style="color:#22c55e;padding-left:16px;">Result: "Person #7 = Matt McArdle (97.3% confidence)"</span>
+        </div>
+      </div>
+
+      <h4 style="color:#a855f7;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">Person Tracking to Machine Assignment</h4>
+      <p style="font-size:.85rem;color:#c4b5d4;line-height:1.8;margin-bottom:14px;">
+        Once a person is detected and tracked, the system needs to know which machine they're at. This is done by comparing 
+        the person's bounding box position against pre-configured machine zones — rectangles drawn on the camera view 
+        that correspond to each machine's footprint.
+      </p>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2.2;">
+        <span style="color:#6b7280;">Machine zones (pre-configured per camera):</span><br/>
+        <span style="color:#c4b5d4;">lat_pulldown_01:  ROI = (x:100, y:80,  w:200, h:350)</span><br/>
+        <span style="color:#c4b5d4;">cable_row_01:     ROI = (x:320, y:80,  w:200, h:350)</span><br/>
+        <span style="color:#c4b5d4;">chest_press_01:   ROI = (x:540, y:80,  w:200, h:350)</span><br/><br/>
+        <span style="color:#6b7280;">Person position check (every 5 frames):</span><br/>
+        <span style="color:#c4b5d4;">Person #7 centroid: (x:195, y:210)</span><br/>
+        <span style="color:#c4b5d4;">Overlaps lat_pulldown_01 zone: <span style="color:#22c55e;">YES</span></span><br/>
+        <span style="color:#22c55e;">→ "Matt McArdle is at lat_pulldown_01"</span>
+      </div>
+
+      <h4 style="color:#a855f7;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">The Card Tap Fallback & Data Flywheel</h4>
+      <div style="background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.3);border-radius:10px;padding:18px;margin-bottom:20px;">
+        <p style="font-size:.85rem;color:#c4b5d4;line-height:1.8;margin-bottom:10px;">
+          When Face ID confidence is below 95%, the tablet shows: <strong style="color:#fff;">"Tap your card to begin."</strong> 
+          This is not a failure — it's a feature. The card tap provides 100% certain identity, which creates a perfect training label:
+        </p>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2.2;background:#0a0615;border-radius:6px;padding:12px;">
+          <span style="color:#f59e0b;">AI uncertain (82% confidence)</span> → tablet: "Tap card"<br/>
+          <span style="color:#22c55e;">Member taps card</span> → 100% certain = Matt McArdle<br/>
+          <span style="color:#a855f7;">Server labels last 60s of video</span> → "This face = Matt McArdle"<br/>
+          <span style="color:#60a5fa;">Training queue updated</span> → next retrain improves confidence<br/>
+          <span style="color:#22c55e;">Next time: 96% confidence</span> → no tap needed
+        </div>
+        <p style="font-size:.82rem;color:var(--muted);margin-top:10px;margin-bottom:0;">
+          This is the data flywheel. Every card tap makes the AI smarter. Over time, taps become rare then unnecessary.
+        </p>
+      </div>
+
+      <h4 style="color:#a855f7;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">Neural Network: Face Embedding Model</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+          <div style="color:#a855f7;font-weight:700;font-size:.85rem;margin-bottom:10px;">Architecture (InsightFace/ArcFace)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2.2;color:#c4b5d4;">
+            Input: 112×112 face crop<br/>
+            Backbone: ResNet50 or MobileNetV3<br/>
+            → Conv layers (feature extraction)<br/>
+            → BatchNorm + PReLU activations<br/>
+            → Global average pooling<br/>
+            → FC layer → 512-dim embedding<br/>
+            → ArcFace margin loss (training)<br/>
+            Output: 512 float vector (face signature)
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+          <div style="color:#a855f7;font-weight:700;font-size:.85rem;margin-bottom:10px;">How matching works</div>
+          <p style="font-size:.8rem;color:#c4b5d4;line-height:1.7;">Every enrolled member has their face embedding stored. At inference, the camera face is compared to all stored embeddings using cosine similarity (0.0 = completely different, 1.0 = identical).</p>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;margin-top:10px;background:#0a0615;padding:10px;border-radius:6px;">
+            <span style="color:#22c55e;">similarity(new, Matt) = 0.97</span> ✅<br/>
+            <span style="color:#6b7280;">similarity(new, Jane) = 0.31</span><br/>
+            <span style="color:#6b7280;">similarity(new, Alex) = 0.28</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════ -->
+      <!-- SUBSYSTEM 2: REP TRACKING & FORM SCORING             -->
+      <!-- ══════════════════════════════════════════════════════ -->
+      <h3 style="color:#22c55e;font-size:1rem;font-weight:900;margin:32px 0 16px;padding-bottom:8px;border-bottom:2px solid #22c55e;">
+        Subsystem 2 — Rep Tracking & Form Scoring
+      </h3>
+      <p style="color:#c4b5d4;font-size:.9rem;line-height:1.8;margin-bottom:20px;">
+        This is the performance layer. Camera 2 watches the user's body from the side and answers: 
+        <strong style="color:#fff;">"Did they do a rep? Was it good form? How deep was the pull?"</strong> 
+        This is the most technically complex subsystem and the one furthest along in development.
+      </p>
+
+      <h4 style="color:#22c55e;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">The Pose Estimation Pipeline</h4>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2.5;background:#0a0615;border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;">
+        <span style="color:#6b7280;">Frame from Camera 2 (1920×1080 @ 30fps)</span><br/>
+        <span style="color:#a855f7;">  ↓  MoveNet Lightning (pre-trained, frozen)</span><br/>
+        <span style="color:#6b7280;">  Internal resize: 1920×1080 → 192×192</span><br/>
+        <span style="color:#c4b5d4;">  17 keypoints × (x, y, confidence)</span><br/>
+        <span style="color:#c4b5d4;">  [NOSE, L_EYE, R_EYE, L_EAR, R_EAR,</span><br/>
+        <span style="color:#c4b5d4;">   L_SHOULDER, R_SHOULDER, L_ELBOW, R_ELBOW,</span><br/>
+        <span style="color:#c4b5d4;">   L_WRIST, R_WRIST, L_HIP, R_HIP,</span><br/>
+        <span style="color:#c4b5d4;">   L_KNEE, R_KNEE, L_ANKLE, R_ANKLE]</span><br/>
+        <span style="color:#a855f7;">  ↓  Feature extraction</span><br/>
+        <span style="color:#22c55e;">  Elbow angle: shoulder → elbow → wrist (v4, v5)</span><br/>
+        <span style="color:#22c55e;">  + Shoulder angle (v6)</span><br/>
+        <span style="color:#22c55e;">  + Hip angle / torso lean (v6)</span><br/>
+        <span style="color:#a855f7;">  ↓  LSTM classifier</span><br/>
+        <span style="color:#22c55e;">  Output: good_rep / bad_rep / false_movement / rest / seated</span>
+      </div>
+
+      <h4 style="color:#22c55e;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">The State Machine — What the AI Is Thinking Every Frame</h4>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
+          <div style="background:#0a0615;border:1px solid #6b7280;border-radius:8px;padding:10px;text-align:center;font-size:.75rem;">
+            <div style="color:#6b7280;font-weight:700;margin-bottom:4px;">STATE 1</div>
+            <div style="color:#fff;font-weight:800;">⬜ Empty</div>
+            <div style="color:var(--muted);font-size:.68rem;margin-top:4px;">No person detected at machine</div>
+          </div>
+          <div style="background:#0a0615;border:1px solid #60a5fa;border-radius:8px;padding:10px;text-align:center;font-size:.75rem;">
+            <div style="color:#60a5fa;font-weight:700;margin-bottom:4px;">STATE 2</div>
+            <div style="color:#fff;font-weight:800;">🚶 Nearby</div>
+            <div style="color:var(--muted);font-size:.68rem;margin-top:4px;">Person present, not seated</div>
+          </div>
+          <div style="background:#0a0615;border:1px solid #a855f7;border-radius:8px;padding:10px;text-align:center;font-size:.75rem;">
+            <div style="color:#a855f7;font-weight:700;margin-bottom:4px;">STATE 3</div>
+            <div style="color:#fff;font-weight:800;">🪑 Seated</div>
+            <div style="color:var(--muted);font-size:.68rem;margin-top:4px;">Seated, gripping bar — ACTIVE</div>
+          </div>
+          <div style="background:#0a0615;border:1px solid #22c55e;border-radius:8px;padding:10px;text-align:center;font-size:.75rem;">
+            <div style="color:#22c55e;font-weight:700;margin-bottom:4px;">STATE 4</div>
+            <div style="color:#fff;font-weight:800;">💪 Repping</div>
+            <div style="color:var(--muted);font-size:.68rem;margin-top:4px;">Rep in progress — counting</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          <div style="background:#0a0615;border:1px solid #ef4444;border-radius:8px;padding:10px;text-align:center;font-size:.75rem;">
+            <div style="color:#ef4444;font-weight:700;margin-bottom:4px;">STATE 5</div>
+            <div style="color:#fff;font-weight:800;">⚠ Bad Rep</div>
+            <div style="color:var(--muted);font-size:.68rem;margin-top:4px;">Poor form detected</div>
+          </div>
+          <div style="background:#0a0615;border:1px solid #f59e0b;border-radius:8px;padding:10px;text-align:center;font-size:.75rem;">
+            <div style="color:#f59e0b;font-weight:700;margin-bottom:4px;">STATE 6</div>
+            <div style="color:#fff;font-weight:800;">⏱ Resting</div>
+            <div style="color:var(--muted);font-size:.68rem;margin-top:4px;">Between sets — timer running</div>
+          </div>
+          <div style="background:#0a0615;border:1px solid #f59e0b;border-radius:8px;padding:10px;text-align:center;font-size:.75rem;">
+            <div style="color:#f59e0b;font-weight:700;margin-bottom:4px;">STATE 7</div>
+            <div style="color:#fff;font-weight:800;">⚡ False</div>
+            <div style="color:var(--muted);font-size:.68rem;margin-top:4px;">Movement — not a rep</div>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="color:#22c55e;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">Form Scoring — How 0–100 is Calculated</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+          <div style="color:#22c55e;font-weight:700;font-size:.85rem;margin-bottom:10px;">Current scoring (v4/v5 — elbow only)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;line-height:2;color:#c4b5d4;">
+            start = 100 points<br/>
+            ROM &lt; 80° → -30 pts<br/>
+            ROM &lt; 100° → -15 pts<br/>
+            bottom_angle &gt; 80° → -25 pts<br/>
+            duration &lt; 0.8s → -20 pts (too fast)<br/>
+            duration &gt; 12s → -10 pts (too slow)<br/>
+            <span style="color:#22c55e;">Final: 0–100 form score</span>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+          <div style="color:#a855f7;font-weight:700;font-size:.85rem;margin-bottom:10px;">Phase 2 scoring (v6 — multi-joint)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;line-height:2;color:#c4b5d4;">
+            + back_arch_angle vs vertical<br/>
+            + shoulder_depression check<br/>
+            + torso_lean during pull<br/>
+            + left/right symmetry<br/>
+            + head position (no forward jut)<br/>
+            + velocity profile (smooth vs jerky)<br/>
+            <span style="color:#a855f7;">→ 95%+ accurate form score</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════ -->
+      <!-- SUBSYSTEM 3: WEIGHT DETECTION                        -->
+      <!-- ══════════════════════════════════════════════════════ -->
+      <h3 style="color:#f59e0b;font-size:1rem;font-weight:900;margin:32px 0 16px;padding-bottom:8px;border-bottom:2px solid #f59e0b;">
+        Subsystem 3 — Weight Detection
+      </h3>
+      <p style="color:#c4b5d4;font-size:.9rem;line-height:1.8;margin-bottom:20px;">
+        Camera 3 has one job: <strong style="color:#fff;">read the weight stack and determine how many kilograms are loaded.</strong>
+        This is Manus's domain. It uses computer vision and a clever physical trick — coloured tape — to make an otherwise 
+        difficult problem straightforward.
+      </p>
+
+      <h4 style="color:#f59e0b;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">The Physical Setup — Coloured Tape</h4>
+      <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:18px;margin-bottom:20px;">
+        <p style="font-size:.85rem;color:#c4b5d4;line-height:1.8;margin-bottom:12px;">
+          All-black weight plates with identical markings are nearly impossible to distinguish by colour alone. The solution: 
+          apply coloured electrical tape to the outer spine edge of each plate. One strip per plate, consistent position, 
+          visible from the side-on camera.
+        </p>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+          <div style="background:#0a0615;border:1px solid #fff;border-radius:8px;padding:12px;text-align:center;">
+            <div style="width:32px;height:8px;background:#ffffff;border-radius:2px;margin:0 auto 8px;"></div>
+            <div style="color:#fff;font-weight:800;font-size:.88rem;">White</div>
+            <div style="color:var(--muted);font-size:.75rem;">5 kg</div>
+          </div>
+          <div style="background:#0a0615;border:1px solid #eab308;border-radius:8px;padding:12px;text-align:center;">
+            <div style="width:32px;height:8px;background:#eab308;border-radius:2px;margin:0 auto 8px;"></div>
+            <div style="color:#eab308;font-weight:800;font-size:.88rem;">Yellow</div>
+            <div style="color:var(--muted);font-size:.75rem;">10 kg</div>
+          </div>
+          <div style="background:#0a0615;border:1px solid #3b82f6;border-radius:8px;padding:12px;text-align:center;">
+            <div style="width:32px;height:8px;background:#3b82f6;border-radius:2px;margin:0 auto 8px;"></div>
+            <div style="color:#3b82f6;font-weight:800;font-size:.88rem;">Blue</div>
+            <div style="color:var(--muted);font-size:.75rem;">20 kg</div>
+          </div>
+          <div style="background:#0a0615;border:1px solid #ef4444;border-radius:8px;padding:12px;text-align:center;">
+            <div style="width:32px;height:8px;background:#ef4444;border-radius:2px;margin:0 auto 8px;"></div>
+            <div style="color:#ef4444;font-weight:800;font-size:.88rem;">Red</div>
+            <div style="color:var(--muted);font-size:.75rem;">25 kg</div>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="color:#f59e0b;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">Detection Pipeline</h4>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2.5;background:#0a0615;border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;">
+        <span style="color:#6b7280;">Camera 3 frame → pre-configured bounding box (ROI)</span><br/>
+        <span style="color:#a855f7;">  ↓  Crop to weight stack region only (ignore rest of image)</span><br/>
+        <span style="color:#a855f7;">  ↓  Convert BGR → HSV colour space</span><br/>
+        <span style="color:#6b7280;">  HSV is robust to lighting changes unlike RGB</span><br/>
+        <span style="color:#a855f7;">  ↓  Colour threshold masks per colour</span><br/>
+        <span style="color:#c4b5d4;">  White mask: H=0-180, S=0-50, V=180-255</span><br/>
+        <span style="color:#c4b5d4;">  Yellow mask: H=25-35, S=150-255, V=150-255</span><br/>
+        <span style="color:#c4b5d4;">  Blue mask:   H=100-130, S=150-255, V=100-255</span><br/>
+        <span style="color:#a855f7;">  ↓  Count plates above selector pin position</span><br/>
+        <span style="color:#a855f7;">  ↓  Sum plate weights</span><br/>
+        <span style="color:#22c55e;">  Output: {weight_kg: 50, plates: ["20kg", "20kg", "10kg"]}</span>
+      </div>
+
+      <h4 style="color:#f59e0b;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">When Weight is Read</h4>
+      <p style="font-size:.85rem;color:#c4b5d4;line-height:1.8;margin-bottom:20px;">
+        The weight detector doesn't run 30 times per second — weight doesn't change that fast. It runs at 1–5fps and only when 
+        the machine is in the "user_seated_engaged" or "rest_period" states. When the selector pin moves (weight change), 
+        the detector runs immediately and updates. Weight is confirmed before each set begins.
+      </p>
+
+      <!-- ══════════════════════════════════════════════════════ -->
+      <!-- SUBSYSTEM 4: ORCHESTRATION & DATA PIPELINE           -->
+      <!-- ══════════════════════════════════════════════════════ -->
+      <h3 style="color:#60a5fa;font-size:1rem;font-weight:900;margin:32px 0 16px;padding-bottom:8px;border-bottom:2px solid #60a5fa;">
+        Subsystem 4 — Orchestration & Data Pipeline
+      </h3>
+      <p style="color:#c4b5d4;font-size:.9rem;line-height:1.8;margin-bottom:20px;">
+        This is the glue layer — the traffic controller that receives outputs from all three subsystems and combines them into 
+        a single coherent session record. Built by Manus as a FastAPI server on the Mac Mini.
+        <strong style="color:#fff;"> Without this layer, the three AIs are isolated. With it, they form the Overseer.</strong>
+      </p>
+
+      <h4 style="color:#60a5fa;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">Event Routing</h4>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2.4;">
+        <span style="color:#a855f7;">Sub1 → POST /event: {event: "member_identified", member_id: "matt", machine: "lat_pulldown_01"}</span><br/>
+        <span style="color:#22c55e;">Sub2 → POST /event: {event: "rep_completed", quality: "good", elbow_angle: 66.2}</span><br/>
+        <span style="color:#22c55e;">Sub2 → POST /event: {event: "rep_completed", quality: "good", elbow_angle: 68.1}</span><br/>
+        <span style="color:#f59e0b;">Sub3 → POST /event: {event: "weight_detected", weight_kg: 50}</span><br/>
+        <span style="color:#22c55e;">Sub2 → POST /event: {event: "rest_period_start", duration_so_far: 0}</span><br/>
+        <span style="color:#6b7280;">... (10 reps × 3 sets) ...</span><br/>
+        <span style="color:#a855f7;">Sub1 → POST /event: {event: "member_left", machine: "lat_pulldown_01"}</span><br/><br/>
+        <span style="color:#60a5fa;">Orchestrator combines all events →</span><br/>
+        <span style="color:#60a5fa;">Session: Matt | lat_pulldown_01 | 3 sets | 30 reps | 50kg | 1,500kg volume</span>
+      </div>
+
+      <h4 style="color:#60a5fa;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">Data Pipeline — Session to Outputs</h4>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2.4;overflow-x:auto;">
+        <span style="color:#60a5fa;">Session complete</span><br/>
+        <span style="color:#a855f7;">  ↓  Write to Supabase (PostgreSQL)</span><br/>
+        <span style="color:#c4b5d4;">     INSERT INTO sets (member_id, machine_id, reps, good_reps, weight_kg, volume, form_score, rest_s)</span><br/>
+        <span style="color:#a855f7;">  ↓  Webhook to tablet (local LAN — instant)</span><br/>
+        <span style="color:#c4b5d4;">     POST http://tablet-ip/session-complete  →  tablet shows summary</span><br/>
+        <span style="color:#a855f7;">  ↓  Leaderboard update (Power BI queries Supabase every 60s)</span><br/>
+        <span style="color:#c4b5d4;">     Matt's weekly volume +1,500kg  →  leaderboard refreshes</span><br/>
+        <span style="color:#a855f7;">  ↓  Personal best check</span><br/>
+        <span style="color:#c4b5d4;">     Compare vs member.personal_bests  →  notify if new PB</span><br/>
+        <span style="color:#a855f7;">  ↓  Training data archive (if opted in)</span><br/>
+        <span style="color:#c4b5d4;">     Clip saved to NAS for future model retraining</span>
+      </div>
+
+      <h4 style="color:#60a5fa;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">The Supabase Schema</h4>
+      <div style="background:#0a0615;border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:24px;font-family:'JetBrains Mono',monospace;font-size:.75rem;line-height:2;overflow-x:auto;color:#c4b5d4;">
+        <span style="color:#a855f7;">members</span>     (id, gymmaster_id, name, email, face_embedding, joined_at)<br/>
+        <span style="color:#22c55e;">sessions</span>    (id, member_id, machine_id, start_time, end_time, total_volume)<br/>
+        <span style="color:#f59e0b;">sets</span>         (id, session_id, set_number, reps, good_reps, weight_kg, volume, form_score, rest_s)<br/>
+        <span style="color:#60a5fa;">events</span>      (id, session_id, timestamp, event_type, payload JSONB)<br/>
+        <span style="color:#ef4444;">machines</span>    (id, name, exercise_type, zone, camera_config JSONB)<br/>
+        <span style="color:#6b7280;">leaderboard</span> (VIEW — calculated from sets, refreshed every 60s)
+      </div>
+
+      <!-- THE COMPLETE SYSTEM DIAGRAM -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:32px 0 16px">The Complete System — All 4 Subsystems Together</h3>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:28px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2.4;min-width:500px;">
+        <span style="color:#6b7280;">CAMERAS (ceiling rig)</span><br/>
+        <span style="color:#a855f7;">  📷 Camera 1 (fisheye)</span> <span style="color:#6b7280;">→ video stream → </span><span style="color:#a855f7;">Sub1: Person Tracking + Face ID</span><br/>
+        <span style="color:#22c55e;">  📷 Camera 2 (side-on)</span> <span style="color:#6b7280;">→ video stream → </span><span style="color:#22c55e;">Sub2: Pose Estimation + LSTM</span><br/>
+        <span style="color:#f59e0b;">  📷 Camera 3 (stack)</span>  <span style="color:#6b7280;">→ video stream → </span><span style="color:#f59e0b;">Sub3: Colour Detection</span><br/>
+        <span style="color:#6b7280;">                         (all running on Mac Mini M4 Pro)</span><br/><br/>
+        <span style="color:#a855f7;">Sub1 output: "Matt @ lat_pulldown_01"</span> <span style="color:#6b7280;">────────────────→</span> <span style="color:#60a5fa;">┐</span><br/>
+        <span style="color:#22c55e;">Sub2 output: "10 good reps, form 81/100"</span> <span style="color:#6b7280;">──────────→</span> <span style="color:#60a5fa;">│ Sub4: Orchestrator</span><br/>
+        <span style="color:#f59e0b;">Sub3 output: "50kg loaded"</span> <span style="color:#6b7280;">──────────────────────→</span> <span style="color:#60a5fa;">┘</span><br/><br/>
+        <span style="color:#60a5fa;">Sub4 → Session record: {Matt, lat_pulldown_01, 10 reps, 50kg, 500kg vol, 81/100 form}</span><br/><br/>
+        <span style="color:#6b7280;">OUTPUTS (parallel, instant)</span><br/>
+        <span style="color:#fff;">  → Supabase cloud DB</span><br/>
+        <span style="color:#fff;">  → Tablet webhook (local LAN)</span><br/>
+        <span style="color:#fff;">  → Leaderboard (Power BI ← Supabase)</span><br/>
+        <span style="color:#fff;">  → Member app notification (future)</span>
+      </div>
+
+      <div class="callout" style="border-color:#60a5fa;background:rgba(96,165,250,.06);">
+        <strong style="color:#60a5fa;">The key insight:</strong> Each subsystem is completely independent. If Face ID fails, reps still count (just unattributed until card tap). If weight detection fails, reps still count (weight defaults to last known). The system degrades gracefully — it never stops counting.
+      </div>
+
+    </section>
+    <!-- /SECTION 18 -->
+
+    <!-- ========================================================
+         SECTION 13: STATUS
+         ======================================================== -->
 </div>
 
 <!-- ============================================================
