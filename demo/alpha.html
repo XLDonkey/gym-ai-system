@@ -476,7 +476,7 @@ if('serviceWorker' in navigator){
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('selectstart', e => e.preventDefault());
 
-  // Secret exit — tap bottom-right corner 5 times within 3 seconds
+  // Bottom-right corner: 3 taps = toggle fullscreen, 7 taps = exit kiosk
   let tapCount = 0, tapTimer = null;
   document.addEventListener('touchend', function(e){
     const t = e.changedTouches[0];
@@ -484,10 +484,17 @@ if('serviceWorker' in navigator){
     if(!inCorner) return;
     tapCount++;
     clearTimeout(tapTimer);
-    tapTimer = setTimeout(()=>{ tapCount = 0; }, 3000);
-    if(tapCount >= 5){
+    tapTimer = setTimeout(()=>{ tapCount = 0; }, 2000);
+    if(tapCount === 3){
+      // Toggle fullscreen
+      if(!document.fullscreenElement){
+        document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen && document.exitFullscreen();
+      }
+    }
+    if(tapCount >= 7){
       tapCount = 0;
-      // Show exit prompt
       if(confirm('Exit kiosk mode?')){
         if(document.exitFullscreen) document.exitFullscreen();
       }
