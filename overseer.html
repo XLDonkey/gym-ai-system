@@ -1429,7 +1429,8 @@ ol.styled li::before {
 
       <div class="nav-section-label">Deep Dives</div>
       <a class="nav-item" href="#ai-system">18 — The AI System</a>
-      <a class="nav-item" href="#machine-engagement">19 — Machine Engagement</a>
+      <a class="nav-item" href="#machine-engagement">19 — Machine Engagement
+      <a class="nav-item" href="#training-labels">20 — Training Labels</a>
       <a class="nav-item" href="#camera-options">14 — Camera Options</a>
       <a class="nav-item" href="#server-options">15 — Server Architecture</a>
       <a class="nav-item" href="#scaling">16 — Scaling</a>
@@ -6782,6 +6783,287 @@ CREATE TABLE sets (
 
     </section>
     <!-- /SECTION 19 -->
+
+    <!-- ========================================================
+         SECTION 20: TRAINING LABELS & SESSION LOGIC
+         ======================================================== -->
+    <section id="training-labels" class="section">
+      <div class="section-eyebrow">Section 20</div>
+      <h2 class="section-title">Training Labels & Session Logic — The Definitive Reference</h2>
+      <p class="section-desc">
+        These are the exact 7 labels used to train the AI. Every piece of footage we collect is labelled 
+        with one of these states. The session logic defines exactly when a session starts, when it ends, 
+        and how the system handles the member temporarily leaving the machine.
+      </p>
+
+      <!-- THE 7 LABELS -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">The 7 Training Labels</h3>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px;">
+
+        <!-- Label 1 -->
+        <div style="background:var(--card);border:1px solid #374151;border-left:4px solid #6b7280;border-radius:10px;padding:16px 20px;display:grid;grid-template-columns:180px 1fr 1fr;gap:16px;align-items:start;">
+          <div>
+            <div style="font-size:.65rem;color:#6b7280;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Label 1</div>
+            <div style="font-size:1rem;font-weight:800;color:#9ca3af;">⬜ no_user_present</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">What it looks like</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">Machine is completely empty. No person in the camera frame at the machine. Could be early morning, between members, or machine not in use.</p>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Why we need it</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">Baseline state. Tells the system the machine is available. Prevents any accidental triggers from an empty machine. Establishes what "nothing happening" looks like.</p>
+          </div>
+        </div>
+
+        <!-- Label 2 -->
+        <div style="background:var(--card);border:1px solid #374151;border-left:4px solid #60a5fa;border-radius:10px;padding:16px 20px;display:grid;grid-template-columns:180px 1fr 1fr;gap:16px;align-items:start;">
+          <div>
+            <div style="font-size:.65rem;color:#60a5fa;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Label 2</div>
+            <div style="font-size:1rem;font-weight:800;color:#60a5fa;">🚶 user_detected<br/>_not_engaged</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">What it looks like</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">A person is in the machine zone but not actively using it. Standing near it, adjusting the seat, wiping it down, talking to someone nearby, or temporarily at the machine between sets (e.g. walking away to fill a water bottle).</p>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Why we need it</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">Critical buffer state. Without this, any person near the machine could trigger the rep counter. This label teaches the AI "person present ≠ person using machine."</p>
+          </div>
+        </div>
+
+        <!-- Label 3 -->
+        <div style="background:var(--card);border:1px solid #374151;border-left:4px solid #a855f7;border-radius:10px;padding:16px 20px;display:grid;grid-template-columns:180px 1fr 1fr;gap:16px;align-items:start;">
+          <div>
+            <div style="font-size:.65rem;color:#a855f7;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Label 3</div>
+            <div style="font-size:1rem;font-weight:800;color:#a855f7;">🪑 user_engaged</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">What it looks like</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">Person is seated at the machine in the correct position, gripping the handles or bar, ready to perform the exercise. Not moving yet — the setup moment before the first rep.</p>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Why we need it</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;"><strong style="color:#a855f7;">This is the trigger state.</strong> When the AI detects this, the rep counter activates. Weight is confirmed. Session set begins. The transition from Label 2 → Label 3 is the moment everything turns on.</p>
+          </div>
+        </div>
+
+        <!-- Label 4 -->
+        <div style="background:var(--card);border:1px solid #374151;border-left:4px solid #22c55e;border-radius:10px;padding:16px 20px;display:grid;grid-template-columns:180px 1fr 1fr;gap:16px;align-items:start;">
+          <div>
+            <div style="font-size:.65rem;color:#22c55e;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Label 4</div>
+            <div style="font-size:1rem;font-weight:800;color:#22c55e;">✅ good_rep</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">What it looks like</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">Full range of motion, controlled tempo throughout. For lat pulldown: bar comes to chest level, controlled return to full extension. Back straight, no swinging. The textbook rep.</p>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Why we need it</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">The primary success state. The AI learns the exact signature of a quality rep — the angle range, the timing, the smooth velocity curve. This is what we're counting and rewarding on the leaderboard.</p>
+          </div>
+        </div>
+
+        <!-- Label 5 -->
+        <div style="background:var(--card);border:1px solid #374151;border-left:4px solid #ef4444;border-radius:10px;padding:16px 20px;display:grid;grid-template-columns:180px 1fr 1fr;gap:16px;align-items:start;">
+          <div>
+            <div style="font-size:.65rem;color:#ef4444;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Label 5</div>
+            <div style="font-size:1rem;font-weight:800;color:#ef4444;">⚠ bad_rep /<br/>uncontrolled_rep</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">What it looks like</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">A rep movement is performed but with poor form: excessive lean-back/swing to generate momentum, partial ROM (bar only comes halfway down), too fast with no control, one arm dominant, jerky rather than smooth.</p>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Why we need it</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">Teaches the AI what a "cheat rep" looks like. Bad reps are flagged on the tablet ("Watch your form") and stored separately in the database — they won't count toward the leaderboard in Phase 3. Also injury prevention.</p>
+          </div>
+        </div>
+
+        <!-- Label 6 -->
+        <div style="background:var(--card);border:1px solid #374151;border-left:4px solid #f59e0b;border-radius:10px;padding:16px 20px;display:grid;grid-template-columns:180px 1fr 1fr;gap:16px;align-items:start;">
+          <div>
+            <div style="font-size:.65rem;color:#f59e0b;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Label 6</div>
+            <div style="font-size:1rem;font-weight:800;color:#f59e0b;">⚡ false_movement /<br/>false_rep</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">What it looks like</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">Body movement while seated and engaged that is NOT a rep: adjusting grip, reaching for a towel or phone, talking with hand gestures, stretching shoulders, wiping face, adjusting clothing. The joint moves but it's not exercise.</p>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Why we need it</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">The hardest problem to solve. False movements can trigger the angle thresholds and look like partial reps. This label explicitly teaches the AI: "elbow moved but it wasn't a rep." This is where we need the most training data.</p>
+          </div>
+        </div>
+
+        <!-- Label 7 -->
+        <div style="background:var(--card);border:1px solid #374151;border-left:4px solid #94a3b8;border-radius:10px;padding:16px 20px;display:grid;grid-template-columns:180px 1fr 1fr;gap:16px;align-items:start;">
+          <div>
+            <div style="font-size:.65rem;color:#94a3b8;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Label 7</div>
+            <div style="font-size:1rem;font-weight:800;color:#94a3b8;">⏱ resting</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">What it looks like</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">Member is seated at machine, has completed a set, not performing reps. May be catching breath, checking phone, looking around, drinking water (if bottle is nearby). Still at the machine — hasn't left.</p>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Why we need it</div>
+            <p style="font-size:.82rem;color:#c4b5d4;line-height:1.6;margin:0;">Enables rest time tracking — a unique data point no gym currently captures. Also prevents false_movement labels being applied during rest. The rest timer runs during this state and resets when user_engaged is detected again.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SESSION LOGIC -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">Session Logic — When Does a Session Start and End?</h3>
+
+      <div style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.3);border-radius:10px;padding:20px;margin-bottom:24px;">
+        <p style="font-size:.88rem;color:#fff;font-weight:700;margin-bottom:12px;">The fundamental rule:</p>
+        <p style="font-size:.85rem;color:#c4b5d4;line-height:1.8;margin-bottom:0;">A session starts when a member first engages the machine. A session ends when either: (a) a different member engages the machine, or (b) the member's label transitions to <code>no_user_present</code> AND they are detected at a different machine. Temporarily leaving to fill a water bottle does NOT end the session.</p>
+      </div>
+
+      <!-- SESSION STATE DIAGRAM -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:24px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:2.8;overflow-x:auto;">
+        <div style="color:#6b7280;margin-bottom:8px;">SESSION LIFECYCLE:</div>
+
+        <span style="color:#6b7280;">⬜ no_user</span>
+        <span style="color:#374151;"> ───────────── person approaches ────────────→ </span>
+        <span style="color:#60a5fa;">🚶 not_engaged</span><br/>
+
+        <span style="color:#60a5fa;">🚶 not_engaged</span>
+        <span style="color:#374151;"> ──────── sits down, grips ──────────────────→ </span>
+        <span style="color:#a855f7;">🪑 engaged</span>
+        <span style="color:#22c55e;"> ← SESSION STARTS</span><br/>
+
+        <span style="color:#a855f7;">🪑 engaged</span>
+        <span style="color:#374151;"> ──────────── pulls bar ──────────────────────→ </span>
+        <span style="color:#22c55e;">✅ good_rep / </span>
+        <span style="color:#ef4444;">⚠ bad_rep</span><br/>
+
+        <span style="color:#22c55e;">✅ rep done</span>
+        <span style="color:#374151;"> ────────── releases bar ─────────────────────→ </span>
+        <span style="color:#94a3b8;">⏱ resting</span>
+        <span style="color:#374151;"> (rest timer runs)</span><br/>
+
+        <span style="color:#94a3b8;">⏱ resting</span>
+        <span style="color:#374151;"> ────────── grips bar again ──────────────────→ </span>
+        <span style="color:#a855f7;">🪑 engaged</span>
+        <span style="color:#374151;"> (next set begins)</span><br/>
+
+        <span style="color:#94a3b8;">⏱ resting</span>
+        <span style="color:#374151;"> ── walks away (water bottle) ────────────────→ </span>
+        <span style="color:#60a5fa;">🚶 not_engaged</span>
+        <span style="color:#f59e0b;"> SESSION PAUSED</span><br/>
+
+        <span style="color:#60a5fa;">🚶 not_engaged</span>
+        <span style="color:#374151;"> ──── returns to machine ─────────────────────→ </span>
+        <span style="color:#a855f7;">🪑 engaged</span>
+        <span style="color:#22c55e;"> SESSION RESUMES</span><br/>
+
+        <span style="color:#60a5fa;">🚶 not_engaged</span>
+        <span style="color:#374151;"> ─── walks to different machine ──────────────→ </span>
+        <span style="color:#6b7280;">⬜ no_user</span>
+        <span style="color:#ef4444;"> ← SESSION ENDS</span><br/>
+
+        <span style="color:#60a5fa;">🚶 not_engaged</span>
+        <span style="color:#374151;"> ─── new member sits down ────────────────────→ </span>
+        <span style="color:#a855f7;">🪑 new_engaged</span>
+        <span style="color:#ef4444;"> ← OLD SESSION ENDS / NEW SESSION STARTS</span>
+      </div>
+
+      <!-- THE WATER BOTTLE RULE -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">The "Water Bottle Rule" — Temporary Absence</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+        <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:18px;">
+          <div style="color:#22c55e;font-weight:700;font-size:.88rem;margin-bottom:10px;">✅ Session PAUSES (does not end)</div>
+          <ul style="font-size:.82rem;color:#c4b5d4;list-style:none;padding:0;line-height:2.2;">
+            <li>🚰 Walks to water fountain and returns</li>
+            <li>🗣 Steps away briefly to talk to someone</li>
+            <li>📱 Walks a few steps to check phone</li>
+            <li>🧴 Goes to grab chalk or their bag nearby</li>
+            <li>🧘 Stretches beside the machine between sets</li>
+          </ul>
+          <p style="font-size:.75rem;color:var(--muted);margin-top:10px;margin-bottom:0;">Logic: person leaves camera zone but has NOT been detected at another machine. Session held open for up to 5 minutes.</p>
+        </div>
+        <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:18px;">
+          <div style="color:#ef4444;font-weight:700;font-size:.88rem;margin-bottom:10px;">❌ Session ENDS</div>
+          <ul style="font-size:.82rem;color:#c4b5d4;list-style:none;padding:0;line-height:2.2;">
+            <li>🏃 Walks to a completely different machine</li>
+            <li>👋 Leaves the gym floor entirely</li>
+            <li>🚪 GymMaster records check-out</li>
+            <li>👤 A different member sits at the machine</li>
+            <li>⏰ 5+ minutes with no return to the machine</li>
+          </ul>
+          <p style="font-size:.75rem;color:var(--muted);margin-top:10px;margin-bottom:0;">Logic: person definitively at a different location, or timeout exceeded. Session written to database.</p>
+        </div>
+      </div>
+
+      <!-- HOW TO FILM EACH LABEL -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">How to Film Each Label — Training Data Guide</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Keyboard shortcut (labeler)</th>
+              <th>How to film it</th>
+              <th>Target % of dataset</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:#9ca3af;font-weight:700;">⬜ no_user_present</td>
+              <td><code>N</code></td>
+              <td>Let camera run with machine empty. No effort needed — just leave it recording.</td>
+              <td>10%</td>
+            </tr>
+            <tr>
+              <td style="color:#60a5fa;font-weight:700;">🚶 user_detected_not_engaged</td>
+              <td><code>U</code></td>
+              <td>Walk near the machine. Adjust seat height. Stand and look at the machine. Wipe it down. Walk past it.</td>
+              <td>15%</td>
+            </tr>
+            <tr>
+              <td style="color:#a855f7;font-weight:700;">🪑 user_engaged</td>
+              <td><code>E</code></td>
+              <td>Sit down, grip bar, hold still for 3–5 seconds before starting a set. Repeat at start of each set.</td>
+              <td>10%</td>
+            </tr>
+            <tr>
+              <td style="color:#22c55e;font-weight:700;">✅ good_rep</td>
+              <td><code>G</code></td>
+              <td>Perform proper form lat pulldowns. Full ROM (bar to chest), controlled tempo, back straight, no swinging.</td>
+              <td>30%</td>
+            </tr>
+            <tr>
+              <td style="color:#ef4444;font-weight:700;">⚠ bad_rep / uncontrolled</td>
+              <td><code>B</code></td>
+              <td>Deliberately bad form: lean way back and swing, only pull halfway, rush the movement, use momentum not muscle.</td>
+              <td>20%</td>
+            </tr>
+            <tr>
+              <td style="color:#f59e0b;font-weight:700;">⚡ false_movement</td>
+              <td><code>F</code></td>
+              <td>Sit at machine in engaged position and: reach for phone, adjust grip, wave arm, scratch head, stretch shoulders. Do NOT pull the bar.</td>
+              <td>10%</td>
+            </tr>
+            <tr>
+              <td style="color:#94a3b8;font-weight:700;">⏱ resting</td>
+              <td><code>R</code></td>
+              <td>Sit at machine after completing a set. Rest naturally — breathe, look around, check phone. 30–120 seconds.</td>
+              <td>5%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <strong>Labeler shortcut reminder:</strong> The labeler tool at <a href="https://xldonkey.github.io/gym-ai-system/pose/label.html" style="color:var(--purple-light);">xldonkey.github.io/gym-ai-system/pose/label.html</a> uses section-based labelling — press <strong>S</strong> to mark the start of a section, then the letter key (G/B/F/E/N/R/U) when the section ends. Much faster than frame-by-frame. One 1-hour session can produce 100+ labeled sequences.
+      </div>
+
+    </section>
+    <!-- /SECTION 20 -->
 
     <!-- ========================================================
          SECTION 13: STATUS
