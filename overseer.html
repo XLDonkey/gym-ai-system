@@ -3078,7 +3078,7 @@ Body: (see webhook event format in Section 04)</code></pre>
             <li>Position camera side-on at shoulder height, 2–3m from machine</li>
             <li>Film 30+ minutes of training footage (good reps, bad reps, rest)</li>
             <li>Upload footage to Google Drive, share link with Donkey</li>
-            <li>Apply coloured tape to weight plates (White=5kg, Yellow=10kg, Blue=20kg)</li>
+            <li>XL Fitness uses Alphafit competition bumper plates — colour stripes are built in, no tape needed</li>
             <li>Get quote from rigging contractor for Phase 2 ceiling rig</li>
             <li>Contact other dev about webhook endpoint</li>
           </ol>
@@ -3214,7 +3214,7 @@ Body: (see webhook event format in Section 04)</code></pre>
                   <tr><td>Phone/tablet clamp mount (column)</td><td>~$50</td></tr>
                   <tr><td>Camera (repurpose existing phone or tablet)</td><td>$0</td></tr>
                   <tr><td>USB-C power adapter + cable</td><td>~$40</td></tr>
-                  <tr><td>Coloured tape (weight plates)</td><td>~$30</td></tr>
+                  <tr><td>Alphafit plates (already colour-coded — no cost)</td></tr>
                   <tr><td>Phase 1 PoE camera (if phone inadequate)</td><td>~$200</td></tr>
                   <tr><td>PoE injector or small switch</td><td>~$80</td></tr>
                   <tr><td>Misc (cable ties, velcro, labels)</td><td>~$50</td></tr>
@@ -3841,7 +3841,7 @@ CREATE TABLE sets (
             </tr>
             <tr class="priority-row-amber">
               <td><span class="badge badge-amber">🟡 HIGH</span></td>
-              <td><strong>Apply coloured tape to weight plates</strong> — White=5kg, Yellow=10kg, Blue=20kg. Vertical stripe on plate spine.</td>
+              <td><strong>Apply coloured tape to weight plates</strong> — Red=25kg, Blue=20kg, Yellow=15kg, Green=10kg, Grey=5kg. Vertical stripe on plate spine.</td>
               <td>Matt</td>
               <td>This week</td>
             </tr>
@@ -5228,7 +5228,7 @@ CREATE TABLE sets (
         <div class="card">
           <h4>Weight Detection Detail</h4>
           <ul class="styled" style="margin-top:8px;">
-            <li>Colour tape on each plate spine (white=5kg, yellow=10kg, blue=20kg)</li>
+            <li>Alphafit bumper plates already have built-in colour stripes — no preparation needed</li>
             <li>Bounding box pre-configured to the stack area only</li>
             <li>CV model counts visible plate colours above selector pin</li>
             <li>Sums to total kg loaded</li>
@@ -5696,39 +5696,52 @@ CREATE TABLE sets (
       </h3>
       <p style="color:#c4b5d4;font-size:.9rem;line-height:1.8;margin-bottom:20px;">
         Camera 3 has one job: <strong style="color:#fff;">read the weight stack and determine how many kilograms are loaded.</strong>
-        This is Manus's domain. It uses computer vision and a clever physical trick — coloured tape — to make an otherwise 
+        This is Manus's domain. It uses computer vision and a clever physical trick — built-in colour stripes on Alphafit competition bumper plates — to make an otherwise 
         difficult problem straightforward.
       </p>
 
-      <h4 style="color:#f59e0b;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">The Physical Setup — Coloured Tape</h4>
-      <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:18px;margin-bottom:20px;">
+      <h4 style="color:#f59e0b;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">The Physical Setup — Alphafit Competition Bumper Plates</h4>
+
+      <!-- ALPHAFIT PHOTO -->
+      <div style="margin-bottom:20px;">
+        <img src="docs/images/alphafit-plates.jpg" alt="Alphafit competition bumper plates with colour stripes" style="width:100%;border-radius:10px;border:1px solid var(--border);object-fit:cover;max-height:280px;"/>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:6px;text-align:center;">XL Fitness Alphafit competition bumper plates — built-in colour stripes on the outer edge. No tape needed.</div>
+      </div>
+
+      <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:18px;margin-bottom:20px;">
         <p style="font-size:.85rem;color:#c4b5d4;line-height:1.8;margin-bottom:12px;">
-          All-black weight plates with identical markings are nearly impossible to distinguish by colour alone. The solution: 
-          apply coloured electrical tape to the outer spine edge of each plate. One strip per plate, consistent position, 
-          visible from the side-on camera.
+          XL Fitness uses <strong style="color:#fff;">Alphafit competition bumper plates</strong> which follow the IWF/IPF international colour standard. 
+          The colour stripes are built directly into the outer edge of each plate — <strong style="color:#22c55e;">no tape application required.</strong> 
+          Camera 3 reads the colour stripe on the outer rim from a tight side-on angle.
         </p>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-          <div style="background:#0a0615;border:1px solid #fff;border-radius:8px;padding:12px;text-align:center;">
-            <div style="width:32px;height:8px;background:#ffffff;border-radius:2px;margin:0 auto 8px;"></div>
-            <div style="color:#fff;font-weight:800;font-size:.88rem;">White</div>
-            <div style="color:var(--muted);font-size:.75rem;">5 kg</div>
-          </div>
-          <div style="background:#0a0615;border:1px solid #eab308;border-radius:8px;padding:12px;text-align:center;">
-            <div style="width:32px;height:8px;background:#eab308;border-radius:2px;margin:0 auto 8px;"></div>
-            <div style="color:#eab308;font-weight:800;font-size:.88rem;">Yellow</div>
-            <div style="color:var(--muted);font-size:.75rem;">10 kg</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+          <div style="background:#0a0615;border:1px solid #ef4444;border-radius:8px;padding:12px;text-align:center;">
+            <div style="width:32px;height:8px;background:#ef4444;border-radius:2px;margin:0 auto 8px;"></div>
+            <div style="color:#ef4444;font-weight:800;font-size:.88rem;">Red</div>
+            <div style="color:var(--muted);font-size:.75rem;">25 kg</div>
           </div>
           <div style="background:#0a0615;border:1px solid #3b82f6;border-radius:8px;padding:12px;text-align:center;">
             <div style="width:32px;height:8px;background:#3b82f6;border-radius:2px;margin:0 auto 8px;"></div>
             <div style="color:#3b82f6;font-weight:800;font-size:.88rem;">Blue</div>
             <div style="color:var(--muted);font-size:.75rem;">20 kg</div>
           </div>
-          <div style="background:#0a0615;border:1px solid #ef4444;border-radius:8px;padding:12px;text-align:center;">
-            <div style="width:32px;height:8px;background:#ef4444;border-radius:2px;margin:0 auto 8px;"></div>
-            <div style="color:#ef4444;font-weight:800;font-size:.88rem;">Red</div>
-            <div style="color:var(--muted);font-size:.75rem;">25 kg</div>
+          <div style="background:#0a0615;border:1px solid #eab308;border-radius:8px;padding:12px;text-align:center;">
+            <div style="width:32px;height:8px;background:#eab308;border-radius:2px;margin:0 auto 8px;"></div>
+            <div style="color:#eab308;font-weight:800;font-size:.88rem;">Yellow</div>
+            <div style="color:var(--muted);font-size:.75rem;">15 kg</div>
+          </div>
+          <div style="background:#0a0615;border:1px solid #22c55e;border-radius:8px;padding:12px;text-align:center;">
+            <div style="width:32px;height:8px;background:#22c55e;border-radius:2px;margin:0 auto 8px;"></div>
+            <div style="color:#22c55e;font-weight:800;font-size:.88rem;">Green</div>
+            <div style="color:var(--muted);font-size:.75rem;">10 kg</div>
+          </div>
+          <div style="background:#0a0615;border:1px solid #9ca3af;border-radius:8px;padding:12px;text-align:center;">
+            <div style="width:32px;height:8px;background:#9ca3af;border-radius:2px;margin:0 auto 8px;"></div>
+            <div style="color:#9ca3af;font-weight:800;font-size:.88rem;">Grey</div>
+            <div style="color:var(--muted);font-size:.75rem;">5 kg</div>
           </div>
         </div>
+        <p style="font-size:.78rem;color:var(--muted);margin-top:12px;margin-bottom:0;">Small plates (2.5kg, 1.25kg) identified by diameter size — too thin for reliable colour reading. Plate diameter detection handles these.</p>
       </div>
 
       <h4 style="color:#f59e0b;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">Detection Pipeline</h4>
@@ -5738,9 +5751,12 @@ CREATE TABLE sets (
         <span style="color:#a855f7;">  ↓  Convert BGR → HSV colour space</span><br/>
         <span style="color:#6b7280;">  HSV is robust to lighting changes unlike RGB</span><br/>
         <span style="color:#a855f7;">  ↓  Colour threshold masks per colour</span><br/>
-        <span style="color:#c4b5d4;">  White mask: H=0-180, S=0-50, V=180-255</span><br/>
-        <span style="color:#c4b5d4;">  Yellow mask: H=25-35, S=150-255, V=150-255</span><br/>
-        <span style="color:#c4b5d4;">  Blue mask:   H=100-130, S=150-255, V=100-255</span><br/>
+        <span style="color:#ef4444;">  Red mask:    H=0-10 or H=170-180, S=150-255, V=100-255  (25kg)</span><br/>
+        <span style="color:#3b82f6;">  Blue mask:   H=100-130, S=150-255, V=100-255             (20kg)</span><br/>
+        <span style="color:#eab308;">  Yellow mask: H=25-35, S=150-255, V=150-255               (15kg)</span><br/>
+        <span style="color:#22c55e;">  Green mask:  H=40-80, S=100-255, V=80-255                (10kg)</span><br/>
+        <span style="color:#9ca3af;">  Grey mask:   H=0-180, S=0-60, V=80-180                   (5kg)</span><br/>
+        <span style="color:#6b7280;">  Size detect: diameter &lt;280mm = 2.5kg, &lt;210mm = 1.25kg</span><br/>
         <span style="color:#a855f7;">  ↓  Count plates above selector pin position</span><br/>
         <span style="color:#a855f7;">  ↓  Sum plate weights</span><br/>
         <span style="color:#22c55e;">  Output: {weight_kg: 50, plates: ["20kg", "20kg", "10kg"]}</span>
