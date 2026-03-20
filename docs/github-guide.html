@@ -1453,6 +1453,8 @@
       <li><a href="#commits">9. Commits</a></li>
       <li><a href="#breaks">10. When It Breaks</a></li>
       <li><a href="#glossary">11. Glossary</a></li>
+      <li><a href="#current-state">12. GitHub Today</a></li>
+      <li><a href="#future-github">13. AI on GitHub</a></li>
     </ul>
   </div>
 </nav>
@@ -1521,6 +1523,14 @@
       <a href="#glossary" class="toc-item">
         <div class="toc-num">SECTION 11</div>
         <div class="toc-title">Glossary</div>
+      </a>
+      <a href="#current-state" class="toc-item">
+        <div class="toc-num">SECTION 12</div>
+        <div class="toc-title">How Our GitHub Works Right Now</div>
+      </a>
+      <a href="#future-github" class="toc-item">
+        <div class="toc-num">SECTION 13</div>
+        <div class="toc-title">How the Overseer AI Will Live on GitHub</div>
       </a>
     </div>
   </div>
@@ -3047,6 +3057,917 @@
       </tbody>
     </table>
   </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 12 — HOW OUR GITHUB WORKS RIGHT NOW
+  ════════════════════════════════════════════ -->
+  <div class="section" id="current-state">
+    <span class="section-number">Section 12</span>
+    <h2>How Our GitHub Works Right Now</h2>
+    <p class="section-subtitle">A granular, honest look at the exact current state of the repo — what exists, what's live, what's connected, and what's not yet connected.</p>
+
+    <div class="callout purple">
+      <span class="callout-icon">🗺️</span>
+      <div class="callout-body">
+        <strong>This section is a snapshot</strong>
+        <p>The information here reflects the state of the repo as of March 20, 2026. It's designed to be brutally honest — not just what's planned, but what's real, what's working, and what's still waiting. If something is wired up, it says so. If it isn't, it says that too.</p>
+      </div>
+    </div>
+
+    <!-- ── 12.1 Repo Snapshot ── -->
+    <h3>12.1 — The Repo Today: Exact Snapshot</h3>
+    <p>Here is everything in our repo, categorised by its actual current status — not aspirational, not planned, but what exists and what works right now.</p>
+
+    <!-- LIVE AND WORKING -->
+    <div class="folder-section" style="border-color: var(--green);">
+      <div class="folder-header" style="background: var(--green-bg); border-color: var(--green);">
+        <span class="folder-icon">✅</span>
+        <span class="folder-name" style="color: var(--green);">LIVE AND WORKING</span>
+        <span class="folder-tagline">These files do exactly what they claim, right now, on any device</span>
+      </div>
+      <div class="folder-body">
+
+        <div class="file-detail">
+          <div class="file-detail-header">
+            <span class="file-name">pose/alpha.html</span>
+            <span class="file-tag tag-demo">Live Demo</span>
+          </div>
+          <p>The rep counter. Opens in Chrome on any phone or tablet. Points the camera at someone doing a lat pulldown and counts reps in real time using MoveNet pose estimation + rule-based angle detection. The fullscreen button works. The flip-camera button works. NN v4 (75% accuracy) is present and fires the brain animation when it detects a rep, but it doesn't gate counting — the pure angle logic does the gating. This is the thing that makes the whole project real.</p>
+          <div class="file-meta-grid">
+            <div class="file-meta-item"><div class="meta-label">Model</div><div class="meta-value">MoveNet Lightning</div></div>
+            <div class="file-meta-item"><div class="meta-label">Counting Logic</div><div class="meta-value">Angle-based rules</div></div>
+            <div class="file-meta-item"><div class="meta-label">NN Role</div><div class="meta-value">Animation only (not gate)</div></div>
+            <div class="file-meta-item"><div class="meta-label">Offline</div><div class="meta-value">Yes — model is embedded</div></div>
+          </div>
+        </div>
+
+        <div class="file-detail">
+          <div class="file-detail-header">
+            <span class="file-name">pose/label.html</span>
+            <span class="file-tag tag-code">Training Tool</span>
+          </div>
+          <p>The training data labeler. Load a video file, scrub through it, and mark sections with keyboard shortcuts: <code>S</code> to mark a start point, then <code>G</code> (good rep), <code>B</code> (bad rep), <code>F</code> (fast), <code>E</code> (eccentric), <code>N</code> (noise), or <code>R</code> (rest) to label what happens after. Export the result as JSON. This is how we turn raw gym footage into training data without writing a line of Python.</p>
+          <div class="file-meta-grid">
+            <div class="file-meta-item"><div class="meta-label">Input</div><div class="meta-value">Any video file</div></div>
+            <div class="file-meta-item"><div class="meta-label">Output</div><div class="meta-value">label JSON file</div></div>
+            <div class="file-meta-item"><div class="meta-label">Keyboard shortcuts</div><div class="meta-value">S / G / B / F / E / N / R</div></div>
+          </div>
+        </div>
+
+        <div class="file-detail">
+          <div class="file-detail-header">
+            <span class="file-name">demo/alpha.html</span>
+            <span class="file-tag tag-frozen">Frozen Kiosk</span>
+          </div>
+          <p>The frozen stakeholder demo. Identical functionality to <code>pose/alpha.html</code>, but this file is <strong>never edited</strong>. It exists purely so we always have a known-good, presentation-ready demo that can't be accidentally broken during development. Has a service worker for offline use — meaning once it's been loaded once, it works even without internet. Perfect for showing in a gym with dodgy Wi-Fi.</p>
+          <div class="file-meta-grid">
+            <div class="file-meta-item"><div class="meta-label">Status</div><div class="meta-value">Permanently frozen</div></div>
+            <div class="file-meta-item"><div class="meta-label">Offline</div><div class="meta-value">Yes — service worker PWA</div></div>
+            <div class="file-meta-item"><div class="meta-label">Purpose</div><div class="meta-value">Stakeholder presentations</div></div>
+          </div>
+        </div>
+
+        <div class="file-detail">
+          <div class="file-detail-header">
+            <span class="file-name">overseer.html</span>
+            <span class="file-tag tag-doc">Master Doc</span>
+          </div>
+          <p>The Overseer Bible. Every decision, every architectural choice, every phase of the system is documented here. If it's been discussed and decided, it's in the Bible. This is the single source of truth for the whole project — not Slack messages, not Google Docs, not memory. The Bible.</p>
+        </div>
+
+        <div class="file-detail">
+          <div class="file-detail-header">
+            <span class="file-name">docs/</span>
+            <span class="file-tag tag-doc">Documentation</span>
+          </div>
+          <p>All the reference documentation: <code>deep-dive.html</code> (technical architecture), <code>ceiling-rig.html</code> (camera mounting plans), <code>camera-guide.html</code> (buying guide and specs), and this document (<code>github-guide.html</code>). All live, all current, all accessible via GitHub Pages.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- EXISTS BUT NOT CONNECTED -->
+    <div class="folder-section" style="border-color: var(--amber);">
+      <div class="folder-header" style="background: var(--amber-bg); border-color: var(--amber);">
+        <span class="folder-icon">🔌</span>
+        <span class="folder-name" style="color: var(--amber);">BUILT BUT NOT YET CONNECTED</span>
+        <span class="folder-tagline">These files exist and are finished — they're just waiting for the rest of the system to catch up</span>
+      </div>
+      <div class="folder-body">
+
+        <div class="file-detail" style="border-color: var(--amber);">
+          <div class="file-detail-header">
+            <span class="file-name">pose/session.js</span>
+            <span class="file-tag tag-config">Ready, Not Wired</span>
+          </div>
+          <p>The session manager. This file is complete and correct — it handles the full session lifecycle: NFC card tap starts a session, reps are counted and queued, session ends when the member leaves, all events are POSTed to Manus's server. It even has an offline queue so events don't get lost if the network drops mid-workout.</p>
+          <p><strong>Why it's not wired in:</strong> <code>alpha.html</code> doesn't import it yet. We're waiting on Manus's server IP address. Once we have that IP, we add one line of config and wire it in. The work is done — we're waiting on infrastructure, not code.</p>
+          <div class="callout warning" style="margin: 12px 0 0;">
+            <span class="callout-icon">⏳</span>
+            <div class="callout-body">
+              <strong>Blocker: Manus's server IP</strong>
+              <p>session.js is complete. Integration is one config change once the server is deployed.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="file-detail" style="border-color: var(--amber);">
+          <div class="file-detail-header">
+            <span class="file-name">pose/machine_configs/lat_pulldown.json</span>
+            <span class="file-tag tag-config">Config File</span>
+          </div>
+          <p>The machine config for the Nautilus Nitro lat pulldown — the first machine in the system. Defines all the joint angle thresholds, engagement criteria, camera specifications, and machine metadata. This is the file that will make the system machine-agnostic in the future.</p>
+          <p><strong>Why it's not active:</strong> <code>alpha.html</code> currently has all these values hardcoded inside it for simplicity and offline reliability. Future: alpha.html will fetch this config at startup and adapt automatically. The config is correct — the loading mechanism isn't built yet.</p>
+        </div>
+
+        <div class="file-detail" style="border-color: var(--amber);">
+          <div class="file-detail-header">
+            <span class="file-name">pose/model.json</span>
+            <span class="file-tag tag-config">Model Backup</span>
+          </div>
+          <p>NN v4 model weights, extracted from alpha.html and saved as a clean standalone file. The model is currently embedded directly inside alpha.html as a Base64 blob (for offline reliability — no external fetch required). This file is the clean reference copy and backup.</p>
+          <p><strong>Why it's not the active source:</strong> Embedding in alpha.html means the demo works offline without any network requests. Future: once we have a CDN or reliable local server, alpha.html will fetch from this file instead.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PLANNED BUT NOT BUILT -->
+    <div class="folder-section" style="border-color: var(--border2);">
+      <div class="folder-header">
+        <span class="folder-icon">📋</span>
+        <span class="folder-name">PLANNED BUT NOT BUILT YET</span>
+        <span class="folder-tagline">Folders and features that are on the roadmap — placeholders only today</span>
+      </div>
+      <div class="folder-body">
+
+        <div class="card-grid">
+          <div class="concept-card">
+            <span class="icon">⚖️</span>
+            <h4>weight/ folder</h4>
+            <p>Placeholder directory only. Manus's team builds the weight detector. When it's ready, their code goes here. Our job is to keep the folder structure clean so there's a clear home for it when it arrives.</p>
+          </div>
+          <div class="concept-card">
+            <span class="icon">👤</span>
+            <h4>face/ folder</h4>
+            <p>Placeholder. Phase 3. Member identification via face recognition — so the system knows who's at which machine without needing a card tap. Complex, privacy-sensitive, very future.</p>
+          </div>
+          <div class="concept-card">
+            <span class="icon">👥</span>
+            <h4>members/ folder</h4>
+            <p>Placeholder. Phase 3. Member profile management, history, and personalisation. The full member-facing experience layer.</p>
+          </div>
+          <div class="concept-card">
+            <span class="icon">🧠</span>
+            <h4>LSTM Model (v5)</h4>
+            <p>Not built yet. Needs 500+ training sequences to train on. Currently at roughly 300 sequences. The LSTM will replace the rule-based angle counting with learned temporal pattern recognition — meaning it understands rep timing and form, not just angles.</p>
+          </div>
+          <div class="concept-card">
+            <span class="icon">🔗</span>
+            <h4>Full Server Integration</h4>
+            <p>The complete pipeline: rep counted → session.js → POST to Manus server → Supabase → tablet webhook → leaderboard update. session.js is built on our side. Manus's server isn't deployed yet. Once it is: one config change and this is live.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── 12.2 Current Data Flow ── -->
+    <h3>12.2 — The Current Data Flow: What Actually Happens Today</h3>
+    <p>Here is an honest diagram of what data flows where in three states: what works today, what we're building toward in Phase 1, and what Phase 4 looks like.</p>
+
+    <div class="card" style="margin-bottom: 20px;">
+      <h4 style="color: var(--green); margin-bottom: 16px; font-family: monospace; font-size: 13px; letter-spacing: .08em; text-transform: uppercase;">TODAY — What's Actually Live</h4>
+      <div style="background: #000; border-radius: var(--radius-sm); padding: 20px; font-family: monospace; font-size: 14px; line-height: 2.2; overflow-x: auto;">
+        <div style="color: var(--purple-lt);">📱 Phone / tablet camera</div>
+        <div style="color: var(--text-dim); padding-left: 20px;">↓ video stream (local only — never leaves the device)</div>
+        <div style="color: var(--purple-lt);">⚙️ alpha.html</div>
+        <div style="color: var(--text-dim); padding-left: 40px;">MoveNet pose estimation</div>
+        <div style="color: var(--text-dim); padding-left: 40px;">Rule-based angle detection</div>
+        <div style="color: var(--text-dim); padding-left: 40px;">NN v4 (brain animation only)</div>
+        <div style="color: var(--text-dim); padding-left: 20px;">↓</div>
+        <div style="color: var(--green);">🔢 Rep count on screen</div>
+        <div style="color: var(--red); padding-left: 20px; font-size: 13px; margin-top: 4px;">✗ Nothing sent anywhere — no server, no database, no persistence</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 20px; border-color: var(--amber);">
+      <h4 style="color: var(--amber); margin-bottom: 16px; font-family: monospace; font-size: 13px; letter-spacing: .08em; text-transform: uppercase;">PHASE 1 TARGET — What We're Building Toward</h4>
+      <div style="background: #000; border-radius: var(--radius-sm); padding: 20px; font-family: monospace; font-size: 14px; line-height: 2.2; overflow-x: auto;">
+        <div style="color: var(--purple-lt);">📷 Camera on column mount</div>
+        <div style="color: var(--text-dim); padding-left: 20px;">↓ video stream (local only)</div>
+        <div style="color: var(--purple-lt);">⚙️ alpha.html</div>
+        <div style="color: var(--text-dim); padding-left: 40px;">MoveNet + LSTM counter (v5)</div>
+        <div style="color: var(--text-dim); padding-left: 40px;">session.js (wired in)</div>
+        <div style="color: var(--text-dim); padding-left: 20px;">↓ POST /event</div>
+        <div style="color: var(--amber);">🖥️ Manus server (Mac Mini)</div>
+        <div style="color: var(--text-dim); padding-left: 20px;">↓ write</div>
+        <div style="color: var(--amber);">🗄️ Supabase database</div>
+        <div style="color: var(--text-dim); padding-left: 20px;">↓ webhook</div>
+        <div style="color: var(--green);">📊 Tablet leaderboard update</div>
+      </div>
+    </div>
+
+    <div class="card" style="border-color: var(--purple-dk);">
+      <h4 style="color: var(--purple-lt); margin-bottom: 16px; font-family: monospace; font-size: 13px; letter-spacing: .08em; text-transform: uppercase;">PHASE 4 — The Full Overseer</h4>
+      <div style="background: #000; border-radius: var(--radius-sm); padding: 20px; font-family: monospace; font-size: 14px; line-height: 2.2; overflow-x: auto;">
+        <div style="color: var(--purple-lt);">🎥 3 cameras per machine on ceiling rig</div>
+        <div style="color: var(--text-dim); padding-left: 20px;">↓ video streams via PoE → zone switches → Mac Mini</div>
+        <div style="color: var(--purple-lt);">🖥️ Mac Mini orchestration layer</div>
+        <div style="color: var(--text-dim); padding-left: 40px;">Pose AI → rep detection + form analysis</div>
+        <div style="color: var(--text-dim); padding-left: 40px;">Weight AI → load detection per set</div>
+        <div style="color: var(--text-dim); padding-left: 40px;">Face AI → member identification</div>
+        <div style="color: var(--text-dim); padding-left: 20px;">↓ structured events</div>
+        <div style="color: var(--purple-lt);">⚡ FastAPI orchestration server</div>
+        <div style="color: var(--text-dim); padding-left: 20px;">↓ writes</div>
+        <div style="color: var(--purple-lt);">🗄️ Supabase cloud database</div>
+        <div style="color: var(--text-dim); padding-left: 20px;">↓ parallel outputs</div>
+        <div style="color: var(--green);">📊 Tablet display &nbsp;&nbsp;+&nbsp;&nbsp; 🏆 Leaderboard &nbsp;&nbsp;+&nbsp;&nbsp; 📱 Member app</div>
+      </div>
+    </div>
+
+    <!-- ── 12.3 Training Data Pipeline ── -->
+    <h3>12.3 — The Training Data Pipeline: Where Everything Lives</h3>
+    <p>Training data is some of the most important and most scattered information in the project. Here is exactly where each piece lives and why.</p>
+
+    <div class="card-grid">
+      <div class="concept-card">
+        <span class="icon">🎬</span>
+        <h4>Raw Videos</h4>
+        <div class="term-label">Google Drive</div>
+        <p>Training videos are gigabytes each — far too large for GitHub. They live in Google Drive and are shared with Donkey via link. Never committed to GitHub.</p>
+      </div>
+      <div class="concept-card">
+        <span class="icon">🏷️</span>
+        <h4>Label JSON Files</h4>
+        <div class="term-label">Mac Mini Local</div>
+        <p>Output from <code>pose/label.html</code>. Should be saved to <code>Desktop/Training Data/labels/</code> on the Mac Mini, then backed up to Google Drive. Never committed to GitHub (matched by .gitignore).</p>
+      </div>
+      <div class="concept-card">
+        <span class="icon">🧠</span>
+        <h4>Model Weights</h4>
+        <div class="term-label">GitHub + Mac Mini</div>
+        <p>The <strong>current deployed model</strong> lives in <code>pose/model.json</code> on GitHub and embedded in <code>alpha.html</code>. <strong>All version history</strong> lives in <code>Desktop/Training Data/models/</code> on the Mac Mini.</p>
+      </div>
+      <div class="concept-card">
+        <span class="icon">📊</span>
+        <h4>Training Sequences</h4>
+        <div class="term-label">Mac Mini Temporary</div>
+        <p>The processed sequences extracted from videos by MoveNet. Generated in <code>/tmp/</code> during processing. Should be immediately saved to <code>Desktop/Training Data/labels/</code> — never left in /tmp where they could be deleted.</p>
+      </div>
+    </div>
+
+    <h3>The Training Pipeline — Step by Step</h3>
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Matt films at the gym</h4>
+          <p>Side-on angle, shoulder height, good lighting. Uploads the video to Google Drive. Sends Donkey the link.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Donkey downloads and processes</h4>
+          <p>Downloads the video to the Mac Mini. Runs MoveNet against it to extract a sequence of joint positions per frame. Saves the sequences as JSON to <code>Desktop/Training Data/labels/</code>.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Model retrained</h4>
+          <p>Python script trains the LSTM model on all accumulated sequences. Accuracy and confusion matrix noted. New model saved as <code>model_v5.json</code> locally.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Committed to GitHub</h4>
+          <p><code>pose/model.json</code> updated with new weights. <code>alpha.html</code> updated with the embedded model. Both committed and pushed.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>GitHub Pages publishes</h4>
+          <p>Within 2 minutes of the push, GitHub Pages rebuilds and the live demo URL serves the new model. No deployment steps, no server restarts. Just push and wait 2 minutes.</p>
+        </div>
+      </li>
+    </ol>
+
+    <!-- ── 12.4 Commit History Timeline ── -->
+    <h3>12.4 — The Commit History as a Project Timeline</h3>
+    <p>Here's the full history of the project, reconstructed from our actual commit log. This is the real timeline of how the Overseer was built.</p>
+
+    <!-- Timeline -->
+    <div style="position: relative; padding-left: 32px; margin: 28px 0;">
+      <!-- Vertical line -->
+      <div style="position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--purple-dk), transparent);"></div>
+
+      <!-- March 12-13 -->
+      <div style="position: relative; margin-bottom: 32px;">
+        <div style="position: absolute; left: -26px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--purple); box-shadow: 0 0 10px var(--purple);"></div>
+        <div class="card" style="margin: 0;">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--purple-lt); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px;">March 12–13 2026 — Project Setup</div>
+          <ul style="color: var(--text-muted); font-size: 14px; padding-left: 18px; margin: 0; line-height: 1.9;">
+            <li>SSH keypair generated, git configured, GitHub auth established</li>
+            <li>Repository created under XLDonkey account</li>
+            <li>GitHub Pages enabled — demo URL goes live</li>
+            <li>First working demo: <code>lat_pulldown_counter.html</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- March 13-14 -->
+      <div style="position: relative; margin-bottom: 32px;">
+        <div style="position: absolute; left: -26px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--purple); box-shadow: 0 0 10px var(--purple);"></div>
+        <div class="card" style="margin: 0;">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--purple-lt); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px;">March 13–14 2026 — Demo Iteration</div>
+          <ul style="color: var(--text-muted); font-size: 14px; padding-left: 18px; margin: 0; line-height: 1.9;">
+            <li>Skeleton visible on phone — first real pose detection confirmed</li>
+            <li>Camera feed working reliably across Android and iOS</li>
+            <li>Multiple rewrites of the rep counter as we found edge cases</li>
+            <li>YouTube lat pulldown video downloaded and processed for training data</li>
+            <li>NN v1 trained — 90% accuracy but on a tiny dataset (50 sequences)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- March 14 -->
+      <div style="position: relative; margin-bottom: 32px;">
+        <div style="position: absolute; left: -26px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 10px var(--amber);"></div>
+        <div class="card" style="margin: 0; border-color: var(--amber);">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--amber); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px;">March 14 2026 — Stakeholder Preparation</div>
+          <ul style="color: var(--text-muted); font-size: 14px; padding-left: 18px; margin: 0; line-height: 1.9;">
+            <li><code>tablet.html</code> created — tablet-sized display for presentations</li>
+            <li>Bad rep blocking logic added — partial reps no longer count</li>
+            <li>Matt filmed real gym training videos — first real-world training data</li>
+            <li>NN v3 trained on real gym data — 76.7% accuracy on actual members</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- March 15 -->
+      <div style="position: relative; margin-bottom: 32px;">
+        <div style="position: absolute; left: -26px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green);"></div>
+        <div class="card" style="margin: 0; border-color: var(--green);">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--green); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px;">March 15 2026 — Demo Polish</div>
+          <ul style="color: var(--text-muted); font-size: 14px; padding-left: 18px; margin: 0; line-height: 1.9;">
+            <li><code>alpha.html</code> created — clean rewrite, the definitive demo version</li>
+            <li>Moved to pure angle-based counting (NN as animation only, not gate)</li>
+            <li>Fullscreen button added with proper webkit support for iOS</li>
+            <li>Kiosk mode added: service worker, PWA manifest, offline support</li>
+            <li>Flip camera button for switching between front and rear</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- March 16-17 -->
+      <div style="position: relative; margin-bottom: 32px;">
+        <div style="position: absolute; left: -26px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--purple); box-shadow: 0 0 10px var(--purple);"></div>
+        <div class="card" style="margin: 0;">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--purple-lt); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px;">March 16–17 2026 — Infrastructure Build</div>
+          <ul style="color: var(--text-muted); font-size: 14px; padding-left: 18px; margin: 0; line-height: 1.9;">
+            <li>Repo renamed from <code>XLFitness_pose-estimation</code> to <code>gym-ai-system</code></li>
+            <li>Full folder structure established: <code>pose/ weight/ face/ members/ docs/ demo/</code></li>
+            <li><code>session.js</code> built — complete session lifecycle manager</li>
+            <li><code>pose/machine_configs/lat_pulldown.json</code> built — machine config system</li>
+            <li>Labeler v2 built — section-based labeling with keyboard shortcuts</li>
+            <li>Fetch (internal research agent) created for background tasks</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- March 18-19 -->
+      <div style="position: relative; margin-bottom: 32px;">
+        <div style="position: absolute; left: -26px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 10px var(--blue);"></div>
+        <div class="card" style="margin: 0; border-color: var(--blue);">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--blue); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px;">March 18–19 2026 — Documentation Sprint</div>
+          <ul style="color: var(--text-muted); font-size: 14px; padding-left: 18px; margin: 0; line-height: 1.9;">
+            <li>Overseer Bible created (<code>overseer.html</code>) — master planning document</li>
+            <li><code>deep-dive.html</code> — full technical architecture documentation</li>
+            <li><code>ceiling-rig.html</code> — camera mounting options and spec comparison</li>
+            <li><code>camera-guide.html</code> — buying guide, angle specs, compatibility</li>
+            <li>Server security section added to the Bible</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- March 20 -->
+      <div style="position: relative; margin-bottom: 0;">
+        <div style="position: absolute; left: -26px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--purple); box-shadow: 0 0 14px var(--purple);"></div>
+        <div class="card" style="margin: 0; border-color: var(--purple-dk); background: var(--purple-bg);">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--purple-lt); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px;">March 20 2026 — Bible Expansion (Today)</div>
+          <ul style="color: var(--text-muted); font-size: 14px; padding-left: 18px; margin: 0; line-height: 1.9;">
+            <li>NN architecture section added to the Bible</li>
+            <li>Four-subsystem explanation (pose / weight / face / members)</li>
+            <li>Machine engagement detail — the 6-gate system documented</li>
+            <li>Training labels definitive reference published</li>
+            <li>This GitHub guide — Sections 12 and 13 added</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">📈</span>
+      <div class="callout-body">
+        <strong>8 days, one working AI system</strong>
+        <p>From zero — no repo, no code, no training data — to a fully working rep counter with documentation, infrastructure, and training pipeline in 8 days. The commit history is proof. Anyone can open the GitHub commits page and see exactly when and how each piece was built.</p>
+      </div>
+    </div>
+
+  </div><!-- /section 12 -->
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 13 — HOW THE OVERSEER AI LIVES ON GITHUB
+  ════════════════════════════════════════════ -->
+  <div class="section" id="future-github">
+    <span class="section-number">Section 13</span>
+    <h2>How the Overseer AI Will Live on GitHub</h2>
+    <p class="section-subtitle">Granular detail on how GitHub will be used as the Overseer grows from Phase 1 to Phase 4 — models, machines, servers, teams, and the long-term backbone.</p>
+
+    <div class="callout purple">
+      <span class="callout-icon">🔭</span>
+      <div class="callout-body">
+        <strong>This section is forward-looking</strong>
+        <p>Everything here is either already in motion or clearly inevitable given where the project is today. GitHub isn't just where the code lives — it's the infrastructure that makes the whole system deployable, reversible, and scalable to 120+ machines.</p>
+      </div>
+    </div>
+
+    <!-- ── 13.1 AI Model Lifecycle ── -->
+    <h3>13.1 — The AI Model Lifecycle on GitHub</h3>
+    <p>How does a neural network go from "Matt sends a video" to "live in the demo within hours"? Here is the exact process, step by step.</p>
+
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Data Collection — Google Drive, not GitHub</h4>
+          <p>Matt films at the gym. Side-on angle, shoulder height. Uploads to Google Drive. Sends Donkey the link. Videos are gigabytes — they never go near GitHub. This is by design: GitHub is for code, not media.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Processing — Mac Mini local, not GitHub</h4>
+          <p>Donkey downloads the video. Runs MoveNet extraction — the video is converted to a JSON sequence of joint positions per frame. Output: <code>training_sequences.json</code>. Saved to <code>Desktop/Training Data/labels/</code>. Not committed to GitHub (blocked by .gitignore — the <code>*_sequences.json</code> rule).</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Training — Mac Mini local</h4>
+          <p>Python script trains the LSTM model on all accumulated sequences. Model saved as <code>model_v5.json</code> locally in <code>Desktop/Training Data/models/</code>. Accuracy noted. Confusion matrix checked. If accuracy is better than current, proceed to commit.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Commit to GitHub — the handover point</h4>
+          <div style="background: #000; border-radius: var(--radius-sm); padding: 16px; margin-top: 10px; font-family: monospace; font-size: 13px; line-height: 2; overflow-x: auto;">
+            <div style="color: var(--text-dim);"># Switch to dev branch first — never commit directly to main</div>
+            <div style="color: var(--green);">git checkout dev</div>
+            <div style="color: var(--text-dim); margin-top: 4px;"># Update the model file and the demo</div>
+            <div style="color: var(--text);"># (copy new weights into pose/model.json)</div>
+            <div style="color: var(--text);"># (embed weights into alpha.html for offline reliability)</div>
+            <div style="color: var(--green);">git add pose/model.json pose/alpha.html</div>
+            <div style="color: var(--green);">git commit -m "feat: deploy NN v5 LSTM - 500 sequences, 91% accuracy"</div>
+            <div style="color: var(--green);">git push origin dev</div>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Test on dev — before anything goes live</h4>
+          <p>Open the dev branch version in Chrome. Test with real movements. Confirm the new model is counting accurately and the accuracy improvement is real. If something's wrong, fix it on dev — it hasn't touched main yet, so the live demo is still working.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h4>Merge to main — it goes live</h4>
+          <div style="background: #000; border-radius: var(--radius-sm); padding: 16px; margin-top: 10px; font-family: monospace; font-size: 13px; line-height: 2; overflow-x: auto;">
+            <div style="color: var(--green);">git checkout main</div>
+            <div style="color: var(--green);">git merge dev</div>
+            <div style="color: var(--green);">git push origin main</div>
+            <div style="color: var(--text-dim); margin-top: 4px;"># GitHub Pages rebuilds automatically</div>
+            <div style="color: var(--text-dim);"># Demo is live with the new model in ~2 minutes</div>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">7</div>
+        <div class="step-body">
+          <h4>Verify — confirm it worked</h4>
+          <p>Open the live demo URL. Test a few reps. Confirm the model is running correctly in the browser. Done. The whole process from "Matt sends a video" to "new model live in the demo" can take as little as 2–4 hours.</p>
+        </div>
+      </li>
+    </ol>
+
+    <!-- ── 13.2 Adding New Machines ── -->
+    <h3>13.2 — How New Machines Are Added to GitHub</h3>
+    <p>When we're ready to add Machine 2 — say, the seated row — this is exactly how it happens. The machine config system was designed specifically to make this process fast and repeatable.</p>
+
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Create the machine config file</h4>
+          <p>Create <code>pose/machine_configs/seated_row_01.json</code>. Define: <code>machine_id</code>, <code>primary_joint</code> (elbow for rows), engagement criteria, angle thresholds for start/peak/end of rep, weight stack values, and camera position specifications. This file is the complete description of how the AI sees and understands this machine.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Film training data</h4>
+          <p>Matt films at the seated row — side-on angle, shoulder height. Labels the footage with the labeler tool. Sends videos and JSON to Donkey.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Transfer learning — not starting from scratch</h4>
+          <p>Donkey fine-tunes the existing lat pulldown LSTM on the new machine's data. Because both exercises involve similar pushing/pulling motions, the model already understands the fundamentals. Transfer learning means we only need ~100 sequences (not 500) for the new machine — the core knowledge transfers across.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>alpha.html adapts automatically</h4>
+          <p>When <code>alpha.html</code> loads, it reads the machine config and adapts all its thresholds, joint targets, and counting logic to match. No code rewrite required — just a new JSON file. This is why the machine config system was built: adding Machine 50 should take the same effort as adding Machine 2.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Commit and deploy</h4>
+          <div style="background: #000; border-radius: var(--radius-sm); padding: 16px; margin-top: 10px; font-family: monospace; font-size: 13px; line-height: 2; overflow-x: auto;">
+            <div style="color: var(--green);">git add pose/machine_configs/seated_row_01.json</div>
+            <div style="color: var(--green);">git commit -m "feat: add seated_row_01 machine config - transfer from lat pulldown"</div>
+            <div style="color: var(--green);">git push origin main</div>
+            <div style="color: var(--text-dim); margin-top: 4px;"># New machine live in the demo within 2 minutes</div>
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout success">
+      <span class="callout-icon">🔁</span>
+      <div class="callout-body">
+        <strong>This is why the config system exists</strong>
+        <p>Adding Machine 50 should take the same effort as adding Machine 2. One JSON file. One commit. Live in 2 minutes. The architecture was designed for scale from day one.</p>
+      </div>
+    </div>
+
+    <!-- ── 13.3 Server Integration ── -->
+    <h3>13.3 — How the Server Integration Will Work on GitHub</h3>
+    <p>When Manus's server is ready, this is exactly what changes in our GitHub — and it's smaller than you'd expect.</p>
+
+    <div class="card" style="margin-bottom: 16px;">
+      <h4 style="color: var(--text-dim); margin-bottom: 12px;">Current state in session.js:</h4>
+      <div style="background: #000; border-radius: var(--radius-sm); padding: 16px; font-family: monospace; font-size: 14px; line-height: 1.8; overflow-x: auto;">
+        <span style="color: var(--text-dim);">// No server configured — events queue locally only</span><br/>
+        <span style="color: var(--blue);">const</span> <span style="color: var(--text);">SERVER</span> <span style="color: var(--purple-lt);">=</span> <span style="color: var(--green);">''</span><span style="color: var(--text-dim);">; // empty — no server yet</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 16px; border-color: var(--green);">
+      <h4 style="color: var(--green); margin-bottom: 12px;">When Manus gives us the server IP:</h4>
+      <div style="background: #000; border-radius: var(--radius-sm); padding: 16px; font-family: monospace; font-size: 14px; line-height: 1.8; overflow-x: auto;">
+        <span style="color: var(--text-dim);">// ONE line change — this connects the entire Overseer</span><br/>
+        <span style="color: var(--blue);">const</span> <span style="color: var(--text);">SERVER</span> <span style="color: var(--purple-lt);">=</span> <span style="color: var(--green);">'http://192.168.1.50:8000/event'</span><span style="color: var(--text-dim);">; // Manus's Mac Mini</span>
+      </div>
+    </div>
+
+    <p>This single config change connects the entire Overseer pipeline:</p>
+    <ul>
+      <li>Every rep counted → POST to Manus's server</li>
+      <li>Every session start and end → POST to server</li>
+      <li>Every weight detected (Manus's side) → POST to server</li>
+      <li>Server combines all events → writes to Supabase → updates leaderboard</li>
+    </ul>
+
+    <div class="card" style="margin-top: 16px;">
+      <h4 style="color: var(--purple-lt); margin-bottom: 12px;">The commit that makes Phase 1 real:</h4>
+      <div style="background: #000; border-radius: var(--radius-sm); padding: 16px; font-family: monospace; font-size: 14px; overflow-x: auto;">
+        <span style="color: var(--green);">git commit -m "feat: connect session.js to Manus server - Phase 1 integration live"</span>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">⚡</span>
+      <div class="callout-body">
+        <strong>One line. Full pipeline.</strong>
+        <p>This is the moment the full AI pipeline becomes real. Everything else is already built. We're waiting on infrastructure, not code.</p>
+      </div>
+    </div>
+
+    <!-- ── 13.4 Branch Strategy ── -->
+    <h3>13.4 — Branch Strategy as the Team Grows</h3>
+    <p>Right now Donkey works alone. That won't always be the case. Here's how the branch structure evolves as complexity grows.</p>
+
+    <div class="card-grid">
+      <div class="concept-card">
+        <span class="icon">🌱</span>
+        <div class="term-label" style="background:var(--green-bg);border-color:var(--green);color:var(--green);">Phase 1 — Now</div>
+        <h4>Solo workflow</h4>
+        <p>Donkey works on <code>dev</code> branch. When tested and confirmed working, merges to <code>main</code>. Simple. Fast. Appropriate for single contributor.</p>
+      </div>
+      <div class="concept-card">
+        <span class="icon">🌿</span>
+        <div class="term-label" style="background:var(--amber-bg);border-color:var(--amber);color:var(--amber);">Phase 2 — Feature Branches</div>
+        <h4>Parallel work streams</h4>
+        <p>Each major feature gets its own branch. Donkey works on LSTM; Manus works on weight integration. Neither breaks the other. Branches merge to <code>dev</code> for integration testing, then to <code>main</code>.</p>
+      </div>
+      <div class="concept-card">
+        <span class="icon">🌳</span>
+        <div class="term-label" style="background:var(--blue-bg);border-color:var(--blue);color:var(--blue);">Phase 3 — Full PR Workflow</div>
+        <h4>Team with review</h4>
+        <p>Multiple contributors. All changes go through Pull Requests — a formal review step before code is merged. Changes are documented, discussed, and approved before they affect the live system.</p>
+      </div>
+    </div>
+
+    <h3>What Phase 2 Branch Structure Looks Like</h3>
+    <div class="branch-diagram" style="overflow-x: auto;">
+      <div style="font-family: monospace; font-size: 13px; line-height: 2.4; min-width: 560px; color: var(--text-muted);">
+        <div><span style="color: var(--green); font-weight: 700;">main</span> <span style="color: var(--green);">──────────────────────────────────────────────────────→</span> <span style="color: var(--text-dim);">(live — production only)</span></div>
+        <div style="padding-left: 16px;">│</div>
+        <div style="padding-left: 16px;"><span style="color: var(--purple-lt); font-weight: 700;">dev</span>  <span style="color: var(--purple);">──────────────────────────────────────────────────────→</span> <span style="color: var(--text-dim);">(integration — tested here first)</span></div>
+        <div style="padding-left: 32px;">│</div>
+        <div style="padding-left: 32px;"><span style="color: var(--amber);">├── feature/lstm-v5</span>            <span style="color: var(--amber);">──────────────→</span> <span style="color: var(--text-dim);">Donkey: new LSTM model training</span></div>
+        <div style="padding-left: 32px;"><span style="color: var(--amber);">├── feature/weight-integration</span>  <span style="color: var(--amber);">──────────────→</span> <span style="color: var(--text-dim);">Manus: weight detector wired up</span></div>
+        <div style="padding-left: 32px;"><span style="color: var(--amber);">├── feature/face-id-poc</span>         <span style="color: var(--amber);">──────────────→</span> <span style="color: var(--text-dim);">Phase 3: face ID proof of concept</span></div>
+        <div style="padding-left: 32px;"><span style="color: var(--amber);">└── feature/seated-row-machine</span>  <span style="color: var(--amber);">──────────────→</span> <span style="color: var(--text-dim);">Donkey: new machine type</span></div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">🛡️</span>
+      <div class="callout-body">
+        <strong>Isolation is the key benefit</strong>
+        <p>If the face ID branch breaks, the rep counter still works. If weight detection has a bug, the kiosk demo is unaffected. Feature branches mean any individual piece of work can fail without taking down the whole system.</p>
+      </div>
+    </div>
+
+    <!-- ── 13.5 Commit Discipline ── -->
+    <h3>13.5 — What Gets Committed When: The Discipline</h3>
+    <p>As the project grows, commit discipline becomes more important. Here's the standard we hold ourselves to.</p>
+
+    <div class="card-grid">
+      <div class="concept-card">
+        <span class="icon">✅</span>
+        <h4>Every commit should:</h4>
+        <ul style="color: var(--text-muted); font-size: 14px; padding-left: 16px; margin: 0; line-height: 1.9;">
+          <li>Do ONE thing (not 5 things mixed together)</li>
+          <li>Have a clear message anyone can understand</li>
+          <li>Not break <code>main</code></li>
+          <li>Reference a specific, testable improvement</li>
+        </ul>
+      </div>
+      <div class="concept-card">
+        <span class="icon">❌</span>
+        <h4>What to avoid:</h4>
+        <ul style="color: var(--text-muted); font-size: 14px; padding-left: 16px; margin: 0; line-height: 1.9;">
+          <li>Vague messages like <code>"stuff"</code> or <code>"update"</code></li>
+          <li>Multiple unrelated changes in one commit</li>
+          <li>Committing directly to <code>main</code> without testing on <code>dev</code></li>
+          <li>Committing broken code — even to <code>dev</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Examples: Bad vs Good</h3>
+    <div class="commit-list">
+      <div class="commit-item" style="background: var(--red-bg);">
+        <span class="commit-type ct-fix">bad</span>
+        <span class="commit-msg" style="color: var(--text-dim); text-decoration: line-through;">stuff</span>
+        <span style="font-size: 12px; color: var(--red);">❌ tells you nothing</span>
+      </div>
+      <div class="commit-item" style="background: var(--red-bg);">
+        <span class="commit-type ct-fix">bad</span>
+        <span class="commit-msg" style="color: var(--text-dim); text-decoration: line-through;">updates and fixes</span>
+        <span style="font-size: 12px; color: var(--red);">❌ what updates? what fixes?</span>
+      </div>
+      <div class="commit-item" style="background: var(--green-bg);">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">LSTM v5 deployed — 91.2% accuracy on 523 sequences</span>
+        <span style="font-size: 12px; color: var(--green);">✅ clear, specific, meaningful</span>
+      </div>
+      <div class="commit-item" style="background: var(--green-bg);">
+        <span class="commit-type ct-fix">fix</span>
+        <span class="commit-msg">rep counter — debounce prevents double-count on slow pulldowns</span>
+        <span style="font-size: 12px; color: var(--green);">✅ describes the problem and the solution</span>
+      </div>
+      <div class="commit-item" style="background: var(--green-bg);">
+        <span class="commit-type ct-docs">docs</span>
+        <span class="commit-msg">github-guide — add sections 12 and 13 (current state + future)</span>
+        <span style="font-size: 12px; color: var(--green);">✅ says exactly what changed and where</span>
+      </div>
+    </div>
+
+    <div class="rule-box">
+      <div class="rule-label">The Main Branch Rule</div>
+      <p>Only things that are <strong>tested and working</strong> get merged to main. Dev can be messy — main never is. The live demo URL always reflects a working version of the system.</p>
+    </div>
+
+    <h3>Commit Frequency</h3>
+    <div class="card-grid">
+      <div class="concept-card">
+        <span class="icon">📅</span>
+        <h4>At minimum</h4>
+        <p>Once per working session. If Donkey worked on the project today, there's a commit for it. No dark periods where significant work happened but nothing was saved.</p>
+      </div>
+      <div class="concept-card">
+        <span class="icon">🔄</span>
+        <h4>After meaningful changes</h4>
+        <p>Every time something new works — commit it. Don't bundle three new features into one commit. Commit when each one works.</p>
+      </div>
+      <div class="concept-card">
+        <span class="icon">⚠️</span>
+        <h4>Before and after risky changes</h4>
+        <p>Before making a significant change, commit the current working state. Then if the change breaks things, there's a clean rollback point immediately available.</p>
+      </div>
+    </div>
+
+    <!-- ── 13.6 Manus and GitHub ── -->
+    <h3>13.6 — How Manus Will Use Our GitHub</h3>
+    <p>Manus is building the server and weight detector on their side. Here's how they interact with our repo across phases.</p>
+
+    <div class="role-card">
+      <div class="role-avatar amber">📖</div>
+      <div class="role-info">
+        <h4>Now — Read-Only Reference</h4>
+        <div class="role-title">Phase 1</div>
+        <ul>
+          <li>Manus reads our documentation to understand the event format and API structure</li>
+          <li>Key documents: <code>docs/ai-plan-for-manus.md</code> and <code>docs/manus-week1-brief.md</code></li>
+          <li>These define the exact JSON format that session.js sends to Manus's server</li>
+          <li>If the format changes, Donkey updates the doc, commits it — Manus sees the update immediately</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="role-card">
+      <div class="role-avatar purple">👁️</div>
+      <div class="role-info">
+        <h4>Phase 2 — Read Access to Repo</h4>
+        <div class="role-title">Phase 2</div>
+        <ul>
+          <li>Manus gets read access to the full repo</li>
+          <li>Can read machine config JSON files to understand what events we're generating</li>
+          <li>Can read session.js directly to see the event structure in code, not just docs</li>
+          <li>Still doesn't have write access — no risk of accidentally affecting our code</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="role-card">
+      <div class="role-avatar blue">🌿</div>
+      <div class="role-info">
+        <h4>Phase 3 — Integration Branch</h4>
+        <div class="role-title">Phase 3</div>
+        <ul>
+          <li>Potentially: Manus maintains their own feature branch for integration code</li>
+          <li>Server-side endpoints, event handling, Supabase schema — documented alongside our client code</li>
+          <li>Full PR workflow — all integration changes reviewed before merging</li>
+          <li>The repo becomes the single source of truth for both sides of the integration</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">📄</span>
+      <div class="callout-body">
+        <strong>The API contract lives in GitHub</strong>
+        <p>The exact JSON format for events, the session lifecycle structure, the authentication model — all of it is documented in files that live in our GitHub repo. If the format changes, update the doc and commit. GitHub's history ensures both teams can always see what the current agreed format is and when it changed.</p>
+      </div>
+    </div>
+
+    <!-- ── 13.7 .gitignore ── -->
+    <h3>13.7 — The .gitignore: What Never Goes on GitHub</h3>
+    <p>The <code>.gitignore</code> file is a safety net. It tells git to automatically ignore certain files and never commit them, no matter what. Here's what our .gitignore protects us from.</p>
+
+    <div class="card">
+      <div style="background: #000; border-radius: var(--radius-sm); padding: 20px; font-family: monospace; font-size: 13px; line-height: 2.2; overflow-x: auto;">
+        <div style="color: var(--text-dim);"># Training videos — too large, live in Google Drive</div>
+        <div><span style="color: var(--red);">*.mp4 &nbsp;*.mov &nbsp;*.MOV &nbsp;*.avi</span> &nbsp;<span style="color: var(--text-dim);">← gigabytes per file, not code</span></div>
+        <div style="margin-top: 8px; color: var(--text-dim);"># Raw training data — large, stored locally</div>
+        <div><span style="color: var(--red);">*_sequences.json</span> &nbsp;<span style="color: var(--text-dim);">← can be regenerated from video + MoveNet</span></div>
+        <div style="margin-top: 8px; color: var(--text-dim);"># Model versions — only current model lives in repo</div>
+        <div><span style="color: var(--red);">model_v*.json</span> &nbsp;<span style="color: var(--text-dim);">← versions live in Desktop/Training Data/models/</span></div>
+        <div style="margin-top: 8px; color: var(--text-dim);"># Mac OS system files — irrelevant to code</div>
+        <div><span style="color: var(--red);">.DS_Store</span> &nbsp;<span style="color: var(--text-dim);">← Apple metadata, meaningless outside macOS</span></div>
+        <div style="margin-top: 8px; color: var(--text-dim);"># Credentials — NEVER commit these</div>
+        <div><span style="color: var(--red);">*.pem &nbsp;*.key &nbsp;*.token</span> &nbsp;<span style="color: var(--text-dim);">← private keys and tokens</span></div>
+        <div><span style="color: var(--red);">secrets.json &nbsp;credentials.json</span> &nbsp;<span style="color: var(--text-dim);">← API keys</span></div>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Why this matters for training videos</strong>
+        <p>If someone accidentally committed a training video, the repo would be hundreds of gigabytes — effectively unusable. Git doesn't just store the current file; it keeps the whole history. Once a large file is committed, removing it from the repo history is painful and sometimes incomplete. The .gitignore prevents this from ever happening.</p>
+      </div>
+    </div>
+
+    <div class="rule-box">
+      <div class="rule-label">The Security Rule — No Exceptions</div>
+      <p>Never commit passwords, API keys, tokens, or credentials to GitHub. Even in a private repo. If a key is accidentally committed, it must be <strong>immediately rotated</strong> (changed everywhere it's used) — even if you delete it from GitHub afterwards, it may have already been seen by anyone who had access to the repo in that window.</p>
+    </div>
+
+    <!-- ── 13.8 Long-Term Vision ── -->
+    <h3>13.8 — The Long-Term Vision: GitHub as the Backbone</h3>
+    <p>As the Overseer scales to 120 machines across a full commercial gym, GitHub doesn't become less important — it becomes more important. Here's what that looks like.</p>
+
+    <div class="system-diagram" style="grid-template-columns: repeat(2, 1fr);">
+      <div class="sys-node github">
+        <div class="node-icon">🔄</div>
+        <h4>Version Control for AI Models</h4>
+        <div class="node-role">Model History</div>
+        <p>Every model version committed with its accuracy metrics attached to the commit message. If v8 performs worse than v7 in production, roll back in 60 seconds. Full model improvement history visible to anyone on the team.</p>
+        <span class="analogy-tag">No black boxes — every model change is documented and reversible</span>
+      </div>
+
+      <div class="sys-node mac">
+        <div class="node-icon">📁</div>
+        <h4>Machine Config Management</h4>
+        <div class="node-role">120 JSON Files</div>
+        <p>One JSON config per machine. Adding a new machine means creating one file and committing it. Adjusting a threshold on Machine 47 means editing one value, committing, and it's live in 2 minutes. No custom deployments, no server restarts.</p>
+        <span class="analogy-tag">Scale doesn't require proportionally more effort — it's always one file, one commit</span>
+      </div>
+
+      <div class="sys-node supabase">
+        <div class="node-icon">📖</div>
+        <h4>Documentation as Code</h4>
+        <div class="node-role">Living Docs</div>
+        <p>All planning docs, technical specs, API contracts, and architecture decisions live in the same repo as the code. Investors, contractors, new team members, equipment suppliers — one URL gives anyone the complete picture. The Bible is always the latest version.</p>
+        <span class="analogy-tag">One URL for everything — no emailing outdated PDFs</span>
+      </div>
+
+      <div class="sys-node pages">
+        <div class="node-icon">👥</div>
+        <h4>Team Scaling</h4>
+        <div class="node-role">Onboarding Tool</div>
+        <p>A new developer joins the team. They clone the repo. Immediately they have every doc, every config, every piece of code, and the complete project history. The commit log is the onboarding document. Branch strategy means they can't accidentally break the live system.</p>
+        <span class="analogy-tag">Onboarding time drops from weeks to hours</span>
+      </div>
+    </div>
+
+    <div class="callout purple">
+      <span class="callout-icon">🎯</span>
+      <div class="callout-body">
+        <strong>The single source of truth principle</strong>
+        <p>Everything that matters about the Overseer — its architecture, its models, its machine configs, its plans — lives in this repository. There is no separate "real" document somewhere else. No email thread that contains the actual decision. No Google Doc that's more up to date than what's here. This repo IS the project. That's the discipline that makes it scalable.</p>
+      </div>
+    </div>
+
+    <h3>What Phase 4 Looks Like on GitHub</h3>
+    <div class="card">
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">With 120 machines live, this is what the repo contains:</p>
+      <div class="file-tree">
+        <div class="file-tree-header">
+          <div class="dot-row">
+            <span class="dot-red"></span><span class="dot-amber"></span><span class="dot-green"></span>
+          </div>
+          <div class="title">gym-ai-system / (Phase 4 — 120 machines)</div>
+        </div>
+        <div class="tree-body">
+          <div class="tree-item"><span class="tree-folder">pose/</span></div>
+          <div class="tree-item"><span class="tree-indent">  </span><span class="tree-file">alpha.html</span><span class="tree-badge green">live</span><span class="tree-comment">— universal rep counter, reads machine config</span></div>
+          <div class="tree-item"><span class="tree-indent">  </span><span class="tree-file">model.json</span><span class="tree-comment">— current deployed LSTM (v12 or whatever we're on)</span></div>
+          <div class="tree-item"><span class="tree-indent">  </span><span class="tree-folder">machine_configs/</span><span class="tree-comment">— 120 JSON files, one per machine</span></div>
+          <div class="tree-item"><span class="tree-indent">    </span><span class="tree-file">lat_pulldown_01.json</span></div>
+          <div class="tree-item"><span class="tree-indent">    </span><span class="tree-file">seated_row_01.json</span></div>
+          <div class="tree-item"><span class="tree-indent">    </span><span class="tree-file">leg_press_01.json</span></div>
+          <div class="tree-item"><span class="tree-indent">    </span><span class="tree-file">... (117 more)</span></div>
+          <div class="tree-item" style="margin-top: 8px;"><span class="tree-folder">weight/</span><span class="tree-comment">— Manus's weight detector code</span></div>
+          <div class="tree-item"><span class="tree-folder">face/</span><span class="tree-comment">— member identification AI</span></div>
+          <div class="tree-item"><span class="tree-folder">members/</span><span class="tree-comment">— member profile management</span></div>
+          <div class="tree-item" style="margin-top: 8px;"><span class="tree-folder">docs/</span></div>
+          <div class="tree-item"><span class="tree-indent">  </span><span class="tree-file">overseer.html</span><span class="tree-comment">— the Bible, always current</span></div>
+          <div class="tree-item"><span class="tree-indent">  </span><span class="tree-file">deep-dive.html</span></div>
+          <div class="tree-item"><span class="tree-indent">  </span><span class="tree-file">github-guide.html</span><span class="tree-comment">— this document</span></div>
+          <div class="tree-item"><span class="tree-indent">  </span><span class="tree-file">... (more as needed)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">🏋️</span>
+      <div class="callout-body">
+        <strong>From one machine to 120</strong>
+        <p>The architecture decisions made on day one — machine configs, the branch strategy, the commit discipline, the gitignore rules — were all made with Phase 4 in mind. The first 8 days of work laid the foundation for a system that can scale to a full commercial gym without needing to be rebuilt. That's the point of doing it properly from the start.</p>
+      </div>
+    </div>
+
+  </div><!-- /section 13 -->
 
 
   <!-- ─────────────────────────────────────────────
