@@ -1430,7 +1430,8 @@ ol.styled li::before {
       <div class="nav-section-label">Deep Dives</div>
       <a class="nav-item" href="#ai-system">18 — The AI System</a>
       <a class="nav-item" href="#machine-engagement">19 — Machine Engagement
-      <a class="nav-item" href="#training-labels">20 — Training Labels</a>
+      <a class="nav-item" href="#training-labels">20 — Training Labels
+      <a class="nav-item" href="#competitive-advantage">21 — Competitive Advantage</a>
       <a class="nav-item" href="#camera-options">14 — Camera Options</a>
       <a class="nav-item" href="#server-options">15 — Server Architecture</a>
       <a class="nav-item" href="#scaling">16 — Scaling</a>
@@ -1828,7 +1829,7 @@ ol.styled li::before {
               <ol class="styled">
                 <li>Camera 3 is positioned overhead, angled toward the weight stack</li>
                 <li>A bounding box is pre-configured in software to the weight stack area only</li>
-                <li>Coloured tape strips are applied to each plate spine before deployment</li>
+                <li>XL Fitness uses custom colour-coded plates — colour stripes built into each plate</li>
                 <li>Colour detection algorithm identifies which tapes are above the selector pin</li>
                 <li>Plate weights are summed: all detected plates above pin = total weight loaded</li>
                 <li>Weight value sent to orchestration server, combined with rep data</li>
@@ -1848,7 +1849,7 @@ ol.styled li::before {
 
               <h4>Physical Action Required</h4>
               <div class="callout amber">
-                <strong>Matt action:</strong> Apply coloured tape strips to the spine of every weight plate on all machines before Camera 3 deployment. Vertical stripe, full height of visible edge, centred on the spine.
+                <strong> Vertical stripe, full height of visible edge, centred on the spine.
               </div>
 
               <h4>Current Status</h4>
@@ -3709,7 +3710,7 @@ CREATE TABLE sets (
       <h2 class="section-title">Current Status &amp; Next Actions</h2>
       <p class="section-desc">
         Live status of every component. What's working, what's in progress, what's blocked.
-        Updated March 2026.
+        Updated March 20, 2026.
       </p>
 
       <h3>Component Status</h3>
@@ -3721,35 +3722,47 @@ CREATE TABLE sets (
               <tbody>
                 <tr>
                   <td><strong>Rule-based rep counter</strong></td>
-                  <td><span class="badge badge-green"><span class="dot dot-green"></span>Live</span></td>
+                  <td><span class="badge badge-green"><span class="dot dot-green"></span>Live on tablet</span></td>
                 </tr>
                 <tr>
                   <td><strong>NN v4 MLP classifier</strong></td>
-                  <td><span class="badge badge-green"><span class="dot dot-green"></span>75% accuracy</span></td>
+                  <td><span class="badge badge-green"><span class="dot dot-green"></span>75% — display only</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Fullscreen kiosk demo</strong></td>
+                  <td><span class="badge badge-green"><span class="dot dot-green"></span>PWA, offline capable</span></td>
                 </tr>
                 <tr>
                   <td><strong>Section-based labeler tool</strong></td>
-                  <td><span class="badge badge-green"><span class="dot dot-green"></span>Built</span></td>
+                  <td><span class="badge badge-green"><span class="dot dot-green"></span>7 states, keyboard shortcuts</span></td>
                 </tr>
                 <tr>
                   <td><strong>Session manager (session.js)</strong></td>
-                  <td><span class="badge badge-green"><span class="dot dot-green"></span>Built</span></td>
+                  <td><span class="badge badge-green"><span class="dot dot-green"></span>Built — awaiting server IP</span></td>
                 </tr>
                 <tr>
                   <td><strong>Machine config system</strong></td>
-                  <td><span class="badge badge-green"><span class="dot dot-green"></span>Built</span></td>
+                  <td><span class="badge badge-green"><span class="dot dot-green"></span>lat_pulldown_01 configured</span></td>
                 </tr>
                 <tr>
-                  <td><strong>Kiosk demo (alpha.html)</strong></td>
-                  <td><span class="badge badge-green"><span class="dot dot-green"></span>Fullscreen, live</span></td>
+                  <td><strong>Overseer Bible</strong></td>
+                  <td><span class="badge badge-green"><span class="dot dot-green"></span>20 sections, live</span></td>
                 </tr>
                 <tr>
-                  <td><strong>Stakeholder demo page</strong></td>
-                  <td><span class="badge badge-green"><span class="dot dot-green"></span>GitHub Pages</span></td>
+                  <td><strong>GitHub infrastructure</strong></td>
+                  <td><span class="badge badge-green"><span class="dot dot-green"></span>4 folders, branches, .gitignore</span></td>
                 </tr>
                 <tr>
-                  <td><strong>Training data (445 sequences)</strong></td>
-                  <td><span class="badge badge-green"><span class="dot dot-green"></span>Collected</span></td>
+                  <td><strong>Training data</strong></td>
+                  <td><span class="badge badge-green"><span class="dot dot-green"></span>445 sequences collected</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Brave Search (web research)</strong></td>
+                  <td><span class="badge badge-green"><span class="dot dot-green"></span>Donkey + Fetch enabled</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Stakeholder approval</strong></td>
+                  <td><span class="badge badge-green"><span class="dot dot-green"></span>Phase 1 approved ✓</span></td>
                 </tr>
               </tbody>
             </table>
@@ -3762,51 +3775,63 @@ CREATE TABLE sets (
               <tbody>
                 <tr>
                   <td><strong>FastAPI orchestration server</strong></td>
-                  <td><span class="badge badge-amber"><span class="dot dot-amber"></span>Manus — Week 1</span></td>
+                  <td><span class="badge badge-amber"><span class="dot dot-amber"></span>Manus — building</span></td>
                 </tr>
                 <tr>
                   <td><strong>Weight detection POC</strong></td>
-                  <td><span class="badge badge-amber"><span class="dot dot-amber"></span>Manus building</span></td>
+                  <td><span class="badge badge-amber"><span class="dot dot-amber"></span>Manus — custom plates TBD</span></td>
                 </tr>
                 <tr>
-                  <td><strong>Supabase schema</strong></td>
-                  <td><span class="badge badge-amber"><span class="dot dot-amber"></span>Design phase</span></td>
+                  <td><strong>LSTM v5 model scaffold</strong></td>
+                  <td><span class="badge badge-amber"><span class="dot dot-amber"></span>55 sequences from target</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Training data filming</strong></td>
+                  <td><span class="badge badge-amber"><span class="dot dot-amber"></span>Matt — gym access next week</span></td>
                 </tr>
                 <tr>
                   <td><strong>Webhook integration (tablet)</strong></td>
-                  <td><span class="badge badge-amber"><span class="dot dot-amber"></span>Awaiting other dev</span></td>
+                  <td><span class="badge badge-amber"><span class="dot dot-amber"></span>Awaiting other dev endpoint</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Camera rig contractor quote</strong></td>
+                  <td><span class="badge badge-amber"><span class="dot dot-amber"></span>To be arranged</span></td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <h4 style="margin-top:24px;">🔴 Not Started</h4>
+          <h4 style="margin-top:24px;">🔴 Phase 2 +</h4>
           <div class="table-wrap">
             <table>
               <tbody>
                 <tr>
-                  <td><strong>LSTM v5 model</strong></td>
-                  <td><span class="badge badge-red"><span class="dot dot-red"></span>Needs 500+ sequences</span></td>
+                  <td><strong>Ceiling rig installation</strong></td>
+                  <td><span class="badge badge-red"><span class="dot dot-red"></span>Phase 2 — 5 machines</span></td>
                 </tr>
                 <tr>
-                  <td><strong>Ceiling rig (Phase 2)</strong></td>
-                  <td><span class="badge badge-red"><span class="dot dot-red"></span>Needs contractor quote</span></td>
+                  <td><strong>LSTM v5 deployed</strong></td>
+                  <td><span class="badge badge-red"><span class="dot dot-red"></span>Phase 2 — after 500+ seq</span></td>
                 </tr>
                 <tr>
-                  <td><strong>Phase 2 cameras (5 machines)</strong></td>
-                  <td><span class="badge badge-red"><span class="dot dot-red"></span>After quote</span></td>
+                  <td><strong>Multi-joint LSTM v6</strong></td>
+                  <td><span class="badge badge-red"><span class="dot dot-red"></span>Phase 2 — 1000+ seq</span></td>
                 </tr>
                 <tr>
                   <td><strong>Face ID system</strong></td>
                   <td><span class="badge badge-red"><span class="dot dot-red"></span>Phase 3</span></td>
                 </tr>
                 <tr>
-                  <td><strong>Member dashboard</strong></td>
+                  <td><strong>GymMaster NFC integration</strong></td>
                   <td><span class="badge badge-red"><span class="dot dot-red"></span>Phase 3</span></td>
                 </tr>
                 <tr>
-                  <td><strong>GymMaster NFC integration</strong></td>
+                  <td><strong>Member dashboard / app</strong></td>
                   <td><span class="badge badge-red"><span class="dot dot-red"></span>Phase 3</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Full gym (120 machines)</strong></td>
+                  <td><span class="badge badge-red"><span class="dot dot-red"></span>Phase 4</span></td>
                 </tr>
               </tbody>
             </table>
@@ -6581,7 +6606,7 @@ CREATE TABLE sets (
               <li>Transfer learning from lat pulldown to new machine types</li>
               <li>Machine configs for each new machine (small labelled dataset per machine)</li>
               <li>Zone PoE switch infrastructure deployed</li>
-              <li>Weight detection integrated (Manus gloves + coloured tape system)</li>
+              <li>Weight detection integrated (custom colour-coded plate system)</li>
               <li>Face ID field testing begins</li>
               <li>LSTM deployed — targeting 90%+ accuracy</li>
             </ul>
@@ -6592,7 +6617,7 @@ CREATE TABLE sets (
               <li>Does the config system scale to fundamentally different machine types?</li>
               <li>How does knee tracking accuracy compare to elbow tracking?</li>
               <li>What specific data requirements exist for leg machines (camera height, angle)?</li>
-              <li>How reliable is weight detection with the coloured tape system in practice?</li>
+              <li>How reliable is weight detection with the custom plate colour system in practice?</li>
               <li>What are the real-world failure modes across 5 different machines?</li>
             </ul>
           </div>
@@ -7080,6 +7105,117 @@ CREATE TABLE sets (
 
     </section>
     <!-- /SECTION 20 -->
+
+    <!-- ========================================================
+         SECTION 21: THE COMPETITIVE ADVANTAGE
+         ======================================================== -->
+    <section id="competitive-advantage" class="section">
+      <div class="section-eyebrow">Section 21</div>
+      <h2 class="section-title">The Competitive Advantage — Why This Is Defensible</h2>
+      <p class="section-desc">
+        This section explains what makes the XL Fitness AI Overseer genuinely hard to copy, why the data moat grows over time, 
+        and how the system becomes a licensable product worth far more than any single gym.
+      </p>
+
+      <!-- THE MOAT -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">The Four Moats</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px;">
+
+        <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid #a855f7;border-radius:10px;padding:20px;">
+          <div style="font-size:1.5rem;margin-bottom:8px;">🧠</div>
+          <div style="font-weight:800;color:#a855f7;font-size:.95rem;margin-bottom:8px;">Moat 1 — Proprietary Training Data</div>
+          <p style="font-size:.82rem;color:#c4b5d4;line-height:1.7;">Every session at XL Fitness generates labeled training data. After 6 months of operation with 230+ members using 120 machines — we have millions of real-world labeled rep sequences. No competitor can buy this. No researcher can replicate it. It only exists because XL Fitness opened first.</p>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid #22c55e;border-radius:10px;padding:20px;">
+          <div style="font-size:1.5rem;margin-bottom:8px;">🔄</div>
+          <div style="font-weight:800;color:#22c55e;font-size:.95rem;margin-bottom:8px;">Moat 2 — The Data Flywheel</div>
+          <p style="font-size:.82rem;color:#c4b5d4;line-height:1.7;">More members → more data → better AI → better member experience → more members. Each rotation of this flywheel makes the system more accurate and harder to compete with. A competitor starting today would need 2+ years of real gym data to catch up — if they could get members to use their system at all.</p>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid #f59e0b;border-radius:10px;padding:20px;">
+          <div style="font-size:1.5rem;margin-bottom:8px;">⚙️</div>
+          <div style="font-weight:800;color:#f59e0b;font-size:.95rem;margin-bottom:8px;">Moat 3 — Transfer Learning Library</div>
+          <p style="font-size:.82rem;color:#c4b5d4;line-height:1.7;">Every machine we add to the Overseer builds a reusable model library. Lat pulldown → seated row takes 10% of the original effort. By Machine 20, we have a library of exercise models that transfers to any gym, any equipment brand, any configuration. The library is the asset — not just the software.</p>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid #60a5fa;border-radius:10px;padding:20px;">
+          <div style="font-size:1.5rem;margin-bottom:8px;">🏗️</div>
+          <div style="font-weight:800;color:#60a5fa;font-size:.95rem;margin-bottom:8px;">Moat 4 — Physical Infrastructure Investment</div>
+          <p style="font-size:.82rem;color:#c4b5d4;line-height:1.7;">A competitor can copy the software. They cannot instantly replicate 360 cameras, a ceiling rig across 120 machines, zone switches, edge servers, and 2 years of integration with GymMaster, Dynamics, and existing tablets. The physical install is a switching cost that locks the system in.</p>
+        </div>
+
+      </div>
+
+      <!-- WHY NO ONE ELSE HAS DONE THIS -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">Why No One Else Has Done This</h3>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:24px;">
+        <p style="font-size:.88rem;color:#c4b5d4;line-height:1.8;margin-bottom:16px;">This is a genuine gap in the market. Here's why it hasn't been built:</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:#0a0615;border-radius:8px;padding:14px;">
+            <div style="color:#ef4444;font-weight:700;font-size:.82rem;margin-bottom:6px;">❌ Most gyms tried and gave up</div>
+            <p style="font-size:.78rem;color:#c4b5d4;line-height:1.6;">Early attempts used expensive proprietary hardware ($500-2000 per machine). The economics didn't work. We use $300 of cameras and a $3,500 server for the whole gym.</p>
+          </div>
+          <div style="background:#0a0615;border-radius:8px;padding:14px;">
+            <div style="color:#ef4444;font-weight:700;font-size:.82rem;margin-bottom:6px;">❌ Cloud-only approaches failed</div>
+            <p style="font-size:.78rem;color:#c4b5d4;line-height:1.6;">Sending gym video to the cloud costs $2,000-5,000/month and has 200-500ms latency — unusable for real-time rep counting. Edge computing (our approach) solves both problems.</p>
+          </div>
+          <div style="background:#0a0615;border-radius:8px;padding:14px;">
+            <div style="color:#ef4444;font-weight:700;font-size:.82rem;margin-bottom:6px;">❌ Privacy was a blocker</div>
+            <p style="font-size:.78rem;color:#c4b5d4;line-height:1.6;">Sending member video to external servers creates GDPR/privacy liability. Our edge-only approach keeps all video on-site — members' faces and bodies never leave the building.</p>
+          </div>
+          <div style="background:#0a0615;border-radius:8px;padding:14px;">
+            <div style="color:#ef4444;font-weight:700;font-size:.82rem;margin-bottom:6px;">❌ No one had the data</div>
+            <p style="font-size:.78rem;color:#c4b5d4;line-height:1.6;">Training a reliable rep counter requires thousands of labeled gym reps in real conditions. No public dataset exists. You have to build a gym first to get the data — a chicken-and-egg problem we're solving by doing both at once.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- THE LICENSING OPPORTUNITY -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">The Licensing Opportunity</h3>
+      <p style="font-size:.88rem;color:#c4b5d4;line-height:1.8;margin-bottom:16px;">
+        XL Fitness is the proof of concept. Once the system is running across 120 machines with verified accuracy, it becomes a product that can be licensed to other gyms globally.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:900;color:#a855f7;margin-bottom:4px;">$500</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;">per machine, one-time</div>
+          <div style="font-size:.78rem;color:#c4b5d4;line-height:1.6;">Hardware + software + training. A gym with 60 machines pays $30,000 upfront.</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:900;color:#22c55e;margin-bottom:4px;">$200</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;">per month, per gym</div>
+          <div style="font-size:.78rem;color:#c4b5d4;line-height:1.6;">SaaS licence: cloud database, model updates, support. Recurring revenue from every gym.</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:1.4rem;font-weight:900;color:#60a5fa;margin-bottom:4px;">100 gyms</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;">= $20K/month recurring</div>
+          <div style="font-size:.78rem;color:#c4b5d4;line-height:1.6;">At 100 licensed gyms the SaaS revenue alone funds all future development.</div>
+        </div>
+      </div>
+
+      <!-- WHAT MAKES XL FITNESS FIRST MOVER -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">First Mover Advantage</h3>
+      <div style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.3);border-radius:10px;padding:20px;margin-bottom:24px;">
+        <p style="font-size:.88rem;color:#c4b5d4;line-height:1.8;margin-bottom:14px;">XL Fitness has a window of approximately <strong style="color:#fff;">18–24 months</strong> before a well-funded competitor could replicate this system. The first-mover advantages that expire after that window:</p>
+        <ul style="font-size:.85rem;color:#c4b5d4;line-height:2.2;list-style:none;padding:0;">
+          <li>✅ <strong style="color:#fff;">Brand recognition</strong> — "Australia's first AI-tracked gym" is a permanent claim once opened</li>
+          <li>✅ <strong style="color:#fff;">Training data lead</strong> — 2 years of real member data is irreplaceable</li>
+          <li>✅ <strong style="color:#fff;">Partner relationships</strong> — GymMaster, the tablet dev, equipment suppliers</li>
+          <li>✅ <strong style="color:#fff;">Member loyalty</strong> — members who joined for the AI experience are unlikely to leave</li>
+          <li>✅ <strong style="color:#fff;">Refined system</strong> — by Phase 4 the system has been debugged across 120 machines — a competitor starts at zero</li>
+        </ul>
+      </div>
+
+      <!-- THE SIMPLE PITCH -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">The Simple Pitch</h3>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
+        <p style="font-size:1.15rem;font-weight:700;color:#fff;line-height:1.6;margin-bottom:16px;">"We're not building a gym with AI features.<br/>We're building an AI platform that runs in a gym."</p>
+        <p style="font-size:.88rem;color:#c4b5d4;line-height:1.8;max-width:600px;margin:0 auto;">The gym is the proof of concept and the data source. The AI platform is the product. XL Fitness is the first customer of its own technology — and when it's proven, every premium gym in Australia becomes a potential licensee.</p>
+      </div>
+
+    </section>
+    <!-- /SECTION 21 -->
 
     <!-- ========================================================
          SECTION 13: STATUS
