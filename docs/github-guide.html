@@ -1,0 +1,3070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitHub Guide — XL Fitness AI Overseer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─────────────────────────────────────────────
+       RESET & BASE
+    ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #06040f;
+      --card:      #0d0a18;
+      --card2:     #110e1f;
+      --border:    #1c1530;
+      --border2:   #2a2040;
+      --purple:    #8b5cf6;
+      --purple-lt: #a78bfa;
+      --purple-dk: #6d28d9;
+      --purple-bg: #1a1230;
+      --green:     #10b981;
+      --green-bg:  #0d2e22;
+      --amber:     #f59e0b;
+      --amber-bg:  #2a1e06;
+      --red:       #ef4444;
+      --red-bg:    #2a0a0a;
+      --blue:      #3b82f6;
+      --blue-bg:   #0a1a2e;
+      --text:      #e2d9f3;
+      --text-muted:#a89cc8;
+      --text-dim:  #6b5f82;
+      --radius:    12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    h1, h2, h3, h4, h5 {
+      font-family: 'Space Grotesk', sans-serif;
+      line-height: 1.25;
+    }
+
+    a {
+      color: var(--purple-lt);
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; color: #c4b5fd; }
+
+    code, pre {
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    /* ─────────────────────────────────────────────
+       STICKY NAV
+    ───────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(6, 4, 15, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+    }
+
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      height: 56px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-inner::-webkit-scrollbar { display: none; }
+
+    .nav-brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--purple);
+      white-space: nowrap;
+      margin-right: 20px;
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2px;
+      list-style: none;
+      flex-shrink: 0;
+    }
+
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 6px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: color .15s, background .15s;
+    }
+    .nav-links a:hover {
+      color: var(--text);
+      background: var(--border);
+      text-decoration: none;
+    }
+
+    /* ─────────────────────────────────────────────
+       LAYOUT
+    ───────────────────────────────────────────── */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ─────────────────────────────────────────────
+       HERO
+    ───────────────────────────────────────────── */
+    .hero {
+      padding: 64px 0 48px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--purple-bg);
+      border: 1px solid var(--purple-dk);
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--purple-lt);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span { color: var(--purple); }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 620px;
+      line-height: 1.65;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 24px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    .hero-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .hero-meta-item .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      flex-shrink: 0;
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION HEADERS
+    ───────────────────────────────────────────── */
+    .section {
+      margin-bottom: 72px;
+    }
+
+    .section-number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .section h2 {
+      font-size: clamp(22px, 3.5vw, 30px);
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .section-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      margin: 28px 0 12px;
+    }
+
+    .section h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--purple-lt);
+      margin: 20px 0 8px;
+    }
+
+    .section p {
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .section ul, .section ol {
+      color: var(--text-muted);
+      padding-left: 20px;
+      margin-bottom: 16px;
+    }
+    .section li { margin-bottom: 6px; }
+
+    /* ─────────────────────────────────────────────
+       CARDS
+    ───────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .concept-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .concept-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--purple-dk), var(--purple-lt));
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .concept-card .icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .concept-card h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 6px;
+    }
+
+    .concept-card .term-label {
+      display: inline-block;
+      background: var(--purple-bg);
+      border: 1px solid var(--purple-dk);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple-lt);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      font-family: monospace;
+    }
+
+    .concept-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .concept-card .analogy {
+      margin-top: 10px;
+      padding: 8px 10px;
+      background: rgba(139, 92, 246, .08);
+      border-left: 3px solid var(--purple);
+      border-radius: 0 4px 4px 0;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* ─────────────────────────────────────────────
+       ANALOGY COMPARISON
+    ───────────────────────────────────────────── */
+    .analogy-compare {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: center;
+      margin: 24px 0;
+    }
+
+    .analogy-side {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .analogy-side.google { border-color: #4285f4; }
+    .analogy-side.github { border-color: var(--purple-dk); }
+
+    .analogy-side .platform-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .analogy-side.google .platform-name { color: #4285f4; }
+    .analogy-side.github .platform-name { color: var(--purple-lt); }
+
+    .analogy-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .analogy-row .emoji { font-size: 16px; flex-shrink: 0; }
+    .analogy-row .label { color: var(--text); font-weight: 500; }
+    .analogy-row .desc { color: var(--text-muted); font-size: 13px; }
+
+    .analogy-arrow {
+      font-size: 28px;
+      color: var(--purple);
+      text-align: center;
+      font-weight: 700;
+    }
+
+    @media (max-width: 600px) {
+      .analogy-compare {
+        grid-template-columns: 1fr;
+      }
+      .analogy-arrow { transform: rotate(90deg); }
+    }
+
+    /* ─────────────────────────────────────────────
+       FILE TREE
+    ───────────────────────────────────────────── */
+    .file-tree {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 24px 0;
+    }
+
+    .file-tree-header {
+      background: var(--card2);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .file-tree-header .dot-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .file-tree-header .dot-row span {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-red   { background: #ff5f57; }
+    .dot-amber { background: #ffbd2e; }
+    .dot-green { background: #28c840; }
+
+    .file-tree-header .title {
+      flex: 1;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dim);
+      font-family: monospace;
+    }
+
+    .tree-body {
+      padding: 20px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13.5px;
+      line-height: 1.9;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: baseline;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .tree-indent { color: var(--border2); }
+
+    .tree-folder {
+      color: var(--purple-lt);
+      font-weight: 600;
+    }
+
+    .tree-file {
+      color: var(--text);
+    }
+
+    .tree-comment {
+      color: var(--text-dim);
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+    .tree-badge {
+      display: inline-block;
+      background: var(--purple-bg);
+      border: 1px solid var(--purple-dk);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--purple-lt);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .tree-badge.green {
+      background: var(--green-bg);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* ─────────────────────────────────────────────
+       FILE DETAIL CARDS
+    ───────────────────────────────────────────── */
+    .file-detail {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 12px;
+    }
+
+    .file-detail-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .file-name {
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 4px 10px;
+    }
+
+    .file-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      border-radius: 4px;
+      padding: 3px 8px;
+    }
+    .tag-demo    { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+    .tag-doc     { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue); }
+    .tag-config  { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber); }
+    .tag-code    { background: var(--purple-bg); color: var(--purple-lt); border: 1px solid var(--purple-dk); }
+    .tag-future  { background: #1a1a1a; color: var(--text-dim); border: 1px solid var(--border2); }
+    .tag-frozen  { background: rgba(59,130,246,.12); color: var(--blue); border: 1px solid var(--blue); }
+
+    .file-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .file-meta-item {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+    }
+
+    .file-meta-item .meta-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .file-meta-item .meta-value {
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .file-url {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--purple-lt);
+      background: var(--purple-bg);
+      border: 1px solid var(--purple-dk);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: inline-block;
+      margin-top: 8px;
+      word-break: break-all;
+    }
+
+    /* ─────────────────────────────────────────────
+       BRANCH DIAGRAM
+    ───────────────────────────────────────────── */
+    .branch-diagram {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      margin: 24px 0;
+      overflow-x: auto;
+    }
+
+    .branch-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 20px;
+      min-width: 560px;
+    }
+
+    .branch-label {
+      width: 160px;
+      flex-shrink: 0;
+      text-align: right;
+      padding-right: 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .branch-label.main  { color: var(--green); }
+    .branch-label.dev   { color: var(--purple-lt); }
+    .branch-label.feat  { color: var(--amber); }
+
+    .branch-line-wrap {
+      flex: 1;
+      position: relative;
+      height: 36px;
+      display: flex;
+      align-items: center;
+    }
+
+    .branch-line {
+      position: absolute;
+      height: 3px;
+      border-radius: 999px;
+    }
+    .branch-line.main { background: var(--green); width: 100%; top: 50%; transform: translateY(-50%); }
+    .branch-line.dev  { background: var(--purple); width: 100%; top: 50%; transform: translateY(-50%); }
+    .branch-line.feat { background: var(--amber); width: 80%; top: 50%; transform: translateY(-50%); }
+
+    .branch-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1;
+    }
+    .branch-dot.start { left: 0; }
+    .branch-dot.end   { right: 20px; }
+    .branch-dot.green  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .branch-dot.purple { background: var(--purple); box-shadow: 0 0 8px var(--purple); }
+    .branch-dot.amber  { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+
+    .branch-tag {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .merge-arrow {
+      color: var(--text-dim);
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+    .branch-connector {
+      width: 160px;
+      flex-shrink: 0;
+      padding-left: 16px;
+    }
+
+    /* ─────────────────────────────────────────────
+       FLOW DIAGRAM (GitHub Pages)
+    ───────────────────────────────────────────── */
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin: 28px 0;
+      overflow-x: auto;
+    }
+
+    .flow-step {
+      flex: 1;
+      min-width: 120px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 20px 14px;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-step:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+    .flow-step:last-child  { border-radius: 0 var(--radius) var(--radius) 0; }
+
+    .flow-step + .flow-step {
+      border-left: none;
+    }
+
+    .flow-step::after {
+      content: '→';
+      position: absolute;
+      right: -14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--purple);
+      font-size: 18px;
+      font-weight: 700;
+      z-index: 2;
+    }
+
+    .flow-step:last-child::after { display: none; }
+
+    .flow-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--purple-bg);
+      border: 2px solid var(--purple-dk);
+      color: var(--purple-lt);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+
+    .flow-icon { font-size: 22px; margin-bottom: 6px; }
+
+    .flow-step h5 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .flow-step p {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin: 0;
+    }
+
+    @media (max-width: 640px) {
+      .flow { flex-direction: column; }
+      .flow-step { border-radius: 0 !important; border-left: 1px solid var(--border) !important; }
+      .flow-step::after { content: '↓'; right: auto; left: 50%; top: auto; bottom: -14px; transform: translateX(-50%); }
+      .flow-step:last-child::after { display: none; }
+    }
+
+    /* ─────────────────────────────────────────────
+       URL TABLE
+    ───────────────────────────────────────────── */
+    .url-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    .url-table th {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .url-table td {
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    .url-table tr:hover td { background: rgba(139,92,246,.04); }
+
+    .url-table .what { color: var(--text); font-weight: 500; }
+
+    .url-table .url-link {
+      font-family: monospace;
+      font-size: 12.5px;
+      color: var(--purple-lt);
+    }
+
+    /* ─────────────────────────────────────────────
+       SYSTEM DIAGRAM (Section 6)
+    ───────────────────────────────────────────── */
+    .system-diagram {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    @media (max-width: 560px) {
+      .system-diagram { grid-template-columns: 1fr; }
+    }
+
+    .sys-node {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .sys-node.github  { border: 2px solid var(--purple-dk); }
+    .sys-node.mac     { border: 2px solid var(--blue); }
+    .sys-node.supabase{ border: 2px solid var(--green); }
+    .sys-node.pages   { border: 2px solid var(--amber); }
+
+    .sys-node .node-icon { font-size: 32px; margin-bottom: 8px; }
+
+    .sys-node h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .sys-node .node-role {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .sys-node.github  .node-role { color: var(--purple-lt); }
+    .sys-node.mac     .node-role { color: var(--blue); }
+    .sys-node.supabase .node-role { color: var(--green); }
+    .sys-node.pages   .node-role { color: var(--amber); }
+
+    .sys-node p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .sys-node .analogy-tag {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    /* ─────────────────────────────────────────────
+       GITHUB UI MOCK
+    ───────────────────────────────────────────── */
+    .gh-ui-mock {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 24px 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .gh-topbar {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .gh-logo {
+      font-size: 20px;
+      color: #f0f6fc;
+    }
+
+    .gh-breadcrumb {
+      font-size: 14px;
+      color: #8b949e;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .gh-breadcrumb .repo { color: #58a6ff; font-weight: 600; }
+    .gh-breadcrumb .sep  { color: #30363d; }
+
+    .gh-body { padding: 16px; }
+
+    .gh-repo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .gh-branch-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 13px;
+      color: #f0f6fc;
+    }
+
+    .gh-commit-count {
+      font-size: 13px;
+      color: #58a6ff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .gh-code-btn {
+      background: #238636;
+      border: 1px solid #2ea043;
+      border-radius: 6px;
+      padding: 6px 16px;
+      font-size: 13px;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .gh-file-list {
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .gh-file-list-header {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: #8b949e;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .gh-file-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border-bottom: 1px solid #21262d;
+      font-size: 14px;
+    }
+
+    .gh-file-row:last-child { border-bottom: none; }
+    .gh-file-row:hover { background: #161b22; }
+
+    .gh-file-icon { color: #8b949e; width: 16px; text-align: center; }
+    .gh-file-name { color: #58a6ff; flex: 1; }
+    .gh-file-msg  { color: #8b949e; font-size: 12px; flex: 2; }
+    .gh-file-time { color: #8b949e; font-size: 12px; }
+
+    /* ─────────────────────────────────────────────
+       STEPS GUIDE
+    ───────────────────────────────────────────── */
+    .steps {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    .steps li {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .steps li:last-child { border-bottom: none; }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--purple-bg);
+      border: 2px solid var(--purple-dk);
+      color: var(--purple-lt);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-body h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 6px;
+    }
+
+    .step-body p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .step-body code {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 13px;
+      color: var(--purple-lt);
+    }
+
+    /* ─────────────────────────────────────────────
+       ROLES
+    ───────────────────────────────────────────── */
+    .role-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .role-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .role-avatar.purple { background: var(--purple-bg); border: 2px solid var(--purple-dk); }
+    .role-avatar.blue   { background: var(--blue-bg);   border: 2px solid var(--blue); }
+    .role-avatar.amber  { background: var(--amber-bg);  border: 2px solid var(--amber); }
+    .role-avatar.green  { background: var(--green-bg);  border: 2px solid var(--green); }
+
+    .role-info h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 2px;
+    }
+
+    .role-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .role-info ul {
+      color: var(--text-muted);
+      font-size: 14px;
+      padding-left: 16px;
+      margin: 0;
+    }
+
+    /* ─────────────────────────────────────────────
+       COMMIT MESSAGES
+    ───────────────────────────────────────────── */
+    .commit-list {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .commit-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .commit-item:last-child { border-bottom: none; }
+
+    .commit-type {
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 2px 8px;
+      flex-shrink: 0;
+    }
+    .ct-feat     { background: var(--green-bg);   color: var(--green);     border: 1px solid var(--green); }
+    .ct-fix      { background: var(--red-bg);     color: var(--red);       border: 1px solid var(--red); }
+    .ct-docs     { background: var(--blue-bg);    color: var(--blue);      border: 1px solid var(--blue); }
+    .ct-chore    { background: var(--amber-bg);   color: var(--amber);     border: 1px solid var(--amber); }
+    .ct-refactor { background: var(--purple-bg);  color: var(--purple-lt); border: 1px solid var(--purple-dk); }
+
+    .commit-msg {
+      flex: 1;
+      font-family: monospace;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .commit-hash {
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+
+    /* ─────────────────────────────────────────────
+       CALLOUTS
+    ───────────────────────────────────────────── */
+    .callout {
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .callout.info    { background: var(--blue-bg);   border: 1px solid var(--blue); }
+    .callout.success { background: var(--green-bg);  border: 1px solid var(--green); }
+    .callout.warning { background: var(--amber-bg);  border: 1px solid var(--amber); }
+    .callout.purple  { background: var(--purple-bg); border: 1px solid var(--purple-dk); }
+
+    .callout-icon { font-size: 20px; flex-shrink: 0; }
+
+    .callout-body { flex: 1; }
+
+    .callout-body strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .callout.info    strong { color: var(--blue); }
+    .callout.success strong { color: var(--green); }
+    .callout.warning strong { color: var(--amber); }
+    .callout.purple  strong { color: var(--purple-lt); }
+
+    .callout-body p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* ─────────────────────────────────────────────
+       GLOSSARY TABLE
+    ───────────────────────────────────────────── */
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    .glossary-table th {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .glossary-table td {
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    .glossary-table tr:nth-child(even) td { background: rgba(255,255,255,.015); }
+    .glossary-table tr:hover td { background: rgba(139,92,246,.04); }
+
+    .glossary-table .term {
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--purple-lt);
+    }
+
+    .glossary-table .plain { color: var(--text-muted); }
+
+    /* ─────────────────────────────────────────────
+       WHAT'S IN / NOT IN GITHUB
+    ───────────────────────────────────────────── */
+    .in-not-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 540px) {
+      .in-not-grid { grid-template-columns: 1fr; }
+    }
+
+    .in-col, .not-col {
+      background: var(--card);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .in-col  { border: 1px solid var(--green); }
+    .not-col { border: 1px solid var(--border2); }
+
+    .col-header {
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .in-col  .col-header { background: var(--green-bg); color: var(--green); border-bottom: 1px solid var(--green); }
+    .not-col .col-header { background: var(--card2); color: var(--text-dim); border-bottom: 1px solid var(--border2); }
+
+    .col-items {
+      list-style: none;
+      padding: 12px 16px;
+    }
+
+    .col-items li {
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .col-items li:last-child { border-bottom: none; }
+
+    .col-items .icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+    .col-items .label  { color: var(--text); font-weight: 500; display: block; }
+    .col-items .reason { color: var(--text-dim); font-size: 12px; display: block; margin-top: 1px; }
+
+    /* ─────────────────────────────────────────────
+       INLINE CODE
+    ───────────────────────────────────────────── */
+    .section p code,
+    .section li code {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 13px;
+      color: var(--purple-lt);
+    }
+
+    /* ─────────────────────────────────────────────
+       FOLDER HEADER CARDS
+    ───────────────────────────────────────────── */
+    .folder-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .folder-header {
+      background: var(--card2);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .folder-icon { font-size: 20px; }
+
+    .folder-name {
+      font-family: monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--purple-lt);
+    }
+
+    .folder-tagline {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-left: auto;
+    }
+
+    .folder-body { padding: 16px 20px; }
+
+    .folder-body p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    /* ─────────────────────────────────────────────
+       FOOTER
+    ───────────────────────────────────────────── */
+    .page-footer {
+      margin-top: 80px;
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .page-footer p {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .page-footer .logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+
+    /* ─────────────────────────────────────────────
+       PRINT STYLES
+    ───────────────────────────────────────────── */
+    @media print {
+      nav { display: none; }
+      body { background: #fff; color: #000; font-size: 12pt; }
+      .card, .concept-card, .file-detail, .folder-section,
+      .role-card, .commit-list, .callout, .branch-diagram,
+      .gh-ui-mock, .url-table, .glossary-table {
+        border: 1px solid #ccc !important;
+        background: #fff !important;
+        break-inside: avoid;
+      }
+      a { color: #000; }
+      .section { break-inside: avoid; }
+      .hero { padding: 20px 0; }
+    }
+
+    /* ─────────────────────────────────────────────
+       RESPONSIVE TWEAKS
+    ───────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .container { padding: 0 16px 60px; }
+      .card-grid { grid-template-columns: 1fr; }
+      .gh-file-msg, .gh-file-time { display: none; }
+      .commit-hash { display: none; }
+    }
+
+    /* ─────────────────────────────────────────────
+       HIGHLIGHT RULE
+    ───────────────────────────────────────────── */
+    .rule-box {
+      background: linear-gradient(135deg, rgba(139,92,246,.12), rgba(109,40,217,.06));
+      border: 1px solid var(--purple-dk);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin: 20px 0;
+    }
+
+    .rule-box .rule-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+
+    .rule-box p {
+      font-size: 15px;
+      font-weight: 500;
+      color: #fff;
+      margin: 0;
+    }
+
+    .rule-box code {
+      background: rgba(139,92,246,.2);
+      border: 1px solid var(--purple-dk);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 13px;
+      color: var(--purple-lt);
+    }
+
+    /* toc highlight */
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 24px 0;
+    }
+
+    .toc-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      transition: border-color .15s, background .15s;
+    }
+
+    .toc-item:hover {
+      border-color: var(--purple-dk);
+      background: var(--purple-bg);
+      text-decoration: none;
+    }
+
+    .toc-item .toc-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple);
+      letter-spacing: .08em;
+      margin-bottom: 4px;
+    }
+
+    .toc-item .toc-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─────────────────────────────────────────────
+     NAV
+───────────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">🫏 XL Fitness</span>
+    <ul class="nav-links">
+      <li><a href="#what-is-github">1. What Is GitHub</a></li>
+      <li><a href="#our-account">2. Our Account</a></li>
+      <li><a href="#our-repo">3. Our Repo</a></li>
+      <li><a href="#branches">4. Branches</a></li>
+      <li><a href="#pages">5. GitHub Pages</a></li>
+      <li><a href="#project-structure">6. Project Structure</a></li>
+      <li><a href="#navigate">7. Navigation</a></li>
+      <li><a href="#roles">8. Roles</a></li>
+      <li><a href="#commits">9. Commits</a></li>
+      <li><a href="#breaks">10. When It Breaks</a></li>
+      <li><a href="#glossary">11. Glossary</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ─────────────────────────────────────────────
+     HERO
+───────────────────────────────────────────── -->
+<div class="container">
+  <div class="hero">
+    <div class="hero-badge">📖 Project Reference Guide</div>
+    <h1>GitHub Guide<br/><span>XL Fitness AI Overseer</span></h1>
+    <p>Everything you need to know about how our project is organised, where to find things, and how the code gets from Donkey's Mac Mini to your browser — explained in plain English with zero assumed knowledge.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="dot"></span> No coding knowledge required</div>
+      <div class="hero-meta-item"><span class="dot"></span> For new team members, investors &amp; stakeholders</div>
+      <div class="hero-meta-item"><span class="dot"></span> Start at the top, read as much as you need</div>
+    </div>
+  </div>
+
+  <!-- TABLE OF CONTENTS -->
+  <div class="section" style="margin-bottom: 48px;">
+    <span class="section-number">Contents</span>
+    <h2>What's In This Guide</h2>
+    <p class="section-subtitle">Click any section to jump straight to it. If you only have 5 minutes, read Sections 1, 3, and 5.</p>
+    <div class="toc-grid">
+      <a href="#what-is-github" class="toc-item">
+        <div class="toc-num">SECTION 01</div>
+        <div class="toc-title">What Is GitHub?</div>
+      </a>
+      <a href="#our-account" class="toc-item">
+        <div class="toc-num">SECTION 02</div>
+        <div class="toc-title">Our GitHub Account</div>
+      </a>
+      <a href="#our-repo" class="toc-item">
+        <div class="toc-num">SECTION 03</div>
+        <div class="toc-title">Our Repository</div>
+      </a>
+      <a href="#branches" class="toc-item">
+        <div class="toc-num">SECTION 04</div>
+        <div class="toc-title">Branch Strategy</div>
+      </a>
+      <a href="#pages" class="toc-item">
+        <div class="toc-num">SECTION 05</div>
+        <div class="toc-title">GitHub Pages</div>
+      </a>
+      <a href="#project-structure" class="toc-item">
+        <div class="toc-num">SECTION 06</div>
+        <div class="toc-title">Project Structure</div>
+      </a>
+      <a href="#navigate" class="toc-item">
+        <div class="toc-num">SECTION 07</div>
+        <div class="toc-title">Navigating the Repo</div>
+      </a>
+      <a href="#roles" class="toc-item">
+        <div class="toc-num">SECTION 08</div>
+        <div class="toc-title">Project Roles</div>
+      </a>
+      <a href="#commits" class="toc-item">
+        <div class="toc-num">SECTION 09</div>
+        <div class="toc-title">Commit Messages</div>
+      </a>
+      <a href="#breaks" class="toc-item">
+        <div class="toc-num">SECTION 10</div>
+        <div class="toc-title">When Something Breaks</div>
+      </a>
+      <a href="#glossary" class="toc-item">
+        <div class="toc-num">SECTION 11</div>
+        <div class="toc-title">Glossary</div>
+      </a>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 1 — WHAT IS GITHUB
+  ════════════════════════════════════════════ -->
+  <div class="section" id="what-is-github">
+    <span class="section-number">Section 01</span>
+    <h2>What Is GitHub?</h2>
+    <p class="section-subtitle">A plain-English explanation — no coding experience required.</p>
+
+    <p>If you've never heard of GitHub before, here's the simplest way to think about it:</p>
+
+    <div class="callout purple">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>The One-Line Explanation</strong>
+        <p>GitHub is like Google Drive for code — but smarter. Every change is saved with a note explaining what changed and why. You can go back to any previous version. Multiple people can work on the project without overwriting each other. The entire project history is permanently preserved.</p>
+      </div>
+    </div>
+
+    <p>You already know how Google Drive works: you create folders, put files in them, and the files are saved online so anyone with the link can see them. GitHub works the same way — but it's built specifically for code projects, and it has some extra superpowers that Google Drive doesn't have.</p>
+
+    <h3>The Key Superpower: Nothing Is Ever Lost</h3>
+    <p>In Google Drive, if you accidentally delete a file or overwrite it with bad changes, recovering it can be tricky. In GitHub, <strong>every single change ever made is permanently recorded</strong>. You could go back to exactly what the project looked like on the day it was created. This is what developers mean when they say "version control" — GitHub controls the versions.</p>
+
+    <h3>The Six Concepts You Need to Know</h3>
+    <p>There are six terms that come up constantly when talking about GitHub. Here's what they all mean:</p>
+
+    <div class="card-grid">
+      <div class="concept-card">
+        <span class="icon">📁</span>
+        <div class="term-label">Repository</div>
+        <h4>Repository (Repo)</h4>
+        <p>The main project folder. It contains all the code, documents, and files for a project. Our AI Overseer project lives in one repository.</p>
+        <div class="analogy">Like a Google Drive folder for the whole project — but it remembers every version of every file, forever.</div>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">💾</span>
+        <div class="term-label">Commit</div>
+        <h4>Commit</h4>
+        <p>A saved snapshot of the project at a specific moment in time. Every commit has a message explaining what changed and why.</p>
+        <div class="analogy">Like hitting "Save" in a Word document — but every save is kept forever, labelled with a note, and you can go back to any of them.</div>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">🌿</span>
+        <div class="term-label">Branch</div>
+        <h4>Branch</h4>
+        <p>A parallel copy of the project where you can make changes safely. We have a "main" branch (always working) and a "dev" branch (work in progress).</p>
+        <div class="analogy">Like photocopying a document before editing it — you work on the copy and decide later whether to replace the original.</div>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">⬆️</span>
+        <div class="term-label">Push</div>
+        <h4>Push</h4>
+        <p>Uploading your saved changes from your computer to GitHub. Once you push, the changes are online and anyone with access can see them.</p>
+        <div class="analogy">Like syncing files to Google Drive. Your changes go from your computer to the cloud.</div>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">🌐</span>
+        <div class="term-label">GitHub Pages</div>
+        <h4>GitHub Pages</h4>
+        <p>A free feature that turns files in your repository into a live website. Any HTML file becomes accessible at a public URL — no server needed, no hosting fees.</p>
+        <div class="analogy">Like Google Drive's "Publish to web" feature, but for proper websites. This is how our demo runs live.</div>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">📄</span>
+        <div class="term-label">README</div>
+        <h4>README</h4>
+        <p>A special file that serves as the front page of a repository. When someone opens our project on GitHub, the README is the first thing they read.</p>
+        <div class="analogy">Like the description on the front of a folder — it tells you what's inside before you open it.</div>
+      </div>
+    </div>
+
+    <h3>The Analogy Side by Side</h3>
+    <p>Here's how GitHub compares to Google Drive, the tool most people already know:</p>
+
+    <div class="analogy-compare">
+      <div class="analogy-side google">
+        <div class="platform-name">📂 Google Drive</div>
+        <div class="analogy-row">
+          <span class="emoji">📁</span>
+          <div>
+            <div class="label">My Drive → Folder</div>
+            <div class="desc">A folder containing your files</div>
+          </div>
+        </div>
+        <div class="analogy-row">
+          <span class="emoji">💾</span>
+          <div>
+            <div class="label">Auto-save</div>
+            <div class="desc">Changes saved automatically, old versions limited</div>
+          </div>
+        </div>
+        <div class="analogy-row">
+          <span class="emoji">📤</span>
+          <div>
+            <div class="label">Upload files</div>
+            <div class="desc">Add files directly via drag and drop</div>
+          </div>
+        </div>
+        <div class="analogy-row">
+          <span class="emoji">🌐</span>
+          <div>
+            <div class="label">Publish to web</div>
+            <div class="desc">Basic sharing via link</div>
+          </div>
+        </div>
+        <div class="analogy-row">
+          <span class="emoji">📄</span>
+          <div>
+            <div class="label">Folder description</div>
+            <div class="desc">No standard front page</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analogy-arrow">⇄</div>
+
+      <div class="analogy-side github">
+        <div class="platform-name">🐙 GitHub</div>
+        <div class="analogy-row">
+          <span class="emoji">📁</span>
+          <div>
+            <div class="label">Repository</div>
+            <div class="desc">A project folder with full history</div>
+          </div>
+        </div>
+        <div class="analogy-row">
+          <span class="emoji">💾</span>
+          <div>
+            <div class="label">Commit</div>
+            <div class="desc">Every save is permanent, labelled, and reversible</div>
+          </div>
+        </div>
+        <div class="analogy-row">
+          <span class="emoji">📤</span>
+          <div>
+            <div class="label">Push</div>
+            <div class="desc">Upload changes with notes from your computer</div>
+          </div>
+        </div>
+        <div class="analogy-row">
+          <span class="emoji">🌐</span>
+          <div>
+            <div class="label">GitHub Pages</div>
+            <div class="desc">Full website hosting, auto-deploys on push</div>
+          </div>
+        </div>
+        <div class="analogy-row">
+          <span class="emoji">📄</span>
+          <div>
+            <div class="label">README</div>
+            <div class="desc">Standard front page shown to everyone</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">✅</span>
+      <div class="callout-body">
+        <strong>You don't need an account to view our project</strong>
+        <p>Our repository is currently public, which means anyone can open the URL in a browser and see the code, documents, and demos. You do <em>not</em> need to sign up for GitHub to read anything in this guide or to view the live URLs.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 2 — OUR ACCOUNT
+  ════════════════════════════════════════════ -->
+  <div class="section" id="our-account">
+    <span class="section-number">Section 02</span>
+    <h2>Our GitHub Account</h2>
+    <p class="section-subtitle">Where XL Fitness development lives online.</p>
+
+    <div class="card" style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+      <div style="font-size: 52px;">🐙</div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">GitHub Account</div>
+        <div style="font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px;">XLDonkey</div>
+        <a href="https://github.com/XLDonkey" style="font-family: monospace; font-size: 14px; color: var(--purple-lt);">github.com/XLDonkey</a>
+      </div>
+    </div>
+
+    <h3>What Is This Account?</h3>
+    <p>Think of <strong>XLDonkey</strong> as XL Fitness's official GitHub profile — the same way your business might have a Facebook page or an Instagram account. It's the online home for all of XL Fitness's development work.</p>
+
+    <p>Under this account, you can find all the repositories (project folders) for the AI Overseer system. Right now there's one main repository: <code>gym-ai-system</code> (covered in detail in Section 3).</p>
+
+    <div class="card-grid">
+      <div class="concept-card">
+        <span class="icon">👁️</span>
+        <h4>Currently Public</h4>
+        <p>The repository is currently visible to anyone on the internet. This is intentional — it allows the GitHub Pages demo to work without requiring login, and lets stakeholders and potential partners view the project without needing an account.</p>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">🔒</span>
+        <h4>Will Go Private After Launch</h4>
+        <p>Once XL Fitness is operational and the system is in active use with real members, the repository will be converted to private. At that point, only authorised team members will be able to see the code.</p>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">🤖</span>
+        <h4>Managed by Donkey</h4>
+        <p>All code, documents, and changes in this account are managed by Donkey (the AI PM and developer for this project). Matt doesn't need to interact with the GitHub account directly.</p>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">🏋️</span>
+        <h4>XL Fitness Only</h4>
+        <p>This account is dedicated to XL Fitness development. Everything here is part of the AI Overseer project or future XL Fitness technology. It's not a personal account.</p>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>How to open it in your browser</strong>
+        <p>Go to <a href="https://github.com/XLDonkey">github.com/XLDonkey</a> in any browser. You'll see the account profile and a list of public repositories. Click on <strong>gym-ai-system</strong> to enter the main project.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 3 — OUR REPOSITORY
+  ════════════════════════════════════════════ -->
+  <div class="section" id="our-repo">
+    <span class="section-number">Section 03</span>
+    <h2>Our Repository — gym-ai-system</h2>
+    <p class="section-subtitle">A detailed walkthrough of every file and folder in the project.</p>
+
+    <div class="card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">GitHub Repo</div>
+        <a href="https://github.com/XLDonkey/gym-ai-system" style="font-family: monospace; font-size: 13px; color: var(--purple-lt);">github.com/XLDonkey/gym-ai-system</a>
+      </div>
+      <div>
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px;">Live Website (GitHub Pages)</div>
+        <a href="https://xldonkey.github.io/gym-ai-system/" style="font-family: monospace; font-size: 13px; color: var(--purple-lt);">xldonkey.github.io/gym-ai-system/</a>
+      </div>
+    </div>
+
+    <p>A <strong>repository</strong> is just a project folder — but one that lives on GitHub and remembers every version of every file. Our <code>gym-ai-system</code> repository is the single source of truth for the entire AI Overseer project. Everything is in here: the demo app, the AI model, the planning documents, the tools Donkey uses to build the system.</p>
+
+    <p>Below is the complete file structure, followed by a detailed explanation of every file and folder.</p>
+
+    <!-- FILE TREE -->
+    <div class="file-tree">
+      <div class="file-tree-header">
+        <div class="dot-row">
+          <span class="dot-red"></span>
+          <span class="dot-amber"></span>
+          <span class="dot-green"></span>
+        </div>
+        <div class="title">gym-ai-system / (root)</div>
+      </div>
+      <div class="tree-body">
+        <div class="tree-item"><span class="tree-file">📄 overseer.html</span><span class="tree-badge">bible</span><span class="tree-comment">← Master plan document</span></div>
+        <div class="tree-item"><span class="tree-file">📄 README.md</span><span class="tree-comment">← GitHub front page description</span></div>
+        <br/>
+        <div class="tree-item"><span class="tree-folder">📁 pose/</span><span class="tree-comment">← All rep counting / pose tracking code</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 alpha.html</span><span class="tree-badge green">live demo</span><span class="tree-comment">← THE DEMO — live rep counter</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 label.html</span><span class="tree-comment">← Training data labeler tool</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 session.js</span><span class="tree-comment">← Session manager (sends data to server)</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 model.json</span><span class="tree-comment">← Neural network weights (the AI brain)</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-folder">📁 machine_configs/</span><span class="tree-comment">← One JSON file per gym machine</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   │   </span><span class="tree-file">📄 lat_pulldown.json</span><span class="tree-comment">← Config for Nautilus Lat Pulldown</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-folder">📁 training-data/</span><span class="tree-comment">← Training data configuration files</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-folder">📁 archive/</span><span class="tree-comment">← Old versions kept for reference</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-folder">📁 office/</span><span class="tree-comment">← Internal dashboard</span></div>
+        <br/>
+        <div class="tree-item"><span class="tree-folder">📁 demo/</span><span class="tree-badge" style="background:rgba(59,130,246,.12);border-color:var(--blue);color:var(--blue)">frozen</span><span class="tree-comment">← Kiosk demo, never edited</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 alpha.html</span><span class="tree-comment">← Stakeholder kiosk demo</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 manifest.json</span><span class="tree-comment">← PWA config (makes app installable)</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 sw.js</span><span class="tree-comment">← Service worker (offline support)</span></div>
+        <br/>
+        <div class="tree-item"><span class="tree-folder">📁 weight/</span><span class="tree-comment">← Weight plate detection — future Manus work</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 README.md</span></div>
+        <br/>
+        <div class="tree-item"><span class="tree-folder">📁 face/</span><span class="tree-comment">← Face ID — future Phase 3</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 README.md</span></div>
+        <br/>
+        <div class="tree-item"><span class="tree-folder">📁 members/</span><span class="tree-comment">← Member data API — future Phase 3</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 README.md</span></div>
+        <br/>
+        <div class="tree-item"><span class="tree-folder">📁 docs/</span><span class="tree-comment">← All documentation</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 overseer.html</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 deep-dive.html</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 ceiling-rig.html</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 camera-guide.html</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 github-guide.html</span><span class="tree-badge green">this file</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 ai-plan-for-manus.md</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 manus-week1-brief.md</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-file">📄 gym-infrastructure-report.md</span></div>
+        <div class="tree-item"><span style="color:var(--border2)">│   </span><span class="tree-folder">📁 images/</span><span class="tree-comment">← Gym photos used in docs</span></div>
+      </div>
+    </div>
+
+    <h3>Root Level Files</h3>
+    <p>These files sit at the top of the repository — the first things you see when you open it on GitHub.</p>
+
+    <div class="file-detail">
+      <div class="file-detail-header">
+        <span class="file-name">overseer.html</span>
+        <span class="file-tag tag-doc">The Bible</span>
+      </div>
+      <p>This is the master planning document for the entire AI Overseer project. It contains the full vision, architecture, technical decisions, roadmap, and everything Donkey and Matt have agreed on for the system. It's called "The Bible" because it's the authoritative reference — if there's ever a question about what the project is trying to achieve, this is where to look.</p>
+      <div class="file-meta-grid">
+        <div class="file-meta-item"><div class="meta-label">Who uses it</div><div class="meta-value">Matt, Donkey, Manus AI, new team members</div></div>
+        <div class="file-meta-item"><div class="meta-label">Updated by</div><div class="meta-value">Donkey, after decisions with Matt</div></div>
+        <div class="file-meta-item"><div class="meta-label">Format</div><div class="meta-value">HTML — readable in any browser</div></div>
+      </div>
+      <a href="https://xldonkey.github.io/gym-ai-system/overseer.html" class="file-url">🔗 xldonkey.github.io/gym-ai-system/overseer.html</a>
+    </div>
+
+    <div class="file-detail">
+      <div class="file-detail-header">
+        <span class="file-name">README.md</span>
+        <span class="file-tag tag-doc">Front Page</span>
+      </div>
+      <p>The README is what GitHub automatically shows on the repository's front page — underneath the file list. It's a formatted description of what the project is, what it does, and how to navigate it. Anyone opening github.com/XLDonkey/gym-ai-system will see this first.</p>
+      <div class="file-meta-grid">
+        <div class="file-meta-item"><div class="meta-label">Who sees it</div><div class="meta-value">Everyone who opens the repo on GitHub</div></div>
+        <div class="file-meta-item"><div class="meta-label">Format</div><div class="meta-value">Markdown (renders as formatted text)</div></div>
+        <div class="file-meta-item"><div class="meta-label">Live URL</div><div class="meta-value">Shown on GitHub automatically — not a separate page</div></div>
+      </div>
+    </div>
+
+    <!-- POSE FOLDER -->
+    <h3>The pose/ Folder — Where the AI Lives</h3>
+    <p>This is the most important folder in the project. It contains all the code for the rep-counting AI — the pose tracking, the neural network, the session manager, and the configuration for each gym machine.</p>
+
+    <div class="folder-section">
+      <div class="folder-header">
+        <span class="folder-icon">📁</span>
+        <span class="folder-name">pose/</span>
+        <span class="folder-tagline">Rep counting · Pose tracking · AI models</span>
+      </div>
+      <div class="folder-body">
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">pose/alpha.html</span>
+            <span class="file-tag tag-demo">Live Demo</span>
+          </div>
+          <p>This is the main demo — the live rep counter. It runs entirely in the browser using TensorFlow.js (Google's AI library) and MoveNet (a pose tracking model). Point a camera at someone doing a lat pulldown, and it counts the reps in real time. This is the version Donkey actively develops and improves. It changes frequently as new features are added.</p>
+          <div class="file-meta-grid">
+            <div class="file-meta-item"><div class="meta-label">Who uses it</div><div class="meta-value">Donkey (development), Matt (testing)</div></div>
+            <div class="file-meta-item"><div class="meta-label">Technology</div><div class="meta-value">HTML + JavaScript + TensorFlow.js</div></div>
+            <div class="file-meta-item"><div class="meta-label">Changes?</div><div class="meta-value">Yes — updated frequently</div></div>
+          </div>
+          <a href="https://xldonkey.github.io/gym-ai-system/pose/alpha.html" class="file-url">🔗 xldonkey.github.io/gym-ai-system/pose/alpha.html</a>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">pose/label.html</span>
+            <span class="file-tag tag-code">Tool</span>
+          </div>
+          <p>The labeling tool. When Matt films training videos at the gym, those videos need to be "labeled" — meaning each frame needs to be tagged as "start of rep", "mid rep", "end of rep", etc. This tool makes that process as fast as possible. Matt watches the video, hits keys to label each frame, and the data is saved automatically for Donkey to use in training the AI.</p>
+          <div class="file-meta-grid">
+            <div class="file-meta-item"><div class="meta-label">Who uses it</div><div class="meta-value">Matt (labeling training videos)</div></div>
+            <div class="file-meta-item"><div class="meta-label">What it produces</div><div class="meta-value">Labeled training data for the AI</div></div>
+          </div>
+          <a href="https://xldonkey.github.io/gym-ai-system/pose/label.html" class="file-url">🔗 xldonkey.github.io/gym-ai-system/pose/label.html</a>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">pose/session.js</span>
+            <span class="file-tag tag-code">Code</span>
+          </div>
+          <p>The session manager. When someone finishes a set of exercises, this code packages up the data (rep count, timestamps, machine used, member ID) and sends it to the FastAPI server for storage. It's the bridge between the browser-based demo and the backend database.</p>
+          <div class="file-meta-grid">
+            <div class="file-meta-item"><div class="meta-label">Who uses it</div><div class="meta-value">Used automatically by the demo — not directly</div></div>
+            <div class="file-meta-item"><div class="meta-label">Connects to</div><div class="meta-value">FastAPI server (built by Manus AI)</div></div>
+          </div>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">pose/model.json</span>
+            <span class="file-tag tag-config">AI Model</span>
+          </div>
+          <p>This file contains the neural network weights — essentially, the "brain" of the custom AI model Donkey has trained. Neural network weights are numbers that encode what the AI has learned from the training videos Matt filmed. When the demo loads, it reads this file to know how to identify rep phases. When Donkey trains an improved model, this file gets updated.</p>
+          <div class="file-meta-grid">
+            <div class="file-meta-item"><div class="meta-label">What it is</div><div class="meta-value">Trained AI model data</div></div>
+            <div class="file-meta-item"><div class="meta-label">Updated by</div><div class="meta-value">Donkey, after retraining on new data</div></div>
+            <div class="file-meta-item"><div class="meta-label">Used by</div><div class="meta-value">pose/alpha.html automatically</div></div>
+          </div>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">pose/machine_configs/</span>
+            <span class="file-tag tag-config">Config</span>
+          </div>
+          <p>This folder contains one JSON configuration file per gym machine. Each file tells the AI the specific angles, thresholds, and counting logic for that machine. For example, a lat pulldown has different arm angles at the top and bottom of the movement than a seated row would. Having a config file per machine means the system can be extended to all 120+ machines without rewriting the core code — just add a new config file.</p>
+          <div class="file-meta-grid">
+            <div class="file-meta-item"><div class="meta-label">Current machines</div><div class="meta-value">Nautilus Nitro Lat Pulldown</div></div>
+            <div class="file-meta-item"><div class="meta-label">Future</div><div class="meta-value">120+ machines, one file each</div></div>
+            <div class="file-meta-item"><div class="meta-label">Format</div><div class="meta-value">JSON (structured data file)</div></div>
+          </div>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">pose/training-data/</span>
+            <span class="file-tag tag-config">Training</span>
+          </div>
+          <p>Configuration and metadata files for the training pipeline. Importantly, this folder does NOT contain the actual training videos (those are gigabytes of video footage stored on Google Drive). Instead it contains the labeled data files and configuration for training the neural network — smaller structured data that belongs in GitHub.</p>
+          <div class="file-meta-grid">
+            <div class="file-meta-item"><div class="meta-label">Contains</div><div class="meta-value">Labeled pose data, training configs</div></div>
+            <div class="file-meta-item"><div class="meta-label">Does NOT contain</div><div class="meta-value">Raw video files (too large, on Google Drive)</div></div>
+          </div>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">pose/archive/</span>
+            <span class="file-tag tag-future">Archive</span>
+          </div>
+          <p>Old versions of the demo and other files, kept for reference. When Donkey does a major rewrite of the rep counter, the old version moves here rather than being deleted. This provides a "museum" of how the system evolved, and a safety net if we ever need to refer back to an earlier approach.</p>
+        </div>
+
+        <div class="file-detail">
+          <div class="file-detail-header">
+            <span class="file-name">pose/office/</span>
+            <span class="file-tag tag-code">Internal</span>
+          </div>
+          <p>An internal dashboard for Donkey — monitoring tools, data views, and utilities that aren't part of the public demo. Not intended for external viewing.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- DEMO FOLDER -->
+    <h3>The demo/ Folder — The Frozen Kiosk</h3>
+
+    <div class="folder-section">
+      <div class="folder-header">
+        <span class="folder-icon">📁</span>
+        <span class="folder-name">demo/</span>
+        <span class="folder-tagline">Frozen · Stakeholder presentations · Never edited</span>
+      </div>
+      <div class="folder-body">
+
+        <div class="callout warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-body">
+            <strong>This folder is intentionally frozen</strong>
+            <p>The files in <code>demo/</code> are never modified during development. They represent a known-good version of the demo that stakeholders can always rely on. If <code>pose/alpha.html</code> is temporarily broken while Donkey develops a new feature, <code>demo/alpha.html</code> always works.</p>
+          </div>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">demo/alpha.html</span>
+            <span class="file-tag tag-frozen">Frozen Kiosk</span>
+          </div>
+          <p>The frozen kiosk demo. This is the version used for stakeholder presentations, investor meetings, and on-site demonstrations. It's set up to run in full-screen "kiosk mode" on a tablet. Because it's never edited, it will never unexpectedly break. If you're showing the demo to someone important, use this URL.</p>
+          <div class="file-meta-grid">
+            <div class="file-meta-item"><div class="meta-label">Who uses it</div><div class="meta-value">Matt, stakeholders, investors</div></div>
+            <div class="file-meta-item"><div class="meta-label">Changes?</div><div class="meta-value">No — deliberately frozen</div></div>
+            <div class="file-meta-item"><div class="meta-label">Runs on</div><div class="meta-value">Tablet in full-screen kiosk mode</div></div>
+          </div>
+          <a href="https://xldonkey.github.io/gym-ai-system/demo/alpha.html" class="file-url">🔗 xldonkey.github.io/gym-ai-system/demo/alpha.html</a>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">demo/manifest.json</span>
+            <span class="file-tag tag-config">PWA Config</span>
+          </div>
+          <p>This file makes the demo installable as a "Progressive Web App" (PWA). On an iPhone or Android tablet, a user can tap "Add to Home Screen" and the demo gets an app icon — it looks and feels like a native app even though it's a web page. The manifest file defines the app name, icon, and display settings.</p>
+        </div>
+
+        <div class="file-detail">
+          <div class="file-detail-header">
+            <span class="file-name">demo/sw.js</span>
+            <span class="file-tag tag-code">Service Worker</span>
+          </div>
+          <p>The service worker enables offline support. Once the demo has been loaded once, it caches itself — meaning it can run even if the Wi-Fi goes down during a presentation. This is critical for on-site demos in a gym environment where network reliability can't always be guaranteed.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FUTURE FOLDERS -->
+    <h3>Future Phase Folders</h3>
+    <p>These folders are placeholders for features that are planned but not yet built. They exist now to establish the structure of the project and signal the roadmap.</p>
+
+    <div class="card-grid">
+      <div class="file-detail">
+        <div class="file-detail-header">
+          <span class="file-name">weight/</span>
+          <span class="file-tag tag-future">Future — Manus</span>
+        </div>
+        <p style="font-size:14px;color:var(--text-muted);margin:0">Weight plate detection. Computer vision to identify which plates are loaded on a barbell or machine, allowing the system to know how much weight was lifted without the member entering it manually. This module will be built by Manus AI as a separate contract after Phase 1 is complete.</p>
+      </div>
+
+      <div class="file-detail">
+        <div class="file-detail-header">
+          <span class="file-name">face/</span>
+          <span class="file-tag tag-future">Future — Phase 3</span>
+        </div>
+        <p style="font-size:14px;color:var(--text-muted);margin:0">Facial recognition for automatic member identification. When a member sits down at a machine, the camera identifies them and automatically starts their session. No NFC tap or app interaction needed. Planned for Phase 3.</p>
+      </div>
+
+      <div class="file-detail">
+        <div class="file-detail-header">
+          <span class="file-name">members/</span>
+          <span class="file-tag tag-future">Future — Phase 3</span>
+        </div>
+        <p style="font-size:14px;color:var(--text-muted);margin:0">The member data API module. This will handle member profiles, workout history, personal bests, and progress tracking. The actual member data lives in Supabase (a cloud database) — this folder will contain the code that talks to that database.</p>
+      </div>
+    </div>
+
+    <!-- DOCS FOLDER -->
+    <h3>The docs/ Folder — All Documentation</h3>
+
+    <div class="folder-section">
+      <div class="folder-header">
+        <span class="folder-icon">📁</span>
+        <span class="folder-name">docs/</span>
+        <span class="folder-tagline">Planning documents · Technical guides · Reference material</span>
+      </div>
+      <div class="folder-body">
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">docs/deep-dive.html</span>
+            <span class="file-tag tag-doc">Technical</span>
+          </div>
+          <p>A deep technical explanation of how the pose estimation system works. Covers the MoveNet model, how angles are calculated, the rep-counting logic, and the neural network architecture. Intended for technical team members, developers, or anyone wanting to understand the system at a deeper level.</p>
+          <a href="https://xldonkey.github.io/gym-ai-system/docs/deep-dive.html" class="file-url">🔗 xldonkey.github.io/gym-ai-system/docs/deep-dive.html</a>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">docs/ceiling-rig.html</span>
+            <span class="file-tag tag-doc">Planning</span>
+          </div>
+          <p>The ceiling camera rig planning document. One of the key infrastructure challenges for the AI Overseer is mounting cameras above each machine at the right angle and height. This document covers the hardware plan, mounting approaches, cable management, and the rollout strategy for fitting all 120+ machines.</p>
+          <a href="https://xldonkey.github.io/gym-ai-system/docs/ceiling-rig.html" class="file-url">🔗 xldonkey.github.io/gym-ai-system/docs/ceiling-rig.html</a>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">docs/camera-guide.html</span>
+            <span class="file-tag tag-doc">Guide</span>
+          </div>
+          <p>The camera buying guide. A detailed breakdown of which cameras to buy for the ceiling rigs — comparing options on resolution, frame rate, field of view, low-light performance, price, and ease of installation. Helps Matt make informed purchasing decisions without needing to research the market himself.</p>
+          <a href="https://xldonkey.github.io/gym-ai-system/docs/camera-guide.html" class="file-url">🔗 xldonkey.github.io/gym-ai-system/docs/camera-guide.html</a>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">docs/github-guide.html</span>
+            <span class="file-tag tag-doc">This File</span>
+          </div>
+          <p>This document. The guide you're reading right now. It explains how GitHub works, how our project is organised, and how everything connects. Written for people with no coding background.</p>
+          <a href="https://xldonkey.github.io/gym-ai-system/docs/github-guide.html" class="file-url">🔗 xldonkey.github.io/gym-ai-system/docs/github-guide.html</a>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">docs/ai-plan-for-manus.md</span>
+            <span class="file-tag tag-doc">Brief</span>
+          </div>
+          <p>The technical brief prepared for Manus AI, detailing what the FastAPI server needs to do, how it should connect to the browser demo, what data formats to use, and the API contract. Manus AI uses this as their specification document for building the server.</p>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">docs/manus-week1-brief.md</span>
+            <span class="file-tag tag-doc">Brief</span>
+          </div>
+          <p>Manus AI's Week 1 work brief — a specific, actionable list of tasks for the first week of their engagement on the project. Concrete deliverables, deadlines, and technical specifications.</p>
+        </div>
+
+        <div class="file-detail" style="margin-bottom: 12px;">
+          <div class="file-detail-header">
+            <span class="file-name">docs/gym-infrastructure-report.md</span>
+            <span class="file-tag tag-doc">Report</span>
+          </div>
+          <p>The gym infrastructure report — a comprehensive assessment of the physical gym environment, network setup, power availability, and what needs to be installed or upgraded to support the AI Overseer system at scale across all machines.</p>
+        </div>
+
+        <div class="file-detail">
+          <div class="file-detail-header">
+            <span class="file-name">docs/images/</span>
+            <span class="file-tag tag-config">Assets</span>
+          </div>
+          <p>Photos of the gym used in documentation. Images of the machines, the layout, the camera mounting points, and other reference photos that make the planning documents more concrete and useful.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 4 — BRANCHES
+  ════════════════════════════════════════════ -->
+  <div class="section" id="branches">
+    <span class="section-number">Section 04</span>
+    <h2>The Branch Strategy</h2>
+    <p class="section-subtitle">How we keep the live demo always working while development happens in parallel.</p>
+
+    <p>A <strong>branch</strong> is like making a photocopy of the entire project to work on. You can edit the copy freely without affecting the original. When you're happy with your changes, you "merge" the copy back into the original. If the copy turns out to be bad, you throw it away — the original is untouched.</p>
+
+    <p>We use a specific branching strategy to ensure the demo is always working, even when Donkey is in the middle of a big change:</p>
+
+    <!-- BRANCH DIAGRAM -->
+    <div class="branch-diagram">
+      <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 20px;">Branch Structure — Live View</div>
+
+      <div class="branch-row">
+        <div class="branch-label main">main</div>
+        <div class="branch-line-wrap">
+          <div class="branch-line main"></div>
+          <div class="branch-dot start green"></div>
+          <div class="branch-dot end green"></div>
+          <div class="branch-tag">✅ always live · always working</div>
+        </div>
+      </div>
+
+      <div style="color:var(--text-dim); font-size:12px; padding-left:176px; margin-top:-10px; margin-bottom:12px;">↓ branched from main</div>
+
+      <div class="branch-row">
+        <div class="branch-label dev">dev</div>
+        <div class="branch-line-wrap">
+          <div class="branch-line dev"></div>
+          <div class="branch-dot start purple"></div>
+          <div class="branch-dot end purple"></div>
+          <div class="branch-tag">🔧 work in progress</div>
+        </div>
+      </div>
+
+      <div style="color:var(--text-dim); font-size:12px; padding-left:176px; margin-top:-10px; margin-bottom:12px;">↓ feature branches off dev</div>
+
+      <div class="branch-row">
+        <div class="branch-label feat" style="font-size:11px;">feature/lstm-model</div>
+        <div class="branch-line-wrap">
+          <div class="branch-line feat"></div>
+          <div class="branch-dot start amber"></div>
+          <div class="branch-tag" style="right:20%;">→ merged to dev when done</div>
+        </div>
+      </div>
+
+      <div class="branch-row">
+        <div class="branch-label feat" style="font-size:11px;">feature/face-id</div>
+        <div class="branch-line-wrap">
+          <div class="branch-line feat" style="width:65%;"></div>
+          <div class="branch-dot start amber"></div>
+          <div class="branch-tag" style="right:35%;">→ merged to dev when done</div>
+        </div>
+      </div>
+
+      <div class="branch-row">
+        <div class="branch-label feat" style="font-size:11px;">feature/weight</div>
+        <div class="branch-line-wrap">
+          <div class="branch-line feat" style="width:50%;"></div>
+          <div class="branch-dot start amber"></div>
+          <div class="branch-tag" style="right:50%;">→ in progress</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>The Three Types of Branch</h3>
+
+    <div class="card-grid">
+      <div class="concept-card">
+        <span class="icon">🟢</span>
+        <div class="term-label">main</div>
+        <h4>Main Branch</h4>
+        <p>The live, always-working version of the project. The GitHub Pages demo runs from this branch. Donkey never makes experimental changes directly here. Only tested, confirmed-working code gets merged into main.</p>
+        <div class="analogy">Like the master copy of a document that's being actively shown to clients. You don't scribble drafts on it — you work on a photocopy first.</div>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">🟣</span>
+        <div class="term-label">dev</div>
+        <h4>Dev Branch</h4>
+        <p>Where Donkey actually builds things. This could be broken at any time during development — that's fine here. Once a feature is complete and tested on dev, it gets merged into main.</p>
+        <div class="analogy">Like the workshop. Messy, things get taken apart, half-built stuff everywhere — but that's what workshops are for. The showroom (main) stays tidy.</div>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">🟡</span>
+        <div class="term-label">feature/...</div>
+        <h4>Feature Branches</h4>
+        <p>Created for a single specific piece of work — e.g., building the LSTM model, adding face ID, or integrating weight detection. These branch off dev, get developed in isolation, then merge back to dev when complete.</p>
+        <div class="analogy">Like a separate notepad for each task. Work on one thing without getting mixed up with everything else.</div>
+      </div>
+    </div>
+
+    <div class="rule-box">
+      <div class="rule-label">🔁 The Golden Rule</div>
+      <p>Build on <code>dev</code> → test it → confirm it works → merge to <code>main</code> → the demo URL automatically updates within 2 minutes.</p>
+    </div>
+
+    <h3>Why Does This Matter?</h3>
+    <p>Without this strategy, there would be a real risk of breaking the demo for Matt or a stakeholder at exactly the wrong moment — like just before an investor meeting. The branch strategy means:</p>
+    <ul>
+      <li>The demo URL is <strong>always reliable</strong> — it only ever shows tested, working code</li>
+      <li>Donkey can work on complex features that take days or weeks without disrupting anyone</li>
+      <li>If something goes wrong during development, it's on dev — not visible to anyone</li>
+      <li>The frozen <code>demo/</code> folder adds an extra layer of safety for presentations</li>
+    </ul>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 5 — GITHUB PAGES
+  ════════════════════════════════════════════ -->
+  <div class="section" id="pages">
+    <span class="section-number">Section 05</span>
+    <h2>How GitHub Pages Works</h2>
+    <p class="section-subtitle">The magic that turns code into a live website automatically.</p>
+
+    <div class="callout purple">
+      <span class="callout-icon">✨</span>
+      <div class="callout-body">
+        <strong>The Simple Version</strong>
+        <p>When Donkey pushes code to the main branch, GitHub automatically publishes it as a live website. No server to set up. No hosting fees. No technical steps. Within about 2 minutes, any change Donkey makes is live at the URL — and Matt can see it in his browser.</p>
+      </div>
+    </div>
+
+    <h3>The Publish Flow — Step by Step</h3>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-icon">💻</div>
+        <h5>Edit</h5>
+        <p>Donkey edits code on the Mac Mini</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-icon">💾</div>
+        <h5>Commit</h5>
+        <p>Saves the change with a note explaining what was done</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-icon">⬆️</div>
+        <h5>Push</h5>
+        <p>Uploads the commit to GitHub's servers</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-icon">🤖</div>
+        <h5>GitHub Publishes</h5>
+        <p>GitHub automatically rebuilds and deploys the site</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-icon">🌐</div>
+        <h5>Live!</h5>
+        <p>Available at the public URL within ~2 minutes</p>
+      </div>
+    </div>
+
+    <p>The whole process from Donkey saving a change to it being live on the internet takes around 2 minutes. There's no server to maintain, no deployment process to run, and no extra costs — GitHub provides this hosting for free as part of their service.</p>
+
+    <h3>All Live URLs</h3>
+    <p>Every HTML file in the repository is automatically available as a live URL. Here are all the important ones:</p>
+
+    <table class="url-table">
+      <thead>
+        <tr>
+          <th>What It Is</th>
+          <th>Live URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="what">📖 The Bible (Master Plan)</td>
+          <td><a href="https://xldonkey.github.io/gym-ai-system/overseer.html" class="url-link">xldonkey.github.io/gym-ai-system/overseer.html</a></td>
+        </tr>
+        <tr>
+          <td class="what">🤸 Live Demo (Active Dev)</td>
+          <td><a href="https://xldonkey.github.io/gym-ai-system/pose/alpha.html" class="url-link">xldonkey.github.io/gym-ai-system/pose/alpha.html</a></td>
+        </tr>
+        <tr>
+          <td class="what">🖥️ Frozen Kiosk Demo</td>
+          <td><a href="https://xldonkey.github.io/gym-ai-system/demo/alpha.html" class="url-link">xldonkey.github.io/gym-ai-system/demo/alpha.html</a></td>
+        </tr>
+        <tr>
+          <td class="what">🏷️ Labeler Tool</td>
+          <td><a href="https://xldonkey.github.io/gym-ai-system/pose/label.html" class="url-link">xldonkey.github.io/gym-ai-system/pose/label.html</a></td>
+        </tr>
+        <tr>
+          <td class="what">🔬 Technical Deep Dive</td>
+          <td><a href="https://xldonkey.github.io/gym-ai-system/docs/deep-dive.html" class="url-link">xldonkey.github.io/gym-ai-system/docs/deep-dive.html</a></td>
+        </tr>
+        <tr>
+          <td class="what">📐 Ceiling Rig Plan</td>
+          <td><a href="https://xldonkey.github.io/gym-ai-system/docs/ceiling-rig.html" class="url-link">xldonkey.github.io/gym-ai-system/docs/ceiling-rig.html</a></td>
+        </tr>
+        <tr>
+          <td class="what">📷 Camera Guide</td>
+          <td><a href="https://xldonkey.github.io/gym-ai-system/docs/camera-guide.html" class="url-link">xldonkey.github.io/gym-ai-system/docs/camera-guide.html</a></td>
+        </tr>
+        <tr>
+          <td class="what">📚 This Guide (GitHub Guide)</td>
+          <td><a href="https://xldonkey.github.io/gym-ai-system/docs/github-guide.html" class="url-link">xldonkey.github.io/gym-ai-system/docs/github-guide.html</a></td>
+        </tr>
+        <tr>
+          <td class="what">🐙 GitHub Repo (Code)</td>
+          <td><a href="https://github.com/XLDonkey/gym-ai-system" class="url-link">github.com/XLDonkey/gym-ai-system</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>Tip: Bookmark the frozen demo for presentations</strong>
+        <p>For any important presentation or stakeholder demo, always use <code>xldonkey.github.io/gym-ai-system/demo/alpha.html</code> — not the pose/alpha.html version. The demo/ version is frozen and will never break, even when Donkey is in the middle of developing new features.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 6 — PROJECT STRUCTURE
+  ════════════════════════════════════════════ -->
+  <div class="section" id="project-structure">
+    <span class="section-number">Section 06</span>
+    <h2>The Overseer Project Structure</h2>
+    <p class="section-subtitle">How GitHub fits into the bigger picture — the whole system, not just the code.</p>
+
+    <p>GitHub contains the code and documents, but the full AI Overseer system involves several other pieces. Understanding how they all connect helps make sense of what's where and why.</p>
+
+    <!-- WHAT'S IN / NOT IN GITHUB -->
+    <h3>What Lives Where</h3>
+
+    <div class="in-not-grid">
+      <div class="in-col">
+        <div class="col-header">✅ What's In GitHub</div>
+        <ul class="col-items">
+          <li>
+            <span class="icon">🧠</span>
+            <div>
+              <span class="label">AI models</span>
+              <span class="reason">Neural network weights, training configs</span>
+            </div>
+          </li>
+          <li>
+            <span class="icon">📱</span>
+            <div>
+              <span class="label">Demo application</span>
+              <span class="reason">The rep counter that runs on tablet</span>
+            </div>
+          </li>
+          <li>
+            <span class="icon">🏷️</span>
+            <div>
+              <span class="label">Labeling tool</span>
+              <span class="reason">What Matt uses to label training videos</span>
+            </div>
+          </li>
+          <li>
+            <span class="icon">📖</span>
+            <div>
+              <span class="label">All planning documents</span>
+              <span class="reason">The bible, camera guide, infrastructure report</span>
+            </div>
+          </li>
+          <li>
+            <span class="icon">🔌</span>
+            <div>
+              <span class="label">Session manager</span>
+              <span class="reason">Code that sends workout data to the server</span>
+            </div>
+          </li>
+          <li>
+            <span class="icon">⚙️</span>
+            <div>
+              <span class="label">Machine configs</span>
+              <span class="reason">Settings for each gym machine</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="not-col">
+        <div class="col-header">🚫 What's NOT In GitHub</div>
+        <ul class="col-items">
+          <li>
+            <span class="icon">🎥</span>
+            <div>
+              <span class="label">Raw training videos</span>
+              <span class="reason">Gigabytes of footage — stored on Google Drive</span>
+            </div>
+          </li>
+          <li>
+            <span class="icon">👤</span>
+            <div>
+              <span class="label">Face embeddings</span>
+              <span class="reason">Sensitive biometric data — Mac Mini only</span>
+            </div>
+          </li>
+          <li>
+            <span class="icon">🗄️</span>
+            <div>
+              <span class="label">Member data</span>
+              <span class="reason">Stored in Supabase cloud database</span>
+            </div>
+          </li>
+          <li>
+            <span class="icon">🔑</span>
+            <div>
+              <span class="label">API keys &amp; passwords</span>
+              <span class="reason">Security rule: never in code, ever</span>
+            </div>
+          </li>
+          <li>
+            <span class="icon">🖥️</span>
+            <div>
+              <span class="label">FastAPI server</span>
+              <span class="reason">Manus AI builds and hosts this separately</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SYSTEM DIAGRAM -->
+    <h3>How the Whole System Connects</h3>
+    <p>The AI Overseer system has four main components. GitHub is just one of them:</p>
+
+    <div class="system-diagram">
+      <div class="sys-node github">
+        <div class="node-icon">🐙</div>
+        <div class="node-role">GitHub</div>
+        <h4>The Recipe Book</h4>
+        <p>Where all the code and documents are stored. Every version ever written is preserved here.</p>
+        <div class="analogy-tag">📍 github.com/XLDonkey</div>
+      </div>
+
+      <div class="sys-node mac">
+        <div class="node-icon">🖥️</div>
+        <div class="node-role">Mac Mini</div>
+        <h4>The Kitchen</h4>
+        <p>Where Donkey writes code, trains AI models, and runs the development environment. The code from GitHub runs here during development.</p>
+        <div class="analogy-tag">📍 XL Fitness office</div>
+      </div>
+
+      <div class="sys-node supabase">
+        <div class="node-icon">🗄️</div>
+        <div class="node-role">Supabase</div>
+        <h4>The Filing Cabinet</h4>
+        <p>Cloud database where member profiles, workout sessions, rep counts, and history are permanently stored.</p>
+        <div class="analogy-tag">📍 supabase.com (cloud)</div>
+      </div>
+
+      <div class="sys-node pages">
+        <div class="node-icon">🌐</div>
+        <div class="node-role">GitHub Pages</div>
+        <h4>The Display Window</h4>
+        <p>Where documents and demos are automatically published. Anyone with the URL can see them — no login, no download, no setup.</p>
+        <div class="analogy-tag">📍 xldonkey.github.io</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:#fff; margin-bottom:12px;">How They Work Together</h4>
+      <ol style="color: var(--text-muted); padding-left: 20px; line-height: 2;">
+        <li>Donkey writes code on the <strong style="color:var(--blue)">Mac Mini</strong></li>
+        <li>Donkey pushes the code to <strong style="color:var(--purple-lt)">GitHub</strong></li>
+        <li><strong style="color:var(--amber)">GitHub Pages</strong> automatically publishes the demo and documents</li>
+        <li>A gym member uses the demo on a tablet → the rep counter runs</li>
+        <li>When the session ends, <code>session.js</code> sends the data to the FastAPI server</li>
+        <li>The FastAPI server saves everything to <strong style="color:var(--green)">Supabase</strong></li>
+        <li>Matt can review session data via an admin dashboard (future)</li>
+      </ol>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 7 — NAVIGATION
+  ════════════════════════════════════════════ -->
+  <div class="section" id="navigate">
+    <span class="section-number">Section 07</span>
+    <h2>How to Navigate the Repo on GitHub</h2>
+    <p class="section-subtitle">A first-timer's guide to opening the project on GitHub.</p>
+
+    <p>Opening the repository on GitHub for the first time can feel a bit overwhelming. Here's exactly what you'll see and what everything means:</p>
+
+    <!-- GITHUB UI MOCK -->
+    <div class="gh-ui-mock">
+      <div class="gh-topbar">
+        <span class="gh-logo">🐙</span>
+        <div class="gh-breadcrumb">
+          <span class="repo">XLDonkey</span>
+          <span class="sep">/</span>
+          <span class="repo">gym-ai-system</span>
+        </div>
+      </div>
+      <div class="gh-body">
+        <div class="gh-repo-header">
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <div class="gh-branch-badge">🌿 main ▾</div>
+            <span class="gh-commit-count">↑ 47 commits</span>
+          </div>
+          <div class="gh-code-btn">⬇ Code ▾</div>
+        </div>
+        <div class="gh-file-list">
+          <div class="gh-file-list-header">
+            <span>Name</span>
+            <span>Last commit message</span>
+            <span>Updated</span>
+          </div>
+          <div class="gh-file-row"><span class="gh-file-icon">📁</span><span class="gh-file-name">demo/</span><span class="gh-file-msg">chore: freeze demo for stakeholder use</span><span class="gh-file-time">3 days ago</span></div>
+          <div class="gh-file-row"><span class="gh-file-icon">📁</span><span class="gh-file-name">docs/</span><span class="gh-file-msg">docs: add github-guide.html</span><span class="gh-file-time">1 hour ago</span></div>
+          <div class="gh-file-row"><span class="gh-file-icon">📁</span><span class="gh-file-name">face/</span><span class="gh-file-msg">chore: placeholder for Phase 3</span><span class="gh-file-time">2 weeks ago</span></div>
+          <div class="gh-file-row"><span class="gh-file-icon">📁</span><span class="gh-file-name">members/</span><span class="gh-file-msg">chore: placeholder for Phase 3</span><span class="gh-file-time">2 weeks ago</span></div>
+          <div class="gh-file-row"><span class="gh-file-icon">📁</span><span class="gh-file-name">pose/</span><span class="gh-file-msg">feat: alpha.html — clean rewrite, pure angle counting</span><span class="gh-file-time">2 days ago</span></div>
+          <div class="gh-file-row"><span class="gh-file-icon">📁</span><span class="gh-file-name">weight/</span><span class="gh-file-msg">chore: placeholder for Manus Phase 2</span><span class="gh-file-time">2 weeks ago</span></div>
+          <div class="gh-file-row"><span class="gh-file-icon">📄</span><span class="gh-file-name">README.md</span><span class="gh-file-msg">docs: update README with all live URLs</span><span class="gh-file-time">5 days ago</span></div>
+          <div class="gh-file-row"><span class="gh-file-icon">📄</span><span class="gh-file-name">overseer.html</span><span class="gh-file-msg">docs: overseer bible — add NN architecture section</span><span class="gh-file-time">1 day ago</span></div>
+        </div>
+        <div style="background:#161b22; border:1px solid #30363d; border-radius:6px; padding:16px; font-size:14px; color:#e6edf3;">
+          <div style="font-weight:700; margin-bottom:8px; color:#f0f6fc;">📖 README — XL Fitness AI Overseer</div>
+          <div style="color:#8b949e; font-size:13px;">AI-powered rep counting system for XL Fitness. Phase 1: Lat Pulldown detection live. Built with TensorFlow.js + MoveNet...</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Step-by-Step: What to Click</h3>
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>The Front Page</h4>
+          <p>Go to <a href="https://github.com/XLDonkey/gym-ai-system">github.com/XLDonkey/gym-ai-system</a> in any browser. You'll see a list of folders and files at the top, and below that, the README — a formatted description of the project. The README is automatically shown here by GitHub. Read it for a quick overview before diving into specific files.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Clicking a Folder</h4>
+          <p>Click on any folder name (like <code>pose/</code> or <code>docs/</code>) and GitHub shows you the files inside. It's exactly like opening a folder on your computer. You can keep clicking deeper into subfolders. Use the breadcrumb trail at the top (e.g. <code>gym-ai-system / pose / machine_configs</code>) to see where you are and click back to any level.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Clicking a File</h4>
+          <p>Click on a file to view its contents. HTML and JavaScript files show the raw code. Markdown files (ending in <code>.md</code>) are automatically rendered as formatted text — headings, bold text, bullet lists, links, all nicely formatted. JSON files show structured data. You don't need to understand any of it — just know that you can read it.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Viewing the Commit History</h4>
+          <p>Near the top of the file list, you'll see something like <strong>"47 commits"</strong> (or however many there are). Click that to see every change ever made to the project, from newest to oldest. Each entry shows the commit message (what changed), who made the change, and when. This is the project diary — a complete record of everything that's happened.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Switching Branches</h4>
+          <p>Near the top left, there's a dropdown that shows the current branch — it'll say <strong>"main"</strong> by default. Click it to see all branches. Select <strong>"dev"</strong> to see the work-in-progress version of the project. The file list will update to show the dev branch contents. Switch back to main to return to the stable version. Note: the dev branch may contain files that don't work yet — that's expected.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h4>The Green "Code" Button</h4>
+          <p>In the top right area of the file list, there's a green button labelled <strong>"Code"</strong>. This is for developers who want to download or "clone" a full copy of the project to their computer. You don't need to use this — it's Donkey's tool, not yours. Just know what it is if you see it mentioned.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>Tip: Use the live URLs instead of navigating GitHub directly</strong>
+        <p>For reading documents and using the demo, the GitHub Pages URLs (listed in Section 5) are much easier to use than navigating GitHub itself. GitHub is mainly useful when you want to see the commit history or browse the code. For everything else, go directly to the live URLs.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 8 — ROLES
+  ════════════════════════════════════════════ -->
+  <div class="section" id="roles">
+    <span class="section-number">Section 08</span>
+    <h2>Project Roles and GitHub</h2>
+    <p class="section-subtitle">How each person on the team interacts with the repository.</p>
+
+    <p>Different people on the team interact with GitHub in very different ways. Here's exactly what each person does and doesn't do:</p>
+
+    <div class="role-card">
+      <div class="role-avatar purple">🏋️</div>
+      <div class="role-info">
+        <h4>Matt McArdle</h4>
+        <div class="role-title">Product Owner &amp; Founder</div>
+        <ul>
+          <li>Views documents and the demo via the live GitHub Pages URLs — no login required</li>
+          <li>Can review the project's progress by reading commit messages in the history</li>
+          <li>Does <strong>not</strong> need to create a GitHub account or interact with the repo directly</li>
+          <li>Films training videos at the gym and sends them to Donkey via Telegram or Google Drive</li>
+          <li>Uses the labeler tool (<code>pose/label.html</code>) to tag training footage</li>
+          <li>Makes product decisions and direction — Donkey implements them</li>
+          <li>The GitHub Pages live URLs are his window into what's been built</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="role-card">
+      <div class="role-avatar purple">🫏</div>
+      <div class="role-info">
+        <h4>Donkey</h4>
+        <div class="role-title">PM + Pose AI Developer</div>
+        <ul>
+          <li>Makes all code changes — the only person who commits to this repository</li>
+          <li>Writes a clear commit message for every single change explaining what was done and why</li>
+          <li>Works on the <code>dev</code> branch during development, merges to <code>main</code> when ready</li>
+          <li>Manages all branches — creates feature branches for isolated work, merges when complete</li>
+          <li>Updates all planning documents and keeps the bible current</li>
+          <li>Trains and deploys updated AI models by pushing the new <code>model.json</code> to the repo</li>
+          <li>Reviews any future team member contributions before they merge into main</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="role-card">
+      <div class="role-avatar amber">🤖</div>
+      <div class="role-info">
+        <h4>Manus AI</h4>
+        <div class="role-title">Server + Weight AI Contractor</div>
+        <ul>
+          <li>Has their own separate codebase for the FastAPI backend server — not in our repo</li>
+          <li>Collaborates via the API contract documents stored in our <code>docs/</code> folder</li>
+          <li>References <code>docs/ai-plan-for-manus.md</code> and <code>docs/manus-week1-brief.md</code> as their specification</li>
+          <li>May eventually receive read-only access to our repo for integration reference</li>
+          <li>Responsible for the server, database connections, and future weight plate detection</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="role-card">
+      <div class="role-avatar green">👥</div>
+      <div class="role-info">
+        <h4>Future Team Members</h4>
+        <div class="role-title">Developers (Phase 2+)</div>
+        <ul>
+          <li>Would "clone" the repository (download a full copy) to their own computer</li>
+          <li>Create their own feature branches for the specific thing they're working on</li>
+          <li>Make changes and push them to GitHub for review</li>
+          <li>Open a "pull request" — a formal request for Donkey to review and approve their changes</li>
+          <li>Donkey reviews the code before it can merge into <code>dev</code> or <code>main</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">✅</span>
+      <div class="callout-body">
+        <strong>The key takeaway for Matt</strong>
+        <p>You don't need to touch GitHub directly at any point. Your interaction with the project is through the live URLs — open them in your browser, and you're seeing exactly what's been built. The commit history is there if you want to see what changed and when, but it's optional reading, not a task.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 9 — COMMIT MESSAGES
+  ════════════════════════════════════════════ -->
+  <div class="section" id="commits">
+    <span class="section-number">Section 09</span>
+    <h2>Commit Messages — Understanding the History</h2>
+    <p class="section-subtitle">How to read the project's development diary.</p>
+
+    <p>Every commit (every saved change) in GitHub has a message attached to it. These messages follow a consistent format so anyone can understand the project history at a glance — even if they weren't involved in writing the code.</p>
+
+    <div class="callout purple">
+      <span class="callout-icon">📓</span>
+      <div class="callout-body">
+        <strong>Think of it as a project diary</strong>
+        <p>Reading the commit history is like reading a diary of everything that's been built, fixed, and changed — going back to the very first day the project started. You can see what was done, when, and exactly why.</p>
+      </div>
+    </div>
+
+    <h3>The Commit Message Format</h3>
+    <p>Our commit messages follow a simple pattern:</p>
+
+    <div class="card" style="font-family: monospace; font-size: 15px; text-align: center; padding: 20px;">
+      <span style="color: var(--purple-lt);">[type]</span><span style="color: var(--text-dim);">: </span><span style="color: #fff;">[what changed]</span><span style="color: var(--text-dim);"> — </span><span style="color: var(--text-muted);">[detail]</span>
+    </div>
+
+    <h3>The Commit Types</h3>
+    <div class="card-grid">
+      <div class="concept-card">
+        <span class="icon">✨</span>
+        <div class="term-label" style="background:var(--green-bg);border-color:var(--green);color:var(--green);">feat</div>
+        <h4>feat:</h4>
+        <p>A new feature was added. Something that didn't exist before now exists. This is the most exciting type — it means the system can do something new.</p>
+        <div class="analogy">Example: <code>feat: rep counter — add voice feedback on completion</code></div>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">🔧</span>
+        <div class="term-label" style="background:var(--red-bg);border-color:var(--red);color:var(--red);">fix</div>
+        <h4>fix:</h4>
+        <p>A bug was fixed. Something that was broken or incorrect has been corrected. The system is more reliable after a fix commit.</p>
+        <div class="analogy">Example: <code>fix: fullscreen button — proper webkit support for iOS</code></div>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">📖</span>
+        <div class="term-label" style="background:var(--blue-bg);border-color:var(--blue);color:var(--blue);">docs</div>
+        <h4>docs:</h4>
+        <p>Documentation was added or updated. No code changes — just information. This guide, the bible, the camera guide — these are all docs commits.</p>
+        <div class="analogy">Example: <code>docs: github-guide — initial version</code></div>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">🧹</span>
+        <div class="term-label" style="background:var(--amber-bg);border-color:var(--amber);color:var(--amber);">chore</div>
+        <h4>chore:</h4>
+        <p>Maintenance, cleanup, and behind-the-scenes work. Not a user-facing feature, but necessary housekeeping. Reorganising files, updating dependencies, cleaning up old code.</p>
+        <div class="analogy">Example: <code>chore: repo audit — clean structure, .gitignore</code></div>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">♻️</span>
+        <div class="term-label">refactor</div>
+        <h4>refactor:</h4>
+        <p>The code was restructured or rewritten without changing what it does. Same behaviour, better code. Like rewriting a poorly-worded paragraph to say the same thing more clearly.</p>
+        <div class="analogy">Example: <code>refactor: session.js — consolidate API calls</code></div>
+      </div>
+    </div>
+
+    <h3>Real Commit Examples From Our Project</h3>
+    <p>Here's what the commit history actually looks like:</p>
+
+    <div class="commit-list">
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">alpha.html — clean rewrite, pure angle counting, SinglePose, debug display</span>
+        <span class="commit-hash">a29a9cd</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-fix">fix</span>
+        <span class="commit-msg">fullscreen button — proper webkit support for Android/iOS tablet</span>
+        <span class="commit-hash">b18f3e1</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-docs">docs</span>
+        <span class="commit-msg">overseer bible — add NN architecture section, update roadmap</span>
+        <span class="commit-hash">c44a7b2</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-chore">chore</span>
+        <span class="commit-msg">repo audit — private repo, .gitignore, clean structure</span>
+        <span class="commit-hash">d91e2f8</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">model.json — retrained with 400 new labeled frames, 94% accuracy</span>
+        <span class="commit-hash">e55c1a9</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-refactor">refactor</span>
+        <span class="commit-msg">pose detection — migrate from BlazePose to MoveNet SinglePose Lightning</span>
+        <span class="commit-hash">f7d3b40</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-docs">docs</span>
+        <span class="commit-msg">ceiling-rig.html — initial camera mounting plan, 4 rig options</span>
+        <span class="commit-hash">g23e8c5</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-fix">fix</span>
+        <span class="commit-msg">rep counter — prevent double-count on slow movements, add debounce</span>
+        <span class="commit-hash">h90f4d2</span>
+      </div>
+    </div>
+
+    <h3>What the Commit Hash Means</h3>
+    <p>Each commit has a unique ID called a <strong>commit hash</strong> — a short string of letters and numbers like <code>a29a9cd</code>. This is the exact fingerprint of that moment in the project's history. If Donkey ever says "roll back to commit a29a9cd", that means restore the project to exactly the state it was in when that commit was made. You don't need to use hashes yourself — just know what they are if you hear the term.</p>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>How to view the full commit history</strong>
+        <p>Go to <a href="https://github.com/XLDonkey/gym-ai-system/commits/main">github.com/XLDonkey/gym-ai-system/commits/main</a> to see every commit ever made to the main branch, from newest to oldest. Each entry is clickable — click any commit to see exactly which lines of code changed.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 10 — WHEN IT BREAKS
+  ════════════════════════════════════════════ -->
+  <div class="section" id="breaks">
+    <span class="section-number">Section 10</span>
+    <h2>What Happens When Something Breaks</h2>
+    <p class="section-subtitle">Why nothing is ever permanently lost in GitHub — and what to do if the demo looks wrong.</p>
+
+    <div class="callout success">
+      <span class="callout-icon">🛡️</span>
+      <div class="callout-body">
+        <strong>Nothing is ever permanently lost in GitHub</strong>
+        <p>This is the single most important thing to understand. No matter what goes wrong during development, the entire history of the project is preserved. Every version that ever worked is still there, accessible in under 2 minutes.</p>
+      </div>
+    </div>
+
+    <h3>What Happens If Donkey Breaks the Demo</h3>
+
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>The commit history shows exactly what changed</h4>
+          <p>Every change is recorded with a timestamp and a message. If something breaks after a commit, it's immediately obvious which change caused it. There's no guessing.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Donkey can revert to any previous version in under 2 minutes</h4>
+          <p>Using the commit hash of the last working version, Donkey can restore the entire project to that exact state with a single command. The broken change is effectively undone — like hitting <strong>Undo</strong>, but for the entire project.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>The demo URL goes back to working as if nothing happened</h4>
+          <p>After the revert is pushed to GitHub, GitHub Pages republishes the restored version. Within 2 minutes, the URL is working again. No lasting damage.</p>
+        </div>
+      </li>
+    </ol>
+
+    <h3>The Two Layers of Protection</h3>
+
+    <div class="card-grid">
+      <div class="concept-card">
+        <span class="icon">🌿</span>
+        <h4>Layer 1: The Branch Strategy</h4>
+        <p>Donkey only merges tested code into <code>main</code>. The demo URL (<code>pose/alpha.html</code>) only ever runs code that has been tested on the <code>dev</code> branch first. Experimental or broken code never reaches the live URL under normal conditions.</p>
+      </div>
+
+      <div class="concept-card">
+        <span class="icon">🧊</span>
+        <h4>Layer 2: The Frozen Demo</h4>
+        <p>The <code>demo/alpha.html</code> file is never modified during development. It is a deliberately frozen, known-good version kept purely for presentations. Even if the main demo had issues, the frozen demo always works.</p>
+      </div>
+    </div>
+
+    <h3>Practical: What To Do If Something Looks Wrong</h3>
+
+    <div class="card">
+      <h4 style="color:#fff; margin-bottom:16px;">If the demo URL looks different than expected, or shows an error:</h4>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="background: var(--card2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 14px 16px;">
+          <div style="font-size: 13px; font-weight: 700; color: var(--amber); margin-bottom: 6px;">Step 1 — Try a hard refresh first</div>
+          <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Your browser often shows a cached (saved) old version of the page. A hard refresh forces it to download the latest version fresh from GitHub.</p>
+          <div style="margin-top: 10px; display: flex; gap: 12px; flex-wrap: wrap;">
+            <div style="background: var(--purple-bg); border: 1px solid var(--purple-dk); border-radius: 6px; padding: 8px 14px; font-size: 13px; color: var(--purple-lt); font-family: monospace;">Mac: Cmd + Shift + R</div>
+            <div style="background: var(--purple-bg); border: 1px solid var(--purple-dk); border-radius: 6px; padding: 8px 14px; font-size: 13px; color: var(--purple-lt); font-family: monospace;">Windows: Ctrl + Shift + R</div>
+            <div style="background: var(--purple-bg); border: 1px solid var(--purple-dk); border-radius: 6px; padding: 8px 14px; font-size: 13px; color: var(--purple-lt); font-family: monospace;">Mobile Chrome: Hold reload → Hard Reload</div>
+          </div>
+        </div>
+
+        <div style="background: var(--card2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 14px 16px;">
+          <div style="font-size: 13px; font-weight: 700; color: var(--amber); margin-bottom: 6px;">Step 2 — Switch to the frozen demo</div>
+          <p style="font-size: 14px; color: var(--text-muted); margin: 0;">If the live demo is having issues, switch to the frozen kiosk demo. It's never edited and will always work:</p>
+          <a href="https://xldonkey.github.io/gym-ai-system/demo/alpha.html" class="file-url" style="margin-top: 8px;">🔗 xldonkey.github.io/gym-ai-system/demo/alpha.html</a>
+        </div>
+
+        <div style="background: var(--card2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 14px 16px;">
+          <div style="font-size: 13px; font-weight: 700; color: var(--amber); margin-bottom: 6px;">Step 3 — Message Donkey</div>
+          <p style="font-size: 14px; color: var(--text-muted); margin: 0;">If the frozen demo is also broken (very unlikely), or you need the live version working for a specific reason, message Donkey on Telegram. A fix can typically be deployed within a few minutes.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <span class="callout-icon">⚡</span>
+      <div class="callout-body">
+        <strong>Before an important meeting</strong>
+        <p>Always test the demo URL at least 30 minutes before any stakeholder meeting, investor presentation, or important demo. This gives enough time to identify any issue and for Donkey to deploy a fix before the meeting starts.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 11 — GLOSSARY
+  ════════════════════════════════════════════ -->
+  <div class="section" id="glossary">
+    <span class="section-number">Section 11</span>
+    <h2>Glossary</h2>
+    <p class="section-subtitle">Plain English definitions of every GitHub term used in this project.</p>
+
+    <p>Reference this table any time you see a GitHub term you don't recognise. Bookmark this page — it's your cheat sheet.</p>
+
+    <table class="glossary-table">
+      <thead>
+        <tr>
+          <th>Term</th>
+          <th>Plain English Definition</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="term">Repository (Repo)</td>
+          <td class="plain">A project folder containing all the code, documents, and files for a project. Like a Google Drive folder, but with complete version history. Our project lives at <a href="https://github.com/XLDonkey/gym-ai-system">github.com/XLDonkey/gym-ai-system</a>.</td>
+        </tr>
+        <tr>
+          <td class="term">Commit</td>
+          <td class="plain">A saved snapshot of the project at a specific moment in time, with a message explaining what changed. Every commit is permanent and reversible. Like saving a Word document — but every save is kept forever with a label.</td>
+        </tr>
+        <tr>
+          <td class="term">Commit Message</td>
+          <td class="plain">The note attached to a commit explaining what was changed and why. We follow the format: <code>type: what changed — detail</code>. Reading them is like reading a project diary.</td>
+        </tr>
+        <tr>
+          <td class="term">Commit Hash</td>
+          <td class="plain">The unique ID of a specific commit — e.g. <code>a29a9cd</code>. Like a receipt number. Donkey can use this to restore the project to exactly that moment in history.</td>
+        </tr>
+        <tr>
+          <td class="term">Push</td>
+          <td class="plain">Uploading commits from Donkey's Mac Mini to GitHub's servers. Like syncing files to Google Drive. Once pushed, the changes are online and (if on the main branch) will be published via GitHub Pages within ~2 minutes.</td>
+        </tr>
+        <tr>
+          <td class="term">Pull</td>
+          <td class="plain">Downloading the latest changes from GitHub to your computer. The opposite of Push. Like syncing Google Drive files to your local machine. Used by developers to get the latest version of the code before working on it.</td>
+        </tr>
+        <tr>
+          <td class="term">Branch</td>
+          <td class="plain">A parallel copy of the project where changes can be made safely without affecting the original. We have <code>main</code> (live), <code>dev</code> (work in progress), and feature branches (isolated work on one thing).</td>
+        </tr>
+        <tr>
+          <td class="term">Main Branch</td>
+          <td class="plain">The live, always-working version of the project. GitHub Pages publishes from here. Only tested, confirmed-working code gets merged into main. Never broken intentionally.</td>
+        </tr>
+        <tr>
+          <td class="term">Dev Branch</td>
+          <td class="plain">Where Donkey builds things. Can be broken during development — that's fine here. Once a feature works on dev, it gets merged into main and the demo updates.</td>
+        </tr>
+        <tr>
+          <td class="term">Feature Branch</td>
+          <td class="plain">A branch created for one specific piece of work — e.g. <code>feature/lstm-model</code>. Keeps that work isolated from everything else until it's ready to merge.</td>
+        </tr>
+        <tr>
+          <td class="term">Merge</td>
+          <td class="plain">Combining changes from one branch into another. When work on dev is done, it gets merged into main. Like deciding to replace the original document with the improved photocopy you've been editing.</td>
+        </tr>
+        <tr>
+          <td class="term">GitHub Pages</td>
+          <td class="plain">A free GitHub feature that automatically publishes HTML files from a repository as a live website. No server needed. Our entire demo and documentation suite is hosted this way at <code>xldonkey.github.io</code>.</td>
+        </tr>
+        <tr>
+          <td class="term">README</td>
+          <td class="plain">A special file (README.md) that GitHub automatically displays on the repository's front page. It's the first thing anyone sees when they open the project — a description and introduction to the project.</td>
+        </tr>
+        <tr>
+          <td class="term">Clone</td>
+          <td class="plain">Downloading a full copy of a repository to your own computer, including the entire history. This is what developers do before starting to work on a project. Matt doesn't need to do this.</td>
+        </tr>
+        <tr>
+          <td class="term">Fork</td>
+          <td class="plain">Creating your own copy of someone else's repository under your own GitHub account. Used when you want to make changes to a project you don't have write access to. Not something we do in our current workflow.</td>
+        </tr>
+        <tr>
+          <td class="term">Pull Request (PR)</td>
+          <td class="plain">A formal request to merge changes from one branch into another. Used by developers to say "I've finished this work — please review it before adding it to the main project." Donkey reviews PRs from any future team members.</td>
+        </tr>
+        <tr>
+          <td class="term">.gitignore</td>
+          <td class="plain">A special file that tells Git which files should never be committed to the repository. We use it to exclude API keys (passwords), large video files, and other sensitive or oversized items. Security essential.</td>
+        </tr>
+        <tr>
+          <td class="term">Version Control</td>
+          <td class="plain">The general concept of tracking every change to files over time. GitHub is a platform for version control. "Using version control" means you're keeping a complete history of every change — nothing is ever permanently lost.</td>
+        </tr>
+        <tr>
+          <td class="term">Revert</td>
+          <td class="plain">Undoing a commit by creating a new commit that reverses it. If a change breaks something, Donkey can revert it — restoring the project to how it was before. Takes under 2 minutes.</td>
+        </tr>
+        <tr>
+          <td class="term">Deploy</td>
+          <td class="plain">Making a new version of the system available to users. For us, "deploying" means pushing to the main branch — GitHub Pages handles the rest automatically. No separate deployment step needed.</td>
+        </tr>
+        <tr>
+          <td class="term">PWA (Progressive Web App)</td>
+          <td class="plain">A website that behaves like a native phone app. Can be installed from the browser, works offline, and gets an icon on the home screen. Our frozen demo is a PWA — that's why you can add it to your tablet's home screen.</td>
+        </tr>
+        <tr>
+          <td class="term">Service Worker</td>
+          <td class="plain">A background script that makes PWAs work offline. Once the demo loads once, the service worker caches it so it can run even without internet. Critical for gym presentations where Wi-Fi may be unreliable.</td>
+        </tr>
+        <tr>
+          <td class="term">JSON</td>
+          <td class="plain">A file format for structured data — like a very precise spreadsheet. Our machine configs and model weights are stored as JSON files. You don't need to read them, but you'll see the <code>.json</code> extension in the file tree.</td>
+        </tr>
+        <tr>
+          <td class="term">Markdown (.md)</td>
+          <td class="plain">A simple text format where special characters create formatting. <code># Heading</code> becomes a big heading. <code>**bold**</code> becomes <strong>bold</strong>. GitHub automatically renders Markdown files as formatted text — the README is a Markdown file.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ─────────────────────────────────────────────
+       FOOTER
+  ───────────────────────────────────────────── -->
+  <div class="page-footer">
+    <div class="logo-text">🫏 XL Fitness AI Overseer</div>
+    <p style="margin-bottom: 8px;">GitHub Guide · Maintained by Donkey</p>
+    <p>Questions? Message Donkey via Telegram. For urgent demo issues, message Matt directly.</p>
+    <div style="margin-top: 20px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <a href="https://github.com/XLDonkey/gym-ai-system" style="font-size: 13px; color: var(--purple-lt);">🐙 GitHub Repo</a>
+      <a href="https://xldonkey.github.io/gym-ai-system/overseer.html" style="font-size: 13px; color: var(--purple-lt);">📖 The Bible</a>
+      <a href="https://xldonkey.github.io/gym-ai-system/demo/alpha.html" style="font-size: 13px; color: var(--purple-lt);">🤸 Live Demo</a>
+      <a href="https://xldonkey.github.io/gym-ai-system/docs/deep-dive.html" style="font-size: 13px; color: var(--purple-lt);">🔬 Deep Dive</a>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+</body>
+</html>
