@@ -1429,6 +1429,7 @@ ol.styled li::before {
 
       <div class="nav-section-label">Deep Dives</div>
       <a class="nav-item" href="#ai-system">18 — The AI System</a>
+      <a class="nav-item" href="#machine-engagement">19 — Machine Engagement</a>
       <a class="nav-item" href="#camera-options">14 — Camera Options</a>
       <a class="nav-item" href="#server-options">15 — Server Architecture</a>
       <a class="nav-item" href="#scaling">16 — Scaling</a>
@@ -5826,6 +5827,961 @@ CREATE TABLE sets (
 
     </section>
     <!-- /SECTION 18 -->
+
+    <!-- ========================================================
+         SECTION 19: MACHINE ENGAGEMENT
+         ======================================================== -->
+    <section id="machine-engagement" class="section">
+      <div class="section-eyebrow">Section 19</div>
+      <h2 class="section-title">Machine Engagement — How the AI Knows You're Actually Using It</h2>
+      <p class="section-desc">
+        This is the most critical reliability question: how does the system know a person is genuinely using a machine 
+        versus walking past, sitting nearby, or doing something else entirely? This section explains the layered gate 
+        system, how engagement is detected per machine type, and how Phase 1 learnings feed into Phase 2 — and beyond.
+      </p>
+
+      <!-- ─── PART 1: THE ENGAGEMENT PROBLEM ─── -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:40px 0 16px">Part 1 — The Engagement Problem</h3>
+
+      <p style="color:var(--textMid);font-size:.93rem;line-height:1.8;margin-bottom:20px;">
+        A gym floor is chaotic. At any given moment, there might be three people near the lat pulldown — one doing 
+        their set, one resting between sets sitting on the seat, and one walking past to grab their water bottle. 
+        The AI camera sees all three. Without a robust engagement detection system, it could count reps for the 
+        wrong person, or count movements that aren't reps at all.
+      </p>
+
+      <div class="callout">
+        <strong>The core problem:</strong> Different machines engage different body parts — a lat pulldown uses arms 
+        reaching overhead, a leg press uses legs elevated on a plate, a chest press uses arms at chest height. 
+        The system can't apply a single "is this person working out?" rule. It must know what <em>this specific machine</em> 
+        looks like when someone is genuinely using it — and reject everything else.
+      </div>
+
+      <img src="docs/images/gym-floor.jpg" alt="XL Fitness gym floor" style="width:100%;border-radius:12px;margin:24px 0 8px;border:1px solid var(--border);">
+      <p style="color:var(--muted);font-size:.78rem;text-align:center;margin-bottom:28px;">
+        The challenge: multiple people, multiple machines, windows causing backlight — the system must correctly identify who is using which machine
+      </p>
+
+      <p style="color:var(--textMid);font-size:.93rem;line-height:1.8;margin-bottom:20px;">
+        Consider the range of movements that happen <em>near</em> a machine that should <strong>never</strong> trigger rep counting:
+      </p>
+
+      <!-- Scenario Diagram -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 32px;">
+
+        <div style="background:#071a0f;border:2px solid #22c55e;border-radius:12px;padding:20px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <span style="font-size:1.4rem;">✅</span>
+            <span style="font-weight:800;color:#22c55e;font-size:.88rem;text-transform:uppercase;letter-spacing:1px;">Engaged</span>
+          </div>
+          <div style="font-weight:700;color:#fff;font-size:.9rem;margin-bottom:6px;">Seated at machine, gripping, repping</div>
+          <div style="font-size:.78rem;color:#86efac;line-height:1.7;">
+            Person in seat → wrists above shoulders → arms pulling bar down through full range of motion → returning up → repeating. 
+            All 6 gates pass. Rep counted.
+          </div>
+        </div>
+
+        <div style="background:#1a0707;border:2px solid #ef4444;border-radius:12px;padding:20px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <span style="font-size:1.4rem;">❌</span>
+            <span style="font-weight:800;color:#ef4444;font-size:.88rem;text-transform:uppercase;letter-spacing:1px;">Not Engaged</span>
+          </div>
+          <div style="font-weight:700;color:#fff;font-size:.9rem;margin-bottom:6px;">Walking past the machine</div>
+          <div style="font-size:.78rem;color:#fca5a5;line-height:1.7;">
+            Person's centroid passes through the bounding box briefly. Gate 1 fails immediately — centroid is never stable 
+            inside the zone long enough. Gate 2 never activates. No counting.
+          </div>
+        </div>
+
+        <div style="background:#1a0707;border:2px solid #ef4444;border-radius:12px;padding:20px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <span style="font-size:1.4rem;">❌</span>
+            <span style="font-weight:800;color:#ef4444;font-size:.88rem;text-transform:uppercase;letter-spacing:1px;">Not Engaged</span>
+          </div>
+          <div style="font-weight:700;color:#fff;font-size:.9rem;margin-bottom:6px;">Sitting on machine, adjusting seat</div>
+          <div style="font-size:.78rem;color:#fca5a5;line-height:1.7;">
+            Person is inside the bounding zone (Gate 1 passes) but their wrists are at hip/shoulder level, not overhead. 
+            Gate 2 (engaged pose) fails. Rep counting stays off.
+          </div>
+        </div>
+
+        <div style="background:#1a0707;border:2px solid #ef4444;border-radius:12px;padding:20px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <span style="font-size:1.4rem;">❌</span>
+            <span style="font-weight:800;color:#ef4444;font-size:.88rem;text-transform:uppercase;letter-spacing:1px;">Not Engaged</span>
+          </div>
+          <div style="font-weight:700;color:#fff;font-size:.9rem;margin-bottom:6px;">Nearby doing unrelated arm movements</div>
+          <div style="font-size:.78rem;color:#fca5a5;line-height:1.7;">
+            Person stands near the machine doing stretches. Gate 1 may pass (they're in the zone), Gate 2 may partially 
+            pass — but Gate 3 (range of motion) fails. Stretching doesn't produce a clean 60°+ joint cycle. No count.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ─── PART 2: THE 6-GATE SYSTEM ─── -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:40px 0 16px">Part 2 — The 6-Gate System</h3>
+
+      <p style="color:var(--textMid);font-size:.93rem;line-height:1.8;margin-bottom:24px;">
+        The system requires <strong style="color:#ddd6fe;">ALL 6 gates to pass</strong> before a rep is counted. 
+        Think of these as a pipeline — if any stage fails, the rep is not counted and the pipeline resets. 
+        Each gate adds a layer of protection against false triggers, and together they make false positives 
+        almost impossible in practice.
+      </p>
+
+      <!-- Gate pipeline visual -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px;margin-bottom:32px;overflow-x:auto;">
+        <div style="display:flex;align-items:stretch;gap:0;min-width:700px;">
+
+          <div style="flex:1;background:#0a0615;border:2px solid #a855f7;border-radius:10px 0 0 10px;padding:16px;text-align:center;">
+            <div style="font-size:1.2rem;margin-bottom:6px;">📍</div>
+            <div style="font-weight:800;color:#a855f7;font-size:.72rem;margin-bottom:4px;">GATE 1</div>
+            <div style="font-weight:700;color:#fff;font-size:.72rem;margin-bottom:4px;">Occupancy<br/>Zone</div>
+            <div style="font-size:.65rem;color:var(--muted);">In the bounding box?</div>
+          </div>
+          <div style="display:flex;align-items:center;color:var(--muted);font-size:.9rem;padding:0 4px;">→</div>
+
+          <div style="flex:1;background:#0a0615;border:2px solid #a855f7;border-top:2px solid #a855f7;border-bottom:2px solid #a855f7;border-left:none;border-right:none;padding:16px;text-align:center;">
+            <div style="font-size:1.2rem;margin-bottom:6px;">🪑</div>
+            <div style="font-weight:800;color:#a855f7;font-size:.72rem;margin-bottom:4px;">GATE 2</div>
+            <div style="font-weight:700;color:#fff;font-size:.72rem;margin-bottom:4px;">Engaged<br/>Pose</div>
+            <div style="font-size:.65rem;color:var(--muted);">Correct posture?</div>
+          </div>
+          <div style="display:flex;align-items:center;color:var(--muted);font-size:.9rem;padding:0 4px;">→</div>
+
+          <div style="flex:1;background:#0a0615;border-top:2px solid #a855f7;border-bottom:2px solid #a855f7;border-left:none;border-right:none;padding:16px;text-align:center;">
+            <div style="font-size:1.2rem;margin-bottom:6px;">📐</div>
+            <div style="font-weight:800;color:#a855f7;font-size:.72rem;margin-bottom:4px;">GATE 3</div>
+            <div style="font-weight:700;color:#fff;font-size:.72rem;margin-bottom:4px;">Range of<br/>Motion</div>
+            <div style="font-size:.65rem;color:var(--muted);">40°+ joint angle?</div>
+          </div>
+          <div style="display:flex;align-items:center;color:var(--muted);font-size:.9rem;padding:0 4px;">→</div>
+
+          <div style="flex:1;background:#0a0615;border-top:2px solid #a855f7;border-bottom:2px solid #a855f7;border-left:none;border-right:none;padding:16px;text-align:center;">
+            <div style="font-size:1.2rem;margin-bottom:6px;">⏱️</div>
+            <div style="font-weight:800;color:#a855f7;font-size:.72rem;margin-bottom:4px;">GATE 4</div>
+            <div style="font-weight:700;color:#fff;font-size:.72rem;margin-bottom:4px;">Duration<br/>Gate</div>
+            <div style="font-size:.65rem;color:var(--muted);">300ms–12s?</div>
+          </div>
+          <div style="display:flex;align-items:center;color:var(--muted);font-size:.9rem;padding:0 4px;">→</div>
+
+          <div style="flex:1;background:#0a0615;border-top:2px solid #a855f7;border-bottom:2px solid #a855f7;border-left:none;border-right:none;padding:16px;text-align:center;">
+            <div style="font-size:1.2rem;margin-bottom:6px;">🔄</div>
+            <div style="font-weight:800;color:#a855f7;font-size:.72rem;margin-bottom:4px;">GATE 5</div>
+            <div style="font-weight:700;color:#fff;font-size:.72rem;margin-bottom:4px;">Temporal<br/>Continuity</div>
+            <div style="font-size:.65rem;color:var(--muted);">Full cycle?</div>
+          </div>
+          <div style="display:flex;align-items:center;color:var(--muted);font-size:.9rem;padding:0 4px;">→</div>
+
+          <div style="flex:1;background:#0a0615;border:2px solid #a855f7;border-radius:0 10px 10px 0;padding:16px;text-align:center;">
+            <div style="font-size:1.2rem;margin-bottom:6px;">🧠</div>
+            <div style="font-weight:800;color:#a855f7;font-size:.72rem;margin-bottom:4px;">GATE 6</div>
+            <div style="font-weight:700;color:#fff;font-size:.72rem;margin-bottom:4px;">LSTM<br/>Classification</div>
+            <div style="font-size:.65rem;color:var(--muted);">Genuine rep?</div>
+          </div>
+          <div style="display:flex;align-items:center;color:#22c55e;font-size:.9rem;padding:0 6px;font-weight:700;">→ ✅</div>
+
+        </div>
+        <div style="text-align:center;margin-top:16px;font-size:.75rem;color:var(--muted);">
+          All 6 gates must pass in sequence. Any failure → pipeline resets. Rep not counted.
+        </div>
+      </div>
+
+      <!-- Gate 1 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid #a855f7;border-radius:0 12px 12px 0;padding:24px;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="background:#a855f720;border:1px solid #a855f7;border-radius:8px;padding:6px 12px;font-weight:800;color:#a855f7;font-size:.78rem;">GATE 1</div>
+          <div style="font-weight:700;color:#fff;font-size:1rem;">Occupancy Zone (Bounding Box)</div>
+        </div>
+        <p style="color:var(--textMid);font-size:.88rem;line-height:1.8;margin-bottom:12px;">
+          Camera 1 — the ceiling fisheye — has a pre-configured bounding box drawn for each machine. When a 
+          person is detected, their body centroid (calculated from all visible keypoints) must fall 
+          <strong style="color:#ddd6fe;">inside this box</strong>. If the centroid is outside, all other 
+          gates are ignored and counting stays off entirely.
+        </p>
+        <ul style="color:var(--textMid);font-size:.85rem;line-height:2;padding-left:20px;margin-bottom:12px;">
+          <li>In Phase 1: box is drawn manually during camera setup</li>
+          <li>In Phase 2: AI-refined after initial setup based on observed usage patterns</li>
+          <li>In Phase 3: AI-learned automatically from blank overhead video before opening</li>
+          <li>Each machine gets its own named zone — zones do not overlap</li>
+        </ul>
+        <div style="background:#0a0615;border-radius:8px;padding:14px;font-family:'SF Mono','Fira Code',monospace;font-size:.78rem;color:#22c55e;">
+          Person detected at (x:195, y:210) — inside <span style="color:#a855f7;">lat_pulldown_01</span> zone ✅<br/>
+          Person detected at (x:402, y:187) — outside all zones ❌ → no gates evaluated
+        </div>
+      </div>
+
+      <!-- Gate 2 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid #6366f1;border-radius:0 12px 12px 0;padding:24px;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="background:#6366f120;border:1px solid #6366f1;border-radius:8px;padding:6px 12px;font-weight:800;color:#818cf8;font-size:.78rem;">GATE 2</div>
+          <div style="font-weight:700;color:#fff;font-size:1rem;">Machine-Specific Seated / Engaged Pose</div>
+        </div>
+        <p style="color:var(--textMid);font-size:.88rem;line-height:1.8;margin-bottom:12px;">
+          Just being inside the bounding box isn't enough — someone resting between sets will also be inside the box. 
+          Gate 2 checks whether the person's current pose matches what "actively using this machine" looks like. 
+          Every machine has a different engaged pose defined in its config.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:0;">
+          <div style="background:#0a0615;border-radius:8px;padding:12px;">
+            <div style="font-weight:700;color:#818cf8;font-size:.78rem;margin-bottom:6px;">Lat Pulldown</div>
+            <div style="font-size:.75rem;color:var(--textMid);line-height:1.7;">Wrists above shoulder height — person is gripping the overhead bar ready to pull</div>
+          </div>
+          <div style="background:#0a0615;border-radius:8px;padding:12px;">
+            <div style="font-weight:700;color:#818cf8;font-size:.78rem;margin-bottom:6px;">Leg Press</div>
+            <div style="font-size:.75rem;color:var(--textMid);line-height:1.7;">Feet elevated above hip height — person's feet are on the plate, legs extended forward</div>
+          </div>
+          <div style="background:#0a0615;border-radius:8px;padding:12px;">
+            <div style="font-weight:700;color:#818cf8;font-size:.78rem;margin-bottom:6px;">Seated Row</div>
+            <div style="font-size:.75rem;color:var(--textMid);line-height:1.7;">Torso leaning slightly forward, hands at cable height (~waist level), arms extended</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gate 3 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid #22c55e;border-radius:0 12px 12px 0;padding:24px;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="background:#22c55e20;border:1px solid #22c55e;border-radius:8px;padding:6px 12px;font-weight:800;color:#22c55e;font-size:.78rem;">GATE 3</div>
+          <div style="font-weight:700;color:#fff;font-size:1rem;">Range of Motion Threshold</div>
+        </div>
+        <p style="color:var(--textMid);font-size:.88rem;line-height:1.8;margin-bottom:12px;">
+          The movement must cover a minimum joint angle range. Accidental movements — fidgeting, grip adjustments, 
+          small postural shifts — are small. Real reps cover <strong style="color:#4ade80;">40° or more</strong> 
+          of joint angle. Anything less is rejected.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:#0a0615;border-radius:8px;padding:14px;">
+            <div style="font-weight:700;color:#4ade80;font-size:.8rem;margin-bottom:8px;">Lat Pulldown</div>
+            <div style="font-size:.78rem;color:var(--textMid);line-height:1.8;">
+              Elbow: <span style="color:#fff;">~150°</span> (top, arms extended) → <span style="color:#fff;">&lt;90°</span> (bottom, bar at chest)<br/>
+              <strong style="color:#4ade80;">Minimum: 60° arc</strong>
+            </div>
+          </div>
+          <div style="background:#0a0615;border-radius:8px;padding:14px;">
+            <div style="font-weight:700;color:#4ade80;font-size:.8rem;margin-bottom:8px;">Leg Press</div>
+            <div style="font-size:.78rem;color:var(--textMid);line-height:1.8;">
+              Knee: <span style="color:#fff;">~160°</span> (extended) → <span style="color:#fff;">&lt;80°</span> (bent, plate close)<br/>
+              <strong style="color:#4ade80;">Minimum: 80° arc</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gate 4 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid #f59e0b;border-radius:0 12px 12px 0;padding:24px;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="background:#f59e0b20;border:1px solid #f59e0b;border-radius:8px;padding:6px 12px;font-weight:800;color:#f59e0b;font-size:.78rem;">GATE 4</div>
+          <div style="font-weight:700;color:#fff;font-size:1rem;">Duration Gate</div>
+        </div>
+        <p style="color:var(--textMid);font-size:.88rem;line-height:1.8;margin-bottom:14px;">
+          A valid rep must happen within a human-possible time window. Too fast and it's a jerk or camera artifact. 
+          Too slow and it's a position shift or someone sitting down.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:#1a1000;border:1px solid #f59e0b40;border-radius:8px;padding:14px;text-align:center;">
+            <div style="font-size:1.6rem;font-weight:800;color:#f59e0b;margin-bottom:4px;">300ms</div>
+            <div style="font-size:.75rem;color:var(--muted);">Minimum rep duration</div>
+            <div style="font-size:.72rem;color:#fcd34d;margin-top:6px;">Protects against sudden jerks, camera glitches, accidental contact</div>
+          </div>
+          <div style="background:#1a1000;border:1px solid #f59e0b40;border-radius:8px;padding:14px;text-align:center;">
+            <div style="font-size:1.6rem;font-weight:800;color:#f59e0b;margin-bottom:4px;">12,000ms</div>
+            <div style="font-size:.75rem;color:var(--muted);">Maximum rep duration</div>
+            <div style="font-size:.72rem;color:#fcd34d;margin-top:6px;">Protects against slow position shifts, someone lowering themselves into a seat</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gate 5 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid #06b6d4;border-radius:0 12px 12px 0;padding:24px;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="background:#06b6d420;border:1px solid #06b6d4;border-radius:8px;padding:6px 12px;font-weight:800;color:#06b6d4;font-size:.78rem;">GATE 5</div>
+          <div style="font-weight:700;color:#fff;font-size:1rem;">Temporal Continuity</div>
+        </div>
+        <p style="color:var(--textMid);font-size:.88rem;line-height:1.8;margin-bottom:14px;">
+          A rep isn't just reaching the bottom position — it's a complete cycle. The system tracks the full 
+          movement arc: start position → peak contraction → return to start. The return must actually happen. 
+          This prevents counting someone who adjusts their grip mid-pull without completing the movement.
+        </p>
+        <div style="background:#0a0615;border-radius:8px;padding:14px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+          <div style="text-align:center;padding:8px 14px;background:#071a18;border:1px solid #06b6d4;border-radius:8px;font-size:.78rem;color:#67e8f9;">
+            🔝 Start<br/><span style="color:var(--muted);font-size:.7rem;">Arms extended</span>
+          </div>
+          <div style="color:var(--muted);font-size:.85rem;">→</div>
+          <div style="text-align:center;padding:8px 14px;background:#071a18;border:1px solid #06b6d4;border-radius:8px;font-size:.78rem;color:#67e8f9;">
+            ⬇️ Bottom<br/><span style="color:var(--muted);font-size:.7rem;">Full contraction</span>
+          </div>
+          <div style="color:var(--muted);font-size:.85rem;">→</div>
+          <div style="text-align:center;padding:8px 14px;background:#071a18;border:1px solid #06b6d4;border-radius:8px;font-size:.78rem;color:#67e8f9;">
+            🔝 Return<br/><span style="color:var(--muted);font-size:.7rem;">Back to start</span>
+          </div>
+          <div style="color:var(--muted);font-size:.85rem;">→</div>
+          <div style="text-align:center;padding:8px 14px;background:#071a0f;border:1px solid #22c55e;border-radius:8px;font-size:.78rem;color:#4ade80;font-weight:700;">
+            ✅ Rep counted
+          </div>
+        </div>
+      </div>
+
+      <!-- Gate 6 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid #ec4899;border-radius:0 12px 12px 0;padding:24px;margin-bottom:28px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="background:#ec489920;border:1px solid #ec4899;border-radius:8px;padding:6px 12px;font-weight:800;color:#ec4899;font-size:.78rem;">GATE 6</div>
+          <div style="font-weight:700;color:#fff;font-size:1rem;">LSTM Classification — The Final Catch-All</div>
+        </div>
+        <p style="color:var(--textMid);font-size:.88rem;line-height:1.8;margin-bottom:12px;">
+          Even if all five rule-based gates pass, the LSTM evaluates the complete movement sequence. The LSTM is 
+          trained explicitly on <code style="color:#f472b6;background:#0d0a18;padding:2px 6px;border-radius:4px;">false_movement</code> examples — cases where the rules said "rep" but a human labeller said "not a rep." 
+          This is the intelligence layer that catches what rules cannot.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div style="background:#071a0f;border:1px solid #22c55e40;border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:1.3rem;margin-bottom:4px;">✅</div>
+            <div style="font-weight:700;color:#22c55e;font-size:.8rem;margin-bottom:4px;">good_rep</div>
+            <div style="font-size:.72rem;color:var(--muted);">Full rep, good form. Count it.</div>
+          </div>
+          <div style="background:#1a0e00;border:1px solid #f59e0b40;border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:1.3rem;margin-bottom:4px;">⚠️</div>
+            <div style="font-weight:700;color:#f59e0b;font-size:.8rem;margin-bottom:4px;">bad_rep</div>
+            <div style="font-size:.72rem;color:var(--muted);">Rep completed but form was poor. Counted but flagged.</div>
+          </div>
+          <div style="background:#1a0707;border:1px solid #ef444440;border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:1.3rem;margin-bottom:4px;">❌</div>
+            <div style="font-weight:700;color:#ef4444;font-size:.8rem;margin-bottom:4px;">false_movement</div>
+            <div style="font-size:.72rem;color:var(--muted);">Gates passed but AI says: not a rep. Rejected.</div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top:12px;">
+          <strong>Why this matters:</strong> The LSTM sees patterns across the full sequence — not just individual frames. 
+          It can detect that a movement which looked like a rep was actually someone reaching past the machine, 
+          or a rep that paused halfway through and resumed. This is the difference between rule-following and intelligence.
+        </div>
+      </div>
+
+      <!-- ─── PART 3: MACHINE CONFIG SYSTEM ─── -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:40px 0 16px">Part 3 — Machine Config System: Every Machine Type</h3>
+
+      <p style="color:var(--textMid);font-size:.93rem;line-height:1.8;margin-bottom:24px;">
+        Every machine in the gym has a machine config — a JSON definition that tells the AI exactly what engagement 
+        looks like for that machine, which joint to track, and what angle thresholds define a rep. This config-driven 
+        approach is what makes the system scalable: adding a new machine type doesn't require retraining the full model — 
+        it requires writing a config and collecting a small amount of validation data.
+      </p>
+
+      <!-- Machine Type 1: Vertical Pull -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:#a855f720;border:1px solid #a855f7;border-radius:8px;padding:6px 12px;font-weight:800;color:#a855f7;font-size:.78rem;">TYPE 1</div>
+          <div>
+            <div style="font-weight:700;color:#fff;font-size:1rem;">Vertical Pull</div>
+            <div style="font-size:.78rem;color:var(--muted);">Lat Pulldown, Cable Pulldown</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+          <div>
+            <div style="font-size:.75rem;color:#a855f7;font-weight:700;margin-bottom:8px;">ENGAGEMENT DETECTION</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Wrists above shoulder height (gripping overhead bar)</li>
+              <li>Person seated (hips in seat zone)</li>
+              <li>Torso upright, not leaning forward</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#a855f7;font-weight:700;margin-bottom:8px;">TRACKING PARAMETERS</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Primary joint: <strong style="color:#ddd6fe;">Elbow</strong></li>
+              <li>Top angle: ~140–150° (arms extended up)</li>
+              <li>Bottom angle: ~65–80° (bar at chest)</li>
+              <li>Camera 2: Side-on, shoulder height, 2–3m away</li>
+            </ul>
+          </div>
+        </div>
+        <div style="background:#0a0615;border-radius:8px;padding:16px;font-family:'SF Mono','Fira Code',monospace;font-size:.76rem;color:#e2e8f0;overflow-x:auto;">
+          <span style="color:#6366f1;">{</span><br/>
+          &nbsp;&nbsp;<span style="color:#86efac;">"machine_id"</span>: <span style="color:#fcd34d;">"lat_pulldown_01"</span>,<br/>
+          &nbsp;&nbsp;<span style="color:#86efac;">"engagement"</span>: <span style="color:#6366f1;">{</span><span style="color:#86efac;">"wrist_above_shoulder"</span>: <span style="color:#f472b6;">true</span>, <span style="color:#86efac;">"seated"</span>: <span style="color:#f472b6;">true</span><span style="color:#6366f1;">}</span>,<br/>
+          &nbsp;&nbsp;<span style="color:#86efac;">"primary_joint"</span>: <span style="color:#fcd34d;">"elbow"</span>,<br/>
+          &nbsp;&nbsp;<span style="color:#86efac;">"rep_direction"</span>: <span style="color:#fcd34d;">"vertical_pull"</span>,<br/>
+          &nbsp;&nbsp;<span style="color:#86efac;">"angle_top"</span>: <span style="color:#f472b6;">130</span>,<br/>
+          &nbsp;&nbsp;<span style="color:#86efac;">"angle_bottom"</span>: <span style="color:#f472b6;">90</span><br/>
+          <span style="color:#6366f1;">}</span>
+        </div>
+      </div>
+
+      <!-- Machine Type 2: Horizontal Pull -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:#6366f120;border:1px solid #6366f1;border-radius:8px;padding:6px 12px;font-weight:800;color:#818cf8;font-size:.78rem;">TYPE 2</div>
+          <div>
+            <div style="font-weight:700;color:#fff;font-size:1rem;">Horizontal Pull</div>
+            <div style="font-size:.78rem;color:var(--muted);">Seated Row, Cable Row</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:.75rem;color:#818cf8;font-weight:700;margin-bottom:8px;">ENGAGEMENT DETECTION</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Leaning slightly forward</li>
+              <li>Hands at cable height (~waist/chest level)</li>
+              <li>Arms extended forward toward the cable stack</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#818cf8;font-weight:700;margin-bottom:8px;">TRACKING PARAMETERS</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Primary joint: <strong style="color:#ddd6fe;">Elbow</strong></li>
+              <li>Top angle: ~160° (arms fully extended forward)</li>
+              <li>Bottom angle: ~60–70° (elbows behind torso)</li>
+              <li>Also tracks: torso lean (leaning back during pull = bad form)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Machine Type 3: Vertical Push -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:#22c55e20;border:1px solid #22c55e;border-radius:8px;padding:6px 12px;font-weight:800;color:#22c55e;font-size:.78rem;">TYPE 3</div>
+          <div>
+            <div style="font-weight:700;color:#fff;font-size:1rem;">Vertical Push</div>
+            <div style="font-size:.78rem;color:var(--muted);">Shoulder Press, Overhead Press Machine</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:.75rem;color:#22c55e;font-weight:700;margin-bottom:8px;">ENGAGEMENT DETECTION</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Seated upright</li>
+              <li>Hands at shoulder height, elbows bent</li>
+              <li>Ready to push handles overhead</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#22c55e;font-weight:700;margin-bottom:8px;">TRACKING PARAMETERS</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Primary joint: <strong style="color:#ddd6fe;">Elbow</strong></li>
+              <li>Bottom angle: ~80–90° (hands at shoulder, elbows bent)</li>
+              <li>Top angle: ~160–170° (arms fully extended overhead)</li>
+              <li>Form check: excessive lower back arch flagged</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Machine Type 4: Horizontal Push -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:#f59e0b20;border:1px solid #f59e0b;border-radius:8px;padding:6px 12px;font-weight:800;color:#f59e0b;font-size:.78rem;">TYPE 4</div>
+          <div>
+            <div style="font-weight:700;color:#fff;font-size:1rem;">Horizontal Push</div>
+            <div style="font-size:.78rem;color:var(--muted);">Chest Press, Pec Deck</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:.75rem;color:#f59e0b;font-weight:700;margin-bottom:8px;">ENGAGEMENT DETECTION</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Seated with back against pad</li>
+              <li>Hands level with chest, elbows out to sides</li>
+              <li>Elbows behind torso in starting position</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#f59e0b;font-weight:700;margin-bottom:8px;">TRACKING PARAMETERS</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Primary joint: <strong style="color:#ddd6fe;">Elbow</strong></li>
+              <li>Bottom angle: ~70–80° (elbows back, hands at chest)</li>
+              <li>Top angle: ~160° (arms extended forward)</li>
+              <li>Camera 2: Side-on, captures horizontal movement clearly</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Machine Type 5: Leg Extension/Curl -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:#06b6d420;border:1px solid #06b6d4;border-radius:8px;padding:6px 12px;font-weight:800;color:#06b6d4;font-size:.78rem;">TYPE 5</div>
+          <div>
+            <div style="font-weight:700;color:#fff;font-size:1rem;">Leg Extension / Leg Curl</div>
+            <div style="font-size:.78rem;color:var(--muted);">Leg Extension Machine, Leg Curl Machine</div>
+          </div>
+        </div>
+        <div class="callout amber" style="margin-bottom:14px;font-size:.82rem;">
+          <strong>Key difference:</strong> This is the first machine type where the primary joint switches from Elbow to 
+          <strong>Knee</strong>. The camera must also be positioned lower (~0.8m height) to clearly capture knee angles.
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:.75rem;color:#06b6d4;font-weight:700;margin-bottom:8px;">LEG EXTENSION</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Seated, feet hooked under ankle pad</li>
+              <li>Primary joint: <strong style="color:#ddd6fe;">Knee</strong></li>
+              <li>Start: Knee ~80° bent</li>
+              <li>End: Knee ~160° extended (leg straight)</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#06b6d4;font-weight:700;margin-bottom:8px;">LEG CURL</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Seated or prone, feet on top of pad</li>
+              <li>Primary joint: <strong style="color:#ddd6fe;">Knee</strong></li>
+              <li>Start: Knee ~160° extended</li>
+              <li>End: Knee ~30–40° bent (deep curl)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Machine Type 6: Leg Press -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:#ec489920;border:1px solid #ec4899;border-radius:8px;padding:6px 12px;font-weight:800;color:#ec4899;font-size:.78rem;">TYPE 6</div>
+          <div>
+            <div style="font-weight:700;color:#fff;font-size:1rem;">Leg Press</div>
+            <div style="font-size:.78rem;color:var(--muted);">Seated or 45° Leg Press Machine</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:.75rem;color:#ec4899;font-weight:700;margin-bottom:8px;">ENGAGEMENT DETECTION</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Reclined/seated with feet elevated on large plate</li>
+              <li>Feet significantly above hip height</li>
+              <li>Torso reclined back in seat</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#ec4899;font-weight:700;margin-bottom:8px;">TRACKING PARAMETERS</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Primary joint: <strong style="color:#ddd6fe;">Knee</strong></li>
+              <li>Bottom angle: ~70–80° (knees bent, plate close)</li>
+              <li>Top angle: ~160–170° (legs extended — NOT full lockout)</li>
+              <li>Camera 2: Side-on, 1–1.5m height to track leg movement</li>
+              <li>Full lockout flagged as bad form</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Machine Type 7: Hip/Glute -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:#8b5cf620;border:1px solid #8b5cf6;border-radius:8px;padding:6px 12px;font-weight:800;color:#c4b5fd;font-size:.78rem;">TYPE 7</div>
+          <div>
+            <div style="font-weight:700;color:#fff;font-size:1rem;">Hip / Glute Machines</div>
+            <div style="font-size:.78rem;color:var(--muted);">Hip Abductor, Hip Adductor</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:.75rem;color:#c4b5fd;font-weight:700;margin-bottom:8px;">ENGAGEMENT DETECTION</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Seated, legs placed in machine pads</li>
+              <li>Thighs in contact with pads (abductor: outer, adductor: inner)</li>
+              <li>Torso upright</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#c4b5fd;font-weight:700;margin-bottom:8px;">TRACKING PARAMETERS</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Primary joint: <strong style="color:#ddd6fe;">Hip</strong> (hip keypoints, not elbow or knee)</li>
+              <li>Abductor: legs move outward from neutral</li>
+              <li>Adductor: legs squeeze inward toward neutral</li>
+              <li>Camera: more overhead angle required — side-on misses lateral leg movement</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Machine Type 8: Back Extension -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:28px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:#ef444420;border:1px solid #ef4444;border-radius:8px;padding:6px 12px;font-weight:800;color:#f87171;font-size:.78rem;">TYPE 8</div>
+          <div>
+            <div style="font-weight:700;color:#fff;font-size:1rem;">Back Extension / Hyperextension</div>
+            <div style="font-size:.78rem;color:var(--muted);">Back Extension Bench, Roman Chair</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:.75rem;color:#f87171;font-weight:700;margin-bottom:8px;">ENGAGEMENT DETECTION</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Prone (face down) on angled bench</li>
+              <li>Feet hooked under ankle rollers</li>
+              <li>Upper body hanging forward or extended</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#f87171;font-weight:700;margin-bottom:8px;">TRACKING PARAMETERS</div>
+            <ul style="color:var(--textMid);font-size:.82rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Primary joint: <strong style="color:#ddd6fe;">Hip</strong> (torso angle vs. horizontal)</li>
+              <li>Rep: Torso drops down → extends back up</li>
+              <li>Uses torso angle relative to ground plane</li>
+              <li>Requires careful camera positioning — must see torso angle clearly</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Table -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px">Machine Configuration Reference Table</h3>
+      <div class="table-wrap">
+        <table style="width:100%;border-collapse:collapse;font-size:.8rem;">
+          <thead>
+            <tr style="border-bottom:2px solid var(--border);">
+              <th style="text-align:left;padding:10px 14px;color:var(--purple-light);font-weight:700;">Machine</th>
+              <th style="text-align:left;padding:10px 14px;color:var(--purple-light);font-weight:700;">Engagement Signal</th>
+              <th style="text-align:left;padding:10px 14px;color:var(--purple-light);font-weight:700;">Primary Joint</th>
+              <th style="text-align:center;padding:10px 14px;color:var(--purple-light);font-weight:700;">Top Angle</th>
+              <th style="text-align:center;padding:10px 14px;color:var(--purple-light);font-weight:700;">Bottom Angle</th>
+              <th style="text-align:center;padding:10px 14px;color:var(--purple-light);font-weight:700;">Camera Height</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(168,85,247,0.04);">
+              <td style="padding:10px 14px;color:#ddd6fe;font-weight:600;">Lat Pulldown</td>
+              <td style="padding:10px 14px;color:var(--textMid);">Wrists overhead</td>
+              <td style="padding:10px 14px;color:#a855f7;font-weight:700;">Elbow</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">130°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">90°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">1.3m</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:10px 14px;color:#ddd6fe;font-weight:600;">Seated Row</td>
+              <td style="padding:10px 14px;color:var(--textMid);">Hands at waist, leaning</td>
+              <td style="padding:10px 14px;color:#a855f7;font-weight:700;">Elbow</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">160°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">65°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">1.2m</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(168,85,247,0.04);">
+              <td style="padding:10px 14px;color:#ddd6fe;font-weight:600;">Shoulder Press</td>
+              <td style="padding:10px 14px;color:var(--textMid);">Hands at shoulders</td>
+              <td style="padding:10px 14px;color:#a855f7;font-weight:700;">Elbow</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">165°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">85°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">1.4m</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:10px 14px;color:#ddd6fe;font-weight:600;">Chest Press</td>
+              <td style="padding:10px 14px;color:var(--textMid);">Hands at chest</td>
+              <td style="padding:10px 14px;color:#a855f7;font-weight:700;">Elbow</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">160°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">75°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">1.1m</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(168,85,247,0.04);">
+              <td style="padding:10px 14px;color:#ddd6fe;font-weight:600;">Leg Extension</td>
+              <td style="padding:10px 14px;color:var(--textMid);">Feet under pad</td>
+              <td style="padding:10px 14px;color:#06b6d4;font-weight:700;">Knee</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">160°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">80°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">0.8m</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:10px 14px;color:#ddd6fe;font-weight:600;">Leg Curl</td>
+              <td style="padding:10px 14px;color:var(--textMid);">Feet over pad</td>
+              <td style="padding:10px 14px;color:#06b6d4;font-weight:700;">Knee</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">165°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">35°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">0.8m</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(168,85,247,0.04);">
+              <td style="padding:10px 14px;color:#ddd6fe;font-weight:600;">Leg Press</td>
+              <td style="padding:10px 14px;color:var(--textMid);">Feet on plate</td>
+              <td style="padding:10px 14px;color:#06b6d4;font-weight:700;">Knee</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">165°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">75°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">1.0m</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 14px;color:#ddd6fe;font-weight:600;">Hip Abductor</td>
+              <td style="padding:10px 14px;color:var(--textMid);">Legs in pads</td>
+              <td style="padding:10px 14px;color:#22c55e;font-weight:700;">Hip</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">50° apart</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">10°</td>
+              <td style="padding:10px 14px;color:var(--textMid);text-align:center;">Overhead</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ─── PART 4: PHASE PROGRESSION ─── -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:48px 0 16px">Part 4 — Phase 1 → Phase 2 → Phase 3 → Phase 4 Progression</h3>
+
+      <p style="color:var(--textMid);font-size:.93rem;line-height:1.8;margin-bottom:28px;">
+        The machine engagement system isn't deployed fully formed — it's built phase by phase, with each phase 
+        generating real-world data that makes the next phase smarter. This is the data flywheel in action: 
+        every machine installed teaches the system how to handle the next one.
+      </p>
+
+      <!-- Phase 1 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-left:5px solid #22c55e;border-radius:0 12px 12px 0;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:#22c55e;color:#000;font-weight:800;font-size:.78rem;padding:5px 14px;border-radius:20px;">PHASE 1</div>
+          <div style="font-weight:700;color:#fff;font-size:1rem;">Foundation — One Machine, Proven Approach</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div>
+            <div style="font-size:.75rem;color:#4ade80;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">What We Build</div>
+            <ul style="color:var(--textMid);font-size:.83rem;line-height:2;padding-left:18px;margin:0;">
+              <li>One machine: Nautilus Nitro Lat Pulldown</li>
+              <li>Manual bounding box drawn in setup tool</li>
+              <li>Wrist gate as the engagement signal</li>
+              <li>Rule-based rep counting (reliable, deterministic)</li>
+              <li>NN classifier for form scoring (75% accuracy)</li>
+              <li>Single Camera 1 (ceiling fisheye) + Camera 2 (side-on)</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#4ade80;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">What We Learn</div>
+            <ul style="color:var(--textMid);font-size:.83rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Does the bounding box approach work in a real gym with real lighting?</li>
+              <li>What false triggers appear in practice (not just theory)?</li>
+              <li>How accurate is the wrist gate for this machine type?</li>
+              <li>What does variable gym lighting do to MoveNet keypoint confidence?</li>
+              <li>What edge cases did we not anticipate?</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout green" style="margin-top:16px;font-size:.83rem;">
+          <strong>What Phase 1 data enables:</strong> 500+ labeled movement sequences → LSTM model with real-world training data. 
+          The first machine generates the dataset that makes all future machines smarter.
+        </div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-left:5px solid #3b82f6;border-radius:0 12px 12px 0;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:#3b82f6;color:#fff;font-weight:800;font-size:.78rem;padding:5px 14px;border-radius:20px;">PHASE 2</div>
+          <div style="font-weight:700;color:#fff;font-size:1rem;">Expansion — 5 Machine Types, Transfer Learning</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div>
+            <div style="font-size:.75rem;color:#93c5fd;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">What Changes</div>
+            <ul style="color:var(--textMid);font-size:.83rem;line-height:2;padding-left:18px;margin:0;">
+              <li>5 machines across all different movement types</li>
+              <li>Full ceiling camera rig installed</li>
+              <li>Transfer learning from lat pulldown to new machine types</li>
+              <li>Machine configs for each new machine (small labelled dataset per machine)</li>
+              <li>Zone PoE switch infrastructure deployed</li>
+              <li>Weight detection integrated (Manus gloves + coloured tape system)</li>
+              <li>Face ID field testing begins</li>
+              <li>LSTM deployed — targeting 90%+ accuracy</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#93c5fd;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">What We Learn</div>
+            <ul style="color:var(--textMid);font-size:.83rem;line-height:2;padding-left:18px;margin:0;">
+              <li>Does the config system scale to fundamentally different machine types?</li>
+              <li>How does knee tracking accuracy compare to elbow tracking?</li>
+              <li>What specific data requirements exist for leg machines (camera height, angle)?</li>
+              <li>How reliable is weight detection with the coloured tape system in practice?</li>
+              <li>What are the real-world failure modes across 5 different machines?</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top:16px;font-size:.83rem;">
+          <strong>What Phase 2 data enables:</strong> Multi-joint LSTM model. Face ID training data from real member usage. 
+          Proven configs for 5 machine types ready to scale to 30.
+        </div>
+      </div>
+
+      <!-- Phase 3 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-left:5px solid #f59e0b;border-radius:0 12px 12px 0;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:#f59e0b;color:#000;font-weight:800;font-size:.78rem;padding:5px 14px;border-radius:20px;">PHASE 3</div>
+          <div style="font-weight:700;color:#fff;font-size:1rem;">Intelligence — 30 Machines, Full Automation</div>
+        </div>
+        <ul style="color:var(--textMid);font-size:.83rem;line-height:2.1;padding-left:18px;margin:0 0 14px;">
+          <li>30 machines — full coverage of major equipment areas</li>
+          <li>AI-learned engagement zones (no longer manually drawing bounding boxes)</li>
+          <li>Face ID live — members identified automatically on entry</li>
+          <li>GymMaster NFC fully integrated — check-in triggers session start</li>
+          <li>Multi-joint LSTM tracking full body posture per machine type</li>
+          <li>Form coaching displayed on tablet at each machine in real time</li>
+          <li>Data flywheel running — every session contributes to model improvement</li>
+        </ul>
+        <div class="callout amber" style="font-size:.83rem;">
+          <strong>What Phase 3 enables:</strong> A fully proven system across 30 machines with real member data — 
+          ready for full gym rollout across all 120 machines.
+        </div>
+      </div>
+
+      <!-- Phase 4 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-left:5px solid #a855f7;border-radius:0 12px 12px 0;padding:24px;margin-bottom:32px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;font-weight:800;font-size:.78rem;padding:5px 14px;border-radius:20px;">PHASE 4</div>
+          <div style="font-weight:700;color:#fff;font-size:1rem;">The Complete Overseer — 120 Machines</div>
+        </div>
+        <ul style="color:var(--textMid);font-size:.83rem;line-height:2.1;padding-left:18px;margin:0 0 14px;">
+          <li>Every machine in the gym tracked simultaneously</li>
+          <li>Multiple people at the same machine zone handled correctly via improved zone logic</li>
+          <li>Visitor mode — non-member detection without face ID match</li>
+          <li>PT coaching data — trainer and member sessions tracked together, separately attributed</li>
+          <li>The system teaches itself continuously from the data flywheel — every workout makes it smarter</li>
+        </ul>
+        <div class="callout" style="font-size:.83rem;">
+          <strong>The end state:</strong> An AI that knows every rep performed in the gym, by whom, on which machine, 
+          with what form, at what weight — without any manual logging from the member.
+        </div>
+      </div>
+
+      <!-- ─── PART 5: MULTIPLE PEOPLE ─── -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:40px 0 16px">Part 5 — Multiple People Near the Same Machine</h3>
+
+      <p style="color:var(--textMid);font-size:.93rem;line-height:1.8;margin-bottom:20px;">
+        In a real gym, it's common for two people to be near the same machine at the same time — one working, 
+        one spotting, one waiting. The system must handle this correctly without double-counting or misattribution.
+      </p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;">
+          <div style="font-weight:700;color:#ddd6fe;font-size:.9rem;margin-bottom:10px;">🏋️ Lifter + Spotter</div>
+          <p style="color:var(--textMid);font-size:.82rem;line-height:1.8;margin:0;">
+            The spotter stands <em>behind or beside</em> the machine. They are outside the bounding zone for the seat. 
+            Gate 1 fails for the spotter — their centroid is not inside the occupancy zone. 
+            Only the person actually seated in the machine counts.
+          </p>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;">
+          <div style="font-weight:700;color:#ddd6fe;font-size:.9rem;margin-bottom:10px;">👥 Two People Waiting</div>
+          <p style="color:var(--textMid);font-size:.82rem;line-height:1.8;margin:0;">
+            If two people are both inside the zone (e.g., changing over between sets), Gate 2 resolves this — 
+            only one person can match the engaged pose at a time. The system tracks the person who is 
+            actively in the machine position.
+          </p>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;">
+          <div style="font-weight:700;color:#ddd6fe;font-size:.9rem;margin-bottom:10px;">🔄 Member Changeover</div>
+          <p style="color:var(--textMid);font-size:.82rem;line-height:1.8;margin:0;">
+            When one member finishes and another sits down: the session close logic detects that the previous 
+            member's pose is gone (Gate 2 fails), closes their session, then when the new member's engaged 
+            pose appears and face ID matches, a new session opens. Changeover handled automatically.
+          </p>
+        </div>
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;">
+          <div style="font-weight:700;color:#ddd6fe;font-size:.9rem;margin-bottom:10px;">🎽 Between-Set Rest</div>
+          <p style="color:var(--textMid);font-size:.82rem;line-height:1.8;margin:0;">
+            Member sits on the seat but isn't actively pulling/pressing — they're resting. Gate 2 (engaged pose) 
+            fails because wrists are not in the overhead position. The session stays open but rep counting pauses 
+            automatically until they re-engage.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- ─── PART 6: WHEN THE AI IS WRONG ─── -->
+      <h3 style="color:var(--purple-light);font-size:.8rem;letter-spacing:2px;text-transform:uppercase;margin:40px 0 16px">Part 6 — What Happens When the AI Is Wrong</h3>
+
+      <p style="color:var(--textMid);font-size:.93rem;line-height:1.8;margin-bottom:24px;">
+        No AI system is perfect. The Overseer is designed to be wrong as rarely as possible — and to recover 
+        gracefully when it is wrong, using every mistake as training data that makes the system smarter.
+      </p>
+
+      <!-- False positive -->
+      <div style="background:var(--card);border:1px solid #ef444430;border-left:4px solid #ef4444;border-radius:0 12px 12px 0;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.4rem;">⚠️</span>
+            <div>
+              <div style="font-weight:700;color:#f87171;font-size:1rem;">False Positive — Counted a rep that wasn't one</div>
+              <div style="font-size:.75rem;color:var(--muted);">Gates passed but it wasn't a real rep</div>
+            </div>
+          </div>
+          <div style="background:#ef444420;border:1px solid #ef444440;border-radius:8px;padding:6px 14px;font-size:.8rem;font-weight:700;color:#f87171;">
+            Target: &lt;1 per 100 reps
+          </div>
+        </div>
+        <p style="color:var(--textMid);font-size:.85rem;line-height:1.8;margin-bottom:12px;">
+          All 6 gates working together make false positives extremely unlikely. Gate 6 (LSTM) is specifically 
+          trained on false movement examples to catch edge cases that pass the rule-based gates. 
+          If one does slip through:
+        </p>
+        <ul style="color:var(--textMid);font-size:.85rem;line-height:2;padding-left:18px;margin:0;">
+          <li>Member sees the rep appear on the tablet display</li>
+          <li>They can tap "Not my rep" to flag it</li>
+          <li>Flagged data is automatically labeled as <code style="color:#f472b6;background:#0d0a18;padding:1px 5px;border-radius:3px;">false_movement</code> and queued for training</li>
+          <li>Next model update: LSTM learns this movement pattern → future false positives of this type eliminated</li>
+        </ul>
+      </div>
+
+      <!-- False negative -->
+      <div style="background:var(--card);border:1px solid #f59e0b30;border-left:4px solid #f59e0b;border-radius:0 12px 12px 0;padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.4rem;">🔇</span>
+            <div>
+              <div style="font-weight:700;color:#fcd34d;font-size:1rem;">False Negative — Missed a real rep</div>
+              <div style="font-size:.75rem;color:var(--muted);">Rep happened but wasn't counted</div>
+            </div>
+          </div>
+          <div style="background:#f59e0b20;border:1px solid #f59e0b40;border-radius:8px;padding:6px 14px;font-size:.8rem;font-weight:700;color:#fcd34d;">
+            Target: &lt;2 per 100 reps
+          </div>
+        </div>
+        <p style="color:var(--textMid);font-size:.85rem;line-height:1.8;margin-bottom:12px;">
+          More common than false positives in the current system. Primary causes:
+        </p>
+        <ul style="color:var(--textMid);font-size:.85rem;line-height:2;padding-left:18px;margin:0 0 12px;">
+          <li>Poor camera angle — another machine or person blocks the view mid-rep</li>
+          <li>Occlusion — member's arm blocks their own elbow keypoint</li>
+          <li>Low keypoint confidence — gym lighting variation causes MoveNet to drop keypoints</li>
+          <li>Very fast rep — completed in under 300ms (rare, but possible for experienced lifters)</li>
+        </ul>
+        <div style="background:#0a0615;border-radius:8px;padding:14px;font-size:.82rem;color:var(--textMid);line-height:1.8;">
+          <strong style="color:#fcd34d;">Recovery:</strong> Member can tap "+ Add rep" on the tablet to manually add missed reps. 
+          Manually added reps are stored separately in the database 
+          (<code style="color:#f472b6;background:#0d0a18;padding:1px 5px;border-radius:3px;">source: "manual"</code> vs <code style="color:#f472b6;background:#0d0a18;padding:1px 5px;border-radius:3px;">source: "ai"</code>) 
+          so the data integrity is preserved — we can always see where the AI was confident vs where it needed human correction.
+        </div>
+      </div>
+
+      <!-- Wrong form -->
+      <div style="background:var(--card);border:1px solid #6366f130;border-left:4px solid #6366f1;border-radius:0 12px 12px 0;padding:24px;margin-bottom:28px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <span style="font-size:1.4rem;">📊</span>
+          <div>
+            <div style="font-weight:700;color:#818cf8;font-size:1rem;">Wrong Form Classification</div>
+            <div style="font-size:.75rem;color:var(--muted);">Rep was counted but form score was wrong</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div style="background:#0a0615;border-radius:8px;padding:14px;text-align:center;border:1px solid #6366f130;">
+            <div style="font-size:1.4rem;font-weight:800;color:#818cf8;margin-bottom:6px;">Phase 1</div>
+            <div style="font-size:.75rem;color:#a5b4fc;font-weight:700;margin-bottom:4px;">75% Accuracy</div>
+            <div style="font-size:.72rem;color:var(--muted);">NN classifier, display only — does not gate rep counting. 1 in 4 form judgements may be wrong. Accepted for now.</div>
+          </div>
+          <div style="background:#0a0615;border-radius:8px;padding:14px;text-align:center;border:1px solid #3b82f630;">
+            <div style="font-size:1.4rem;font-weight:800;color:#60a5fa;margin-bottom:6px;">Phase 2</div>
+            <div style="font-size:.75rem;color:#93c5fd;font-weight:700;margin-bottom:4px;">90%+ Accuracy</div>
+            <div style="font-size:.72rem;color:var(--muted);">LSTM deployed. Form scoring becomes trusted enough to gate bad reps — a "bad_rep" result is still counted but flagged in the member's history.</div>
+          </div>
+          <div style="background:#0a0615;border-radius:8px;padding:14px;text-align:center;border:1px solid #22c55e30;">
+            <div style="font-size:1.4rem;font-weight:800;color:#4ade80;margin-bottom:6px;">Phase 3</div>
+            <div style="font-size:.75rem;color:#86efac;font-weight:700;margin-bottom:4px;">95%+ Accuracy</div>
+            <div style="font-size:.72rem;color:var(--muted);">Full trust. Form coaching is reliable enough to display real-time cues at the machine tablet and inform personalised training recommendations.</div>
+          </div>
+        </div>
+      </div>
+
+      <img src="docs/images/gym-tablet.jpg" alt="XL Fitness gym tablet interface" style="width:100%;border-radius:12px;margin:0 0 8px;border:1px solid var(--border);">
+      <p style="color:var(--muted);font-size:.78rem;text-align:center;margin-bottom:32px;">
+        The tablet allows members to manually correct missed reps, creating training data that improves the model
+      </p>
+
+      <div class="callout">
+        <strong>The core principle:</strong> Every correction a member makes — flagging a false positive, manually adding 
+        a missed rep, or rating a form judgement — is not just a fix. It is a labeled training example. 
+        The system is designed to learn from every interaction, so that over time, the gap between AI accuracy 
+        and perfect accuracy closes. The members aren't just using the system. They are training it.
+      </div>
+
+    </section>
+    <!-- /SECTION 19 -->
 
     <!-- ========================================================
          SECTION 13: STATUS
