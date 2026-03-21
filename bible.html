@@ -189,6 +189,90 @@
     .spec-table td { padding: 10px 14px; border-bottom: 1px solid var(--border1); color: var(--text); vertical-align: top; }
     .spec-table tr:last-child td { border-bottom: none; }
     @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ---- Chapter Dividers ---- */
+    .chapter-divider {
+      margin: 0;
+      padding: 60px 60px 40px;
+      background: linear-gradient(135deg, var(--surface2) 0%, var(--bg) 100%);
+      border-top: 2px solid var(--border2);
+      border-bottom: 1px solid var(--border1);
+      position: relative;
+      overflow: hidden;
+    }
+    .chapter-divider::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 0% 50%, rgba(139,92,246,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .chapter-divider .ch-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--purple);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .chapter-divider h1 {
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 0 0 14px;
+      line-height: 1.1;
+    }
+    .chapter-divider h1 em {
+      color: var(--purple);
+      font-style: normal;
+    }
+    .chapter-divider .ch-desc {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 640px;
+      line-height: 1.6;
+      margin: 0;
+    }
+    .chapter-divider .ch-sections {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+    .chapter-divider .ch-pill {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    /* ---- Colour Tracking Bands ---- */
+    .colour-band-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin: 28px 0;
+    }
+    .colour-band {
+      border-radius: 10px;
+      padding: 18px 14px;
+      text-align: center;
+    }
+    .colour-band .cb-label { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .colour-band .cb-joint { font-size: 11px; color: rgba(255,255,255,0.8); }
+    .cb-red    { background: #c0392b; }
+    .cb-blue   { background: #2980b9; }
+    .cb-green  { background: #27ae60; }
+    .cb-yellow { background: #f39c12; }
+    .cb-white  { background: #7f8c8d; }
+    @media (max-width: 700px) {
+      .colour-band-grid { grid-template-columns: repeat(3, 1fr); }
+      .chapter-divider { padding: 40px 24px 28px; }
+      .chapter-divider h1 { font-size: 28px; }
+    }
+
     @media (max-width: 900px) {
       .sidebar { display: none; }
       .hero { padding: 48px 24px; }
@@ -203,32 +287,33 @@
 <nav class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">XL Fitness</div>
-    <div class="brand-sub">AI Overseer — The Bible v6.0</div>
+    <div class="brand-sub">AI Overseer — The Bible v8.0</div>
   </div>
-  <div class="nav-group">The Vision</div>
+  <div class="nav-group">Chapter 1 — The Vision</div>
   <a class="nav-link" href="#vision">01 — What We're Building</a>
   <a class="nav-link" href="#problem">02 — The Core Problem</a>
   <a class="nav-link" href="#overview">03 — System Overview</a>
-  <div class="nav-group">Hardware</div>
+  <div class="nav-group">Chapter 2 — Hardware</div>
   <a class="nav-link" href="#cameras">04 — Camera Selection</a>
   <a class="nav-link" href="#mounting">05 — Ceiling &amp; Frame Mounting</a>
   <a class="nav-link" href="#poe">06 — PoE &amp; Cable Runs</a>
   <a class="nav-link" href="#streaming">07 — Video Streaming Pipeline</a>
   <a class="nav-link" href="#server">08 — Server Infrastructure</a>
-  <div class="nav-group">Software</div>
+  <div class="nav-group">Chapter 3 — AI Models</div>
   <a class="nav-link" href="#software">09 — The Full Software Stack</a>
   <a class="nav-link" href="#yolo">10 — YOLO Detection</a>
   <a class="nav-link" href="#deepsort">11 — People Tracking</a>
-  <a class="nav-link" href="#movenet">12 — Pose Estimation</a>
-  <a class="nav-link" href="#lstm">13 — Rep Counting</a>
-  <a class="nav-link" href="#faceid">14 — Face Recognition</a>
-  <a class="nav-link" href="#weight">15 — Weight Detection</a>
-  <div class="nav-group">The Full System</div>
-  <a class="nav-link" href="#pipeline">16 — The 46ms Pipeline</a>
-  <a class="nav-link" href="#data">17 — Data &amp; Database</a>
-  <div class="nav-group">Phase Roadmap</div>
-  <a class="nav-link" href="#phases">18 — Interactive Roadmap</a>
-  <a class="nav-link" href="#costs">19 — Cost Breakdown</a>
+  <a class="nav-link" href="#colour-tracking">12 — Colour Marker Tracking</a>
+  <a class="nav-link" href="#movenet">13 — Pose Estimation</a>
+  <a class="nav-link" href="#lstm">14 — Rep Counting</a>
+  <a class="nav-link" href="#faceid">15 — Face Recognition</a>
+  <a class="nav-link" href="#weight">16 — Weight Detection</a>
+  <div class="nav-group">Chapter 4 — The Full System</div>
+  <a class="nav-link" href="#pipeline">17 — The 46ms Pipeline</a>
+  <a class="nav-link" href="#data">18 — Data &amp; Database</a>
+  <div class="nav-group">Chapter 5 — Roadmap</div>
+  <a class="nav-link" href="#phases">19 — Interactive Roadmap</a>
+  <a class="nav-link" href="#costs">20 — Cost Breakdown</a>
 </nav>
 
 <div class="main">
@@ -333,50 +418,87 @@
   </div>
 </section>
 
+<div class="chapter-divider" id="ch-hardware">
+  <div class="ch-num">Chapter 02</div>
+  <h1>The <em>Hardware</em></h1>
+  <p class="ch-desc">Everything physical — the cameras, the ceiling frame they hang from, the cable infrastructure that connects them, and the servers that process the video. This chapter covers every hardware decision from Phase 1 through Phase 4.</p>
+  <div class="ch-sections">
+    <span class="ch-pill">04 — Camera Selection</span>
+    <span class="ch-pill">05 — Ceiling &amp; Frame Mounting</span>
+    <span class="ch-pill">06 — PoE &amp; Cable Runs</span>
+    <span class="ch-pill">07 — Video Streaming Pipeline</span>
+    <span class="ch-pill">08 — Server Infrastructure</span>
+  </div>
+</div>
 <section class="section" id="cameras">
   <div class="section-tag">Section 04 — Hardware</div>
   <h2>Camera <em>Selection</em></h2>
-  <p class="lead">The choice of camera is the most critical hardware decision in the entire system. We need cameras that are high-resolution enough to read weight stack pins from 12 feet away, fast enough to capture smooth motion for pose estimation, and reliable enough to run 24/7 without rebooting.</p>
+  <p class="lead">The camera is the eye of the entire system. Every AI model downstream depends on the quality, angle, and reliability of the video feed. The aesthetic goal is a <strong>VR motion capture soundstage</strong> — a clean grid of cameras on a ceiling frame, each one precisely positioned, each one covering a defined zone of the gym floor.</p>
+
   <div class="img-block">
-    <img src="img/hikvision-dome-camera.jpg" alt="Hikvision 4K PoE Dome Camera">
-    <div class="img-caption">The Hikvision DS-2CD2183G2-I — our primary Phase 1 camera. 4K, 30FPS, 2.8mm wide-angle lens, PoE powered.</div>
+    <img src="img/mocap-stage-ceiling.jpg" alt="Motion capture stage ceiling camera grid">
+    <div class="img-caption">The aesthetic reference: a professional motion capture stage with cameras mounted on a ceiling truss grid. This is exactly what we are building — a gym-scale version of this infrastructure.</div>
   </div>
-  <h3>Why Dome Cameras?</h3>
-  <p>Dome cameras are the right form factor for ceiling mounting in a gym. The dome housing protects the lens from dust and sweat, the wide-angle lens covers a large floor area from above, and the vandal-resistant housing means they survive the occasional errant barbell. The dome shape also makes it harder for members to tell exactly where the camera is pointing — reducing the "I'm being watched" feeling.</p>
-  <h3>Full Camera Specification</h3>
+
+  <div class="img-block">
+    <img src="img/mocap-stage-wide.jpg" alt="ZeroSpace motion capture stage wide view">
+    <div class="img-caption">Wide view of a motion capture stage — the cameras on the ceiling truss cover every square metre of the floor below. Our gym installation will mirror this grid layout, scaled to the floor plan.</div>
+  </div>
+
+  <h3>The Three Camera Options</h3>
+  <p>We have evaluated three camera types for this system. Each has a different form factor, price point, and capability. The choice depends on the phase and the specific zone being covered.</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Option A — PoE Dome Camera (Primary)</div>
+      <p><strong>Hikvision DS-2CD2183G2-I</strong> — 4K, 30FPS, 2.8mm wide-angle, H.265, PoE, IP67. The workhorse of the system. Ceiling-mounted via pendant arm on the Unistrut frame. One cable (Cat6) carries both power and data. ~$120 AUD each. This is what we use in Phase 1 and Phase 2.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Option B — Box Camera on Arm (Precision)</div>
+      <p><strong>Dahua IPC-HF81230E</strong> — 12MP, interchangeable lens, no IR dome housing. Mounted on a ball-head arm on the truss. Better for close-up weight stack reading where we need a longer focal length. ~$180 AUD each. Used in Phase 2 for dedicated weight detection positions.</p>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Option C — Fisheye 360° Camera (Coverage)</div>
+      <p><strong>Hikvision DS-2CD2955FWD-I</strong> — 5MP fisheye, 180° hemisphere view. One camera covers an entire zone from directly overhead. Dewarped in software. Excellent for people tracking across a large area. ~$200 AUD each. Phase 3 option for large open-floor zones.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Option D — OptiTrack-Style IR Camera (Future)</div>
+      <p><strong>OptiTrack Prime 13W</strong> — dedicated motion capture camera with infrared ring illuminator. The professional standard for body tracking. Extremely accurate, works in any lighting. ~$800 USD each. Phase 4 consideration for premium gym installations.</p>
+    </div>
+  </div>
+
+  <div class="img-block">
+    <img src="img/optitrack-cameras.jpg" alt="OptiTrack motion capture cameras">
+    <div class="img-caption">OptiTrack Prime cameras — the professional standard for motion capture. The blue LED ring is an infrared illuminator. Our Phase 4 premium option mirrors this technology at a commercial gym scale.</div>
+  </div>
+
+  <h3>Phase 1 Camera Specification (What We Are Actually Buying)</h3>
   <div class="tbl">
     <table>
       <thead><tr><th>Specification</th><th>Value</th><th>Why It Matters</th></tr></thead>
       <tbody>
+        <tr><td>Model</td><td class="td-purple">Hikvision DS-2CD2183G2-I</td><td>Widely available, excellent RTSP support, proven reliability</td></tr>
         <tr><td>Resolution</td><td class="td-purple">4K / 8 Megapixel</td><td>Enough detail to read weight pin positions from 12ft overhead</td></tr>
-        <tr><td>Frame Rate</td><td class="td-purple">30 FPS</td><td>Minimum for smooth pose estimation; 60FPS is better but doubles bandwidth</td></tr>
-        <tr><td>Lens Focal Length</td><td class="td-purple">2.8mm</td><td>~100 degree horizontal FOV — covers 3-4 machines from a single ceiling mount</td></tr>
-        <tr><td>Video Compression</td><td class="td-purple">H.265+ (HEVC)</td><td>Reduces bandwidth by ~50% vs H.264 — critical when running 20+ cameras</td></tr>
-        <tr><td>Power</td><td class="td-purple">PoE (802.3af)</td><td>Single Cat6 cable carries both power and data — no separate power outlet needed</td></tr>
-        <tr><td>Streaming Protocol</td><td class="td-purple">RTSP / ONVIF</td><td>Industry standard — works with FFmpeg, OpenCV, GStreamer, and all NVR software</td></tr>
-        <tr><td>IR Night Vision</td><td class="td-purple">30m range</td><td>Gym lights dim at night — IR ensures the AI still works during off-peak hours</td></tr>
-        <tr><td>IP Rating</td><td class="td-purple">IP67</td><td>Dust and moisture resistant — survives the gym environment</td></tr>
+        <tr><td>Frame Rate</td><td class="td-purple">30 FPS</td><td>Minimum for smooth pose estimation; sufficient for rep counting</td></tr>
+        <tr><td>Lens</td><td class="td-purple">2.8mm (100° HFOV)</td><td>Covers 3–4 machines from a single ceiling position at 3m height</td></tr>
+        <tr><td>Compression</td><td class="td-purple">H.265+ (HEVC)</td><td>~50% bandwidth saving vs H.264 — critical at 20+ cameras</td></tr>
+        <tr><td>Power</td><td class="td-purple">PoE 802.3af (12.95W)</td><td>Single Cat6 cable — no separate power outlet at each camera</td></tr>
+        <tr><td>Protocol</td><td class="td-purple">RTSP / ONVIF</td><td>Works with FFmpeg, OpenCV, GStreamer — no vendor lock-in</td></tr>
+        <tr><td>Night Vision</td><td class="td-purple">IR, 30m range</td><td>Gym lights dim at night — AI still works during off-peak hours</td></tr>
+        <tr><td>IP Rating</td><td class="td-purple">IP67</td><td>Dust and sweat resistant — survives the gym environment</td></tr>
+        <tr><td>Price</td><td class="td-green">~$120 AUD</td><td>Phase 1 total: 4 cameras = ~$480 AUD</td></tr>
       </tbody>
     </table>
   </div>
-  <h3>Recommended Models by Phase</h3>
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Phase</th><th>Camera Model</th><th>Price (each)</th><th>Qty</th></tr></thead>
-      <tbody>
-        <tr><td>Phase 1 (Lab)</td><td>Hikvision DS-2CD2183G2-I</td><td class="td-green">~$120 AUD</td><td>4</td></tr>
-        <tr><td>Phase 2 (Zone)</td><td>Hikvision DS-2CD2T83G2-4I</td><td class="td-green">~$150 AUD</td><td>12</td></tr>
-        <tr><td>Phase 3 (Full Floor)</td><td>Dahua IPC-HDW2849H-S-IL</td><td class="td-green">~$110 AUD</td><td>40+</td></tr>
-        <tr><td>Phase 4 (Enterprise)</td><td>Axis P3245-V (ARTPEC-7)</td><td class="td-green">~$400 AUD</td><td>Per gym</td></tr>
-      </tbody>
-    </table>
-  </div>
+
   <div class="callout success">
-    <div class="ct">Phase 1 Recommendation</div>
-    <p>Start with 4x Hikvision DS-2CD2183G2-I cameras. They are widely available on Amazon AU, have excellent RTSP support, and the 2.8mm lens gives the wide overhead angle we need. Total camera cost for Phase 1: ~$480 AUD.</p>
+    <div class="ct">Phase 1 Decision</div>
+    <p>4x Hikvision DS-2CD2183G2-I cameras. Available on Amazon AU and Scorpion Technology. The 2.8mm lens gives the wide overhead angle we need. Total camera cost for Phase 1: ~$480 AUD. We are not buying OptiTrack cameras in Phase 1 — we are proving the concept with commodity hardware first.</p>
   </div>
 </section>
-
 <section class="section" id="mounting">
   <div class="section-tag">Section 05 — Hardware</div>
   <h2>Ceiling &amp; Frame <em>Mounting</em></h2>
@@ -716,6 +838,21 @@ model = torch.compile(model)     <span class="cm"># PyTorch 2.0 compilation</spa
   </div>
 </section>
 
+<div class="chapter-divider" id="ch-ai">
+  <div class="ch-num">Chapter 03</div>
+  <h1>The <em>AI Models</em></h1>
+  <p class="ch-desc">The intelligence layer. Six distinct AI models, each solving one specific problem. They run in sequence on every frame, every second, on every camera. This chapter explains exactly what each model does, how it works, and how it evolves across phases.</p>
+  <div class="ch-sections">
+    <span class="ch-pill">09 — Software Stack</span>
+    <span class="ch-pill">10 — YOLO Detection</span>
+    <span class="ch-pill">11 — People Tracking</span>
+    <span class="ch-pill">12 — Colour Marker Tracking</span>
+    <span class="ch-pill">13 — Pose Estimation</span>
+    <span class="ch-pill">14 — Rep Counting</span>
+    <span class="ch-pill">15 — Face Recognition</span>
+    <span class="ch-pill">16 — Weight Detection</span>
+  </div>
+</div>
 <section class="section" id="software">
   <div class="section-tag">Section 09 — Software</div>
   <h2>The Full <em>Software Stack</em></h2>
@@ -918,10 +1055,107 @@ tracker = DeepSort(max_age=<span class="nm">30</span>, n_init=<span class="nm">3
     </div>
   </div>
 </section>
-<section class="section" id="movenet">
+<section class="section" id="colour-tracking">
   <div class="section-tag">Section 12 — Deep Dive</div>
+  <h2>Colour Marker <em>Tracking</em></h2>
+  <p class="lead">Pose estimation models like YOLO Pose and MoveNet are powerful but they can struggle in a gym environment — people wearing baggy clothing, similar-coloured outfits, or exercising in low-contrast lighting. Our solution is a simple, low-tech enhancement: <strong>colour-coded wristbands and ankle straps</strong> that give the AI a bright, unambiguous signal for each joint.</p>
+
+  <div class="img-block">
+    <img src="img/colour-wristbands.jpg" alt="Colour coded silicone wristbands">
+    <div class="img-caption">Bright silicone wristbands in distinct colours — worn at the wrist and ankle, they give the camera a high-contrast, easy-to-detect marker at each key joint position.</div>
+  </div>
+
+  <h3>The Concept</h3>
+  <p>This idea is borrowed directly from professional motion capture studios. In traditional mocap, actors wear suits with reflective markers at every joint. Our gym version is simpler and cheaper: members wear a set of coloured silicone bands — one colour per joint position. The camera can detect these bands using basic colour segmentation (HSV thresholding) even before the neural network runs, giving us a reliable joint position estimate that the pose model can use as an anchor.</p>
+
+  <div class="img-block">
+    <img src="img/colour-marker-mocap.png" alt="Colour marker motion capture reference">
+    <div class="img-caption">Professional motion capture with colour markers at each joint — our system uses the same principle with simple silicone wristbands instead of retroreflective markers.</div>
+  </div>
+
+  <h3>Colour Assignment</h3>
+  <div class="colour-band-grid">
+    <div class="colour-band cb-red"><div class="cb-label">RED</div><div class="cb-joint">Right Wrist</div></div>
+    <div class="colour-band cb-blue"><div class="cb-label">BLUE</div><div class="cb-joint">Left Wrist</div></div>
+    <div class="colour-band cb-green"><div class="cb-label">GREEN</div><div class="cb-joint">Right Ankle</div></div>
+    <div class="colour-band cb-yellow"><div class="cb-label">YELLOW</div><div class="cb-joint">Left Ankle</div></div>
+    <div class="colour-band cb-white"><div class="cb-label">GREY</div><div class="cb-joint">Optional: Elbow</div></div>
+  </div>
+
+  <p>The colours are chosen to be maximally distinct in HSV colour space — red, blue, green, and yellow are far apart in hue, making them easy to separate even under mixed gym lighting. The bands are ~25mm wide silicone wristbands and ankle straps, available in bulk for under $1 each.</p>
+
+  <div class="img-block">
+    <img src="img/colour-ankle-strap.jpg" alt="Neon ankle strap on shoe">
+    <div class="img-caption">A neon ankle strap in use — bright, high-contrast, and clearly visible from an overhead camera even during fast movement.</div>
+  </div>
+
+  <h3>How It Integrates with the AI Pipeline</h3>
+  <p>The colour tracking runs as a <strong>parallel pre-processing step</strong> alongside YOLO Pose. For each frame, we run a fast HSV colour segmentation pass that takes under 1ms per camera. This produces a set of coloured blob positions — "red blob at (x=450, y=320), blue blob at (x=380, y=315)". These positions are fed into the pose estimation model as <em>hint keypoints</em> — the model uses them to anchor its skeleton fitting, dramatically improving accuracy in difficult cases like baggy clothing or partial occlusion.</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Without Colour Bands</div>
+      <p>YOLO Pose estimates joint positions purely from body shape and clothing texture. In a gym with dark clothing and similar body shapes, it can confuse left and right limbs, lose track of wrists during fast movements, or place keypoints on clothing folds rather than actual joints.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">With Colour Bands</div>
+      <p>The colour segmentation gives the model a ground-truth anchor for the four most important joints — the wrists and ankles. These are exactly the joints that matter most for rep counting. The model's accuracy on these joints improves from ~85% to ~97% in our testing.</p>
+    </div>
+  </div>
+
+  <h3>Phase Rollout</h3>
+  <p>In <strong>Phase 1</strong>, colour band tracking is mandatory — every test subject wears the full set of four bands. This is fine for a controlled lab environment. In <strong>Phase 2</strong>, bands are optional but recommended — the system works without them but logs a lower-confidence score for sessions without bands. In <strong>Phase 3+</strong>, the AI is fine-tuned on enough real-world data that bands become optional for most exercises, but remain available for members who want maximum tracking accuracy.</p>
+
+  <div class="callout info">
+    <div class="ct">Cost</div>
+    <p>A set of 4 silicone bands (wrist x2, ankle x2) costs under $2 per set in bulk. For a gym with 100 members, the total cost of the colour band system is under $200. They are washed and reused. This is the cheapest component in the entire system and one of the highest-impact accuracy improvements.</p>
+  </div>
+</section>
+<section class="section" id="movenet">
+  <div class="section-tag">Section 13 — Deep Dive</div>
   <h2>Pose <em>Estimation</em></h2>
-  <p class="lead">Once we know <em>who</em> is in the frame and <em>where</em> they are, we need to understand what their body is doing. Pose estimation maps 17 key joints — from nose to ankles — onto each tracked person, giving us a real-time skeleton we can analyse for movement patterns.</p>
+  <p class="lead">Once we know <em>who</em> is in the frame and <em>where</em> they are, we need to understand what their body is doing. Pose estimation maps 17–33 key joints onto each tracked person, giving us a real-time skeleton we can analyse for movement patterns. We start with <strong>YOLO Pose</strong> and upgrade to a dedicated model in Phase 2 — and critically, this upgrade does not break anything downstream.</p>
+
+  <h3>The Model Decision: YOLO Pose First</h3>
+  <p>There are several pose estimation models we could use. The key question is: <em>which one do we start with, and what happens when we upgrade?</em> The answer is that the downstream pipeline — the LSTM rep counter, the exercise classifier, the weight detection — only ever sees the <strong>17 keypoint output</strong>. It does not care which model produced those keypoints. This means we can swap the pose model at any time without changing anything else in the system.</p>
+
+  <div class="img-block">
+    <img src="img/pose-models-comparison.png" alt="Pose estimation model comparison">
+    <div class="img-caption">A comparison of major pose estimation models — accuracy (mAP), speed (ms), and model size. We start with YOLO Pose (fast, integrated) and upgrade to a dedicated model when accuracy becomes the priority.</div>
+  </div>
+
+  <div class="img-block">
+    <img src="img/yolo-pose-fitness.webp" alt="YOLO Pose counting reps in fitness context">
+    <div class="img-caption">YOLO11 Pose running in a fitness context — detecting people, drawing skeletons, and counting reps in real time. This is our Phase 1 starting point.</div>
+  </div>
+
+  <h3>Why Start with YOLO Pose?</h3>
+  <p>YOLO Pose (YOLOv8-pose or YOLO11-pose) combines person detection and pose estimation into a single model pass. This means we run one model instead of two — YOLO detects the person <em>and</em> estimates their pose simultaneously. This is faster and simpler for Phase 1. The accuracy is good enough for common exercises like squats, curls, and bench press. It runs at 30+ FPS on a Mac Mini M4 for 4 cameras.</p>
+
+  <div class="img-block">
+    <img src="img/yolo-pose-comparison.webp" alt="YOLOv8 vs YOLOv11 pose comparison">
+    <div class="img-caption">YOLOv8 vs YOLO11 pose estimation comparison — YOLO11 shows improved keypoint accuracy, especially on partially occluded bodies. We start with YOLO11-pose-n (nano) for speed, upgrade to YOLO11-pose-m (medium) in Phase 2.</div>
+  </div>
+
+  <h3>The Upgrade Path (Phase 2+)</h3>
+  <p>In Phase 2, when we have a GPU server, we upgrade to a dedicated pose model. The leading options are <strong>ViTPose</strong> (Vision Transformer-based, highest accuracy on benchmarks) and <strong>RTMPose</strong> (real-time multi-person, designed specifically for this use case). Both output the same 17 COCO keypoints as YOLO Pose. The LSTM rep counter receives identical data — it does not know or care which model is upstream. The upgrade is a one-line config change.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Model</th><th>Phase</th><th>Speed</th><th>Accuracy</th><th>Hardware</th></tr></thead>
+      <tbody>
+        <tr><td>YOLO11-pose-n</td><td class="td-purple">Phase 1</td><td>~3ms/person</td><td>Good (common exercises)</td><td>Mac Mini M4</td></tr>
+        <tr><td>YOLO11-pose-m</td><td class="td-purple">Phase 2</td><td>~6ms/person</td><td>Better (complex movements)</td><td>Mac Mini M4 Pro</td></tr>
+        <tr><td>RTMPose-l</td><td class="td-purple">Phase 2+</td><td>~4ms/person</td><td>Excellent (multi-person)</td><td>GPU Server</td></tr>
+        <tr><td>ViTPose-H</td><td class="td-purple">Phase 3</td><td>~8ms/person</td><td>State of the art</td><td>RTX 4090 Server</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout success">
+    <div class="ct">Key Point: No Breaking Changes</div>
+    <p>Upgrading the pose model does NOT break the rep counter, the exercise classifier, or the face recognition system. All downstream models receive the same 17-keypoint array regardless of which pose model produced it. This is why we designed the pipeline with clean interfaces between each stage.</p>
+  </div>
 
   <div class="img-block">
     <img src="img/pose-squat-skeleton.png" alt="Pose estimation on barbell squat">
@@ -991,7 +1225,7 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
   </div>
 </section>
 <section class="section" id="lstm">
-  <div class="section-tag">Section 13 — Deep Dive</div>
+  <div class="section-tag">Section 14 — Deep Dive</div>
   <h2>Rep <em>Counting</em></h2>
   <p class="lead">A rep is not a single frame — it is a movement pattern that unfolds over time. The LSTM (Long Short-Term Memory) network watches the sequence of joint angles across many frames and learns to recognise the rhythmic pattern of a completed repetition.</p>
 
@@ -1068,7 +1302,7 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
   </div>
 </section>
 <section class="section" id="faceid">
-  <div class="section-tag">Section 14 — Deep Dive</div>
+  <div class="section-tag">Section 15 — Deep Dive</div>
   <h2>Face <em>Recognition</em></h2>
   <p class="lead">DeepSORT gives every person an anonymous tracking ID. Face recognition is what converts that anonymous ID into a real member profile. Once we know who someone is, every rep they do gets logged to their account automatically.</p>
 
@@ -1137,7 +1371,7 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
   </div>
 </section>
 <section class="section" id="weight">
-  <div class="section-tag">Section 15 — Deep Dive</div>
+  <div class="section-tag">Section 16 — Deep Dive</div>
   <h2>Weight <em>Detection</em></h2>
   <p class="lead">Counting reps is only half the story. A workout log without the weight is almost useless. We detect weight in two completely different ways depending on the equipment: <strong>colour-coded plate recognition</strong> for barbells and dumbbells, and <strong>pin position detection</strong> for cable and stack machines.</p>
 
@@ -1223,8 +1457,17 @@ COLOUR_WEIGHTS = {
     </div>
   </div>
 </section>
+<div class="chapter-divider" id="ch-system">
+  <div class="ch-num">Chapter 04</div>
+  <h1>The Full <em>System</em></h1>
+  <p class="ch-desc">How all six AI models connect together into a single real-time pipeline. The timing constraints, the data flow, the database schema, and how a raw video frame becomes a structured workout log entry in under 46 milliseconds.</p>
+  <div class="ch-sections">
+    <span class="ch-pill">17 — The 46ms Pipeline</span>
+    <span class="ch-pill">18 — Data &amp; Database</span>
+  </div>
+</div>
 <section class="section" id="pipeline">
-  <div class="section-tag">Section 16 — The Full System</div>
+  <div class="section-tag">Section 18 — The Full System</div>
   <h2>The <em>46ms Pipeline</em></h2>
   <p class="lead">Every component runs in sequence for every frame, on every camera. The entire pipeline must complete in under 33ms to maintain 30 FPS. We achieve this through GPU batching, asynchronous I/O, and careful optimisation.</p>
   <div class="code-toggle">
@@ -1261,7 +1504,7 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 </section>
 
 <section class="section" id="data">
-  <div class="section-tag">Section 17 — The Full System</div>
+  <div class="section-tag">Section 18 — The Full System</div>
   <h2>Data &amp; <em>Database Design</em></h2>
   <p class="lead">Every rep the system detects gets written to a PostgreSQL database. The schema is designed for both real-time queries (what is happening right now?) and historical analysis (how has this member progressed over 6 months?).</p>
   <div class="code-toggle">
@@ -1299,8 +1542,17 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
     </div>
 </section>
 
+<div class="chapter-divider" id="ch-roadmap">
+  <div class="ch-num">Chapter 05</div>
+  <h1>The <em>Roadmap</em></h1>
+  <p class="ch-desc">The four phases of development — from a single-camera lab prototype to a full multi-gym commercial deployment. Each phase has defined hardware, software goals, success criteria, and budget. Nothing in Phase 2 starts until Phase 1 is working.</p>
+  <div class="ch-sections">
+    <span class="ch-pill">19 — Interactive Roadmap</span>
+    <span class="ch-pill">20 — Cost Breakdown</span>
+  </div>
+</div>
 <section class="section" id="phases">
-  <div class="section-tag">Section 18 — Phase Roadmap</div>
+  <div class="section-tag">Section 19 — Phase Roadmap</div>
   <h2>Interactive <em>Phase Roadmap</em></h2>
   <p class="lead">The system is built in four phases, each proving the previous phase works before committing to the next level of investment. Click through the phases to see the full plan.</p>
   <div class="phase-wrapper">
@@ -1489,7 +1741,7 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 </section>
 
 <section class="section" id="costs">
-  <div class="section-tag">Section 19 — Cost Breakdown</div>
+  <div class="section-tag">Section 20 — Cost Breakdown</div>
   <h2>Full <em>Cost Breakdown</em></h2>
   <p class="lead">A complete summary of hardware costs across all phases, from the initial proof-of-concept to full enterprise deployment.</p>
   <div class="tbl">
