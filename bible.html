@@ -86,7 +86,7 @@
     .section h2 { font-size: clamp(28px, 3.5vw, 42px); font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 20px; letter-spacing: -0.02em; }
     .section h2 em { color: var(--purple-light); font-style: normal; }
     .section h3 { font-size: 19px; font-weight: 700; color: #fff; margin: 40px 0 12px; }
-    .lead { font-size: 17px; color: var(--text2); line-height: 1.75; margin-bottom: 28px; max-width: 780px; }
+    .lead { font-size: 18px; color: var(--text2); line-height: 1.75; margin-bottom: 28px; max-width: 780px; }
     p { color: var(--text2); margin-bottom: 16px; max-width: 780px; line-height: 1.75; }
     .img-block { border-radius: 12px; overflow: hidden; border: 1px solid var(--border2); background: var(--surface2); margin: 24px auto; width: 55%; }
     .img-block img { width: 100%; display: block; object-fit: contain; }
@@ -190,13 +190,12 @@
     .spec-table tr:last-child td { border-bottom: none; }
     @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
 
-    /* ---- Chapter Dividers ---- */
+    /* ---- Chapter Dividers (Dramatic Gate Style) ---- */
     .chapter-divider {
       margin: 0;
-      padding: 60px 60px 40px;
-      background: linear-gradient(135deg, var(--surface2) 0%, var(--bg) 100%);
-      border-top: 2px solid var(--border2);
-      border-bottom: 1px solid var(--border1);
+      padding: 0;
+      background: #0a0a0f;
+      border-top: 3px solid var(--purple);
       position: relative;
       overflow: hidden;
     }
@@ -204,50 +203,113 @@
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: radial-gradient(ellipse at 0% 50%, rgba(139,92,246,0.08) 0%, transparent 60%);
+      background: 
+        radial-gradient(ellipse at 20% 50%, rgba(139,92,246,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 50%, rgba(99,102,241,0.08) 0%, transparent 55%);
       pointer-events: none;
+    }
+    .ch-inner {
+      padding: 64px 60px 52px;
+      position: relative;
+      z-index: 1;
     }
     .chapter-divider .ch-num {
       font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.18em;
+      font-weight: 800;
+      letter-spacing: 0.22em;
       color: var(--purple);
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .chapter-divider .ch-num::before {
+      content: '';
+      display: inline-block;
+      width: 32px;
+      height: 2px;
+      background: var(--purple);
     }
     .chapter-divider h1 {
-      font-size: 42px;
-      font-weight: 800;
-      color: var(--text);
-      margin: 0 0 14px;
-      line-height: 1.1;
+      font-size: 52px;
+      font-weight: 900;
+      color: #fff;
+      margin: 0 0 18px;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
     }
     .chapter-divider h1 em {
       color: var(--purple);
       font-style: normal;
     }
     .chapter-divider .ch-desc {
-      font-size: 16px;
-      color: var(--muted);
-      max-width: 640px;
-      line-height: 1.6;
-      margin: 0;
+      font-size: 17px;
+      color: rgba(255,255,255,0.55);
+      max-width: 680px;
+      line-height: 1.7;
+      margin: 0 0 32px;
     }
     .chapter-divider .ch-sections {
       display: flex;
-      gap: 10px;
-      margin-top: 22px;
+      gap: 8px;
       flex-wrap: wrap;
+      margin-bottom: 36px;
     }
     .chapter-divider .ch-pill {
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 20px;
-      padding: 5px 14px;
+      background: rgba(139,92,246,0.12);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 4px;
+      padding: 5px 12px;
       font-size: 11px;
-      color: var(--muted);
+      color: rgba(255,255,255,0.6);
       font-weight: 600;
+      letter-spacing: 0.04em;
     }
+    /* Prerequisites Gate */
+    .ch-prereqs {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 28px;
+    }
+    .ch-prereqs-title {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .ch-prereq-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .ch-prereq {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      font-weight: 500;
+    }
+    .ch-prereq .prereq-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .prereq-done { background: #16a34a; color: #fff; }
+    .prereq-needed { background: rgba(139,92,246,0.4); color: #fff; }
+    .prereq-future { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }
     /* ---- Colour Tracking Bands ---- */
     .colour-band-grid {
       display: grid;
@@ -265,14 +327,9 @@
     .cb-red    { background: #c0392b; }
     .cb-blue   { background: #2980b9; }
     .cb-green  { background: #27ae60; }
-    .cb-yellow { background: #f39c12; }
+    .cb-yellow { background: #d4a017; }
     .cb-white  { background: #7f8c8d; }
-    @media (max-width: 700px) {
-      .colour-band-grid { grid-template-columns: repeat(3, 1fr); }
-      .chapter-divider { padding: 40px 24px 28px; }
-      .chapter-divider h1 { font-size: 28px; }
-    }
-
+    @media (max-width: 900px) {
     @media (max-width: 900px) {
       .sidebar { display: none; }
       .hero { padding: 48px 24px; }
@@ -287,7 +344,7 @@
 <nav class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">XL Fitness</div>
-    <div class="brand-sub">AI Overseer — The Bible v9.0</div>
+    <div class="brand-sub">AI Overseer — The Bible v10.0</div>
   </div>
   <div class="nav-group">Chapter 1 — The Vision</div>
   <a class="nav-link" href="#vision">01 — What We're Building</a>
@@ -334,6 +391,24 @@
   </div>
 </div>
 
+<div class="chapter-divider" id="ch-vision">
+  <div class="ch-inner">
+    <div class="ch-num">Chapter 01</div>
+    <h1>The <em>Vision</em></h1>
+    <p class="ch-desc">What we are building and why. The problem with modern gyms, the opportunity, and the high-level architecture of the AI Overseer system. Read this chapter first — every decision in every subsequent chapter flows from the goals defined here.</p>
+    <div class="ch-sections">
+      <span class="ch-pill">01 — What We're Building</span>
+      <span class="ch-pill">02 — The Core Problem</span>
+      <span class="ch-pill">03 — System Overview</span>
+    </div>
+    <div class="ch-prereqs">
+      <div class="ch-prereqs-title">This is the starting point — no prerequisites</div>
+      <div class="ch-prereq-list">
+        <div class="ch-prereq"><span class="prereq-icon prereq-done">✓</span>Read this chapter to understand the full scope before committing to any hardware or software</div>
+      </div>
+    </div>
+  </div>
+</div>
 <section class="section" id="vision">
   <div class="section-tag">Section 01 — The Vision</div>
   <h2>What We're <em>Building</em></h2>
@@ -423,15 +498,25 @@
 </section>
 
 <div class="chapter-divider" id="ch-hardware">
-  <div class="ch-num">Chapter 02</div>
-  <h1>The <em>Hardware</em></h1>
-  <p class="ch-desc">Everything physical — the cameras, the ceiling frame they hang from, the cable infrastructure that connects them, and the servers that process the video. This chapter covers every hardware decision from Phase 1 through Phase 4.</p>
-  <div class="ch-sections">
-    <span class="ch-pill">04 — Camera Selection</span>
-    <span class="ch-pill">05 — Ceiling &amp; Frame Mounting</span>
-    <span class="ch-pill">06 — PoE &amp; Cable Runs</span>
-    <span class="ch-pill">07 — Video Streaming Pipeline</span>
-    <span class="ch-pill">08 — Server Infrastructure</span>
+  <div class="ch-inner">
+    <div class="ch-num">Chapter 02</div>
+    <h1>The <em>Hardware</em></h1>
+    <p class="ch-desc">Everything physical — the cameras, the steel frame they hang from, the cable infrastructure that connects them, and the servers that process the video. This chapter covers every hardware decision from Phase 1 through Phase 4.</p>
+    <div class="ch-sections">
+      <span class="ch-pill">04 — Camera Selection</span>
+      <span class="ch-pill">05 — Frame Mounting</span>
+      <span class="ch-pill">06 — PoE &amp; Cable Runs</span>
+      <span class="ch-pill">07 — Streaming Pipeline</span>
+      <span class="ch-pill">08 — Server Infrastructure</span>
+    </div>
+    <div class="ch-prereqs">
+      <div class="ch-prereqs-title">Before this chapter can begin</div>
+      <div class="ch-prereq-list">
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Gym floor plan finalised (camera positions mapped)</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Budget approved for Phase 1 hardware (~$3,500 AUD)</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Network cabinet location confirmed</div>
+      </div>
+    </div>
   </div>
 </div>
 <section class="section" id="cameras">
@@ -827,18 +912,29 @@ model = torch.compile(model)     <span class="cm"># PyTorch 2.0 compilation</spa
 </section>
 
 <div class="chapter-divider" id="ch-ai">
-  <div class="ch-num">Chapter 03</div>
-  <h1>The <em>AI Models</em></h1>
-  <p class="ch-desc">The intelligence layer. Six distinct AI models, each solving one specific problem. They run in sequence on every frame, every second, on every camera. This chapter explains exactly what each model does, how it works, and how it evolves across phases.</p>
-  <div class="ch-sections">
-    <span class="ch-pill">09 — Software Stack</span>
-    <span class="ch-pill">10 — YOLO Detection</span>
-    <span class="ch-pill">11 — People Tracking</span>
-    <span class="ch-pill">12 — Colour Marker Tracking</span>
-    <span class="ch-pill">13 — Pose Estimation</span>
-    <span class="ch-pill">14 — Rep Counting</span>
-    <span class="ch-pill">15 — Face Recognition</span>
-    <span class="ch-pill">16 — Weight Detection</span>
+  <div class="ch-inner">
+    <div class="ch-num">Chapter 03</div>
+    <h1>The <em>AI Models</em></h1>
+    <p class="ch-desc">The intelligence layer. Five distinct specialist AI models, each solving exactly one problem. They run in sequence on every frame, every second, on every camera. This chapter explains exactly what each model does, how it works, and how it evolves across phases.</p>
+    <div class="ch-sections">
+      <span class="ch-pill">09 — Software Stack</span>
+      <span class="ch-pill">10 — YOLO Detection</span>
+      <span class="ch-pill">11 — People Tracking</span>
+      <span class="ch-pill">12 — Colour Marker Tracking</span>
+      <span class="ch-pill">13 — Pose Estimation</span>
+      <span class="ch-pill">14 — Rep Counting</span>
+      <span class="ch-pill">15 — Face Recognition</span>
+      <span class="ch-pill">16 — Weight Detection</span>
+    </div>
+    <div class="ch-prereqs">
+      <div class="ch-prereqs-title">Before this chapter can begin</div>
+      <div class="ch-prereq-list">
+        <div class="ch-prereq"><span class="prereq-icon prereq-done">✓</span>Chapter 2 complete — cameras streaming live video</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Mac Mini M4 server set up with Python 3.11 environment</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>At least 4 cameras producing stable RTSP streams</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Training dataset collected (minimum 500 annotated frames)</div>
+      </div>
+    </div>
   </div>
 </div>
 <section class="section" id="software">
@@ -1363,8 +1459,11 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
   <h2>Weight <em>Detection</em></h2>
   <p class="lead">Counting reps is useless if we don't know how much weight is being lifted. The system uses two entirely different visual methods to read weight: Colour-coded stripe detection for barbells (AlphaFit plates), and OCR/Bounding box detection for fixed weight stacks.</p>
 
+  <h3>Can We Read Plates from the Side?</h3>
+  <p>Yes — and for barbells, the side view is actually <em>better</em> than top-down. The coloured stripe runs around the full circumference of the plate edge. From the side, the camera sees a clean, thick coloured band — no perspective distortion, no occlusion from the bar itself. The challenge is that a person standing at the bar can block one side. The solution is simple: <strong>two cameras per barbell station</strong>, one on each side. At least one camera will always have a clear view of the loaded sleeve.</p>
+
   <h3>Method 1: AlphaFit Colour-Coded Plates (Barbells)</h3>
-  <p>For barbells, we are using AlphaFit bumper plates. These plates are black, but they have a thick, brightly coloured stripe around the outer edge. This is a massive advantage for computer vision — we don't need to read a number, we just need to read the colour.</p>
+  <p>For barbells, we are using AlphaFit bumper plates. These plates are black, but they have a thick, brightly coloured stripe around the outer edge. This is a massive advantage for computer vision — we don't need to read a number, we just need to read the colour. From the side, the camera sees a stack of coloured rings on the sleeve — one ring per plate.</p>
 
   <div class="img-block">
     <img src="img/alphafit-colour-plates.webp" alt="AlphaFit colour coded bumper plates">
@@ -1408,6 +1507,26 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
   
   <p><em>Enhancement:</em> If the white numbers wear off over time, we will apply brightly coloured adhesive stickers to the pin-hole area of each plate, converting the stack into a colour-reading problem just like the barbells.</p>
 </section>
+<div class="chapter-divider" id="ch-system">
+  <div class="ch-inner">
+    <div class="ch-num">Chapter 04</div>
+    <h1>The Full <em>System</em></h1>
+    <p class="ch-desc">How all five AI models connect together into a single real-time pipeline. The timing constraints, the data flow, the database schema, and how a raw video frame becomes a structured workout log entry in under 46 milliseconds.</p>
+    <div class="ch-sections">
+      <span class="ch-pill">17 — The 46ms Pipeline</span>
+      <span class="ch-pill">18 — Data &amp; Database</span>
+    </div>
+    <div class="ch-prereqs">
+      <div class="ch-prereqs-title">Before this chapter can begin</div>
+      <div class="ch-prereq-list">
+        <div class="ch-prereq"><span class="prereq-icon prereq-done">✓</span>Chapter 3 complete — all 5 models running individually</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Each model tested in isolation with &gt;90% accuracy</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>PostgreSQL database schema designed and deployed</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Redis message queue installed and running</div>
+      </div>
+    </div>
+  </div>
+</div>
 <section class="section" id="pipeline">
   <div class="section-tag">Section 18 — The Full System</div>
   <h2>The <em>46ms Pipeline</em></h2>
@@ -1485,22 +1604,43 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 </section>
 
 <div class="chapter-divider" id="ch-roadmap">
-  <div class="ch-num">Chapter 06</div>
-  <h1>The <em>Roadmap</em></h1>
-  <p class="ch-desc">The four phases of development — from a single-camera lab prototype to a full multi-gym commercial deployment. Each phase has defined hardware, software goals, success criteria, and budget. Nothing in Phase 2 starts until Phase 1 is working.</p>
-  <div class="ch-sections">
-    <span class="ch-pill">22 — Interactive Roadmap</span>
-    <span class="ch-pill">23 — Cost Breakdown</span>
+  <div class="ch-inner">
+    <div class="ch-num">Chapter 06</div>
+    <h1>The <em>Roadmap</em></h1>
+    <p class="ch-desc">The four phases of development — from a single-camera lab prototype to a full multi-gym commercial deployment. Each phase has defined hardware, software goals, success criteria, and budget. Nothing in Phase 2 starts until Phase 1 is working. Each phase gate is a real checkpoint, not a suggestion.</p>
+    <div class="ch-sections">
+      <span class="ch-pill">22 — Interactive Roadmap</span>
+      <span class="ch-pill">23 — Cost Breakdown</span>
+    </div>
+    <div class="ch-prereqs">
+      <div class="ch-prereqs-title">Phase gate summary</div>
+      <div class="ch-prereq-list">
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">1→2</span>Phase 1 working: reps counted, weight read, 1 person tracked</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-future">2→3</span>Phase 2 working: full zone, face ID, 10+ people tracked</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-future">3→4</span>Phase 3 working: full gym floor, 95%+ accuracy across all machines</div>
+      </div>
+    </div>
   </div>
 </div>
 <div class="chapter-divider" id="ch-neural-network">
-  <div class="ch-num">Chapter 05</div>
-  <h1>The <em>Neural Network</em></h1>
-  <p class="ch-desc">The core intelligence of the system. This chapter explains exactly how the AI works under the hood — why we use multiple specialist networks instead of one giant one, how we train them using manual annotations, and how transfer learning allows us to build a world-class system without millions of dollars of compute.</p>
-  <div class="ch-sections">
-    <span class="ch-pill">19 — One Network vs Many</span>
-    <span class="ch-pill">20 — Training &amp; Annotations</span>
-    <span class="ch-pill">21 — Transfer Learning</span>
+  <div class="ch-inner">
+    <div class="ch-num">Chapter 05</div>
+    <h1>The <em>Neural Network</em></h1>
+    <p class="ch-desc">The core intelligence of the system. This chapter explains exactly how the AI works under the hood — why we use multiple specialist networks instead of one giant one, how we train them using manual annotations, and how transfer learning allows us to build a world-class system without millions of dollars of compute. This is the most important chapter in the document.</p>
+    <div class="ch-sections">
+      <span class="ch-pill">19 — One Network vs Many</span>
+      <span class="ch-pill">20 — Training &amp; Annotations</span>
+      <span class="ch-pill">21 — Transfer Learning</span>
+    </div>
+    <div class="ch-prereqs">
+      <div class="ch-prereqs-title">Before training can begin</div>
+      <div class="ch-prereq-list">
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Minimum 2,000 annotated frames per model (plates, people, poses)</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>GPU available for training (RTX 3080 or better, or cloud GPU)</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Pre-trained base models downloaded (YOLOv11, RTMPose)</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Annotation tool set up (Roboflow or CVAT)</div>
+      </div>
+    </div>
   </div>
 </div>
 
