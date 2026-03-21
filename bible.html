@@ -558,6 +558,7 @@ input[type=range] { width: 100%; accent-color: var(--purple); cursor: pointer; }
   <a class="nav-link" href="#data">31 — Data Strategy</a>
   <a class="nav-link" href="#member-journey">32 — Member Journey</a>
   <a class="nav-link" href="#competitive">33 — Competitive Advantage</a>
+  <a class="nav-link" href="#server-infrastructure">34 — Server Infrastructure</a>
 </nav>
 
 <!-- ═══════════════════════════════════════
@@ -2262,6 +2263,511 @@ class RepCounterLSTM(nn.Module):
   </div>
 </section>
 
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 34 — SERVER INFRASTRUCTURE
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="server-infrastructure">
+  <div class="section-label">Section 34 — Infrastructure</div>
+  <h2>Server Infrastructure — <span class="accent">The Brain Room</span></h2>
+
+  <p>
+    The AI Overseer is only as good as the hardware running it. Every camera frame, every detection, every rep count, every face match — all of it runs on a server. Get the server wrong and the whole system falls apart. This section explains exactly what we need now, what we'll need at scale, and why the answer changes dramatically as we go from 10 machines to 200+.
+  </p>
+
+  <div class="callout callout-info">
+    <strong>The Core Question:</strong> At 200+ machines with 3 cameras each, that's 600+ camera streams running simultaneously. Each stream needs to be decoded, analysed by YOLO, tracked by DeepSORT, pose-estimated, and face-matched — 30 times per second. That is a serious amount of compute. A Mac Mini handles Phase 1. A dedicated server room handles the future.
+  </div>
+
+  <!-- ── PHASE JOURNEY ── -->
+  <h3 style="margin-top:2.5rem;">The Infrastructure Journey</h3>
+  <p>The hardware scales with the business. You don't buy a server room on day one — that's wasteful. But you also don't try to run 200 machines on a Mac Mini — that's impossible. Here's the progression:</p>
+
+  <div class="grid-4" style="margin:2rem 0;">
+    <div class="card" style="border-top:3px solid #7c3aed;">
+      <div style="font-size:2rem;margin-bottom:.5rem;">🍎</div>
+      <div style="color:var(--purple);font-weight:700;font-size:.75rem;letter-spacing:.1em;margin-bottom:.5rem;">PHASE 1 — NOW</div>
+      <div style="font-weight:700;font-size:1.1rem;margin-bottom:.75rem;">Mac Mini M4 Pro</div>
+      <div style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">
+        10–15 machines<br>
+        30 cameras<br>
+        1 location<br>
+        Proof of concept<br>
+        ~$3,000 AUD
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid #2563eb;">
+      <div style="font-size:2rem;margin-bottom:.5rem;">🖥️</div>
+      <div style="color:#2563eb;font-weight:700;font-size:.75rem;letter-spacing:.1em;margin-bottom:.5rem;">PHASE 2 — 6 MONTHS</div>
+      <div style="font-weight:700;font-size:1.1rem;margin-bottom:.75rem;">GPU Workstation</div>
+      <div style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">
+        30–50 machines<br>
+        90–150 cameras<br>
+        1–2 locations<br>
+        Full deployment<br>
+        ~$8,000 AUD
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid #059669;">
+      <div style="font-size:2rem;margin-bottom:.5rem;">🗄️</div>
+      <div style="color:#059669;font-weight:700;font-size:.75rem;letter-spacing:.1em;margin-bottom:.5rem;">PHASE 3 — 12 MONTHS</div>
+      <div style="font-weight:700;font-size:1.1rem;margin-bottom:.75rem;">Dedicated Server Rack</div>
+      <div style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">
+        50–120 machines<br>
+        150–360 cameras<br>
+        3–5 locations<br>
+        Multi-site<br>
+        ~$25,000 AUD
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid #dc2626;">
+      <div style="font-size:2rem;margin-bottom:.5rem;">🏢</div>
+      <div style="color:#dc2626;font-weight:700;font-size:.75rem;letter-spacing:.1em;margin-bottom:.5rem;">PHASE 4 — 24 MONTHS</div>
+      <div style="font-weight:700;font-size:1.1rem;margin-bottom:.75rem;">Server Room + Colocation</div>
+      <div style="font-size:.85rem;color:var(--text-muted);line-height:1.6;">
+        200+ machines<br>
+        600+ cameras<br>
+        10+ locations<br>
+        Enterprise scale<br>
+        ~$80,000+ AUD
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAC MINI PHASE 1 ── -->
+  <h3 style="margin-top:2.5rem;">Phase 1 — Why the Mac Mini M4 Pro Works Right Now</h3>
+
+  <div class="two-col" style="margin:1.5rem 0;">
+    <div>
+      <p>
+        The Mac Mini M4 Pro is genuinely impressive hardware for its size and price. Apple's M4 Pro chip has a <strong>Neural Engine rated at 38 TOPS</strong> (Trillion Operations Per Second) — that's dedicated AI inference hardware built directly into the chip. It runs silently, consumes only 20–40 watts, and fits in the palm of your hand.
+      </p>
+      <p>
+        For Phase 1 (10–15 machines, 30–45 cameras), the Mac Mini can handle the full pipeline. Here's why: YOLO on Apple Silicon runs via CoreML at roughly <strong>30ms per frame</strong>. With 30 cameras at 10fps (we don't need 30fps for tracking), that's 300 frames per second total. The M4 Pro's Neural Engine can handle approximately 200–300 inference operations per second for YOLO-scale models. It's tight but workable for a single gym location.
+      </p>
+      <div class="callout callout-success" style="margin-top:1rem;">
+        <strong>The Mac Mini is the right call for Phase 1.</strong> It's cheap, silent, reliable, and powerful enough to prove the concept. Don't over-engineer the infrastructure before you've proven the AI works.
+      </div>
+    </div>
+    <div>
+      <div class="code-block">
+# Mac Mini M4 Pro — Capacity Estimate
+# ─────────────────────────────────────
+chip:           Apple M4 Pro
+neural_engine:  38 TOPS
+ram:            24GB unified memory
+storage:        512GB SSD
+power:          20–40W (silent, fanless)
+price:          ~$2,799 AUD
+
+# What it can handle:
+cameras:        30–45 (at 10fps each)
+machines:       10–15
+yolo_fps:       ~200 frames/sec (CoreML)
+face_matches:   ~50/sec (InsightFace)
+db_writes:      ~1,000 events/sec (SQLite)
+
+# Bottleneck at scale:
+# Neural Engine saturates at ~45 cameras
+# RAM fills at ~60 concurrent streams
+# This is a single-location device only</div>
+    </div>
+  </div>
+
+  <!-- ── WHY MAC MINI ISN'T ENOUGH AT SCALE ── -->
+  <h3 style="margin-top:2.5rem;">Why the Mac Mini Hits a Wall at Scale</h3>
+
+  <p>
+    Let's do the maths. At 200 machines with 3 cameras each, you have <strong>600 camera streams</strong>. Even at a reduced 5fps per camera, that's 3,000 frames per second that need to be processed. Each frame needs YOLO detection (~15ms), DeepSORT tracking (~5ms), pose estimation (~30ms), and face matching (~25ms). The Mac Mini's Neural Engine can handle roughly 200 frames per second for the full pipeline. You'd need <strong>15 Mac Minis</strong> just to keep up — and that's before accounting for database writes, network overhead, and the web dashboard.
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Scale</th>
+          <th>Machines</th>
+          <th>Cameras</th>
+          <th>Frames/sec needed</th>
+          <th>Mac Minis required</th>
+          <th>Better solution</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span style="color:#7c3aed;font-weight:700;">Phase 1</span></td>
+          <td>10–15</td>
+          <td>30–45</td>
+          <td>~300</td>
+          <td style="color:#10b981;font-weight:700;">1 ✓</td>
+          <td>Mac Mini M4 Pro</td>
+        </tr>
+        <tr>
+          <td><span style="color:#2563eb;font-weight:700;">Phase 2</span></td>
+          <td>30–50</td>
+          <td>90–150</td>
+          <td>~750</td>
+          <td style="color:#f59e0b;font-weight:700;">3–4</td>
+          <td>GPU Workstation (RTX 4090)</td>
+        </tr>
+        <tr>
+          <td><span style="color:#059669;font-weight:700;">Phase 3</span></td>
+          <td>50–120</td>
+          <td>150–360</td>
+          <td>~1,800</td>
+          <td style="color:#ef4444;font-weight:700;">9</td>
+          <td>Dedicated Server Rack</td>
+        </tr>
+        <tr>
+          <td><span style="color:#dc2626;font-weight:700;">Phase 4</span></td>
+          <td>200+</td>
+          <td>600+</td>
+          <td>~3,000</td>
+          <td style="color:#dc2626;font-weight:700;">15 ← impractical</td>
+          <td>Server Room + GPU Cluster</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-warning" style="margin-top:1.5rem;">
+    <strong>The key insight:</strong> Running 15 Mac Minis costs ~$42,000 AUD and creates a coordination nightmare — how do they share data? How do you manage 15 separate machines? A single purpose-built GPU server handles what 15 Mac Minis can't, for less money, with one point of management.
+  </div>
+
+  <!-- ── DEDICATED SERVER ROOM ── -->
+  <h3 style="margin-top:2.5rem;">Phase 3+ — The Dedicated Server Room</h3>
+
+  <div class="two-col" style="margin:1.5rem 0;">
+    <div>
+      <p>
+        This is exactly what you're looking at in the photos — a proper server rack. Not a home setup, not a Mac Mini on a shelf. A <strong>42U rack cabinet</strong> with structured cabling, managed switches, UPS (Uninterruptible Power Supply), and enterprise-grade compute.
+      </p>
+      <p>
+        The rack in your photos shows exactly the right approach: <strong>patch panels at the top</strong> (all the coloured cables — these are the structured cable runs from every camera and device in the building), <strong>managed PoE switches in the middle</strong> (power and data to every camera over a single cable), and <strong>compute servers at the bottom</strong> (the actual processing hardware).
+      </p>
+      <p>
+        For XL Fitness at scale, the server room lives in a dedicated locked room — ideally with air conditioning, a UPS for power backup, and a fibre uplink to the internet. All camera data stays local. Only processed results (rep counts, session logs, leaderboard updates) go to the cloud.
+      </p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <img src="img/server-rack-1.webp" alt="Professional server rack with structured cabling — patch panels, PoE switches, and compute servers" style="width:100%;border-radius:12px;border:1px solid var(--border);">
+      <div style="font-size:.8rem;color:var(--text-muted);text-align:center;">A proper server rack — patch panels (coloured cables at top), managed switches (middle), compute servers (bottom). This is what Phase 3 looks like.</div>
+    </div>
+  </div>
+
+  <!-- ── WHAT GOES IN THE RACK ── -->
+  <h3 style="margin-top:2.5rem;">What Goes in the Rack — Component by Component</h3>
+
+  <div class="two-col" style="margin:1.5rem 0;">
+    <div>
+      <img src="img/server-rack-2.webp" alt="Server rack showing structured cabling and network equipment — the brain of a smart building" style="width:100%;border-radius:12px;border:1px solid var(--border);">
+      <div style="font-size:.8rem;color:var(--text-muted);text-align:center;margin-top:.5rem;">Every cable has a purpose. Every device has a job. A well-built rack is the nervous system of the entire AI operation.</div>
+    </div>
+    <div>
+      <p>Here's exactly what goes in the XL Fitness server rack, from top to bottom:</p>
+      <div class="code-block">
+# XL Fitness Server Rack — Full Spec
+# ─────────────────────────────────────────
+# 1U — Patch Panel (top)
+#   All camera ethernet cables terminate here
+#   Labelled by zone: "Machine 1-10 Cam A"
+#   Clean, organised, easy to trace faults
+
+# 2U — Core Managed Switch (48-port PoE+)
+#   Powers ALL cameras over ethernet
+#   VLAN separation: cameras / servers / admin
+#   10Gbps uplinks to compute servers
+#   Recommended: Ubiquiti UniFi Pro 48 PoE
+
+# 1U — Firewall / Router
+#   Separates camera network from internet
+#   VPN access for remote management
+#   Recommended: Ubiquiti Dream Machine Pro
+
+# 4U — Primary GPU Compute Server
+#   2x NVIDIA RTX 4090 (24GB VRAM each)
+#   128GB DDR5 RAM
+#   AMD EPYC or Intel Xeon CPU
+#   Handles ALL AI inference (YOLO, pose, face)
+#   ~$15,000 AUD
+
+# 2U — Database Server
+#   NVMe RAID array (10TB+)
+#   All session data, embeddings, video clips
+#   PostgreSQL + TimescaleDB
+#   ~$4,000 AUD
+
+# 2U — UPS (Uninterruptible Power Supply)
+#   Keeps everything running during power cuts
+#   30 min runtime at full load
+#   APC Smart-UPS 3000VA
+#   ~$1,500 AUD
+
+# 1U — KVM Switch + Management
+#   Access any server without a monitor
+#   Remote console access</div>
+    </div>
+  </div>
+
+  <!-- ── GPU COMPUTE DEEP DIVE ── -->
+  <h3 style="margin-top:2.5rem;">The GPU — Why It Changes Everything</h3>
+
+  <p>
+    The single biggest difference between a Mac Mini setup and a proper server is the <strong>GPU (Graphics Processing Unit)</strong>. A GPU isn't just for gaming — it's the most efficient hardware ever built for running AI models. Here's why:
+  </p>
+
+  <p>
+    A CPU (like the one in your laptop) has 8–16 powerful cores. It's great at doing complex tasks one at a time. A GPU has <strong>thousands of smaller cores</strong> — an NVIDIA RTX 4090 has 16,384 CUDA cores. It's designed to do thousands of simple tasks simultaneously. Running YOLO on a frame is exactly that kind of task — thousands of simple matrix multiplications happening in parallel. The GPU does in 2ms what takes a CPU 50ms.
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Hardware</th>
+          <th>YOLO per frame</th>
+          <th>Streams at 10fps</th>
+          <th>Cost</th>
+          <th>Best for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Mac Mini M4 Pro (Neural Engine)</td>
+          <td>~15ms</td>
+          <td>~45 streams</td>
+          <td>$2,799 AUD</td>
+          <td>Phase 1 (1 gym)</td>
+        </tr>
+        <tr>
+          <td>NVIDIA RTX 4090</td>
+          <td>~2ms</td>
+          <td>~300 streams</td>
+          <td>$3,500 AUD</td>
+          <td>Phase 2–3 (5–10 gyms)</td>
+        </tr>
+        <tr>
+          <td>2x RTX 4090 (server)</td>
+          <td>~2ms (parallel)</td>
+          <td>~600 streams</td>
+          <td>$15,000 AUD (full server)</td>
+          <td>Phase 3–4 (200+ machines)</td>
+        </tr>
+        <tr>
+          <td>NVIDIA A100 (datacenter)</td>
+          <td>~0.8ms</td>
+          <td>~1,200 streams</td>
+          <td>$40,000+ AUD</td>
+          <td>Phase 4+ (enterprise)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── NETWORK ARCHITECTURE ── -->
+  <h3 style="margin-top:2.5rem;">Network Architecture — How the Data Flows</h3>
+
+  <p>
+    At 200+ machines with 600 cameras, the network is as important as the compute. Each camera streams compressed H.264 video at roughly <strong>2–4 Mbps</strong>. At 600 cameras, that's 1.2–2.4 Gbps of video data flowing through the network constantly. You need a network designed for this — not a home router.
+  </p>
+
+  <div class="code-block">
+# XL Fitness Network Architecture — 200 Machine Scale
+# ─────────────────────────────────────────────────────
+#
+#  CAMERAS (600x)                    SERVER ROOM
+#  ─────────────                     ───────────────────────────────
+#  [Cam A] ─┐                        [Core Switch]
+#  [Cam B] ─┤─ PoE Switch ──────────►  VLAN 10: Camera Network
+#  [Cam C] ─┘  (per zone)               2.4 Gbps sustained
+#                                        10Gbps uplink to servers
+#  Each zone:                         
+#  - 1x 24-port PoE switch            [GPU Compute Server]
+#  - Powers 8 machines (24 cameras)     Receives all 600 streams
+#  - Connects to core switch            Runs YOLO + DeepSORT + Pose
+#  - Cat6A cable (up to 10Gbps)         Outputs: events only (~1Mbps)
+#
+#  MACHINES (200x)                   [Database Server]
+#  ─────────────                       Stores all session data
+#  [Card Reader] ──► PoE Switch         Video clips (flagged events)
+#  [Weight Sensor] ─► PoE Switch        Member profiles + embeddings
+#
+#  INTERNET UPLINK                   [Firewall]
+#  ─────────────                       Camera network NEVER touches internet
+#  NBN Business 1Gbps                  Only processed results go to cloud
+#  Backup: 4G/5G failover              VPN for remote management only</div>
+
+  <!-- ── MULTI-LOCATION ── -->
+  <h3 style="margin-top:2.5rem;">Multi-Location Strategy — 10+ Gyms</h3>
+
+  <p>
+    When XL Fitness expands to 10+ locations, the architecture changes again. You have two options: <strong>edge processing</strong> (a server rack at every gym) or <strong>centralised processing</strong> (one big server room that handles all gyms over the internet). Here's the honest comparison:
+  </p>
+
+  <div class="grid-2" style="margin:1.5rem 0;gap:1.5rem;">
+    <div class="card" style="border-top:3px solid #059669;">
+      <div style="color:#059669;font-weight:700;font-size:.8rem;letter-spacing:.1em;margin-bottom:1rem;">OPTION A — EDGE PROCESSING (RECOMMENDED)</div>
+      <p style="font-size:.9rem;color:var(--text-muted);margin-bottom:1rem;">Each gym has its own server rack. AI runs locally. Only results go to the cloud.</p>
+      <div style="font-size:.85rem;line-height:1.8;">
+        <div style="color:#10b981;">✓ Works if internet goes down</div>
+        <div style="color:#10b981;">✓ No video data leaves the building (privacy)</div>
+        <div style="color:#10b981;">✓ Low latency — everything is local</div>
+        <div style="color:#10b981;">✓ Scales linearly — add a rack per gym</div>
+        <div style="color:#ef4444;">✗ Higher upfront cost per location</div>
+        <div style="color:#ef4444;">✗ Need IT support at each site</div>
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid #f59e0b;">
+      <div style="color:#f59e0b;font-weight:700;font-size:.8rem;letter-spacing:.1em;margin-bottom:1rem;">OPTION B — CENTRALISED CLOUD PROCESSING</div>
+      <p style="font-size:.9rem;color:var(--text-muted);margin-bottom:1rem;">All cameras stream to one central server. One big GPU cluster handles everything.</p>
+      <div style="font-size:.85rem;line-height:1.8;">
+        <div style="color:#10b981;">✓ One place to manage everything</div>
+        <div style="color:#10b981;">✓ Easier to upgrade hardware</div>
+        <div style="color:#ef4444;">✗ Requires 1Gbps+ upload at every gym</div>
+        <div style="color:#ef4444;">✗ Internet outage = system offline</div>
+        <div style="color:#ef4444;">✗ Video data leaves the building (privacy risk)</div>
+        <div style="color:#ef4444;">✗ Latency: 50–200ms vs 5ms local</div>
+        <div style="color:#ef4444;">✗ Bandwidth cost: ~$500–2,000/month per gym</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── INTERACTIVE CAPACITY CALCULATOR ── -->
+  <h3 style="margin-top:2.5rem;">Interactive Capacity Calculator</h3>
+  <p>Drag the slider to see what hardware you need at different scales:</p>
+
+  <div class="demo-box" style="max-width:100%;">
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <label style="font-weight:600;white-space:nowrap;">Number of Machines:</label>
+      <input type="range" id="machine-slider" min="10" max="250" value="15" step="5" style="flex:1;min-width:200px;">
+      <span id="machine-count" style="font-size:1.5rem;font-weight:700;color:var(--purple);min-width:3rem;">15</span>
+    </div>
+
+    <div id="capacity-result" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;">
+      <!-- Filled by JS -->
+    </div>
+
+    <div id="capacity-recommendation" style="margin-top:1.5rem;padding:1.25rem;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+
+  <!-- ── COST BREAKDOWN ── -->
+  <h3 style="margin-top:2.5rem;">Full Cost Breakdown — Phase 3 Server Room</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Spec</th>
+          <th>Purpose</th>
+          <th>Cost (AUD)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>42U Server Rack Cabinet</strong></td>
+          <td>APC NetShelter SX 42U</td>
+          <td>Houses all equipment, cable management</td>
+          <td>$2,500</td>
+        </tr>
+        <tr>
+          <td><strong>GPU Compute Server</strong></td>
+          <td>2x RTX 4090, 128GB RAM, EPYC CPU</td>
+          <td>All AI inference — YOLO, pose, face ID</td>
+          <td>$15,000</td>
+        </tr>
+        <tr>
+          <td><strong>Database Server</strong></td>
+          <td>10TB NVMe RAID, 64GB RAM</td>
+          <td>Session data, embeddings, video clips</td>
+          <td>$4,000</td>
+        </tr>
+        <tr>
+          <td><strong>Core PoE Switch (48-port)</strong></td>
+          <td>Ubiquiti UniFi Pro 48 PoE</td>
+          <td>Powers + connects all cameras</td>
+          <td>$2,200</td>
+        </tr>
+        <tr>
+          <td><strong>Zone PoE Switches (x10)</strong></td>
+          <td>Ubiquiti UniFi 24 PoE (x10)</td>
+          <td>One per zone, 8 machines each</td>
+          <td>$6,000</td>
+        </tr>
+        <tr>
+          <td><strong>Firewall / Router</strong></td>
+          <td>Ubiquiti Dream Machine Pro</td>
+          <td>Network security, VLAN management</td>
+          <td>$800</td>
+        </tr>
+        <tr>
+          <td><strong>Patch Panels + Cabling</strong></td>
+          <td>Cat6A, 600 runs</td>
+          <td>Structured cabling to all cameras</td>
+          <td>$8,000</td>
+        </tr>
+        <tr>
+          <td><strong>UPS</strong></td>
+          <td>APC Smart-UPS 3000VA</td>
+          <td>Power backup — 30 min runtime</td>
+          <td>$1,500</td>
+        </tr>
+        <tr>
+          <td><strong>Air Conditioning</strong></td>
+          <td>Split system, 2.5kW</td>
+          <td>Server room cooling</td>
+          <td>$2,500</td>
+        </tr>
+        <tr>
+          <td><strong>Installation + Labour</strong></td>
+          <td>Certified cabling contractor</td>
+          <td>Rack assembly, cable runs, testing</td>
+          <td>$5,000</td>
+        </tr>
+        <tr style="background:rgba(124,58,237,0.1);">
+          <td colspan="3"><strong>Total — Phase 3 Server Room</strong></td>
+          <td><strong>~$47,500 AUD</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-success" style="margin-top:1.5rem;">
+    <strong>Context:</strong> $47,500 for infrastructure that handles 120 machines across 5 locations. That's $396 per machine — less than the cost of one Technogym treadmill. And unlike a treadmill, this infrastructure generates data that makes every machine more valuable.
+  </div>
+
+  <!-- ── DECISION TIMELINE ── -->
+  <h3 style="margin-top:2.5rem;">When to Upgrade — The Decision Points</h3>
+
+  <div class="code-block">
+# Infrastructure Upgrade Decision Tree
+# ─────────────────────────────────────────────────────────────
+#
+#  START → Mac Mini M4 Pro
+#          ↓
+#          Is CPU/Neural Engine above 80% sustained load?
+#          ├── NO  → Stay on Mac Mini, keep building
+#          └── YES → Are you at 2+ locations?
+#                    ├── NO  → Add a second Mac Mini, cluster them
+#                    └── YES → Move to GPU Workstation (RTX 4090)
+#                              ↓
+#                              Is GPU above 80% sustained load?
+#                              ├── NO  → Stay on workstation
+#                              └── YES → Are you at 5+ locations?
+#                                        ├── NO  → Add second GPU
+#                                        └── YES → Build server rack
+#                                                  ↓
+#                                                  At 10+ locations →
+#                                                  Dedicated server room
+#                                                  + colocation option</div>
+
+  <div class="callout callout-info" style="margin-top:1.5rem;">
+    <strong>The rule of thumb:</strong> Upgrade hardware when you're consistently above 80% utilisation — not when you hit 100%. You want headroom for traffic spikes (peak gym hours, new member onboarding days). Monitor utilisation from day one using the built-in dashboard.
+  </div>
+
+</section>
+
 </main>
 
 <script>
@@ -3020,6 +3526,71 @@ function resetPipeline() {
   document.getElementById('pipeline-stages').innerHTML = '';
   document.getElementById('pipeline-total').innerHTML = 'Press "Process Frame" to run the pipeline';
   document.getElementById('pipeline-run-btn').disabled = false;
+}
+
+
+// ─── CAPACITY CALCULATOR ───
+function updateCapacity() {
+  const machines = parseInt(document.getElementById('machine-slider').value);
+  document.getElementById('machine-count').textContent = machines;
+  const cameras = machines * 3;
+  const framesPerSec = cameras * 10;
+  
+  let hardware, cost, phase, color, recommendation;
+  
+  if (machines <= 15) {
+    hardware = 'Mac Mini M4 Pro'; cost = '$2,799 AUD'; phase = 'Phase 1'; color = '#7c3aed';
+    recommendation = '✓ One Mac Mini M4 Pro handles this comfortably. Start here. Prove the system works. Upgrade when you hit 80% CPU utilisation.';
+  } else if (machines <= 50) {
+    hardware = 'GPU Workstation (RTX 4090)'; cost = '~$8,000 AUD'; phase = 'Phase 2'; color = '#2563eb';
+    recommendation = '⚡ A dedicated GPU workstation with an RTX 4090 is the right call. One GPU handles ~300 camera streams. You have headroom to grow.';
+  } else if (machines <= 120) {
+    hardware = 'Dedicated Server Rack'; cost = '~$25,000 AUD'; phase = 'Phase 3'; color = '#059669';
+    recommendation = '🗄️ Time for a proper server rack. 2x RTX 4090 in a rack server handles 600 streams. Add structured cabling and a managed PoE switch infrastructure.';
+  } else {
+    hardware = 'Server Room + GPU Cluster'; cost = '~$47,500+ AUD'; phase = 'Phase 4'; color = '#dc2626';
+    recommendation = '🏢 Enterprise scale. Dedicated server room with GPU cluster, structured cabling across all locations, and a centralised database. This is the full build.';
+  }
+  
+  const macMinis = Math.ceil(framesPerSec / 200);
+  
+  const resultEl = document.getElementById('capacity-result');
+  if (resultEl) {
+    resultEl.innerHTML = `
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center;">
+        <div style="font-size:.75rem;color:var(--text-muted);letter-spacing:.1em;margin-bottom:.5rem;">CAMERAS NEEDED</div>
+        <div style="font-size:2rem;font-weight:700;color:${color};">${cameras}</div>
+        <div style="font-size:.8rem;color:var(--text-muted);">3 per machine</div>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center;">
+        <div style="font-size:.75rem;color:var(--text-muted);letter-spacing:.1em;margin-bottom:.5rem;">FRAMES/SEC</div>
+        <div style="font-size:2rem;font-weight:700;color:${color};">${framesPerSec.toLocaleString()}</div>
+        <div style="font-size:.8rem;color:var(--text-muted);">at 10fps per camera</div>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center;">
+        <div style="font-size:.75rem;color:var(--text-muted);letter-spacing:.1em;margin-bottom:.5rem;">MAC MINIS NEEDED</div>
+        <div style="font-size:2rem;font-weight:700;color:${macMinis > 3 ? '#ef4444' : '#10b981'};">${macMinis}</div>
+        <div style="font-size:.8rem;color:var(--text-muted);">${macMinis > 3 ? '← impractical' : '← manageable'}</div>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center;">
+        <div style="font-size:.75rem;color:var(--text-muted);letter-spacing:.1em;margin-bottom:.5rem;">RECOMMENDED</div>
+        <div style="font-size:1rem;font-weight:700;color:${color};">${hardware}</div>
+        <div style="font-size:.8rem;color:var(--text-muted);">${cost}</div>
+      </div>
+    `;
+  }
+  
+  const recEl = document.getElementById('capacity-recommendation');
+  if (recEl) {
+    recEl.innerHTML = `<div style="color:${color};font-weight:700;font-size:.8rem;letter-spacing:.1em;margin-bottom:.75rem;">${phase} — ${machines} MACHINES</div><p style="margin:0;line-height:1.7;">${recommendation}</p>`;
+    recEl.style.borderColor = color;
+  }
+}
+
+const machineSlider = document.getElementById('machine-slider');
+if (machineSlider) {
+  machineSlider.addEventListener('input', updateCapacity);
+  updateCapacity();
 }
 
 // ─── INIT ───
