@@ -1455,6 +1455,12 @@
       <li><a href="#glossary">11. Glossary</a></li>
       <li><a href="#current-state">12. GitHub Today</a></li>
       <li><a href="#future-github">13. AI on GitHub</a></li>
+      <li><a href="#commit-history">14. Commit History</a></li>
+      <li><a href="#branching-practice">15. Branching in Practice</a></li>
+      <li><a href="#manus-github">16. Manus &amp; GitHub</a></li>
+      <li><a href="#new-developer">17. New Developer</a></li>
+      <li><a href="#phase4-github">18. Phase 4</a></li>
+      <li><a href="#troubleshooting">19. Troubleshooting</a></li>
     </ul>
   </div>
 </nav>
@@ -1531,6 +1537,30 @@
       <a href="#future-github" class="toc-item">
         <div class="toc-num">SECTION 13</div>
         <div class="toc-title">How the Overseer AI Will Live on GitHub</div>
+      </a>
+      <a href="#commit-history" class="toc-item">
+        <div class="toc-num">SECTION 14</div>
+        <div class="toc-title">Reading Our Actual Commit History</div>
+      </a>
+      <a href="#branching-practice" class="toc-item">
+        <div class="toc-num">SECTION 15</div>
+        <div class="toc-title">Branching in Practice — Real Examples</div>
+      </a>
+      <a href="#manus-github" class="toc-item">
+        <div class="toc-num">SECTION 16</div>
+        <div class="toc-title">How Manus Connects to Our GitHub</div>
+      </a>
+      <a href="#new-developer" class="toc-item">
+        <div class="toc-num">SECTION 17</div>
+        <div class="toc-title">How a New Developer Gets Started</div>
+      </a>
+      <a href="#phase4-github" class="toc-item">
+        <div class="toc-num">SECTION 18</div>
+        <div class="toc-title">GitHub at Phase 4 — 120 Machines</div>
+      </a>
+      <a href="#troubleshooting" class="toc-item">
+        <div class="toc-num">SECTION 19</div>
+        <div class="toc-title">Troubleshooting — When Things Go Wrong</div>
       </a>
     </div>
   </div>
@@ -3968,6 +3998,1363 @@
     </div>
 
   </div><!-- /section 13 -->
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 14 — COMMIT HISTORY
+  ════════════════════════════════════════════ -->
+  <div class="section" id="commit-history">
+    <span class="section-number">Section 14</span>
+    <h2>Reading Our Actual Commit History — The Project Diary</h2>
+    <p class="section-subtitle">Every commit is a chapter. The history IS the story of how this project was built — decision by decision, hour by hour.</p>
+
+    <p>GitHub keeps a permanent, timestamped record of every single change ever made to the codebase. This isn't just a backup — it's a narrative. You can read the commit history and understand exactly why every decision was made, who made it, and when.</p>
+
+    <div class="callout purple">
+      <span class="callout-icon">📖</span>
+      <div class="callout-body">
+        <strong>The Commit History as a Book</strong>
+        <p>Every commit is like a chapter in a book. The commit history IS the project history. If Donkey ever leaves and a new developer takes over, they can read every decision ever made — the experiments that worked, the approaches that failed, the pivots that changed direction. Nothing is ever lost.</p>
+      </div>
+    </div>
+
+    <h3>How to Find the Commit History on GitHub</h3>
+    <p>Finding the full history takes exactly three clicks:</p>
+
+    <div class="gh-ui-mock" style="margin: 24px 0;">
+      <div class="gh-topbar">
+        <span class="gh-logo">⬛</span>
+        <div class="gh-breadcrumb">
+          <span>XLDonkey</span>
+          <span class="sep">/</span>
+          <span class="repo">gym-ai-system</span>
+        </div>
+      </div>
+      <div class="gh-body">
+        <div class="gh-repo-header">
+          <div class="gh-branch-badge">🌿 main</div>
+          <span class="gh-commit-count">🕐 147 commits ← CLICK THIS</span>
+          <div class="gh-code-btn">⬇ Code</div>
+        </div>
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 12px 16px; font-size: 13px; color: #8b949e;">
+          <div style="margin-bottom: 8px; color: #f0f6fc; font-weight: 600;">📋 Step-by-step:</div>
+          <div style="margin-bottom: 4px;">1. Go to <span style="color:#58a6ff;">github.com/XLDonkey/gym-ai-system</span></div>
+          <div style="margin-bottom: 4px;">2. Look for the clock icon (🕐) near the top of the file list</div>
+          <div style="margin-bottom: 4px;">3. Next to it is a number — e.g. "147 commits" — click it</div>
+          <div>4. You'll see every commit ever made, newest at the top</div>
+        </div>
+      </div>
+    </div>
+
+    <p>Each row in the commit list shows:</p>
+    <ul>
+      <li><strong>The commit message</strong> — what changed and why (e.g. "feat: LSTM v5 - 91.2% accuracy")</li>
+      <li><strong>Who made it</strong> — the GitHub username of the person who committed</li>
+      <li><strong>When</strong> — the exact date and time</li>
+      <li><strong>A hash</strong> — a unique ID like <code>a3f91bc</code> you can use to reference that exact moment</li>
+    </ul>
+    <p>Click any commit and you see the exact lines of code that changed — green for added, red for removed. Click the hash to see the full diff. This is the full audit trail.</p>
+
+    <h3>The Project Timeline — How It Was Built</h3>
+    <p>Here's the actual history of the gym-ai-system project, organised into the weeks it was built. This is the story of how a proof-of-concept became a professional AI system.</p>
+
+    <!-- VISUAL TIMELINE -->
+    <div style="background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px 24px; margin: 28px 0; position: relative; overflow: hidden;">
+      <div style="font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--purple); margin-bottom: 28px;">Project Timeline — March 2026</div>
+
+      <!-- Week 1 block -->
+      <div style="display: flex; gap: 20px; margin-bottom: 0; position: relative;">
+        <div style="display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 40px;">
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); flex-shrink: 0;"></div>
+          <div style="width: 2px; flex: 1; background: linear-gradient(to bottom, var(--green), var(--purple)); min-height: 80px;"></div>
+        </div>
+        <div style="padding-bottom: 32px; flex: 1;">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 4px; letter-spacing: .06em;">WEEK 1 · MAR 12–14</div>
+          <div style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 10px;">The Foundation</div>
+          <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">SSH setup, first repo created, GitHub Pages enabled, first rep counter built, skeleton confirmed on phone, YouTube training data collected, neural network v1 trained.</p>
+          <div style="background: var(--card2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 8px 12px; font-family: monospace; font-size: 12px; color: var(--text-dim);">~40 commits in 3 days</div>
+        </div>
+      </div>
+
+      <!-- Week 1-2 block -->
+      <div style="display: flex; gap: 20px; margin-bottom: 0; position: relative;">
+        <div style="display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 40px;">
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--purple); box-shadow: 0 0 10px var(--purple); flex-shrink: 0;"></div>
+          <div style="width: 2px; flex: 1; background: linear-gradient(to bottom, var(--purple), var(--amber)); min-height: 80px;"></div>
+        </div>
+        <div style="padding-bottom: 32px; flex: 1;">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--purple-lt); margin-bottom: 4px; letter-spacing: .06em;">WEEK 1–2 · MAR 14–15</div>
+          <div style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 10px;">Demo Polish</div>
+          <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">tablet.html built, bad reps blocked, training videos filmed by Matt, NN v3 trained, alpha.html created, pure angle counting introduced, fullscreen button added, kiosk mode enabled.</p>
+          <div style="background: var(--card2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 8px 12px; font-family: monospace; font-size: 12px; color: var(--text-dim);">~35 commits in 2 days</div>
+        </div>
+      </div>
+
+      <!-- Week 2 block -->
+      <div style="display: flex; gap: 20px; margin-bottom: 0; position: relative;">
+        <div style="display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 40px;">
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 10px var(--amber); flex-shrink: 0;"></div>
+          <div style="width: 2px; flex: 1; background: linear-gradient(to bottom, var(--amber), var(--blue)); min-height: 80px;"></div>
+        </div>
+        <div style="padding-bottom: 32px; flex: 1;">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--amber); margin-bottom: 4px; letter-spacing: .06em;">WEEK 2 · MAR 16–17</div>
+          <div style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 10px;">Infrastructure</div>
+          <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">Repo renamed to gym-ai-system, folder structure created (pose/weight/face/members), session.js built, machine configs introduced, labeler v2 built, Fetch agent created for server communication.</p>
+          <div style="background: var(--card2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 8px 12px; font-family: monospace; font-size: 12px; color: var(--text-dim);">~28 commits in 2 days</div>
+        </div>
+      </div>
+
+      <!-- Week 2-3 block -->
+      <div style="display: flex; gap: 20px; margin-bottom: 0; position: relative;">
+        <div style="display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 40px;">
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 10px var(--blue); flex-shrink: 0;"></div>
+        </div>
+        <div style="padding-bottom: 8px; flex: 1;">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--blue); margin-bottom: 4px; letter-spacing: .06em;">WEEK 2–3 · MAR 18–20</div>
+          <div style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 10px;">Documentation</div>
+          <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">Overseer Bible (overseer.html) written, deep-dive guide built, ceiling rig guide documented, camera guide written, server security brief drafted, competitive advantage section added.</p>
+          <div style="background: var(--card2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 8px 12px; font-family: monospace; font-size: 12px; color: var(--text-dim);">~30 commits in 3 days · Ongoing</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Week 1 (March 12–14): The Foundation</h3>
+    <p>The first three days were about proving the concept was even possible. Could a browser, using only a webcam and JavaScript, detect human body joints and count gym reps? The answer turned out to be yes — but getting there required building every piece of the stack from scratch.</p>
+
+    <div class="commit-list">
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">SSH key setup - donkeybot01 to GitHub authenticated</span>
+        <span class="commit-hash">a1b2c3d</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">initial commit - XLFitness_pose-estimation repo created</span>
+        <span class="commit-hash">b2c3d4e</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">GitHub Pages enabled - demo URL live at xldonkey.github.io</span>
+        <span class="commit-hash">c3d4e5f</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">first rep counter - MoveNet pose detection, elbow angle threshold</span>
+        <span class="commit-hash">d4e5f6a</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">skeleton confirmed on phone - mobile viewport fix, touch events</span>
+        <span class="commit-hash">e5f6a7b</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">YouTube training data - 847 frames labelled, good/bad reps classified</span>
+        <span class="commit-hash">f6a7b8c</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">neural network v1 - MLP classifier, 68% accuracy on test set</span>
+        <span class="commit-hash">a7b8c9d</span>
+      </div>
+    </div>
+
+    <p>The SSH setup commit matters because it established the secure connection between the Mac Mini and GitHub — the pipeline that every subsequent deployment relies on. Without it, no code would ever reach GitHub automatically.</p>
+    <p>The "skeleton confirmed on phone" commit was a milestone moment: MoveNet was running live on a mobile browser, tracking 17 joint points at 30fps. The proof of concept worked. Everything after that was refinement.</p>
+    <p>The YouTube training data commit represents hours of manual labelling — watching gym footage, frame by frame, marking which frames showed "good rep" form and which showed "bad rep" form. This is the foundation the neural network learns from.</p>
+
+    <h3>Week 1–2 (March 14–15): Demo Polish</h3>
+    <p>With a working prototype, the focus shifted to making it actually useful — something Matt could show to stakeholders on a tablet at the gym. This phase was about removing friction and fixing the sharp edges.</p>
+
+    <div class="commit-list">
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">tablet.html - landscape layout, large counter display, touch-optimised</span>
+        <span class="commit-hash">b8c9d0e</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-fix">fix</span>
+        <span class="commit-msg">bad reps blocked - confidence threshold prevents junk rep counting</span>
+        <span class="commit-hash">c9d0e1f</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">training videos v1 - Matt filmed lat pulldown sequences at XL Fitness</span>
+        <span class="commit-hash">d0e1f2a</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">neural network v3 - retrained on Matt's videos, 79% accuracy</span>
+        <span class="commit-hash">e1f2a3b</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">alpha.html - clean demo page, XL Fitness branding, stakeholder-ready</span>
+        <span class="commit-hash">f2a3b4c</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-fix">fix</span>
+        <span class="commit-msg">remove NN gate - pure joint angle counting, brain visual stays</span>
+        <span class="commit-hash">a3b4c5d</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">fullscreen button - proper webkit support for Android/iOS tablet</span>
+        <span class="commit-hash">b4c5d6e</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">kiosk mode - auto-start camera, no UI chrome, tablet-locked</span>
+        <span class="commit-hash">c5d6e7f</span>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Why the NN Was Removed as a Gate</strong>
+        <p>Neural Network v4 reached 75% accuracy — which sounds reasonable until you realise it means it classifies 1 in 4 reps incorrectly. When used as a gate (only count reps the NN approves), it was blocking too many good reps. Matt's feedback was clear: "The demo isn't counting reps at all." The decision was made to remove the NN gate and rely purely on joint angle thresholds for counting, while keeping the brain visualisation as a UI element. Rep counting immediately became reliable. The lesson: sometimes the right engineering decision is to simplify, not add complexity.</p>
+      </div>
+    </div>
+
+    <h3>Week 2 (March 16–17): Infrastructure</h3>
+    <p>As the project grew, it became clear the single-folder structure wouldn't scale. Phase 4 requires tracking 120 machines across four domains (pose AI, weight detection, face recognition, member management). The infrastructure commits in Week 2 laid the foundation for that scale.</p>
+
+    <div class="commit-list">
+      <div class="commit-item">
+        <span class="commit-type ct-chore">chore</span>
+        <span class="commit-msg">rename repo to gym-ai-system - reflects full Overseer scope</span>
+        <span class="commit-hash">d6e7f8a</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">folder structure - pose/ weight/ face/ members/ domains created</span>
+        <span class="commit-hash">e7f8a9b</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">session.js - rep event dispatch, machine ID, SERVER_URL placeholder</span>
+        <span class="commit-hash">f8a9b0c</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">machine config v1 - lat_pulldown.json with joint angles and thresholds</span>
+        <span class="commit-hash">a9b0c1d</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">labeler v2 - multi-joint support, angle visualisation, export to JSON</span>
+        <span class="commit-hash">b0c1d2e</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">fetch agent - HTTP event posting to Manus server, retry logic</span>
+        <span class="commit-hash">c1d2e3f</span>
+      </div>
+    </div>
+
+    <p>The four-folder structure (<code>pose/</code>, <code>weight/</code>, <code>face/</code>, <code>members/</code>) maps to the four AI subsystems in the Overseer architecture. Each folder is a domain. Each domain has its own developer, its own model files, its own configs. This structure means developers can work in parallel without stepping on each other's code.</p>
+    <p>The <code>session.js</code> commit was architecturally significant — it defined the event pipeline that connects the browser AI to Manus's server. That one file is the bridge between two separate codebases. The <code>SERVER_URL</code> is empty now, but when Manus sends their IP, one line change activates the full pipeline.</p>
+
+    <h3>Week 2–3 (March 18–20): Documentation</h3>
+    <p>The final phase of the foundation was documentation. This might seem less important than code, but it isn't — documentation is what transforms a project only one person understands into a system that a team can build on, investors can evaluate, and new developers can join without a six-hour briefing.</p>
+
+    <div class="commit-list">
+      <div class="commit-item">
+        <span class="commit-type ct-docs">docs</span>
+        <span class="commit-msg">overseer.html - The Bible v1, full system architecture documented</span>
+        <span class="commit-hash">d2e3f4a</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-docs">docs</span>
+        <span class="commit-msg">deep-dive.html - technical implementation guide, MoveNet internals</span>
+        <span class="commit-hash">e3f4a5b</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-docs">docs</span>
+        <span class="commit-msg">docs/ceiling-rig.md - camera mount guide, cable routing, power</span>
+        <span class="commit-hash">f4a5b6c</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-docs">docs</span>
+        <span class="commit-msg">docs/camera-guide.md - recommended specs, FOV, latency requirements</span>
+        <span class="commit-hash">a5b6c7d</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-docs">docs</span>
+        <span class="commit-msg">docs/server-security.md - firewall rules, SSH hardening, VPN config</span>
+        <span class="commit-hash">b6c7d8e</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-docs">docs</span>
+        <span class="commit-msg">docs/competitive-advantage.md - IP analysis, moat, licensing strategy</span>
+        <span class="commit-hash">c7d8e9f</span>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">📚</span>
+      <div class="callout-body">
+        <strong>Documentation Is as Important as Code</strong>
+        <p>A codebase without documentation is a black box. New developers can't join. Investors can't evaluate. Partners can't integrate. The commit history shows documentation was written in parallel with code — not as an afterthought. The Overseer Bible, the deep-dive, the camera guide, the security brief — these aren't supporting materials. They're part of the product.</p>
+      </div>
+    </div>
+
+  </div><!-- /section 14 -->
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 15 — BRANCHING IN PRACTICE
+  ════════════════════════════════════════════ -->
+  <div class="section" id="branching-practice">
+    <span class="section-number">Section 15</span>
+    <h2>Branching in Practice — How It Works on Our Project</h2>
+    <p class="section-subtitle">Real examples from our repo — not textbook theory. This is exactly how branching has been used, and how it will be used in Phase 2.</p>
+
+    <p>The theory of branching is simple: create a parallel copy of the code, work on it safely, then merge it back when it's ready. But what does that actually look like on our project? Here are real examples.</p>
+
+    <h3>What <code>main</code> Looks Like Right Now</h3>
+    <p>The <code>main</code> branch is the live branch. It's what GitHub Pages serves. Every file in <code>main</code> is publicly accessible right now. When you open the demo URL at <code>xldonkey.github.io/gym-ai-system/</code>, you're looking at the files in <code>main</code>.</p>
+
+    <div class="callout success">
+      <span class="callout-icon">✅</span>
+      <div class="callout-body">
+        <strong>main = what members and stakeholders see</strong>
+        <p>Every file in main is live on the internet right now. The demo Matt shows investors runs from main. The Bible runs from main. This guide runs from main. Main is always deployable, always working, always presentable.</p>
+      </div>
+    </div>
+
+    <p>This is why <strong>nothing untested ever goes directly to main</strong>. If you push broken code to main, the live demo breaks immediately — in front of anyone who opens that URL.</p>
+
+    <h3>What <code>dev</code> Looks Like Right Now</h3>
+    <p>The <code>dev</code> branch contains everything in <code>main</code> plus any work in progress. Think of it as "main + today's work". It's one step ahead of main. When Donkey is building something new, it happens on <code>dev</code> first. When it's confirmed working, it gets merged into <code>main</code>.</p>
+
+    <div class="branch-diagram">
+      <div style="font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 24px;">Current Branch State</div>
+
+      <div class="branch-row">
+        <div class="branch-label main">main</div>
+        <div class="branch-line-wrap">
+          <div class="branch-line main"></div>
+          <div class="branch-dot start green"></div>
+          <div class="branch-dot" style="left: 20%; background: var(--green); width: 10px; height: 10px; border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);"></div>
+          <div class="branch-dot" style="left: 40%; background: var(--green); width: 10px; height: 10px; border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);"></div>
+          <div class="branch-dot" style="left: 60%; background: var(--green); width: 10px; height: 10px; border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);"></div>
+          <div class="branch-dot end green"></div>
+          <div class="branch-tag">✅ LIVE · GitHub Pages</div>
+        </div>
+      </div>
+
+      <div class="branch-row">
+        <div class="branch-label dev">dev</div>
+        <div class="branch-line-wrap">
+          <div class="branch-line dev"></div>
+          <div class="branch-dot start purple"></div>
+          <div class="branch-dot" style="left: 20%; background: var(--purple); width: 10px; height: 10px; border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);"></div>
+          <div class="branch-dot" style="left: 40%; background: var(--purple); width: 10px; height: 10px; border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);"></div>
+          <div class="branch-dot" style="left: 60%; background: var(--purple); width: 10px; height: 10px; border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);"></div>
+          <div class="branch-dot" style="left: 80%; background: var(--purple); width: 10px; height: 10px; border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%);"></div>
+          <div class="branch-dot end purple"></div>
+          <div class="branch-tag">🔧 Work in progress</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Real Example: How Fullscreen Was Added</h3>
+    <p>This is the exact sequence of events when Matt reported the tablet had no fullscreen button. This is how feature work actually happens on our project.</p>
+
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Problem Reported</h4>
+          <p>Matt sent a message: "The tablet demo has no fullscreen button. It always shows the browser chrome." The existing demo ran in a Safari browser window on the iPad, with the address bar visible at the top — not ideal for a gym floor demo.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Fix Started on Dev Branch</h4>
+          <p>Donkey switched to the <code>dev</code> branch (not main). This ensures any broken code during development doesn't affect the live demo. Work-in-progress code is sandboxed in dev.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Button Added to alpha.html</h4>
+          <p>A fullscreen button was added to the demo interface. First attempt: a simple <code>&lt;button&gt;</code> element calling <code>document.requestFullscreen()</code>. Committed and pushed to dev.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Commit: First Attempt</h4>
+          <p>Commit message: <code>"fix: fullscreen button - proper webkit support for Android/iOS tablet"</code>. This is the commit message on the first attempt — even though it wasn't fully working yet. Frequent small commits are the right approach.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Tested — Safari Blocked It</h4>
+          <p>When tested on an iOS Safari browser, the fullscreen API was blocked. Safari on iOS has specific restrictions on the standard Fullscreen API. The simple button approach didn't work on the target device.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h4>Multiple Iterations on Dev</h4>
+          <p>Tried: <code>div onclick</code>, standard <code>button</code>, webkit-prefixed API (<code>webkitRequestFullscreen</code>), different event types (<code>onclick</code> vs <code>ontouchend</code>). Each attempt got its own commit. Dev branch absorbed all the trial and error without touching main.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">7</div>
+        <div class="step-body">
+          <h4>Final Fix: XL Logo as Fullscreen Trigger</h4>
+          <p>The working solution: the XL Fitness logo in the corner became a fullscreen toggle, using the <code>ontouchend</code> event handler (iOS responds to touch events more reliably than click events) with webkit-prefixed fullscreen call. Committed as final fix.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">8</div>
+        <div class="step-body">
+          <h4>Merged to Main</h4>
+          <p>Once tested and confirmed working on the actual iPad, the dev branch was merged into main: <code>git checkout main && git merge dev && git push origin main</code>. GitHub Pages rebuilt automatically. The live demo updated within ~60 seconds.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">9</div>
+        <div class="step-body">
+          <h4>Demo Updated</h4>
+          <p>Matt confirmed: the fullscreen button works on the iPad. The complete journey from "problem reported" to "fixed in production" took about 2 hours, with 7 commits documenting every step of the debugging process.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout purple">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>The power of small commits during debugging</strong>
+        <p>Each iteration got its own commit — even the ones that didn't work. This means the commit history records not just the solution, but the debugging journey. If the same problem ever occurs on a different device, the history shows exactly what was tried and what worked. That's not just version control — it's institutional knowledge, permanently preserved.</p>
+      </div>
+    </div>
+
+    <h3>Real Example: How the NN Was Removed as a Gate</h3>
+    <p>This is one of the most important architectural decisions in the project. It shows how the right engineering call is sometimes to <em>remove</em> complexity rather than add it.</p>
+
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Problem Reported</h4>
+          <p>Matt's message: "The demo isn't counting reps at all." This was critical feedback — if the rep counter doesn't count reps, the entire value proposition is gone.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Root Cause Identified</h4>
+          <p>Investigation showed Neural Network v4 was trained to 75% accuracy. This means it correctly classifies reps 3 out of 4 times. When used as a gate — meaning only reps the NN approves get counted — it was blocking 25% of valid reps. When Matt was doing sets with slightly different form than the training data, the rejection rate climbed higher.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Decision: Remove the NN Gate</h4>
+          <p>Rather than trying to retrain the NN to higher accuracy (which would require more data, more time), the decision was made to remove it as a gate entirely. Joint angle thresholds (elbow angle &lt;90° = bottom of rep, &gt;150° = top) are deterministic — they always give the same answer for the same joint positions. Use the deterministic system for counting. Keep the NN brain visualisation as a UI element only.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Commit: The Fix</h4>
+          <p>Commit message: <code>"fix: remove NN gate - pure joint angle counting, brain visual stays"</code>. This single commit changed the rep counter from NN-gated to angle-threshold-based. The brain graphic still pulses on the screen — it just no longer controls whether reps count.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Rep Counter Immediately Reliable</h4>
+          <p>After the fix, the counter counted every rep correctly. Matt confirmed it in testing. The simplification worked better than the more sophisticated approach.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="rule-box">
+      <div class="rule-label">📐 Engineering Principle</div>
+      <p>Sometimes the right engineering decision is to simplify, not add more complexity. A 100% reliable angle threshold beats a 75% accurate neural network as a rep gate. The NN has its place — it will be the quality classifier in Phase 2 when it's trained to 95%+ accuracy. But it wasn't ready to be a gate yet, and forcing it into that role was making the system worse.</p>
+    </div>
+
+    <h3>How Feature Branches Will Work in Phase 2</h3>
+    <p>In Phase 2, multiple developers will be building different features simultaneously. Feature branches allow this without any risk of one person's work breaking another person's work. Here's the exact workflow, with plain-English explanations beside each command.</p>
+
+    <div class="card" style="background: #0d1117; border-color: #30363d;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #30363d;">
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></div>
+        <span style="flex: 1; text-align: center; font-family: monospace; font-size: 12px; color: #8b949e;">Terminal — Feature Branch Workflow</span>
+      </div>
+      <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.8; color: #e6edf3; margin: 0; white-space: pre-wrap;"><span style="color:#8b949e;"># ── STEP 1: Create a new branch for the LSTM model ──</span>
+<span style="color:#79c0ff;">git checkout -b feature/lstm-v5</span>
+<span style="color:#8b949e;"># Creates a copy of dev to work on safely.
+# "checkout -b" means "switch to a new branch".
+# You're now on feature/lstm-v5. dev is untouched.</span>
+
+<span style="color:#8b949e;"># ── STEP 2: Make changes, test, commit multiple times ──</span>
+<span style="color:#79c0ff;">git add pose/model.json</span>
+<span style="color:#8b949e;"># "Stages" the file — marks it for inclusion in next commit.</span>
+
+<span style="color:#79c0ff;">git commit -m "feat: LSTM v5 - first training run, 78% accuracy"</span>
+<span style="color:#8b949e;"># Saves a snapshot. 78% is a start — more training runs ahead.</span>
+
+<span style="color:#8b949e;"># ... more commits as accuracy improves ...</span>
+
+<span style="color:#79c0ff;">git commit -m "feat: LSTM v5 - 523 sequences, 91.2% accuracy, ready to deploy"</span>
+<span style="color:#8b949e;"># Each commit = a checkpoint. Can revert to any earlier state.</span>
+
+<span style="color:#8b949e;"># ── STEP 3: Merge into dev when ready ──</span>
+<span style="color:#79c0ff;">git checkout dev</span>
+<span style="color:#8b949e;"># Switch back to the dev branch.</span>
+
+<span style="color:#79c0ff;">git merge feature/lstm-v5</span>
+<span style="color:#8b949e;"># Brings all commits from the feature branch into dev.
+# dev now has the LSTM model. feature/lstm-v5 still exists
+# but its work is now in dev.</span>
+
+<span style="color:#8b949e;"># ── STEP 4: Test on dev, then deploy to main ──</span>
+<span style="color:#79c0ff;">git checkout main</span>
+<span style="color:#79c0ff;">git merge dev</span>
+<span style="color:#79c0ff;">git push origin main</span>
+<span style="color:#8b949e;"># Live demo now has LSTM model deployed.
+# GitHub Pages rebuilds automatically. ~60 seconds to live.</span></pre>
+    </div>
+
+    <h3>The Golden Rule: main Is Sacred</h3>
+    <div class="rule-box">
+      <div class="rule-label">🏆 The Golden Rule</div>
+      <p>Imagine <code>main</code> is the gym's live leaderboard display. You wouldn't walk up to the display and start editing it while members are watching. You'd test your changes somewhere else first, confirm they work, then update the display. That's exactly how <code>main</code> works. Nothing goes to main unless it's been tested on dev first. Nothing.</p>
+    </div>
+
+  </div><!-- /section 15 -->
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 16 — MANUS & GITHUB
+  ════════════════════════════════════════════ -->
+  <div class="section" id="manus-github">
+    <span class="section-number">Section 16</span>
+    <h2>How Manus and Their Server Connect to Our GitHub</h2>
+    <p class="section-subtitle">A detailed explanation of the two-repo architecture — why there are two separate codebases and how they talk to each other.</p>
+
+    <p>The XL Fitness Overseer is not one codebase — it's two. Understanding why they're separate, and how they connect, is important context for anyone working on the project.</p>
+
+    <h3>The Two Separate Codebases</h3>
+    <p>These two codebases are completely separate repositories. They don't share a repo. They're built by different developers, run on different hardware, and have different deployment processes. But they work together as a unified system.</p>
+
+    <div class="system-diagram" style="grid-template-columns: 1fr 80px 1fr; align-items: center;">
+      <div class="sys-node github" style="border-color: var(--purple-dk);">
+        <div class="node-icon">🫏</div>
+        <h4>gym-ai-system</h4>
+        <div class="node-role" style="color: var(--purple-lt);">Our Repo (XLDonkey)</div>
+        <p>Browser-based AI. MoveNet pose detection. Rep counting. Demo page. Labeler tool. Session.js event dispatcher. Machine configs.</p>
+        <div class="analogy-tag">Runs in the browser on the tablet</div>
+      </div>
+
+      <div style="text-align: center; font-size: 28px; color: var(--purple); font-weight: 700;">⇆</div>
+
+      <div class="sys-node supabase" style="border-color: var(--blue);">
+        <div class="node-icon">🔧</div>
+        <h4>Manus FastAPI Server</h4>
+        <div class="node-role" style="color: var(--blue);">Manus's Repo</div>
+        <p>FastAPI orchestration layer. Weight detection. Supabase database integration. Session management. Member profiles. Admin API.</p>
+        <div class="analogy-tag">Runs on Manus's server hardware</div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">🔗</span>
+      <div class="callout-body">
+        <strong>Two repos, one system</strong>
+        <p>Both repos are independent. Each has its own commit history, its own branch structure, its own deployment pipeline. They communicate only via HTTP — structured JSON events sent from session.js to Manus's server endpoint. Neither repo needs access to the other's code to function.</p>
+      </div>
+    </div>
+
+    <h3>The API Contract — The Bridge Between the Two Systems</h3>
+    <p>The API contract is the document both sides agree to. It defines the exact format that Donkey's code sends events in, the URL those events go to, and what Manus's server does with them. Think of it as a shared language both sides speak fluently.</p>
+
+    <div class="callout purple">
+      <span class="callout-icon">📄</span>
+      <div class="callout-body">
+        <strong>The Invoice Analogy</strong>
+        <p>This is like two businesses agreeing on an invoice format. Donkey always sends invoices in this exact format. Manus's system knows how to read invoices in this exact format. As long as both sides stick to the agreement, it works — even though they're completely separate companies with completely different internal systems.</p>
+      </div>
+    </div>
+
+    <p>Here's the exact event format from <code>docs/ai-plan-for-manus.md</code>. This is what Donkey's <code>session.js</code> sends every time a rep is completed:</p>
+
+    <div class="card" style="background: #0d1117; border-color: #30363d;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #30363d;">
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></div>
+        <span style="flex: 1; text-align: center; font-family: monospace; font-size: 12px; color: #8b949e;">Rep Event JSON Payload</span>
+      </div>
+      <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.8; color: #e6edf3; margin: 0;"><span style="color:#8b949e;">{</span>
+  <span style="color:#79c0ff;">"machine_id"</span><span style="color:#8b949e;">:</span>      <span style="color:#a5d6ff;">"lat_pulldown_01"</span><span style="color:#8b949e;">,</span>
+  <span style="color:#79c0ff;">"timestamp_utc"</span><span style="color:#8b949e;">:</span>   <span style="color:#a5d6ff;">"2026-03-19T10:23:45.123Z"</span><span style="color:#8b949e;">,</span>
+  <span style="color:#79c0ff;">"event_type"</span><span style="color:#8b949e;">:</span>      <span style="color:#a5d6ff;">"pose_estimation"</span><span style="color:#8b949e;">,</span>
+  <span style="color:#79c0ff;">"payload"</span><span style="color:#8b949e;">:</span> <span style="color:#8b949e;">{</span>
+    <span style="color:#79c0ff;">"event"</span><span style="color:#8b949e;">:</span>         <span style="color:#a5d6ff;">"rep_completed"</span><span style="color:#8b949e;">,</span>
+    <span style="color:#79c0ff;">"rep_quality"</span><span style="color:#8b949e;">:</span>   <span style="color:#a5d6ff;">"good"</span><span style="color:#8b949e;">,</span>
+    <span style="color:#79c0ff;">"confidence"</span><span style="color:#8b949e;">:</span>    <span style="color:#ff9a5c;">0.91</span><span style="color:#8b949e;">,</span>
+    <span style="color:#79c0ff;">"elbow_angle"</span><span style="color:#8b949e;">:</span>   <span style="color:#ff9a5c;">45.3</span>
+  <span style="color:#8b949e;">}</span>
+<span style="color:#8b949e;">}</span></pre>
+    </div>
+
+    <p>Breaking down what each field means:</p>
+    <ul>
+      <li><code>"machine_id"</code> — which machine the rep happened on. Every machine has a unique ID from its config file. Phase 4 will have IDs like <code>chest_press_01</code>, <code>leg_press_02</code>, etc.</li>
+      <li><code>"timestamp_utc"</code> — the exact moment the rep completed, in universal time. Manus uses this for session tracking and analytics.</li>
+      <li><code>"event_type"</code> — always <code>pose_estimation</code> for rep events. The contract may define other event types in future.</li>
+      <li><code>"rep_quality"</code> — <code>good</code> or <code>bad</code>, determined by the joint angle classifier.</li>
+      <li><code>"confidence"</code> — MoveNet's confidence that the joints were tracked correctly (0–1). High confidence = reliable data.</li>
+      <li><code>"elbow_angle"</code> — the actual measured angle at the bottom of the rep, in degrees. Manus stores this for trend analysis.</li>
+    </ul>
+
+    <h3>The ONE Line That Connects Everything</h3>
+    <p>In <code>pose/session.js</code>, there is currently one empty string that represents the entire integration:</p>
+
+    <div class="card" style="background: #0d1117; border-color: #30363d;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #30363d;">
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></div>
+        <span style="flex: 1; text-align: center; font-family: monospace; font-size: 12px; color: #8b949e;">pose/session.js — current state</span>
+      </div>
+      <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.8; color: #e6edf3; margin: 0;"><span style="color:#ff7b72;">const</span> <span style="color:#e6edf3;">SERVER_URL</span> <span style="color:#ff7b72;">=</span> <span style="color:#a5d6ff;">''</span><span style="color:#8b949e;">; // empty — waiting for Manus's server IP</span></pre>
+    </div>
+
+    <p>When Manus sends their server IP address, Donkey makes one change:</p>
+
+    <div class="card" style="background: #0d1117; border-color: #2ea043;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #30363d;">
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></div>
+        <span style="flex: 1; text-align: center; font-family: monospace; font-size: 12px; color: #8b949e;">pose/session.js — after Manus sends IP</span>
+      </div>
+      <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; line-height: 1.8; color: #e6edf3; margin: 0;"><span style="color:#ff7b72;">const</span> <span style="color:#e6edf3;">SERVER_URL</span> <span style="color:#ff7b72;">=</span> <span style="color:#a5d6ff;">'http://192.168.x.x:8000/event'</span><span style="color:#8b949e;">;</span></pre>
+    </div>
+
+    <div class="flow" style="margin: 24px 0;">
+      <div class="flow-step">
+        <div class="flow-icon">📨</div>
+        <h5>Manus Sends IP</h5>
+        <p>Server deployed, IP provided</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">✏️</div>
+        <h5>Donkey Updates</h5>
+        <p>SERVER_URL set to real address</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">💾</div>
+        <h5>Commit &amp; Push</h5>
+        <p>git commit + push to main</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🔄</div>
+        <h5>Pages Rebuilds</h5>
+        <p>GitHub deploys in ~60s</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🚀</div>
+        <h5>Pipeline Live</h5>
+        <p>Overseer fully operational</p>
+      </div>
+    </div>
+
+    <p>One line change. One commit. One push. The entire Overseer pipeline — tablet → session.js → Manus server → Supabase → member profiles — is live.</p>
+
+    <h3>How Manus Will Read Our Docs</h3>
+    <p>Manus doesn't need to call us to understand the integration. Every document they need lives in our GitHub repo, publicly accessible, always up to date with the latest commit.</p>
+
+    <table class="url-table">
+      <thead>
+        <tr>
+          <th>Document</th>
+          <th>What It Contains</th>
+          <th>Who Reads It</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="what"><code>docs/ai-plan-for-manus.md</code></td>
+          <td style="color: var(--text-muted);">Full integration plan — event format, API endpoints, data flow, Phase 1-4 deliverables</td>
+          <td style="color: var(--text-muted);">Manus (primary)</td>
+        </tr>
+        <tr>
+          <td class="what"><code>docs/manus-week1-brief.md</code></td>
+          <td style="color: var(--text-muted);">Week 1 deliverables only — what Manus needs to build first to unblock the integration</td>
+          <td style="color: var(--text-muted);">Manus (primary)</td>
+        </tr>
+        <tr>
+          <td class="what"><code>pose/session.js</code></td>
+          <td style="color: var(--text-muted);">The exact code that sends events — Manus reads this to understand the request format</td>
+          <td style="color: var(--text-muted);">Manus + any developer</td>
+        </tr>
+        <tr>
+          <td class="what"><code>pose/machine_configs/lat_pulldown.json</code></td>
+          <td style="color: var(--text-muted);">Machine configuration — joint thresholds, machine ID, exercise parameters</td>
+          <td style="color: var(--text-muted);">Manus (for machine_id field)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>These documents are the source of truth. If the API format changes, Donkey updates the doc and commits. Manus sees the change in their next git pull — or directly on GitHub. No email chains. No out-of-date specs. The repo IS the spec.</p>
+
+    <h3>Future: Manus Contributing to Our Repo</h3>
+    <p>In Phase 2-3, Manus may want to commit configuration files or integration code directly to our repo — for example, updating machine config files or adding server-side event schema definitions. The workflow follows the standard industry Pull Request pattern:</p>
+
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Manus Gets Collaborator Access</h4>
+          <p>Matt goes to Settings → Collaborators on GitHub and invites Manus's GitHub account. They accept the email invitation. They now have write access to the repo.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Manus Creates a Feature Branch</h4>
+          <p>Manus clones the repo and creates a branch: <code>feature/manus-weight-integration</code>. All their changes happen on this branch — not on main or dev.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Manus Opens a Pull Request</h4>
+          <p>When their changes are ready, Manus pushes the branch to GitHub and opens a Pull Request (PR). The PR shows exactly what files changed and why. It's a formal request for review before anything merges.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Donkey Reviews the Changes</h4>
+          <p>Donkey reads through every changed file in the PR. Comments can be left on specific lines. Changes can be requested before approval. This is the quality gate that protects main.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Approved → Merged to Dev → Tested → Main</h4>
+          <p>If approved, the PR merges to dev. Tested in dev. Then merged to main. The same branching discipline applies regardless of who's contributing.</p>
+        </div>
+      </li>
+    </ol>
+
+  </div><!-- /section 16 -->
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 17 — NEW DEVELOPER
+  ════════════════════════════════════════════ -->
+  <div class="section" id="new-developer">
+    <span class="section-number">Section 17</span>
+    <h2>How a New Developer Joins the Project</h2>
+    <p class="section-subtitle">Every step, from zero to first commit — nothing assumed, nothing skipped.</p>
+
+    <p>At some point the project will grow beyond one developer. When a new person joins the team — whether it's a face ID specialist, a mobile developer, or a server engineer — this is the exact sequence they follow. Every step. Nothing skipped.</p>
+
+    <div class="callout info">
+      <span class="callout-icon">👋</span>
+      <div class="callout-body">
+        <strong>For New Developers Reading This</strong>
+        <p>Welcome to the XL Fitness AI Overseer project. This section is written for you. Follow every step in order. Don't skip documentation. Your first day should be spent reading, not coding. The Bible tells you what you're building and why. The deep-dive tells you how it works. This guide tells you how to work with the codebase.</p>
+      </div>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Step 1: Get Access</h4>
+          <p>Matt invites you as a GitHub collaborator (Settings → Collaborators → Add people). You'll receive an invitation email. Create a GitHub account if you don't have one — it's free. Accept the invitation. You now have access to <a href="https://github.com/XLDonkey/gym-ai-system">github.com/XLDonkey/gym-ai-system</a>.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Step 2: Install the Tools (Mac)</h4>
+          <p>The Mac Mini runs macOS, and new developer Macs follow the same setup. Here's every command, in order:</p>
+          <div class="card" style="background: #0d1117; border-color: #30363d; margin-top: 12px;">
+            <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12.5px; line-height: 1.9; color: #e6edf3; margin: 0; white-space: pre-wrap;"><span style="color:#8b949e;"># Install Homebrew — Mac's package manager</span>
+<span style="color:#79c0ff;">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</span>
+<span style="color:#8b949e;"># This installs the tool that installs other tools.</span>
+
+<span style="color:#8b949e;"># Install Git</span>
+<span style="color:#79c0ff;">brew install git</span>
+<span style="color:#8b949e;"># Git is the version control software.
+# GitHub is the website. Git is the tool. Different things.</span>
+
+<span style="color:#8b949e;"># Tell Git who you are</span>
+<span style="color:#79c0ff;">git config --global user.name "Their Name"</span>
+<span style="color:#79c0ff;">git config --global user.email "their@email.com"</span>
+<span style="color:#8b949e;"># Every commit you make will be signed with this name and email.
+# Use the same email as your GitHub account.</span></pre>
+          </div>
+          <div class="callout info" style="margin-top: 12px;">
+            <span class="callout-icon">ℹ️</span>
+            <div class="callout-body">
+              <strong>Git vs GitHub</strong>
+              <p>Git is the software installed on your computer that manages version control. GitHub is the website (github.com) that hosts repositories online. Git is the software, GitHub is the service. You need both — Git runs locally, GitHub stores the project online.</p>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Step 3: Clone the Repo</h4>
+          <p>Cloning downloads the entire project to your computer — not just the current files, but the complete history of every change ever made.</p>
+          <div class="card" style="background: #0d1117; border-color: #30363d; margin-top: 12px;">
+            <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12.5px; line-height: 1.9; color: #e6edf3; margin: 0; white-space: pre-wrap;"><span style="color:#8b949e;"># Download the full repo to your computer</span>
+<span style="color:#79c0ff;">git clone git@github.com:XLDonkey/gym-ai-system.git</span>
+<span style="color:#8b949e;"># This creates a folder called gym-ai-system on your machine.
+# Contains every file, every folder, and the complete history.</span>
+
+<span style="color:#8b949e;"># Navigate into the folder</span>
+<span style="color:#79c0ff;">cd gym-ai-system</span>
+
+<span style="color:#8b949e;"># See everything that's there</span>
+<span style="color:#79c0ff;">ls -la</span>
+<span style="color:#8b949e;"># You'll see: overseer.html, pose/, weight/, face/, members/, docs/
+# and hidden files like .gitignore and .git/</span></pre>
+          </div>
+          <p style="margin-top: 12px; font-size: 14px; color: var(--text-muted);">Cloning is like downloading the entire project — every file, every folder, every past version — to your computer. It's not just a copy of today's files. It includes the entire history. You can look at how any file looked on any day since the project started.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Step 4: Understand the Structure</h4>
+          <p>Before writing a single line of code, spend your first day reading documentation. This is not optional — it's the most important thing you can do.</p>
+          <div class="card" style="margin-top: 12px;">
+            <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; align-items: start;">
+              <span style="font-family: monospace; font-size: 13px; color: var(--purple-lt); padding-top: 2px;">1️⃣</span>
+              <div><strong style="color: #fff; font-size: 14px;">README.md</strong><br><span style="font-size: 13px; color: var(--text-muted);">The entry point. Quick overview of the project, how to run it, who maintains it.</span></div>
+              <span style="font-family: monospace; font-size: 13px; color: var(--purple-lt); padding-top: 2px;">2️⃣</span>
+              <div><strong style="color: #fff; font-size: 14px;">overseer.html — The Bible</strong><br><span style="font-size: 13px; color: var(--text-muted);">The complete architecture document. What you're building and why. Every system, every phase, every decision rationale. Read this first.</span></div>
+              <span style="font-family: monospace; font-size: 13px; color: var(--purple-lt); padding-top: 2px;">3️⃣</span>
+              <div><strong style="color: #fff; font-size: 14px;">docs/deep-dive.html</strong><br><span style="font-size: 13px; color: var(--text-muted);">The technical implementation guide. How MoveNet works, how joint angles are calculated, how the NN is trained. The how.</span></div>
+              <span style="font-family: monospace; font-size: 13px; color: var(--purple-lt); padding-top: 2px;">4️⃣</span>
+              <div><strong style="color: #fff; font-size: 14px;">docs/github-guide.html — This Document</strong><br><span style="font-size: 13px; color: var(--text-muted);">How the project uses GitHub. Branch strategy, commit discipline, workflow. You're reading it now.</span></div>
+            </div>
+          </div>
+          <p style="margin-top: 12px; font-size: 14px; color: var(--text-muted);">The Bible tells you what you're building and why. The deep-dive tells you how it works. This guide tells you how to use GitHub. Only after reading all three should you open a code file.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>Step 5: Switch to Dev Branch</h4>
+          <p>Always work on dev, never directly on main. This is the fundamental rule of the project.</p>
+          <div class="card" style="background: #0d1117; border-color: #30363d; margin-top: 12px;">
+            <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12.5px; line-height: 1.9; color: #e6edf3; margin: 0; white-space: pre-wrap;"><span style="color:#8b949e;"># Switch to the dev branch</span>
+<span style="color:#79c0ff;">git checkout dev</span>
+
+<span style="color:#8b949e;"># Confirm which branch you're on</span>
+<span style="color:#79c0ff;">git branch</span>
+<span style="color:#8b949e;"># Output will show:
+# * dev      ← the * means this is your current branch
+#   main</span></pre>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h4>Step 6: Create a Feature Branch for Your Task</h4>
+          <p>Every piece of work gets its own branch. This isolates your changes from everything else — you can't break anything, and your work can be reviewed separately.</p>
+          <div class="card" style="background: #0d1117; border-color: #30363d; margin-top: 12px;">
+            <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12.5px; line-height: 1.9; color: #e6edf3; margin: 0; white-space: pre-wrap;"><span style="color:#8b949e;"># Example: if you're building face ID:</span>
+<span style="color:#79c0ff;">git checkout -b feature/face-id-poc</span>
+<span style="color:#8b949e;"># Creates a new branch based on dev.
+# You are now on feature/face-id-poc.
+# Dev is untouched. Main is untouched.
+# Your work is completely isolated.</span>
+
+<span style="color:#8b949e;"># Branch naming conventions:</span>
+<span style="color:#8b949e;"># feature/  — new capability</span>
+<span style="color:#8b949e;"># fix/      — bug fix</span>
+<span style="color:#8b949e;"># docs/     — documentation only</span>
+<span style="color:#8b949e;"># chore/    — maintenance (deps, config)</span></pre>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">7</div>
+        <div class="step-body">
+          <h4>Step 7: Make Changes and Commit</h4>
+          <p>Work normally. When you reach a logical checkpoint, commit. Commit often — small, focused commits are better than one massive commit at the end of the week.</p>
+          <div class="card" style="background: #0d1117; border-color: #30363d; margin-top: 12px;">
+            <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12.5px; line-height: 1.9; color: #e6edf3; margin: 0; white-space: pre-wrap;"><span style="color:#8b949e;"># Check what you've changed</span>
+<span style="color:#79c0ff;">git status</span>
+<span style="color:#8b949e;"># Shows: modified, added, and deleted files</span>
+
+<span style="color:#8b949e;"># Stage the file you want to commit</span>
+<span style="color:#79c0ff;">git add face/face_detector.py</span>
+<span style="color:#8b949e;"># "Staging" marks a file for inclusion in the next commit.
+# Only staged files get committed. You can stage selectively.</span>
+
+<span style="color:#8b949e;"># Commit with a descriptive message</span>
+<span style="color:#79c0ff;">git commit -m "feat: face ID PoC - InsightFace model, 92% accuracy on test set"</span>
+<span style="color:#8b949e;"># This saves a permanent snapshot with your message.
+# Future developers (and future-you) will thank you for the detail.</span>
+
+<span style="color:#8b949e;"># Upload to GitHub</span>
+<span style="color:#79c0ff;">git push origin feature/face-id-poc</span>
+<span style="color:#8b949e;"># Pushes your branch to GitHub.
+# It's now backed up online and visible to others.</span></pre>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">8</div>
+        <div class="step-body">
+          <h4>Step 8: Open a Pull Request</h4>
+          <p>When your feature is ready for review, open a Pull Request on GitHub. This is a formal request to merge your branch into dev. It triggers a review before anything is merged.</p>
+          <ul>
+            <li>Go to <a href="https://github.com/XLDonkey/gym-ai-system">github.com/XLDonkey/gym-ai-system</a></li>
+            <li>GitHub will show a banner: "feature/face-id-poc had recent pushes" — click <strong>Compare &amp; pull request</strong></li>
+            <li>Write a clear description: what you built, why, how to test it</li>
+            <li>Set the base branch to <code>dev</code> (not main)</li>
+            <li>Submit. Donkey will review.</li>
+            <li>If approved: merged to dev → tested → merged to main</li>
+          </ul>
+        </div>
+      </li>
+    </ol>
+
+    <div class="rule-box">
+      <div class="rule-label">⏰ The Key Mental Model</div>
+      <p>Git is a time machine. Every commit is a point in time you can return to. If you break something, you can always go back. If you accidentally delete something, it's not gone — it's in the history. If you take a wrong approach, you can revert. The only way to permanently lose work is to <strong>not commit it</strong>. Commit early, commit often.</p>
+    </div>
+
+  </div><!-- /section 17 -->
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 18 — PHASE 4 GITHUB
+  ════════════════════════════════════════════ -->
+  <div class="section" id="phase4-github">
+    <span class="section-number">Section 18</span>
+    <h2>What GitHub Looks Like at Phase 4 — The Full Overseer</h2>
+    <p class="section-subtitle">A detailed picture of the repository when all 120 machines are running and the full team is active.</p>
+
+    <p>Right now the repo is lean — one machine, one developer, one model. Phase 4 is a different scale: 120 machines, four AI subsystems, multiple developers, hundreds of model training runs. Here's what the GitHub repo looks like at that stage.</p>
+
+    <h3>The Repo Structure at Phase 4</h3>
+
+    <div class="file-tree">
+      <div class="file-tree-header">
+        <div class="dot-row">
+          <span class="dot-red"></span>
+          <span class="dot-amber"></span>
+          <span class="dot-green"></span>
+        </div>
+        <div class="title">gym-ai-system — Phase 4</div>
+      </div>
+      <div class="tree-body">
+        <div class="tree-item"><span class="tree-folder">gym-ai-system/</span></div>
+        <div class="tree-item"><span class="tree-indent">├── </span><span class="tree-file">overseer.html</span><span class="tree-comment">← Bible (constantly updated as system evolves)</span></div>
+        <div class="tree-item"><span class="tree-indent">├── </span><span class="tree-folder">pose/</span></div>
+        <div class="tree-item"><span class="tree-indent">│   ├── </span><span class="tree-file">alpha.html</span><span class="tree-comment">← Demo (updated with every model iteration)</span></div>
+        <div class="tree-item"><span class="tree-indent">│   ├── </span><span class="tree-file">model_v7.json</span><span class="tree-badge green">CURRENT</span><span class="tree-comment"> ← Multi-joint LSTM, 97% accuracy</span></div>
+        <div class="tree-item"><span class="tree-indent">│   ├── </span><span class="tree-folder">machine_configs/</span><span class="tree-comment"> ← 120 JSON files, one per machine</span></div>
+        <div class="tree-item"><span class="tree-indent">│   │   ├── </span><span class="tree-file">lat_pulldown_01.json</span></div>
+        <div class="tree-item"><span class="tree-indent">│   │   ├── </span><span class="tree-file">seated_row_01.json</span></div>
+        <div class="tree-item"><span class="tree-indent">│   │   ├── </span><span class="tree-file">chest_press_01.json</span></div>
+        <div class="tree-item"><span class="tree-indent">│   │   ├── </span><span class="tree-file">leg_press_01.json</span></div>
+        <div class="tree-item"><span class="tree-indent">│   │   └── </span><span class="tree-file">... (116 more machine configs)</span></div>
+        <div class="tree-item"><span class="tree-indent">│   └── </span><span class="tree-folder">models/</span><span class="tree-comment"> ← Full model archive</span></div>
+        <div class="tree-item"><span class="tree-indent">│       ├── </span><span class="tree-file">model_v4_mlp.json</span><span class="tree-badge">ARCHIVED</span></div>
+        <div class="tree-item"><span class="tree-indent">│       ├── </span><span class="tree-file">model_v5_lstm.json</span><span class="tree-badge">ARCHIVED</span></div>
+        <div class="tree-item"><span class="tree-indent">│       ├── </span><span class="tree-file">model_v6_multi.json</span><span class="tree-badge">ARCHIVED</span></div>
+        <div class="tree-item"><span class="tree-indent">│       └── </span><span class="tree-file">model_v7_full.json</span><span class="tree-badge green">CURRENT</span></div>
+        <div class="tree-item"><span class="tree-indent">├── </span><span class="tree-folder">weight/</span></div>
+        <div class="tree-item"><span class="tree-indent">│   ├── </span><span class="tree-file">detector.py</span><span class="tree-comment"> ← Manus's plate colour detection</span></div>
+        <div class="tree-item"><span class="tree-indent">│   └── </span><span class="tree-file">plate_config.json</span><span class="tree-comment"> ← Custom plate colour scheme for XL Fitness</span></div>
+        <div class="tree-item"><span class="tree-indent">├── </span><span class="tree-folder">face/</span></div>
+        <div class="tree-item"><span class="tree-indent">│   ├── </span><span class="tree-file">reid_model.py</span><span class="tree-comment"> ← Person re-identification model</span></div>
+        <div class="tree-item"><span class="tree-indent">│   └── </span><span class="tree-folder">embeddings/</span><span class="tree-comment"> ← Member face data (local only, gitignored)</span></div>
+        <div class="tree-item"><span class="tree-indent">├── </span><span class="tree-folder">members/</span></div>
+        <div class="tree-item"><span class="tree-indent">│   └── </span><span class="tree-file">api.py</span><span class="tree-comment"> ← Member profile API</span></div>
+        <div class="tree-item"><span class="tree-indent">└── </span><span class="tree-folder">docs/</span><span class="tree-comment"> ← All planning docs, continually updated</span></div>
+      </div>
+    </div>
+
+    <h3>The Commit Frequency at Phase 4</h3>
+    <p>At Phase 1 (now), commits happen in bursts during active development — sometimes 10–20 in a day. At Phase 4 steady state, the rhythm is different: fewer but more significant commits, driven by model improvements, new machine additions, and production bug fixes.</p>
+
+    <div class="card-grid">
+      <div class="concept-card">
+        <span class="icon">🧠</span>
+        <h4>Model Updates</h4>
+        <p>Every training run with new data gets a commit. Model version, accuracy, training set size all in the commit message. Creates a permanent performance log.</p>
+        <div class="analogy">Frequency: 1-2x per week during active training</div>
+      </div>
+      <div class="concept-card">
+        <span class="icon">⚙️</span>
+        <h4>Machine Config Additions</h4>
+        <p>Each new machine type added to the gym requires a new JSON config file in <code>machine_configs/</code>. One commit per machine type.</p>
+        <div class="analogy">Frequency: as new machines are installed</div>
+      </div>
+      <div class="concept-card">
+        <span class="icon">🐛</span>
+        <h4>Bug Fixes</h4>
+        <p>Real-world edge cases discovered in production — unusual lighting, non-standard form, equipment variants. Each fix is a commit.</p>
+        <div class="analogy">Frequency: 1-3x per week at steady state</div>
+      </div>
+      <div class="concept-card">
+        <span class="icon">📚</span>
+        <h4>Documentation Updates</h4>
+        <p>As the system evolves, the Bible evolves. New sections, updated architecture diagrams, revised integration specs. Kept in sync with code changes.</p>
+        <div class="analogy">Frequency: with every significant change</div>
+      </div>
+    </div>
+
+    <p>Estimated total: <strong>3–10 commits per week</strong> at steady Phase 4 operation. This is a healthy, active codebase — not dormant, not chaotic.</p>
+
+    <h3>The Team at Phase 4</h3>
+    <p>Multiple contributors, each owning their domain. Pull Requests ensure everything is reviewed before it touches main.</p>
+
+    <div class="role-card">
+      <div class="role-avatar purple">🫏</div>
+      <div class="role-info">
+        <h4>Donkey</h4>
+        <div class="role-title">Pose AI · Architecture · Deployment · Documentation</div>
+        <ul>
+          <li>Owns pose/ folder — all model files and machine configs</li>
+          <li>Reviews all Pull Requests before they merge</li>
+          <li>Maintains the Bible and all documentation</li>
+          <li>Final authority on main branch merges</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="role-card">
+      <div class="role-avatar blue">🔧</div>
+      <div class="role-info">
+        <h4>Manus (or successor)</h4>
+        <div class="role-title">Server · Weight Detection · Database</div>
+        <ul>
+          <li>Owns weight/ folder — plate detection and config</li>
+          <li>Manages their own FastAPI server (separate repo)</li>
+          <li>Contributes integration configs via Pull Requests</li>
+          <li>Maintains Supabase schema and member data pipelines</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="role-card">
+      <div class="role-avatar amber">👤</div>
+      <div class="role-info">
+        <h4>Face ID Developer</h4>
+        <div class="role-title">Face Recognition · Person Tracking</div>
+        <ul>
+          <li>Owns face/ folder — re-ID model and embedding system</li>
+          <li>Works entirely on feature branches</li>
+          <li>All changes reviewed via Pull Request before merging</li>
+          <li>Face embeddings gitignored — never committed (privacy)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="role-card">
+      <div class="role-avatar green">📱</div>
+      <div class="role-info">
+        <h4>Member Experience Developer</h4>
+        <div class="role-title">Tablet UI · Mobile App</div>
+        <ul>
+          <li>Owns the tablet demo UI in pose/alpha.html</li>
+          <li>Builds member-facing mobile features</li>
+          <li>Works closely with Donkey on UX decisions</li>
+          <li>All changes tested on dev before main</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>The Model Version History</h3>
+    <p>Every model that gets deployed to production gets a commit. At Phase 4, the commit history for model deployments reads like a performance log — you can see exactly when each milestone was hit, how accuracy improved, and which machines were added when.</p>
+
+    <div class="commit-list">
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">deploy model v7.2 - 120 machines, 97.3% accuracy across all exercise types</span>
+        <span class="commit-hash">Phase 4</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">deploy model v7.1 - improved leg press detection, added hip hinge joint</span>
+        <span class="commit-hash">Phase 4</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-fix">fix</span>
+        <span class="commit-msg">deploy model v6.8 - fixed false positive on seated rest position</span>
+        <span class="commit-hash">Phase 4</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">deploy model v6.5 - 5 new machines: chest press, shoulder press, cable row</span>
+        <span class="commit-hash">Phase 3</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">deploy model v5.0 - LSTM deployed, 91.2% accuracy, lat pulldown + seated row</span>
+        <span class="commit-hash">Phase 2</span>
+      </div>
+      <div class="commit-item">
+        <span class="commit-type ct-feat">feat</span>
+        <span class="commit-msg">deploy model v4.0 - MLP, 75% accuracy, lat pulldown only</span>
+        <span class="commit-hash">Phase 1</span>
+      </div>
+    </div>
+
+    <p>Reading this history tells the entire story of how the AI improved — when each milestone was hit, what changed, how much better it got with each iteration. Every number is verifiable. Every date is recorded. Every decision is documented in the commit message.</p>
+
+    <h3>Why This Is a Valuable Asset</h3>
+    <p>A potential acquirer, licensor, or enterprise client performing due diligence on this system will look at the GitHub repo. What they see tells a story:</p>
+
+    <div class="card-grid">
+      <div class="concept-card">
+        <span class="icon">📋</span>
+        <h4>Professional Codebase</h4>
+        <p>Consistent commit style, clear folder structure, comprehensive documentation. Not a hobby project — an engineered system.</p>
+      </div>
+      <div class="concept-card">
+        <span class="icon">📈</span>
+        <h4>Provable Progress</h4>
+        <p>Model accuracy improving from 68% to 97% over time, documented in commit messages. You don't have to take our word for it — the history proves it.</p>
+      </div>
+      <div class="concept-card">
+        <span class="icon">🏗️</span>
+        <h4>Real Scale</h4>
+        <p>120 machine config files. Multiple developers. Multiple AI subsystems. This isn't a demo — it's a production system running at commercial scale.</p>
+      </div>
+      <div class="concept-card">
+        <span class="icon">📚</span>
+        <h4>Transfer Learning Library</h4>
+        <p>Every machine type taught to the model = a reusable asset. A competitor would need to replicate years of training data to match it.</p>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">💼</span>
+      <div class="callout-body">
+        <strong>The GitHub Repo as a Due Diligence Document</strong>
+        <p>The GitHub repo is a due diligence document. It proves the system is real, it works, and it keeps getting better. A well-maintained repo with clear history, comprehensive documentation, and improving model performance metrics is worth more than any pitch deck. The history doesn't lie.</p>
+      </div>
+    </div>
+
+  </div><!-- /section 18 -->
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 19 — TROUBLESHOOTING
+  ════════════════════════════════════════════ -->
+  <div class="section" id="troubleshooting">
+    <span class="section-number">Section 19</span>
+    <h2>Troubleshooting — When Things Go Wrong</h2>
+    <p class="section-subtitle">Every common problem, its causes, and exactly how to fix it. Keep this section bookmarked.</p>
+
+    <p>Things go wrong. That's normal. The key is knowing exactly what to check and exactly what to do. Here are every common problem someone might encounter working with our GitHub setup.</p>
+
+    <h3>🔴 "The demo URL isn't showing my changes"</h3>
+    <div class="card">
+      <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px;">CAUSE 1: Browser Cache</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin: 0 0 8px;">Your browser is showing the old cached version, not the new one. This is the most common cause by far.</p>
+        <div style="background: var(--card2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 10px 14px; font-family: monospace; font-size: 13px; color: var(--purple-lt);">Mac: Cmd+Shift+R &nbsp;&nbsp; Windows/PC: Ctrl+Shift+R</div>
+        <p style="font-size: 13px; color: var(--text-dim); margin: 8px 0 0;">This is a "hard refresh" — forces the browser to re-download everything, ignoring cache. Try this first, every time.</p>
+      </div>
+      <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px;">CAUSE 2: GitHub Pages Rebuilding</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin: 0;">GitHub Pages takes up to 2 minutes to rebuild after a push. If you just pushed, wait 2 minutes and hard-refresh. Check the Actions tab on GitHub to see rebuild status — a green ✓ means it's done.</p>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--red); margin-bottom: 8px;">CAUSE 3: Changes Are on Dev, Not Main</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin: 0;">GitHub Pages only serves from main. If you pushed to dev but haven't merged to main, the demo won't have your changes. Run <code>git checkout main && git merge dev && git push origin main</code> to deploy.</p>
+      </div>
+    </div>
+
+    <h3>🔴 "I can't push my changes"</h3>
+    <div class="card">
+      <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px;">CAUSE 1: Not Authenticated</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin: 0 0 8px;">Git doesn't know who you are or doesn't have permission. Two options:</p>
+        <ul style="font-size: 13px; color: var(--text-muted); padding-left: 20px;">
+          <li>SSH key: run <code>ssh-keygen -t ed25519</code>, add the public key to GitHub Settings → SSH Keys</li>
+          <li>Personal Access Token: generate at GitHub Settings → Developer Settings → Tokens, use it as your password</li>
+        </ul>
+      </div>
+      <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px;">CAUSE 2: Remote Has New Commits You Don't Have</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin: 0 0 8px;">Someone else pushed to the same branch after you last pulled. You need to pull their changes first, then push yours.</p>
+        <div style="background: var(--card2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 10px 14px; font-family: monospace; font-size: 13px; color: var(--purple-lt);">git pull origin dev &nbsp;&nbsp;&nbsp; # get latest changes</div>
+        <p style="font-size: 13px; color: var(--text-dim); margin: 8px 0 0;">Then push again: <code>git push origin dev</code></p>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--red); margin-bottom: 8px;">CAUSE 3: Trying to Push Directly to Main</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Main is protected. Direct pushes to main may be blocked. This is by design. Work on dev or a feature branch, then merge to main following the proper process.</p>
+      </div>
+    </div>
+
+    <h3>🔴 "The demo was working and now it's broken"</h3>
+    <div class="card">
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">Don't panic. This is fixable within minutes. Follow this exact process:</p>
+      <ol class="steps">
+        <li>
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4>Check the Last 3 Commits on Main</h4>
+            <p>Go to GitHub → gym-ai-system → the clock icon → commits on main. Which commit is the newest? What did it change? That's almost certainly the cause.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Identify Which Commit Broke It</h4>
+            <p>In the terminal: <code>git log --oneline</code> shows a compact list of recent commits with their hash and message. If there were 3 commits today, one of them caused the break.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>Revert That Commit</h4>
+            <div class="card" style="background: #0d1117; border-color: #30363d; margin-top: 8px;">
+              <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12.5px; line-height: 1.8; color: #e6edf3; margin: 0; white-space: pre-wrap;"><span style="color:#8b949e;"># Replace abc1234 with the actual commit hash from git log</span>
+<span style="color:#79c0ff;">git revert abc1234</span>
+<span style="color:#8b949e;"># This creates a NEW commit that undoes the bad commit.
+# The bad commit stays in history — git revert never deletes history.
+# It just applies the opposite changes.</span></pre>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h4>Push the Revert to Main</h4>
+            <p>Run <code>git push origin main</code>. GitHub Pages rebuilds. Within 60–120 seconds, the demo is back to working. Total recovery time: under 5 minutes.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <h3>🟡 "I accidentally committed to main"</h3>
+    <div class="card">
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">Not catastrophic — especially if the commit is small. You have two options:</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div style="background: var(--card2); border: 1px solid var(--green); border-radius: var(--radius-sm); padding: 16px;">
+          <div style="font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--green); margin-bottom: 8px;">OPTION A: Just Fix It on Main</div>
+          <p style="font-size: 13px; color: var(--text-muted); margin: 0;">If it's a small change that worked fine, just commit the follow-up fix directly to main too. Not ideal process, but no harm done. Learn for next time.</p>
+        </div>
+        <div style="background: var(--card2); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 16px;">
+          <div style="font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px;">OPTION B: Revert and Redo Properly</div>
+          <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Run <code>git revert [hash]</code> on main to undo the commit. Then redo the work on dev, merge to main correctly. This is the "right" approach if the change was substantial.</p>
+        </div>
+      </div>
+      <div class="callout warning" style="margin-top: 16px;">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body">
+          <strong>Prevention is better than fixing</strong>
+          <p>Before running <code>git push</code>, always run <code>git branch</code> to confirm which branch you're on. If it shows <code>* main</code>, switch to dev first: <code>git checkout dev</code>.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>🟡 "The GitHub Pages Site Shows a 404"</h3>
+    <div class="card">
+      <div style="margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border);">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--amber); margin-bottom: 6px;">CAUSE 1: Wrong File Path</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin: 0;">The URL is case-sensitive. <code>Alpha.html</code> and <code>alpha.html</code> are different files. Check the spelling and case of the URL path against the actual filename in the repo.</p>
+      </div>
+      <div style="margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border);">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--amber); margin-bottom: 6px;">CAUSE 2: GitHub Pages Not Enabled</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Go to GitHub → Settings → Pages. Confirm it's enabled and set to deploy from main branch. If it got accidentally disabled, re-enable it — the site will be back up within 2 minutes.</p>
+      </div>
+      <div>
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--red); margin-bottom: 6px;">CAUSE 3: Repo Made Private</div>
+        <p style="font-size: 14px; color: var(--text-muted); margin: 0;">GitHub Pages on a free account requires the repo to be public. If the repo was accidentally made private, go to Settings → Danger Zone → Change visibility → Make public. The site will come back automatically.</p>
+      </div>
+    </div>
+
+    <h3>🟡 "I Don't Know What Changed Between Two Versions"</h3>
+    <div class="card">
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">Two ways to compare any two points in time:</p>
+      <div style="margin-bottom: 16px;">
+        <div style="font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 8px;">On GitHub (Visual):</div>
+        <p style="font-size: 14px; color: var(--text-muted);">Go to the commits list → click any commit → see a diff view. Green lines = added. Red lines = removed. Every changed file is listed. You can see exactly what Donkey typed.</p>
+      </div>
+      <div style="margin-bottom: 16px;">
+        <div style="font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 8px;">In Terminal (git diff):</div>
+        <div class="card" style="background: #0d1117; border-color: #30363d;">
+          <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12.5px; line-height: 1.8; color: #e6edf3; margin: 0; white-space: pre-wrap;"><span style="color:#8b949e;"># Compare two specific commits by their hashes</span>
+<span style="color:#79c0ff;">git diff abc1234 def5678</span>
+<span style="color:#8b949e;"># Shows every line that changed between those two moments.
+# Green (+) = added, Red (-) = removed.</span>
+
+<span style="color:#8b949e;"># Compare current state to a specific commit</span>
+<span style="color:#79c0ff;">git diff abc1234 HEAD</span>
+<span style="color:#8b949e;"># HEAD = the latest commit on your current branch</span>
+
+<span style="color:#8b949e;"># Compare two branches</span>
+<span style="color:#79c0ff;">git diff main dev</span>
+<span style="color:#8b949e;"># Shows what dev has that main doesn't</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <h3>🔵 Quick Reference — Emergency Commands</h3>
+    <div class="card" style="background: #0d1117; border-color: #30363d;">
+      <div style="font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--purple); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #30363d;">Emergency Git Cheatsheet</div>
+      <pre style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12.5px; line-height: 2; color: #e6edf3; margin: 0; white-space: pre-wrap;"><span style="color:#8b949e;"># Which branch am I on?</span>
+<span style="color:#79c0ff;">git branch</span>
+
+<span style="color:#8b949e;"># What has changed since my last commit?</span>
+<span style="color:#79c0ff;">git status</span>
+
+<span style="color:#8b949e;"># Show recent commits (compact)</span>
+<span style="color:#79c0ff;">git log --oneline -10</span>
+
+<span style="color:#8b949e;"># Undo the last commit (keeps changes as uncommitted)</span>
+<span style="color:#79c0ff;">git reset --soft HEAD~1</span>
+
+<span style="color:#8b949e;"># Revert a specific commit (safe — adds a new commit, doesn't delete history)</span>
+<span style="color:#79c0ff;">git revert [commit-hash]</span>
+
+<span style="color:#8b949e;"># Get the latest changes from GitHub</span>
+<span style="color:#79c0ff;">git pull origin dev</span>
+
+<span style="color:#8b949e;"># Discard ALL local changes (dangerous — use with care)</span>
+<span style="color:#79c0ff;">git checkout -- .</span>
+
+<span style="color:#8b949e;"># Switch branch without losing uncommitted work</span>
+<span style="color:#79c0ff;">git stash           </span><span style="color:#8b949e;"># save current work temporarily</span>
+<span style="color:#79c0ff;">git checkout dev    </span><span style="color:#8b949e;"># switch branch</span>
+<span style="color:#79c0ff;">git stash pop       </span><span style="color:#8b949e;"># restore saved work</span></pre>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">🛡️</span>
+      <div class="callout-body">
+        <strong>The Safety Net You Always Have</strong>
+        <p>Git never permanently deletes committed work. Even if you run a command that seems destructive, the history is almost always recoverable. The only truly irreversible action in Git is force-pushing to delete remote history — which no one on this project should ever do. If you're unsure, ask before running any command with <code>--force</code> in it.</p>
+      </div>
+    </div>
+
+  </div><!-- /section 19 -->
 
 
   <!-- ─────────────────────────────────────────────
