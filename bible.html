@@ -287,7 +287,7 @@
 <nav class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">XL Fitness</div>
-    <div class="brand-sub">AI Overseer — The Bible v8.0</div>
+    <div class="brand-sub">AI Overseer — The Bible v9.0</div>
   </div>
   <div class="nav-group">Chapter 1 — The Vision</div>
   <a class="nav-link" href="#vision">01 — What We're Building</a>
@@ -311,9 +311,13 @@
   <div class="nav-group">Chapter 4 — The Full System</div>
   <a class="nav-link" href="#pipeline">17 — The 46ms Pipeline</a>
   <a class="nav-link" href="#data">18 — Data &amp; Database</a>
-  <div class="nav-group">Chapter 5 — Roadmap</div>
-  <a class="nav-link" href="#phases">19 — Interactive Roadmap</a>
-  <a class="nav-link" href="#costs">20 — Cost Breakdown</a>
+  <div class="nav-group">Chapter 5 — The Neural Network</div>
+  <a class="nav-link" href="#nn-architecture">19 — One Network vs Many</a>
+  <a class="nav-link" href="#nn-training">20 — Training &amp; Annotations</a>
+  <a class="nav-link" href="#nn-transfer">21 — Transfer Learning</a>
+  <div class="nav-group">Chapter 6 — Roadmap</div>
+  <a class="nav-link" href="#phases">22 — Interactive Roadmap</a>
+  <a class="nav-link" href="#costs">23 — Cost Breakdown</a>
 </nav>
 
 <div class="main">
@@ -501,58 +505,42 @@
 </section>
 <section class="section" id="mounting">
   <div class="section-tag">Section 05 — Hardware</div>
-  <h2>Ceiling &amp; Frame <em>Mounting</em></h2>
-  <p class="lead">Getting the camera angle right is everything. A camera mounted too high loses detail. Too low and it only covers one machine. Too far to the side and the pose estimation fails because limbs overlap. The goal is to mount cameras directly overhead, 10-12 feet above the floor, looking straight down with a slight forward tilt.</p>
-  <div class="img-block">
-    <img src="img/camera-ceiling-mount.jpg" alt="Camera on industrial ceiling frame">
-    <div class="img-caption">A dome camera mounted on a pendant arm dropped from an industrial ceiling beam — exactly the setup we use in Phase 2+.</div>
-  </div>
-  <h3>The Frame System</h3>
-  <p>Most gyms have exposed structural steel beams or Unistrut channels running across the ceiling. We attach a <strong>Unistrut P1000 channel</strong> perpendicular to the main beams, creating a grid of mounting points. From each mounting point, we drop a <strong>telescopic pendant arm</strong> (adjustable from 6" to 24") that positions the camera at the correct height.</p>
-  <div class="code-toggle">
-      <button class="code-toggle-btn" onclick="toggleCode(this)">
-        <span>&#128196;&nbsp; mounting-hardware-per-camera.txt</span>
-        <span class="ct-arr">&#9660;</span>
-      </button>
-      <div class="code-toggle-body">
-<div class="code-block">
-    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">mounting-hardware-per-camera.txt</span></div>
-    <pre><span class="cm">// Mounting hardware per camera position:</span>
-1x  Unistrut P1000 channel (3m length)       ~$25 AUD
-1x  Unistrut spring nut + M8 bolt            ~$3  AUD
-1x  Telescopic pendant mount (6"-24")        ~$35 AUD
-1x  Camera junction box (surface mount)      ~$12 AUD
-1x  Dome camera (Hikvision DS-2CD2183G2-I)   ~$120 AUD
-<span class="cm">// Total per camera position: ~$195 AUD</span>
+  <h2>Camera <em>Mounting Frame</em></h2>
+  <p class="lead">We cannot mount cameras directly to the ceiling. Instead, we are building a suspended steel grid frame — a "lighting truss" or "camera rig" — that hangs below the ceiling. The cameras attach to this frame, giving us total flexibility in positioning.</p>
 
-<span class="cm">// Frame attachment options:</span>
-Option A: Bolt directly to structural I-beam (strongest)
-Option B: Clamp to Unistrut channel (no drilling required)
-Option C: Drop from threaded rod hangers (most flexible)</pre>
+  <div class="img-block">
+    <img src="img/overhead-camera-rig.jpg" alt="Overhead camera mounting rig">
+    <div class="img-caption">A suspended camera rig. We build a grid of steel Unistrut or aluminium truss, suspend it from the main ceiling beams, and mount the cameras to the grid. This allows us to place a camera exactly where we need it, even if there is no ceiling beam directly above.</div>
   </div>
-      </div>
-    </div>
-  <h3>Optimal Camera Positioning Per Machine Type</h3>
+
+  <h3>Why We Use a Frame</h3>
+  <p>If you mount directly to the ceiling, you are restricted by where the structural beams are. If a beam isn't directly over the squat rack, your camera angle is ruined. By building a suspended grid frame (like a VR soundstage or a theatre lighting rig), we decouple the camera positions from the building's architecture.</p>
+  
+  <ul>
+    <li><strong>Perfect Angles:</strong> We can slide the camera along the rail to get the exact top-down or 45-degree angle required.</li>
+    <li><strong>Cable Management:</strong> The Cat6 cables run cleanly inside the channels of the frame, hiding them from view.</li>
+    <li><strong>Modularity:</strong> When a new machine is added to the gym, we just unbolt the camera and slide it down the rail to the new position.</li>
+    <li><strong>No Ceiling Damage:</strong> We only need a few anchor points to hang the entire frame, rather than drilling 20 separate holes for 20 cameras.</li>
+  </ul>
+
+  <div class="img-block">
+    <img src="img/overhead-studio-rig.jpg" alt="Overhead studio rig with crossbars">
+    <div class="img-caption">The frame system uses crossbars. Cameras attach via heavy-duty clamps (like Super Clamps or Unistrut brackets). This is the exact setup used in professional motion capture studios.</div>
+  </div>
+
+  <h3>The Hardware Stack</h3>
   <div class="tbl">
     <table>
-      <thead><tr><th>Machine Type</th><th>Camera Position</th><th>Tilt Angle</th><th>Coverage</th></tr></thead>
+      <thead><tr><th>Component</th><th>Purpose</th><th>Cost</th></tr></thead>
       <tbody>
-        <tr><td>Cable Machine / Stack</td><td>Directly above, slightly forward</td><td>15 deg forward tilt</td><td>1 machine per camera</td></tr>
-        <tr><td>Bench Press / Free Weights</td><td>Directly overhead</td><td>0 deg (straight down)</td><td>2 benches per camera</td></tr>
-        <tr><td>Cardio Zone (Treadmills)</td><td>End of row, elevated</td><td>30 deg down angle</td><td>4-6 machines per camera</td></tr>
-        <tr><td>Squat Rack</td><td>Side angle, slightly elevated</td><td>20 deg down, 45 deg side</td><td>1 rack per camera</td></tr>
-        <tr><td>Leg Press / Seated Machines</td><td>Side-forward angle</td><td>25 deg down, 30 deg side</td><td>2 machines per camera</td></tr>
+        <tr><td>Unistrut P1000 Channel</td><td class="td-purple">The main steel grid rails</td><td>$45 per 3m length</td></tr>
+        <tr><td>Threaded Rod (M10)</td><td class="td-purple">Drops the frame down from the high ceiling</td><td>$10 per length</td></tr>
+        <tr><td>Super Clamps</td><td class="td-purple">Clamps the camera to the steel frame</td><td>$25 each</td></tr>
+        <tr><td>Ball Head Mount</td><td class="td-purple">Allows fine-tuning of the camera angle</td><td>$15 each</td></tr>
       </tbody>
     </table>
   </div>
-  <h3>Phase 1: Temporary Mounting (No Drilling)</h3>
-  <p>For the proof-of-concept phase, we do not need to permanently install anything. A heavy-duty photography C-stand or a freestanding pole mount can position cameras at the correct height and angle for testing. This lets us validate the software pipeline before committing to permanent ceiling installation.</p>
-  <div class="callout warning">
-    <div class="ct">Critical: Camera Angle for Pose Estimation</div>
-    <p>MoveNet works best when the full body is visible and the camera is looking slightly down at the subject. A pure top-down (bird's eye) view actually makes pose estimation harder because limbs overlap. Aim for a 10-20 degree forward tilt from vertical — this gives a clear view of both the body mechanics and the weight stack.</p>
-  </div>
 </section>
-
 <section class="section" id="poe">
   <div class="section-tag">Section 06 — Hardware</div>
   <h2>PoE &amp; <em>Cable Runs</em></h2>
@@ -1373,99 +1361,53 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
 <section class="section" id="weight">
   <div class="section-tag">Section 16 — Deep Dive</div>
   <h2>Weight <em>Detection</em></h2>
-  <p class="lead">Counting reps is only half the story. A workout log without the weight is almost useless. We detect weight in two completely different ways depending on the equipment: <strong>colour-coded plate recognition</strong> for barbells and dumbbells, and <strong>pin position detection</strong> for cable and stack machines.</p>
+  <p class="lead">Counting reps is useless if we don't know how much weight is being lifted. The system uses two entirely different visual methods to read weight: Colour-coded stripe detection for barbells (AlphaFit plates), and OCR/Bounding box detection for fixed weight stacks.</p>
 
-  <h3>Method 1: Colour-Coded Plate Recognition</h3>
-  <p>The International Weightlifting Federation (IWF) standardised a colour coding system for Olympic weight plates that is now used in virtually every commercial gym worldwide. The colours are internationally consistent: <strong>red = 25kg</strong>, <strong>blue = 20kg</strong>, <strong>yellow = 15kg</strong>, <strong>green = 10kg</strong>, <strong>white = 5kg</strong>. Smaller fractional plates follow the same colour pattern at smaller sizes.</p>
-
-  <div class="img-block">
-    <img src="img/plate-colour-chart.png" alt="Olympic plate colour coding chart">
-    <div class="img-caption">The IWF standard colour coding for Olympic weight plates — the same system used in every commercial gym worldwide. Red = 25kg, Blue = 20kg, Yellow = 15kg, Green = 10kg, White = 5kg.</div>
-  </div>
+  <h3>Method 1: AlphaFit Colour-Coded Plates (Barbells)</h3>
+  <p>For barbells, we are using AlphaFit bumper plates. These plates are black, but they have a thick, brightly coloured stripe around the outer edge. This is a massive advantage for computer vision — we don't need to read a number, we just need to read the colour.</p>
 
   <div class="img-block">
-    <img src="img/colour-bumper-plates.png" alt="Colour coded bumper plates on a barbell">
-    <div class="img-caption">A loaded barbell with IWF colour-coded bumper plates — from the camera above, we can see the outermost plate on each side of the bar and read the total weight.</div>
+    <img src="img/alphafit-colour-plates.webp" alt="AlphaFit colour coded bumper plates">
+    <div class="img-caption">The actual AlphaFit plates we are using. Notice the bright, thick colour stripes on the edges: Red (25kg), Blue (20kg), Yellow (15kg), Green (10kg). The camera looks down from above and simply counts the coloured bands.</div>
   </div>
 
-  <h3>How the Camera Reads Plate Colours</h3>
-  <p>From the overhead camera, we can see the barbell from above. The outermost plate on each side of the bar is visible as a coloured ring. We crop the region around the barbell, run a colour segmentation model to identify the dominant colour of the outermost plate, and look up the corresponding weight. Since plates are always loaded symmetrically, we read one side and double it, then add the bar weight (20kg for a standard Olympic bar).</p>
+  <p>The AI model (a custom YOLOv11 object detector) is trained to draw bounding boxes around these coloured stripes. Because the camera is mounted on the overhead frame looking down at a 45-degree angle, it has a clear view of the barbell sleeve.</p>
 
   <div class="img-block">
-    <img src="img/yolo-detection.png" alt="YOLO detection on barbell plates">
-    <div class="img-caption">YOLO detecting and classifying the coloured plates on a loaded barbell — each plate gets a bounding box and a colour/weight classification label.</div>
+    <img src="img/weight-detection-demo.webp" alt="Working weight detection demo">
+    <div class="img-caption">Our working proof-of-concept. The camera looks down and the Neural Network draws bounding boxes around the plates: one Blue (20kg) and two Yellow (10kg). The system adds the barbell weight (20kg) to calculate the total: 70kg.</div>
   </div>
 
-  <h3>Method 2: Weight Stack Pin Detection</h3>
-  <p>Cable machines and selectorised machines use a numbered weight stack with a selector pin. The pin is inserted between two plates to select the weight. From above, the camera can see the top of the weight stack and identify which gap the pin is in. We train a custom YOLO model on images of weight stacks to detect the pin position, then use OCR to read the number printed on the selected plate.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Plate Colour</th><th>Weight</th><th>Detection Reliability</th></tr></thead>
+      <tbody>
+        <tr><td style="color:#e74c3c;font-weight:bold;">Red Stripe</td><td>25 kg</td><td>99% (High contrast)</td></tr>
+        <tr><td style="color:#3498db;font-weight:bold;">Blue Stripe</td><td>20 kg</td><td>99% (High contrast)</td></tr>
+        <tr><td style="color:#f1c40f;font-weight:bold;">Yellow Stripe</td><td>15 kg</td><td>99% (High contrast)</td></tr>
+        <tr><td style="color:#2ecc71;font-weight:bold;">Green Stripe</td><td>10 kg</td><td>98% (High contrast)</td></tr>
+        <tr><td style="color:#95a5a6;font-weight:bold;">White Stripe</td><td>5 kg</td><td>95% (Can blend with floor)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Method 2: Fixed Weight Stacks (Cable Machines)</h3>
+  <p>Cable machines don't use coloured plates. They use a stack of black iron plates with numbers printed on them, and a selector pin. To read these, the Neural Network uses a different approach.</p>
 
   <div class="img-block">
-    <img src="img/weight-stack-closeup.jpg" alt="Weight stack numbered plates close-up">
-    <div class="img-caption">The numbered weight stack on a cable machine — the selector pin is visible between two plates. The camera reads the number on the plate immediately above the pin to determine the selected weight.</div>
+    <img src="img/fixed-weight-plates.webp" alt="Fixed weight stack with numbers">
+    <div class="img-caption">A standard fixed weight stack. The AI must detect where the selector pin is inserted, and then read the white number printed on that specific plate using Optical Character Recognition (OCR).</div>
   </div>
 
-  <div class="img-block">
-    <img src="img/weight-stack-numbered.jpg" alt="Weight stack with coloured position markers">
-    <div class="img-caption">Some weight stacks include coloured position markers alongside the numbers — a secondary visual signal that makes pin detection more reliable in low-contrast lighting conditions.</div>
-  </div>
-
-  <h3>Colour Strip Enhancement (Our Innovation)</h3>
-  <p>Standard weight stacks have black plates with white numbers — low contrast and difficult to read from above in variable gym lighting. Our plan is to apply a <strong>colour-coded adhesive strip</strong> to each plate position on the weight stack, using the same IWF colour system. This gives the camera a large, high-contrast colour signal to detect instead of trying to read small white numbers on black plates. A red strip at the 50kg position, a blue strip at the 40kg position, and so on. The camera reads the colour of the strip immediately above the pin.</p>
-
-  <div class="callout info">
-    <div class="ct">Phase 1 Approach</div>
-    <p>In Phase 1, we focus on a single cable machine with the colour strip system applied. We train a simple colour classifier (not even a neural network — just HSV colour thresholding) to identify which strip is at the pin position. This is the fastest path to a working weight detection demo.</p>
-  </div>
-
-  <table class="spec-table">
-    <thead><tr><th>Equipment Type</th><th>Detection Method</th><th>Accuracy Target</th><th>Phase</th></tr></thead>
-    <tbody>
-      <tr><td>Olympic Barbell</td><td>Plate colour recognition (YOLO + colour classifier)</td><td>&gt;95%</td><td>Phase 2</td></tr>
-      <tr><td>Cable Machine</td><td>Colour strip + pin position (HSV thresholding)</td><td>&gt;98%</td><td>Phase 1</td></tr>
-      <tr><td>Dumbbells</td><td>Colour band + weight label OCR</td><td>&gt;90%</td><td>Phase 2</td></tr>
-      <tr><td>Plate-loaded machines</td><td>Plate colour recognition (side camera)</td><td>&gt;92%</td><td>Phase 3</td></tr>
-    </tbody>
-  </table>
-
-  <div class="code-toggle">
-    <button class="code-toggle-btn" onclick="toggleCode(this)">
-      <span>&#128196;&nbsp; weight_detection.py</span>
-      <span class="ct-arr">&#9660;</span>
-    </button>
-    <div class="code-toggle-body">
-<div class="code-block">
-    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">weight_detection.py</span></div>
-    <pre><span class="kw">import</span> cv2
-<span class="kw">import</span> numpy <span class="kw">as</span> np
-<span class="cm"># IWF colour strip mapping (HSV ranges)</span>
-COLOUR_WEIGHTS = {
-    <span class="st">'red'</span>:    (<span class="nm">25</span>, [(<span class="nm">0</span>,<span class="nm">120</span>,<span class="nm">70</span>), (<span class="nm">10</span>,<span class="nm">255</span>,<span class="nm">255</span>)]),
-    <span class="st">'blue'</span>:   (<span class="nm">20</span>, [(<span class="nm">100</span>,<span class="nm">100</span>,<span class="nm">70</span>), (<span class="nm">130</span>,<span class="nm">255</span>,<span class="nm">255</span>)]),
-    <span class="st">'yellow'</span>: (<span class="nm">15</span>, [(<span class="nm">20</span>,<span class="nm">100</span>,<span class="nm">100</span>), (<span class="nm">35</span>,<span class="nm">255</span>,<span class="nm">255</span>)]),
-    <span class="st">'green'</span>:  (<span class="nm">10</span>, [(<span class="nm">40</span>,<span class="nm">50</span>,<span class="nm">50</span>), (<span class="nm">80</span>,<span class="nm">255</span>,<span class="nm">255</span>)]),
-    <span class="st">'white'</span>:  (<span class="nm">5</span>,  [(<span class="nm">0</span>,<span class="nm">0</span>,<span class="nm">200</span>), (<span class="nm">180</span>,<span class="nm">30</span>,<span class="nm">255</span>)]),
-}
-<span class="kw">def</span> <span class="fn">detect_plate_colour</span>(plate_crop):
-    hsv = cv2.cvtColor(plate_crop, cv2.COLOR_BGR2HSV)
-    best_colour, best_count = <span class="kw">None</span>, <span class="nm">0</span>
-    <span class="kw">for</span> colour, (weight, (lo, hi)) <span class="kw">in</span> COLOUR_WEIGHTS.items():
-        mask = cv2.inRange(hsv, np.array(lo), np.array(hi))
-        <span class="kw">if</span> mask.sum() &gt; best_count:
-            best_count, best_colour = mask.sum(), colour
-    <span class="kw">return</span> COLOUR_WEIGHTS[best_colour][<span class="nm">0</span>] <span class="kw">if</span> best_colour <span class="kw">else</span> <span class="kw">None</span></pre>
-  </div>
-    </div>
-  </div>
+  <p><strong>The Stack Pipeline:</strong></p>
+  <ol>
+    <li><strong>Pin Detection:</strong> A YOLO model is trained specifically to find the selector pin handle.</li>
+    <li><strong>Plate Cropping:</strong> Once the pin is found, the system crops the image tightly around the plate the pin is inserted into.</li>
+    <li><strong>OCR Reading:</strong> A text-recognition model (like PaddleOCR) reads the white painted number on that plate (e.g., "20" or "50").</li>
+  </ol>
+  
+  <p><em>Enhancement:</em> If the white numbers wear off over time, we will apply brightly coloured adhesive stickers to the pin-hole area of each plate, converting the stack into a colour-reading problem just like the barbells.</p>
 </section>
-<div class="chapter-divider" id="ch-system">
-  <div class="ch-num">Chapter 04</div>
-  <h1>The Full <em>System</em></h1>
-  <p class="ch-desc">How all six AI models connect together into a single real-time pipeline. The timing constraints, the data flow, the database schema, and how a raw video frame becomes a structured workout log entry in under 46 milliseconds.</p>
-  <div class="ch-sections">
-    <span class="ch-pill">17 — The 46ms Pipeline</span>
-    <span class="ch-pill">18 — Data &amp; Database</span>
-  </div>
-</div>
 <section class="section" id="pipeline">
   <div class="section-tag">Section 18 — The Full System</div>
   <h2>The <em>46ms Pipeline</em></h2>
@@ -1543,16 +1485,101 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 </section>
 
 <div class="chapter-divider" id="ch-roadmap">
-  <div class="ch-num">Chapter 05</div>
+  <div class="ch-num">Chapter 06</div>
   <h1>The <em>Roadmap</em></h1>
   <p class="ch-desc">The four phases of development — from a single-camera lab prototype to a full multi-gym commercial deployment. Each phase has defined hardware, software goals, success criteria, and budget. Nothing in Phase 2 starts until Phase 1 is working.</p>
   <div class="ch-sections">
-    <span class="ch-pill">19 — Interactive Roadmap</span>
-    <span class="ch-pill">20 — Cost Breakdown</span>
+    <span class="ch-pill">22 — Interactive Roadmap</span>
+    <span class="ch-pill">23 — Cost Breakdown</span>
   </div>
 </div>
+<div class="chapter-divider" id="ch-neural-network">
+  <div class="ch-num">Chapter 05</div>
+  <h1>The <em>Neural Network</em></h1>
+  <p class="ch-desc">The core intelligence of the system. This chapter explains exactly how the AI works under the hood — why we use multiple specialist networks instead of one giant one, how we train them using manual annotations, and how transfer learning allows us to build a world-class system without millions of dollars of compute.</p>
+  <div class="ch-sections">
+    <span class="ch-pill">19 — One Network vs Many</span>
+    <span class="ch-pill">20 — Training &amp; Annotations</span>
+    <span class="ch-pill">21 — Transfer Learning</span>
+  </div>
+</div>
+
+<section class="section" id="nn-architecture">
+  <div class="section-tag">Section 19 — Deep Dive</div>
+  <h2>One Network vs <em>Many</em></h2>
+  <p class="lead">A common question is: <em>"Do we build one giant Neural Network (NN) that does everything, or multiple smaller ones?"</em> The answer is definitively <strong>Multiple Specialist Networks</strong>. Here is exactly how it works and why.</p>
+
+  <h3>The Problem with "One Giant Brain"</h3>
+  <p>If you try to train a single Neural Network to detect faces, count reps, find weight plates, and track people all at once, it will fail. A network forced to learn everything becomes a "jack of all trades, master of none." It requires massive amounts of compute power (costing millions of dollars) and runs too slowly for real-time video.</p>
+
+  <h3>The Solution: A Pipeline of Experts</h3>
+  <p>Instead of one giant NN, our system is a <strong>Pipeline</strong> of 5 small, highly specialized NNs. Each network does exactly one job, does it perfectly, and passes the result to the next network in line.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Network</th><th>Model Type</th><th>Its Only Job</th><th>Input &rarr; Output</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1. Detector</strong></td><td class="td-purple">YOLOv11</td><td>Find people and plates</td><td>Video Frame &rarr; Bounding Boxes</td></tr>
+        <tr><td><strong>2. Tracker</strong></td><td class="td-purple">DeepSORT</td><td>Remember who is who</td><td>Boxes &rarr; Persistent IDs (Person #4)</td></tr>
+        <tr><td><strong>3. Pose</strong></td><td class="td-purple">RTMPose</td><td>Find the joints</td><td>Person Box &rarr; 17 X/Y Coordinates</td></tr>
+        <tr><td><strong>4. Rep Counter</strong></td><td class="td-purple">LSTM</td><td>Count the movement</td><td>Stream of Joints &rarr; "1 Squat Completed"</td></tr>
+        <tr><td><strong>5. Face ID</strong></td><td class="td-purple">ArcFace</td><td>Recognize the member</td><td>Face Crop &rarr; "John Smith"</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>This pipeline approach means if the Rep Counter is making mistakes on bench press, we only have to retrain the small LSTM network. We don't have to touch the Face ID or the Plate Detector. It makes the system modular, debuggable, and incredibly fast.</p>
+</section>
+
+<section class="section" id="nn-training">
+  <div class="section-tag">Section 20 — Deep Dive</div>
+  <h2>Training &amp; <em>Annotations</em></h2>
+  <p class="lead">A Neural Network is just a mathematical formula with millions of blank variables. "Training" is the process of showing the network thousands of examples until it learns the correct values for those variables. To teach it, we have to manually show it the answers first.</p>
+
+  <h3>What is Manual Annotation?</h3>
+  <p>Before the AI can find an AlphaFit yellow plate on its own, a human has to draw a box around a yellow plate in a photo and label it "Yellow 15kg". We use software tools like <strong>CVAT</strong>, <strong>LabelMe</strong>, or <strong>Roboflow</strong> to do this.</p>
+
+  <div class="img-block">
+    <img src="img/roboflow-annotation.jpg" alt="Roboflow bounding box annotation tool">
+    <div class="img-caption">A manual annotation tool. A human draws a box around the object and assigns a class label. We will do this for thousands of frames of gym footage — boxing weight plates, selector pins, and people.</div>
+  </div>
+
+  <h3>The Training Loop</h3>
+  <ol>
+    <li><strong>Data Collection:</strong> We record 10 hours of video from the gym ceiling cameras.</li>
+    <li><strong>Frame Extraction:</strong> We pull out 5,000 individual still images from that video.</li>
+    <li><strong>Manual Annotation:</strong> Humans sit at computers and draw boxes around every barbell plate in those 5,000 images.</li>
+    <li><strong>Training (Forward Pass):</strong> We feed an image into the blank Neural Network. It guesses where the plates are (it will be wrong at first).</li>
+    <li><strong>Loss Calculation:</strong> The system compares the Network's guess to the Human's manual annotation. The difference is called the "Loss".</li>
+    <li><strong>Backpropagation:</strong> The system uses calculus to adjust the network's internal variables (weights) to make the guess slightly better next time.</li>
+  </ol>
+  <p>We repeat steps 4-6 millions of times on a powerful GPU. Slowly, the network learns what a plate looks like.</p>
+
+  <div class="img-block">
+    <img src="img/training-loss-curve.png" alt="Neural network training loss curve">
+    <div class="img-caption">A training loss curve. The blue line represents how "wrong" the network is. As training progresses over hours or days, the network learns from the manual annotations, and the error drops toward zero.</div>
+  </div>
+</section>
+
+<section class="section" id="nn-transfer">
+  <div class="section-tag">Section 21 — Deep Dive</div>
+  <h2>Transfer <em>Learning</em></h2>
+  <p class="lead">Training a Neural Network entirely from scratch takes millions of images and months of supercomputer time. We don't do that. We use a technique called <strong>Transfer Learning</strong>.</p>
+
+  <h3>Standing on the Shoulders of Giants</h3>
+  <p>Companies like Google, Meta, and Ultralytics have already spent millions training base models (like YOLO) on datasets containing millions of general images (cars, dogs, people, chairs). These base models already understand fundamental visual concepts: edges, shapes, shadows, and textures.</p>
+
+  <div class="img-block">
+    <img src="img/transfer-learning-diagram.png" alt="Transfer learning diagram">
+    <div class="img-caption">Transfer Learning: We take a pre-trained model (which already knows how to see shapes and edges) and we "freeze" its core layers. We only train the final output layer on our specific custom dataset (AlphaFit plates).</div>
+  </div>
+
+  <h3>How We Apply It</h3>
+  <p>Instead of starting with a blank network, we download a pre-trained YOLOv11 model. It already knows how to find "people" perfectly. But it doesn't know what an "AlphaFit 20kg Blue Plate" is.</p>
+  <p>We take our 5,000 manually annotated gym images and we <strong>Fine-Tune</strong> the model. Because the model already understands shapes and colours, it only takes a few hours on a single GPU for it to learn our specific gym equipment. This is the secret to building enterprise-grade AI on a startup budget.</p>
+</section>
 <section class="section" id="phases">
-  <div class="section-tag">Section 19 — Phase Roadmap</div>
+  <div class="section-tag">Section 22 — Phase Roadmap</div>
   <h2>Interactive <em>Phase Roadmap</em></h2>
   <p class="lead">The system is built in four phases, each proving the previous phase works before committing to the next level of investment. Click through the phases to see the full plan.</p>
   <div class="phase-wrapper">
@@ -1741,7 +1768,7 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 </section>
 
 <section class="section" id="costs">
-  <div class="section-tag">Section 20 — Cost Breakdown</div>
+  <div class="section-tag">Section 23 — Cost Breakdown</div>
   <h2>Full <em>Cost Breakdown</em></h2>
   <p class="lead">A complete summary of hardware costs across all phases, from the initial proof-of-concept to full enterprise deployment.</p>
   <div class="tbl">
