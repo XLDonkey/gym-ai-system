@@ -344,7 +344,7 @@
 <nav class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">XL Fitness</div>
-    <div class="brand-sub">AI Overseer — The Bible v11.0</div>
+    <div class="brand-sub">AI Overseer — The Bible v12.0</div>
   </div>
   <div class="nav-group">Chapter 1 — The Vision</div>
   <a class="nav-link" href="#vision">01 — What We're Building</a>
@@ -366,15 +366,15 @@
   <a class="nav-link" href="#faceid">15 — Member Identity</a>
   <a class="nav-link" href="#weight">16 — Weight Detection</a>
   <div class="nav-group">Chapter 4 — The Full System</div>
-  <a class="nav-link" href="#pipeline">17 — The 46ms Pipeline</a>
-  <a class="nav-link" href="#data">18 — Data &amp; Database</a>
+  <a class="nav-link" href="#pipeline">18 — The 46ms Pipeline</a>
+  <a class="nav-link" href="#data">19 — Data &amp; Database</a>
   <div class="nav-group">Chapter 5 — The Neural Network</div>
-  <a class="nav-link" href="#nn-architecture">19 — One Network vs Many</a>
-  <a class="nav-link" href="#nn-training">20 — Training &amp; Annotations</a>
-  <a class="nav-link" href="#nn-transfer">21 — Transfer Learning</a>
+  <a class="nav-link" href="#nn-architecture">20 — One Network vs Many</a>
+  <a class="nav-link" href="#nn-training">21 — Training &amp; Annotations</a>
+  <a class="nav-link" href="#nn-transfer">22 — Transfer Learning</a>
   <div class="nav-group">Chapter 6 — Roadmap</div>
-  <a class="nav-link" href="#phases">22 — Interactive Roadmap</a>
-  <a class="nav-link" href="#costs">23 — Cost Breakdown</a>
+  <a class="nav-link" href="#phases">23 — Interactive Roadmap</a>
+  <a class="nav-link" href="#costs">24 — Cost Breakdown</a>
 </nav>
 
 <div class="main">
@@ -1128,8 +1128,98 @@ results = model.predict(
     <div class="img-caption">Cross-camera re-identification: when a member moves from one camera zone to another, their appearance embedding is used to link the new tracking ID to their existing member record — no second card tap required.</div>
   </div>
 </section>
+
+<section class="section" id="yolo-deepsort">
+  <div class="section-tag">Section 12 — Technical Deep Dive</div>
+  <h2>YOLO + DeepSORT <em>Integration</em></h2>
+  <p class="lead">Tracking a person through a crowded gym requires two models working in perfect synchronization. YOLO acts as the "eyes" (finding people in a single frame), while DeepSORT acts as the "memory" (connecting those people across time). Here is the technical breakdown of how they integrate, the data handoff, and the specific challenges of a gym environment.</p>
+
+  <h3>The Architecture & Data Handoff</h3>
+  <p>The integration between YOLO and DeepSORT is a strict, unidirectional pipeline that runs every 33 milliseconds (30 FPS). YOLO does not know about time or history; it only sees the current frame. DeepSORT does not look at raw pixels; it only looks at the bounding boxes YOLO provides.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Step</th><th>Component</th><th>Action</th><th>Data Output</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1</strong></td><td>Video Stream</td><td>Extracts current frame (t=0)</td><td>Raw image array (1920x1080)</td></tr>
+        <tr><td><strong>2</strong></td><td>YOLOv11</td><td>Detects all people in the frame</td><td>List of [x, y, width, height, confidence]</td></tr>
+        <tr><td><strong>3</strong></td><td>Feature Extractor</td><td>Crops the image at each box and extracts a 128-dimensional appearance vector</td><td>List of [128-dim vector]</td></tr>
+        <tr><td><strong>4</strong></td><td>DeepSORT</td><td>Predicts where known IDs <em>should</em> be using a Kalman filter</td><td>Predicted [x, y, w, h] for existing IDs</td></tr>
+        <tr><td><strong>5</strong></td><td>Hungarian Algorithm</td><td>Matches new YOLO boxes to DeepSORT predictions using both distance (IoU) and appearance (Cosine distance)</td><td>Matched pairs (Detection &harr; ID)</td></tr>
+        <tr><td><strong>6</strong></td><td>DeepSORT</td><td>Updates state: confirms matches, creates new IDs for unmatched boxes, marks missing IDs as "lost"</td><td>Final List of [Tracking ID, x, y, w, h]</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Gym-Specific Challenges & Solutions</h3>
+  <p>A gym is one of the most hostile environments for computer vision tracking. The integration must be tuned specifically to handle these edge cases.</p>
+
+  <h4>Challenge 1: Severe Occlusion (The "Squat Rack" Problem)</h4>
+  <p><strong>The Problem:</strong> When a person steps inside a squat rack, the vertical steel uprights slice their body into pieces from the camera's perspective. YOLO might detect them as two separate people, or fail to detect them entirely for several frames.</p>
+  <p><strong>The Solution:</strong> We tune DeepSORT's <code>max_age</code> parameter (how long an ID survives without a YOLO detection) from the default 30 frames up to 90 frames (3 seconds). We also lower the YOLO confidence threshold specifically for the "person" class inside designated machine zones. If DeepSORT loses the person behind the rack upright, it holds the ID in memory. When they step out 2 seconds later, the Kalman filter and appearance embedding re-link them instantly without assigning a new ID.</p>
+
+  <h4>Challenge 2: Similar Appearances (The "Gym Bro Uniform")</h4>
+  <p><strong>The Problem:</strong> DeepSORT relies heavily on the appearance embedding (the 128-dim vector) to match people. In a gym, it is extremely common to have three guys wearing identical black t-shirts and black shorts working out next to each other. The appearance vectors will be nearly identical.</p>
+  <p><strong>The Solution:</strong> We shift the matching weight away from appearance and heavily toward spatial distance (Mahalanobis distance). Because our ceiling cameras are looking down at a steep angle, people rarely overlap perfectly in 2D space. By weighting the Kalman filter's spatial prediction at 80% and the appearance embedding at only 20%, DeepSORT correctly tracks the three identical-looking people based on their physical trajectories rather than their clothes.</p>
+
+  <h4>Challenge 3: Non-Linear Movement (The "Burpee" Problem)</h4>
+  <p><strong>The Problem:</strong> DeepSORT's internal Kalman filter assumes linear, constant-velocity movement (like a car driving down a road). Gym movements are explosive, non-linear, and vertical. A person dropping into a burpee completely breaks the Kalman filter's prediction model, causing the tracking ID to detach and float away.</p>
+  <p><strong>The Solution:</strong> We modify the state space of the Kalman filter. Instead of tracking the bounding box center (x, y) and aspect ratio (a, h), we track the bottom-center point of the bounding box (the feet). Because the feet remain relatively stationary on the floor during most exercises (even burpees or squats), the Kalman filter's spatial prediction remains stable while the bounding box expands and contracts above it.</p>
+
+  <div class="code-toggle">
+    <button class="code-toggle-btn" onclick="toggleCode(this)">
+      <span>&#128196;&nbsp; yolo_deepsort_pipeline.py</span>
+      <span class="ct-arr">&#9660;</span>
+    </button>
+    <div class="code-toggle-body">
+<div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">yolo_deepsort_pipeline.py</span></div>
+    <pre><span class="kw">from</span> ultralytics <span class="kw">import</span> YOLO
+<span class="kw">from</span> deep_sort_realtime.deepsort_tracker <span class="kw">import</span> DeepSort
+
+<span class="cm"># Initialize YOLO (Detector) and DeepSORT (Tracker)</span>
+detector = YOLO(<span class="st">'yolov11m.pt'</span>)
+tracker = DeepSort(
+    max_age=<span class="nm">90</span>,              <span class="cm"># Hold lost IDs for 3 seconds (occlusion fix)</span>
+    n_init=<span class="nm">3</span>,                <span class="cm"># Require 3 consecutive detections to confirm new ID</span>
+    nms_max_overlap=<span class="nm">1.0</span>,
+    max_cosine_distance=<span class="nm">0.3</span>, <span class="cm"># Stricter appearance matching</span>
+    nn_budget=<span class="nm">100</span>            <span class="cm"># Keep last 100 appearance vectors per ID</span>
+)
+
+<span class="kw">def</span> <span class="fn">process_frame</span>(frame):
+    <span class="cm"># 1. YOLO Detection (Find the people)</span>
+    results = detector(frame, classes=[<span class="nm">0</span>], conf=<span class="nm">0.45</span>) <span class="cm"># Class 0 = Person</span>
+    
+    <span class="cm"># Format detections for DeepSORT: [[x, y, w, h], confidence, class_id]</span>
+    detections = []
+    <span class="kw">for</span> box <span class="kw">in</span> results[<span class="nm">0</span>].boxes:
+        x1, y1, x2, y2 = box.xyxy[<span class="nm">0</span>].tolist()
+        conf = box.conf[<span class="nm">0</span>].item()
+        detections.append([[x1, y1, x2-x1, y2-y1], conf, <span class="nm">0</span>])
+        
+    <span class="cm"># 2. DeepSORT Tracking (Connect them across time)</span>
+    <span class="cm"># DeepSORT internally extracts the appearance features from the frame crops</span>
+    tracks = tracker.update_tracks(detections, frame=frame)
+    
+    <span class="cm"># 3. Output the persistent tracked objects</span>
+    tracked_people = []
+    <span class="kw">for</span> track <span class="kw">in</span> tracks:
+        <span class="kw">if not</span> track.is_confirmed() <span class="kw">or</span> track.time_since_update > <span class="nm">1</span>:
+            <span class="kw">continue</span>
+            
+        tracked_people.append({
+            <span class="st">'track_id'</span>: track.track_id,
+            <span class="st">'bbox'</span>: track.to_ltrb() <span class="cm"># [x1, y1, x2, y2]</span>
+        })
+        
+    <span class="kw">return</span> tracked_people</pre>
+  </div>
+    </div>
+  </div>
+</section>
 <section class="section" id="colour-tracking">
-  <div class="section-tag">Section 12 — Deep Dive</div>
+  <div class="section-tag">Section 14 — Deep Dive</div>
   <h2>Colour Tracking — <em>Weight Plates Only</em></h2>
   <p class="lead">Colour tracking in this system has one job and one job only: reading the weight on a barbell. We are not using colour bands or wristbands for person tracking or pose estimation. Members wear whatever they want.</p>
 
@@ -1161,7 +1251,7 @@ results = model.predict(
   <p>The total weight is calculated by summing all detected plates on both sleeves, then adding the standard barbell weight (20kg Olympic bar). This calculation happens in real time, every second, so the logged weight is always current — even if the member adds or removes plates mid-session.</p>
 </section>
 <section class="section" id="movenet">
-  <div class="section-tag">Section 13 — Deep Dive</div>
+  <div class="section-tag">Section 14 — Deep Dive</div>
   <h2>Pose <em>Estimation</em></h2>
   <p class="lead">Once we know <em>who</em> is in the frame and <em>where</em> they are, we need to understand what their body is doing. Pose estimation maps 17–33 key joints onto each tracked person, giving us a real-time skeleton we can analyse for movement patterns. We start with <strong>YOLO Pose</strong> and upgrade to a dedicated model in Phase 2 — and critically, this upgrade does not break anything downstream.</p>
 
@@ -1274,7 +1364,7 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
   </div>
 </section>
 <section class="section" id="lstm">
-  <div class="section-tag">Section 14 — Deep Dive</div>
+  <div class="section-tag">Section 15 — Deep Dive</div>
   <h2>Rep <em>Counting</em></h2>
   <p class="lead">A rep is not a single frame — it is a movement pattern that unfolds over time. The LSTM (Long Short-Term Memory) network watches the sequence of joint angles across many frames and learns to recognise the rhythmic pattern of a completed repetition.</p>
 
@@ -1351,7 +1441,7 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
   </div>
 </section>
 <section class="section" id="faceid">
-  <div class="section-tag">Section 15 — Deep Dive</div>
+  <div class="section-tag">Section 17 — Deep Dive</div>
   <h2>Member Identity — <em>Card Tap System</em></h2>
   <p class="lead">The primary identity system is the membership card tap at the door. Face recognition is not required and is not used in Phase 1 or Phase 2. It may be added as an optional enhancement in Phase 3 for the specific use case of re-identifying members who have changed clothes after the change room.</p>
 
@@ -1391,7 +1481,7 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
   </div>
 </section>
 <section class="section" id="weight">
-  <div class="section-tag">Section 16 — Deep Dive</div>
+  <div class="section-tag">Section 18 — Deep Dive</div>
   <h2>Weight <em>Detection</em></h2>
   <p class="lead">Counting reps is useless if we don't know how much weight is being lifted. The system uses two entirely different visual methods to read weight: Colour-coded stripe detection for barbells (AlphaFit plates), and OCR/Bounding box detection for fixed weight stacks.</p>
 
@@ -1449,8 +1539,8 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
     <h1>The Full <em>System</em></h1>
     <p class="ch-desc">How all five AI models connect together into a single real-time pipeline. The timing constraints, the data flow, the database schema, and how a raw video frame becomes a structured workout log entry in under 46 milliseconds.</p>
     <div class="ch-sections">
-      <span class="ch-pill">17 — The 46ms Pipeline</span>
-      <span class="ch-pill">18 — Data &amp; Database</span>
+      <span class="ch-pill">18 — The 46ms Pipeline</span>
+      <span class="ch-pill">19 — Data &amp; Database</span>
     </div>
     <div class="ch-prereqs">
       <div class="ch-prereqs-title">Before this chapter can begin</div>
@@ -1464,7 +1554,7 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
   </div>
 </div>
 <section class="section" id="pipeline">
-  <div class="section-tag">Section 18 — The Full System</div>
+  <div class="section-tag">Section 20 — The Full System</div>
   <h2>The <em>46ms Pipeline</em></h2>
   <p class="lead">Every component runs in sequence for every frame, on every camera. The entire pipeline must complete in under 33ms to maintain 30 FPS. We achieve this through GPU batching, asynchronous I/O, and careful optimisation.</p>
   <div class="code-toggle">
@@ -1501,7 +1591,7 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 </section>
 
 <section class="section" id="data">
-  <div class="section-tag">Section 18 — The Full System</div>
+  <div class="section-tag">Section 20 — The Full System</div>
   <h2>Data &amp; <em>Database Design</em></h2>
   <p class="lead">Every rep the system detects gets written to a PostgreSQL database. The schema is designed for both real-time queries (what is happening right now?) and historical analysis (how has this member progressed over 6 months?).</p>
   <div class="code-toggle">
@@ -1545,8 +1635,8 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
     <h1>The <em>Roadmap</em></h1>
     <p class="ch-desc">The four phases of development — from a single-camera lab prototype to a full multi-gym commercial deployment. Each phase has defined hardware, software goals, success criteria, and budget. Nothing in Phase 2 starts until Phase 1 is working. Each phase gate is a real checkpoint, not a suggestion.</p>
     <div class="ch-sections">
-      <span class="ch-pill">22 — Interactive Roadmap</span>
-      <span class="ch-pill">23 — Cost Breakdown</span>
+      <span class="ch-pill">23 — Interactive Roadmap</span>
+      <span class="ch-pill">24 — Cost Breakdown</span>
     </div>
     <div class="ch-prereqs">
       <div class="ch-prereqs-title">Phase gate summary</div>
@@ -1564,9 +1654,9 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
     <h1>The <em>Neural Network</em></h1>
     <p class="ch-desc">The core intelligence of the system. This chapter explains exactly how the AI works under the hood — why we use multiple specialist networks instead of one giant one, how we train them using manual annotations, and how transfer learning allows us to build a world-class system without millions of dollars of compute. This is the most important chapter in the document.</p>
     <div class="ch-sections">
-      <span class="ch-pill">19 — One Network vs Many</span>
-      <span class="ch-pill">20 — Training &amp; Annotations</span>
-      <span class="ch-pill">21 — Transfer Learning</span>
+      <span class="ch-pill">20 — One Network vs Many</span>
+      <span class="ch-pill">21 — Training &amp; Annotations</span>
+      <span class="ch-pill">22 — Transfer Learning</span>
     </div>
     <div class="ch-prereqs">
       <div class="ch-prereqs-title">Before training can begin</div>
@@ -1581,7 +1671,7 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 </div>
 
 <section class="section" id="nn-architecture">
-  <div class="section-tag">Section 19 — Deep Dive</div>
+  <div class="section-tag">Section 20 — Deep Dive</div>
   <h2>One Network vs <em>Many</em></h2>
   <p class="lead">A common question is: <em>"Do we build one giant Neural Network (NN) that does everything, or multiple smaller ones?"</em> The answer is definitively <strong>Multiple Specialist Networks</strong>. Here is exactly how it works and why.</p>
 
@@ -1608,7 +1698,7 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 </section>
 
 <section class="section" id="nn-training">
-  <div class="section-tag">Section 20 — Deep Dive</div>
+  <div class="section-tag">Section 21 — Deep Dive</div>
   <h2>Training &amp; <em>Annotations</em></h2>
   <p class="lead">A Neural Network is just a mathematical formula with millions of blank variables. "Training" is the process of showing the network thousands of examples until it learns the correct values for those variables. To teach it, we have to manually show it the answers first.</p>
 
@@ -1638,7 +1728,7 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 </section>
 
 <section class="section" id="nn-transfer">
-  <div class="section-tag">Section 21 — Deep Dive</div>
+  <div class="section-tag">Section 22 — Deep Dive</div>
   <h2>Transfer <em>Learning</em></h2>
   <p class="lead">Training a Neural Network entirely from scratch takes millions of images and months of supercomputer time. We don't do that. We use a technique called <strong>Transfer Learning</strong>.</p>
 
@@ -1655,7 +1745,7 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
   <p>We take our 5,000 manually annotated gym images and we <strong>Fine-Tune</strong> the model. Because the model already understands shapes and colours, it only takes a few hours on a single GPU for it to learn our specific gym equipment. This is the secret to building enterprise-grade AI on a startup budget.</p>
 </section>
 <section class="section" id="phases">
-  <div class="section-tag">Section 22 — Phase Roadmap</div>
+  <div class="section-tag">Section 23 — Phase Roadmap</div>
   <h2>Interactive <em>Phase Roadmap</em></h2>
   <p class="lead">The system is built in four phases, each proving the previous phase works before committing to the next level of investment. Click through the phases to see the full plan.</p>
   <div class="phase-wrapper">
@@ -1844,7 +1934,7 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 </section>
 
 <section class="section" id="costs">
-  <div class="section-tag">Section 23 — Cost Breakdown</div>
+  <div class="section-tag">Section 25 — Cost Breakdown</div>
   <h2>Full <em>Cost Breakdown</em></h2>
   <p class="lead">A complete summary of hardware costs across all phases, from the initial proof-of-concept to full enterprise deployment.</p>
   <div class="tbl">
