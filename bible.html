@@ -1,0 +1,3122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XL Fitness — AI Overseer Bible</title>
+<style>
+:root {
+  --bg: #0a0a12;
+  --surface: #12121e;
+  --surface2: #1a1a2e;
+  --border: #2a2a44;
+  --purple: #7c3aed;
+  --purple-light: #a78bfa;
+  --purple-dim: #7c3aed22;
+  --green: #10b981;
+  --green-dim: #10b98122;
+  --yellow: #f59e0b;
+  --yellow-dim: #f59e0b22;
+  --red: #ef4444;
+  --red-dim: #ef444422;
+  --blue: #3b82f6;
+  --blue-dim: #3b82f622;
+  --cyan: #06b6d4;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --muted2: #94a3b8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  display: flex;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 0 40px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.sidebar-logo {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.sidebar-logo .brand { font-size: 13px; font-weight: 800; letter-spacing: 3px; color: var(--purple-light); }
+.sidebar-logo .title { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.sidebar-group { padding: 8px 20px 4px; font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.sidebar a {
+  display: block;
+  padding: 6px 20px 6px 28px;
+  font-size: 12px;
+  color: var(--muted2);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all 0.2s;
+  line-height: 1.4;
+}
+.sidebar a:hover { color: var(--text); background: var(--surface2); }
+.sidebar a.active { color: var(--purple-light); border-left-color: var(--purple); background: var(--purple-dim); }
+.sidebar-divider { height: 1px; background: var(--border); margin: 12px 20px; }
+
+/* ── MAIN ── */
+main { flex: 1; min-width: 0; }
+
+/* ── SECTIONS ── */
+.section {
+  padding: 80px 64px;
+  border-bottom: 1px solid var(--border);
+  max-width: 960px;
+}
+.section:nth-child(even) { background: var(--surface); }
+.section-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--purple-light);
+  margin-bottom: 12px;
+}
+.section h2 {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  color: #fff;
+}
+.section h2 em { font-style: normal; color: var(--purple-light); }
+.section h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 40px 0 12px;
+  color: #fff;
+}
+.section h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 24px 0 8px;
+  color: var(--purple-light);
+}
+.section p { font-size: 15px; color: var(--muted2); margin-bottom: 16px; max-width: 720px; }
+.section p strong { color: var(--text); }
+.lead { font-size: 18px !important; color: var(--text) !important; line-height: 1.8; }
+
+/* ── HERO ── */
+.hero {
+  padding: 100px 64px 80px;
+  background: linear-gradient(135deg, #0a0a12 0%, #12082a 50%, #0a0a12 100%);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, #7c3aed18 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--purple-dim);
+  border: 1px solid var(--purple);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--purple-light);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.hero h1 {
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1.05;
+  color: #fff;
+  margin-bottom: 24px;
+  max-width: 800px;
+}
+.hero h1 em { font-style: normal; color: var(--purple-light); }
+.hero .subtitle {
+  font-size: 20px;
+  color: var(--muted2);
+  max-width: 600px;
+  line-height: 1.7;
+  margin-bottom: 48px;
+}
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.hero-stat { text-align: left; }
+.hero-stat .num { font-size: 36px; font-weight: 900; color: var(--purple-light); }
+.hero-stat .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* ── CALLOUTS ── */
+.callout {
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 24px 0;
+  border-left: 4px solid;
+}
+.callout-purple { background: var(--purple-dim); border-color: var(--purple); }
+.callout-green { background: var(--green-dim); border-color: var(--green); }
+.callout-yellow { background: var(--yellow-dim); border-color: var(--yellow); }
+.callout-red { background: var(--red-dim); border-color: var(--red); }
+.callout-blue { background: var(--blue-dim); border-color: var(--blue); }
+.callout-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.callout-purple .callout-label { color: var(--purple-light); }
+.callout-green .callout-label { color: var(--green); }
+.callout-yellow .callout-label { color: var(--yellow); }
+.callout-red .callout-label { color: var(--red); }
+.callout-blue .callout-label { color: var(--blue); }
+.callout p { margin: 0; font-size: 14px; max-width: none; }
+
+/* ── DEMO BOXES ── */
+.demo-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 32px 0;
+}
+.demo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.demo-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--purple-light);
+}
+.demo-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); }
+.demo-subtitle { font-size: 11px; color: var(--muted); }
+.demo-body { padding: 24px; }
+.demo-body-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px;
+}
+.demo-body-split-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  padding: 24px;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.btn-primary { background: var(--purple); color: #fff; }
+.btn-primary:hover { background: #6d28d9; }
+.btn-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+.btn-secondary:hover { border-color: var(--purple); color: var(--purple-light); }
+.btn-green { background: var(--green); color: #000; }
+.btn-green:hover { background: #059669; }
+.btn-sm { padding: 6px 12px; font-size: 11px; }
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+/* ── CODE ── */
+pre {
+  background: #060610;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #c9d1d9;
+  margin: 16px 0;
+}
+.kw { color: #ff7b72; }
+.fn { color: #d2a8ff; }
+.str { color: #a5d6ff; }
+.cm { color: #8b949e; }
+.num { color: #79c0ff; }
+.var { color: #ffa657; }
+
+/* ── CANVAS ── */
+canvas {
+  display: block;
+  border-radius: 10px;
+  background: #0d0d14;
+}
+
+/* ── TABLES ── */
+table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+th { background: var(--surface); padding: 10px 14px; text-align: left; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted2); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.badge-purple { background: var(--purple-dim); color: var(--purple-light); border: 1px solid var(--purple); }
+.badge-green { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+.badge-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid var(--yellow); }
+.badge-red { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+.badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue); }
+
+/* ── STEP CARDS ── */
+.steps { display: flex; flex-direction: column; gap: 16px; margin: 24px 0; }
+.step-card {
+  display: flex;
+  gap: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: border-color 0.3s;
+}
+.step-num {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  background: var(--purple-dim);
+  border: 1px solid var(--purple);
+}
+.step-card h4 { margin: 0 0 6px; font-size: 15px; color: #fff; }
+.step-card p { margin: 0; font-size: 13px; color: var(--muted2); max-width: none; }
+
+/* ── GRID CARDS ── */
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+.card-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 24px 0; }
+.card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+.card-icon { font-size: 28px; margin-bottom: 12px; }
+.card h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.card p { font-size: 13px; color: var(--muted2); margin: 0; max-width: none; }
+
+/* ── SLIDERS ── */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--purple);
+  cursor: pointer;
+  border: 2px solid #fff;
+}
+.slider-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
+.slider-label { font-size: 12px; color: var(--muted); min-width: 120px; }
+.slider-val { font-size: 14px; font-weight: 700; color: var(--purple-light); min-width: 50px; text-align: right; }
+
+/* ── TABS ── */
+.tabs { display: flex; gap: 4px; margin-bottom: 0; border-bottom: 1px solid var(--border); padding: 0 24px; }
+.tab-btn {
+  padding: 12px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--purple-light); border-bottom-color: var(--purple); }
+.tab-content { display: none; padding: 24px; }
+.tab-content.active { display: block; }
+
+/* ── PIPELINE ── */
+.pipeline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  padding: 20px 0;
+  flex-wrap: nowrap;
+}
+.pipe-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 110px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.pipe-step:hover, .pipe-step.active { border-color: var(--purple); background: var(--purple-dim); }
+.pipe-step .icon { font-size: 24px; }
+.pipe-step .label { font-size: 11px; font-weight: 700; color: var(--text); }
+.pipe-step .time { font-size: 10px; color: var(--muted); }
+.pipe-arrow { font-size: 20px; color: var(--border); padding: 0 4px; flex-shrink: 0; }
+.pipe-info {
+  background: var(--surface2);
+  border: 1px solid var(--purple);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+  display: none;
+}
+
+/* ── KEYPOINT LEGEND ── */
+.kp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 16px 0; }
+.kp-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+.kp-item:hover { border-color: var(--purple); }
+.kp-item.selected { border-color: var(--purple); background: var(--purple-dim); }
+.kp-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── EMBED BARS ── */
+.embed-bar-wrap { margin-bottom: 6px; }
+.embed-bar-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 2px; }
+.embed-bar-track { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.embed-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+
+/* ── LSTM FRAMES ── */
+.lstm-frames { display: flex; gap: 4px; flex-wrap: wrap; padding: 16px; background: var(--bg); border-radius: 10px; }
+.lstm-frame {
+  width: 40px; height: 40px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.2s;
+}
+.lstm-frame.processing { border-color: var(--yellow); box-shadow: 0 0 8px var(--yellow-dim); }
+.lstm-frame.done { border-color: var(--green); }
+.lstm-frame canvas { width: 40px !important; height: 40px !important; }
+
+/* ── CONFIDENCE ZONES ── */
+.conf-zones { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
+.conf-zone {
+  padding: 16px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  text-align: center;
+  transition: all 0.3s;
+}
+.conf-zone.active { transform: scale(1.04); }
+.conf-zone .zone-range { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.conf-zone .zone-action { font-size: 11px; color: var(--muted); line-height: 1.4; }
+#cz-high { border-color: #10b98140; }
+#cz-high.active { border-color: var(--green); background: var(--green-dim); }
+#cz-med { border-color: #f59e0b40; }
+#cz-med.active { border-color: var(--yellow); background: var(--yellow-dim); }
+#cz-low { border-color: #ef444440; }
+#cz-low.active { border-color: var(--red); background: var(--red-dim); }
+#cz-unknown { border-color: #6b728040; }
+#cz-unknown.active { border-color: #6b7280; background: #6b728020; }
+
+/* ── WEIGHT STACK ── */
+.stack-plate {
+  height: 28px;
+  border-radius: 4px;
+  margin: 3px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.stack-plate:hover { filter: brightness(1.2); }
+
+/* ── STAT BOXES ── */
+.stat-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0; }
+.stat-box {
+  flex: 1;
+  min-width: 120px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.stat-box .val { font-size: 28px; font-weight: 900; color: var(--purple-light); }
+.stat-box .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 60px 64px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+footer .brand { font-size: 20px; font-weight: 900; color: var(--purple-light); margin-bottom: 8px; }
+footer p { font-size: 13px; color: var(--muted); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .section { padding: 48px 24px; }
+  .hero { padding: 60px 24px; }
+  .hero h1 { font-size: 40px; }
+  .card-grid, .card-grid-3 { grid-template-columns: 1fr; }
+  .demo-body-split, .demo-body-split-3 { grid-template-columns: 1fr; }
+  .conf-zones { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">XL FITNESS</div>
+    <div class="title">AI Overseer — Master Bible</div>
+  </div>
+
+  <div class="sidebar-group">The Vision</div>
+  <a href="#vision">01 — What Are We Building?</a>
+  <a href="#problem">02 — The Problem We're Solving</a>
+  <a href="#overview">03 — How the System Works</a>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-group">Layer 1 — Detection</div>
+  <a href="#bounding-boxes">04 — Bounding Boxes</a>
+  <a href="#yolo">05 — YOLO Detection</a>
+  <a href="#confidence">06 — Confidence Scores</a>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-group">Layer 2 — Tracking</div>
+  <a href="#tracking-problem">07 — The Tracking Problem</a>
+  <a href="#deepsort">08 — DeepSORT</a>
+  <a href="#zones">09 — Zone Matching</a>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-group">Layer 3 — Pose</div>
+  <a href="#pose-why">10 — Why Pose Estimation?</a>
+  <a href="#movenet">11 — MoveNet Live Demo</a>
+  <a href="#lstm">12 — LSTM Rep Counter</a>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-group">Layer 4 — Identity</div>
+  <a href="#face-why">13 — Why Face ID?</a>
+  <a href="#embeddings">14 — Face Embeddings</a>
+  <a href="#matching">15 — Matching Demo</a>
+  <a href="#flywheel">16 — The Data Flywheel</a>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-group">Layer 5 — Weight</div>
+  <a href="#weight">17 — Weight Stack AI</a>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-group">The Full System</div>
+  <a href="#pipeline">18 — Full Pipeline</a>
+  <a href="#cameras">19 — Camera Setup</a>
+  <a href="#server">20 — Server & Network</a>
+  <a href="#phases">21 — Build Phases</a>
+  <a href="#implementation">22 — Implementation Plan</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════════════ -->
+<main>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-eyebrow">
+    <span>●</span> Master Plan Bible — v2.0
+  </div>
+  <h1>The XL Fitness<br><em>AI Overseer</em></h1>
+  <p class="subtitle">Every idea explored. Every concept explained simply. Every technical decision justified. This is the complete guide to how we build an AI that watches the gym floor and knows exactly what every member is doing.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">120</div><div class="lbl">Machines Monitored</div></div>
+    <div class="hero-stat"><div class="num">46ms</div><div class="lbl">Full Pipeline Time</div></div>
+    <div class="hero-stat"><div class="num">100%</div><div class="lbl">Data Capture Rate</div></div>
+    <div class="hero-stat"><div class="num">97%+</div><div class="lbl">Face ID Accuracy (Month 3)</div></div>
+    <div class="hero-stat"><div class="num">0</div><div class="lbl">Member Input Required</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 01 — VISION
+═══════════════════════════════════════════════════ -->
+<section class="section" id="vision">
+  <div class="section-tag">Section 01 — The Vision</div>
+  <h2>What Are We <em>Building?</em></h2>
+  <p class="lead">Imagine a person standing in the gym, watching every machine, knowing every member by face, counting every rep, reading every weight — all at once, all the time, never getting tired, never missing anything. That's the AI Overseer.</p>
+
+  <p>The goal is simple to say but hard to build: <strong>zero friction data capture</strong>. A member walks in, sits at a machine, and trains. The AI does everything else. It knows who they are. It knows what machine they're at. It reads the weight. It counts the reps. It scores the form. It logs everything to a database. The member never touches a tablet.</p>
+
+  <div class="callout callout-purple">
+    <div class="callout-label">🎯 The North Star</div>
+    <p>The system should feel like magic to the member. They just train. Behind the scenes, three cameras and four AI models are working in parallel to capture a complete, verified record of their session — better data than any personal trainer could manually collect.</p>
+  </div>
+
+  <h3>What the System Produces</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h4>Verified Session Data</h4>
+      <p>Every set, every rep, every weight — AI-verified. Not self-reported. Not estimated. Actually measured by computer vision.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏆</div>
+      <h4>Tamper-Proof Leaderboard</h4>
+      <p>Because data is captured automatically, the leaderboard can't be gamed. Every number is real. Trust is restored.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📈</div>
+      <h4>Progress Tracking</h4>
+      <p>Members can see their strength progress over weeks and months. The AI tracks volume, weight progression, and form improvement.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🤖</div>
+      <h4>Coaching Intelligence</h4>
+      <p>Coaches get real data to work with. They can see which members are progressing, who's plateauing, and who needs form correction.</p>
+    </div>
+  </div>
+
+  <h3>Why This Is Worth Building</h3>
+  <p>Most gyms have a data problem. Members self-report their workouts, and the data is unreliable — people round up, forget, or simply don't log at all. Studies show <strong>~40% of manually logged gym data contains errors</strong>. You cannot build a coaching product, a leaderboard, or a personalisation engine on unreliable data.</p>
+  <p>The AI Overseer solves this at the source. It captures data automatically, at the point of exercise, with no member effort required. This is the foundation for everything else — the leaderboard, the coaching, the personalisation, the business model.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 02 — THE PROBLEM
+═══════════════════════════════════════════════════ -->
+<section class="section" id="problem">
+  <div class="section-tag">Section 02 — The Problem</div>
+  <h2>The Problem We're <em>Solving</em></h2>
+  <p class="lead">Before we explain any technology, we need to understand the problem deeply. Because if you don't understand the problem, the solution looks like overkill.</p>
+
+  <div class="card-grid">
+    <div class="card" style="border-color: var(--red);">
+      <div class="card-icon">❌</div>
+      <h4 style="color:var(--red)">The Old Way — Honesty System</h4>
+      <div class="steps" style="margin-top:16px">
+        <div class="step-card">
+          <div class="step-num" style="background:var(--red-dim);border-color:var(--red)">1</div>
+          <div><h4>Member finishes a set</h4><p>Tired, sweaty, mid-workout. The last thing they want is to pick up a tablet.</p></div>
+        </div>
+        <div class="step-card">
+          <div class="step-num" style="background:var(--red-dim);border-color:var(--red)">2</div>
+          <div><h4>They type in their reps</h4><p>Did they do 10 or 12? They round up. Did they use 80kg or 85kg? They guess. Data is already wrong.</p></div>
+        </div>
+        <div class="step-card">
+          <div class="step-num" style="background:var(--red-dim);border-color:var(--red)">3</div>
+          <div><h4>Leaderboard fills with fake numbers</h4><p>Everyone knows it. Trust collapses. Members stop caring. The product fails.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="border-color: var(--green);">
+      <div class="card-icon">✅</div>
+      <h4 style="color:var(--green)">The AI Way — Zero Input</h4>
+      <div class="steps" style="margin-top:16px">
+        <div class="step-card">
+          <div class="step-num" style="background:var(--green-dim);border-color:var(--green)">1</div>
+          <div><h4>Member sits at machine</h4><p>Camera detects them. Face ID confirms who they are. Weight stack is read. Session opens automatically.</p></div>
+        </div>
+        <div class="step-card">
+          <div class="step-num" style="background:var(--green-dim);border-color:var(--green)">2</div>
+          <div><h4>They train</h4><p>AI watches every rep. Counts them. Scores the form. Detects rest periods. No tablet interaction required.</p></div>
+        </div>
+        <div class="step-card">
+          <div class="step-num" style="background:var(--green-dim);border-color:var(--green)">3</div>
+          <div><h4>Data is verified and published</h4><p>Every number is AI-verified. Leaderboard is tamper-proof. Coaches have real data to work with.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 03 — SYSTEM OVERVIEW
+═══════════════════════════════════════════════════ -->
+<section class="section" id="overview">
+  <div class="section-tag">Section 03 — System Overview</div>
+  <h2>How the System <em>Works</em></h2>
+  <p class="lead">The system has five layers. Each layer answers one question. Together they answer the only question that matters: <strong>"Who is at this machine, what are they lifting, and how many reps have they done?"</strong></p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> INTERACTIVE PIPELINE — Click each stage to learn what it does</div>
+    </div>
+    <div class="demo-body">
+      <div class="pipeline" id="main-pipeline">
+        <div class="pipe-step" onclick="showPipe(this,'Camera 1 captures a 1920×1080 frame from the overhead fisheye lens. This is de-warped into a flat image and sent to YOLO every 33ms (30 times per second).')">
+          <div class="icon">📷</div><div class="label">Camera</div><div class="time">0ms</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" onclick="showPipe(this,'YOLO (You Only Look Once) scans the entire frame in ~15ms and draws a bounding box around every person it finds. Each box comes with a confidence score — how sure is the AI that this is a real person?')">
+          <div class="icon">📦</div><div class="label">YOLO</div><div class="time">~15ms</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" onclick="showPipe(this,'DeepSORT takes the bounding boxes from YOLO and assigns each person a persistent ID number. Person #7 stays Person #7 across every frame, even as they move around the gym. Without this, every frame would see completely new people.')">
+          <div class="icon">🔢</div><div class="label">Tracking</div><div class="time">~5ms</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" onclick="showPipe(this,'Zone matching checks which machine each tracked person is sitting at. Every machine has a polygon drawn around it in camera coordinates. If Person #7\'s centre point is inside the lat_pulldown_01 polygon, they are assigned to that machine.')">
+          <div class="icon">📍</div><div class="label">Zones</div><div class="time">~1ms</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" onclick="showPipe(this,'Face ID crops the face from Person #7\'s bounding box and runs it through InsightFace, which converts the face into a 512-number mathematical fingerprint. This fingerprint is compared against all enrolled members. If the match score is above 95%, the session opens automatically.')">
+          <div class="icon">👤</div><div class="label">Face ID</div><div class="time">~25ms</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" onclick="showPipe(this,'Camera 2 runs MoveNet to find all 17 body joints (nose, shoulders, elbows, wrists, hips, knees, ankles) 30 times per second. The LSTM neural network reads 30 frames at a time and classifies the movement: good_rep, bad_rep, rest_time, or no_user_present.')">
+          <div class="icon">🦾</div><div class="label">Pose+Reps</div><div class="time">~30ms</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" onclick="showPipe(this,'Camera 3 reads the weight stack using colour-coded plates and pin position detection. The orchestration layer fires an event to the FastAPI server, which updates Supabase, refreshes the tablet, and sends a webhook to the leaderboard. Total pipeline: ~46ms.')">
+          <div class="icon">⚡</div><div class="label">Log + Fire</div><div class="time">~1ms</div>
+        </div>
+      </div>
+      <div class="pipe-info" id="pipe-info">
+        <div class="callout-label" style="color:var(--purple-light);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Stage Details</div>
+        <p id="pipe-info-text" style="margin:0;font-size:14px;color:var(--muted2)"></p>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:16px;margin-bottom:0">Total pipeline time: <strong style="color:var(--green)">~46ms</strong> — faster than a single video frame (33ms at 30fps). We process within 2 frames of the action happening.</p>
+    </div>
+  </div>
+
+  <h3>Three Cameras Per Machine</h3>
+  <p>Each machine has three cameras, each with a specific job:</p>
+  <table>
+    <tr><th>Camera</th><th>Position</th><th>Job</th><th>Why This Position?</th></tr>
+    <tr><td><span class="badge badge-blue">Camera 1</span></td><td>Overhead fisheye, ceiling</td><td>Person detection + tracking + zone matching</td><td>Overhead angle sees all machines simultaneously. One camera covers multiple machines.</td></tr>
+    <tr><td><span class="badge badge-purple">Camera 2</span></td><td>Side angle, column/wall</td><td>Pose estimation + rep counting</td><td>Side angle shows the full range of motion — the elbow bend, the extension. You can't count reps from above.</td></tr>
+    <tr><td><span class="badge badge-green">Camera 3</span></td><td>Facing weight stack</td><td>Weight detection</td><td>Direct view of the weight plates and selector pin. No ambiguity about which weight is selected.</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 04 — BOUNDING BOXES
+═══════════════════════════════════════════════════ -->
+<section class="section" id="bounding-boxes">
+  <div class="section-tag">Section 04 — Layer 1: Detection</div>
+  <h2>What is a <em>Bounding Box?</em></h2>
+  <p class="lead">Before the AI can do anything — count reps, identify faces, read weights — it first needs to know where people are in the camera image. A bounding box is the answer.</p>
+
+  <p>A bounding box is <strong>just a rectangle drawn around a person</strong>. That's it. It's defined by four numbers: the x position (left edge), y position (top edge), width, and height — all measured in pixels from the top-left corner of the image.</p>
+
+  <div class="callout callout-purple">
+    <div class="callout-label">🎯 Why We Start Here</div>
+    <p>Every other AI layer depends on bounding boxes. Face ID crops the face <em>from</em> the bounding box. Pose estimation runs <em>inside</em> the bounding box. Zone matching uses the bounding box <em>centre point</em>. Get detection right and everything else follows.</p>
+  </div>
+
+  <h3>A Bounding Box is Just 4 Numbers</h3>
+  <pre><span class="cm"># This is everything YOLO outputs for one detected person</span>
+{
+  <span class="str">"bbox"</span>: [
+    <span class="num">340</span>,   <span class="cm"># x — how many pixels from the left edge of the image</span>
+    <span class="num">210</span>,   <span class="cm"># y — how many pixels from the top edge of the image</span>
+    <span class="num">80</span>,    <span class="cm"># width — how wide the person is in pixels</span>
+    <span class="num">140</span>    <span class="cm"># height — how tall the person is in pixels</span>
+  ],
+  <span class="str">"confidence"</span>: <span class="num">0.94</span>,  <span class="cm"># 94% sure this is a real person</span>
+  <span class="str">"class"</span>: <span class="str">"person"</span>    <span class="cm"># YOLO detected a person (not a chair, not a weight plate)</span>
+}</pre>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> INTERACTIVE BOUNDING BOX DEMO</div>
+      <div class="demo-subtitle">Click anywhere on the canvas to place a person detection</div>
+    </div>
+    <div class="demo-body-split">
+      <div>
+        <div class="btn-group">
+          <button class="btn btn-primary btn-sm" onclick="addRandomBbox()">+ Add Random Person</button>
+          <button class="btn btn-secondary btn-sm" onclick="clearBbox()">Clear All</button>
+        </div>
+        <canvas id="bbox-canvas" width="480" height="340" onclick="addBboxAtClick(event)" style="width:100%;cursor:crosshair"></canvas>
+      </div>
+      <div>
+        <h4>YOLO Output — Last Detection</h4>
+        <pre style="font-size:11px">{
+  "bbox": [
+    <span id="bx">—</span>,  <span class="cm"># x</span>
+    <span id="by">—</span>,  <span class="cm"># y</span>
+    <span id="bw">—</span>,  <span class="cm"># width</span>
+    <span id="bh">—</span>   <span class="cm"># height</span>
+  ],
+  "confidence": <span id="bc">—</span>,
+  "class": "person"
+}</pre>
+        <h4 style="margin-top:20px">All Detections</h4>
+        <div id="bbox-list" style="font-size:12px;color:var(--muted)">Click the canvas to detect a person</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Why Not Trace the Exact Outline?</h3>
+  <p>You might wonder: why use a simple rectangle? Why not trace the exact shape of the person? The answer is <strong>speed</strong>. Tracing exact outlines (called segmentation) takes 10× more computation. A bounding box gives us 95% of the information we need in 1/10th the time.</p>
+  <table>
+    <tr><th>Method</th><th>Time Per Frame</th><th>Info Quality</th><th>Our Choice?</th></tr>
+    <tr><td>Bounding Box (YOLO)</td><td><span class="badge badge-green">~15ms</span></td><td>Good — rectangle around person</td><td><span class="badge badge-green">✓ Yes</span></td></tr>
+    <tr><td>Pixel Segmentation</td><td><span class="badge badge-red">~150ms+</span></td><td>Perfect — exact outline</td><td><span class="badge badge-red">✗ Too slow</span></td></tr>
+    <tr><td>Simple Motion Detection</td><td><span class="badge badge-green">~2ms</span></td><td>Poor — just "something moved"</td><td><span class="badge badge-red">✗ Not enough info</span></td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 05 — YOLO
+═══════════════════════════════════════════════════ -->
+<section class="section" id="yolo">
+  <div class="section-tag">Section 05 — YOLO Detection</div>
+  <h2>YOLO — <em>You Only Look Once</em></h2>
+  <p class="lead">YOLO is the AI model that scans the camera image and finds every person in it. It does this in about 15 milliseconds — fast enough to run 30 times per second on every camera.</p>
+
+  <p>The name "You Only Look Once" refers to how it works. Older detection systems would scan an image multiple times, checking different regions at different scales. YOLO scans the entire image in a <strong>single forward pass</strong> through a neural network. That's why it's fast enough for real-time video.</p>
+
+  <h3>How YOLO Sees the World</h3>
+  <p>YOLO divides the image into a grid (say, 20×20 cells). For each cell, it predicts: "Is there a person here? If yes, where exactly, and how confident am I?" All of this happens simultaneously across all cells in one pass.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> YOLO LIVE SIMULATOR — Camera 1 (Overhead View)</div>
+      <div class="demo-subtitle">Simulating what YOLO sees on the gym floor at 30fps</div>
+    </div>
+    <div class="demo-body-split">
+      <div>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" id="yolo-btn" onclick="toggleYolo()">⏸ Pause</button>
+          <button class="btn btn-secondary btn-sm" onclick="resetYolo()">↺ Reset</button>
+        </div>
+        <canvas id="yolo-canvas" width="480" height="340" style="width:100%"></canvas>
+      </div>
+      <div>
+        <h4>Frame Stats</h4>
+        <div class="stat-row" style="margin-bottom:20px">
+          <div class="stat-box"><div class="val" id="yolo-frame-num">0</div><div class="lbl">Frame</div></div>
+          <div class="stat-box"><div class="val" id="yolo-detected">0</div><div class="lbl">Detected</div></div>
+          <div class="stat-box"><div class="val">~15ms</div><div class="lbl">Inference</div></div>
+        </div>
+        <h4>Confidence Threshold</h4>
+        <div class="slider-row">
+          <span class="slider-label">Min confidence</span>
+          <input type="range" min="40" max="95" value="70" oninput="updateYoloThresh(this.value)">
+          <span class="slider-val" id="yolo-thresh-val">0.70</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px">Drag left to detect more people (risk false positives). Drag right to only show very confident detections.</p>
+        <h4 style="margin-top:20px">Live Detections</h4>
+        <div id="yolo-dets" style="font-size:12px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-yellow">
+    <div class="callout-label">🤔 Why 0.70 Confidence Threshold?</div>
+    <p>We set the threshold at 70% because the gym environment is controlled — good lighting, fixed camera angles, people always in workout clothes. Too low and you get false detections (a weight plate might look like a person). Too high and you miss real people who are partially behind equipment.</p>
+  </div>
+
+  <h3>The YOLO Code (Simplified)</h3>
+  <pre><span class="kw">from</span> ultralytics <span class="kw">import</span> <span class="fn">YOLO</span>
+<span class="kw">import</span> cv2
+
+<span class="cm"># Load the model — this happens once at startup</span>
+model = <span class="fn">YOLO</span>(<span class="str">'yolov8n.pt'</span>)  <span class="cm"># 'n' = nano, fastest version</span>
+
+<span class="cm"># This runs 30 times per second</span>
+<span class="kw">def</span> <span class="fn">process_frame</span>(frame):
+    results = model(frame, conf=<span class="num">0.70</span>, classes=[<span class="num">0</span>])  <span class="cm"># class 0 = person</span>
+    
+    detections = []
+    <span class="kw">for</span> box <span class="kw">in</span> results[<span class="num">0</span>].boxes:
+        x, y, w, h = box.xywh[<span class="num">0</span>].tolist()  <span class="cm"># bounding box</span>
+        conf = box.conf[<span class="num">0</span>].item()           <span class="cm"># confidence score</span>
+        detections.append({
+            <span class="str">'bbox'</span>: [<span class="fn">int</span>(x), <span class="fn">int</span>(y), <span class="fn">int</span>(w), <span class="fn">int</span>(h)],
+            <span class="str">'confidence'</span>: conf
+        })
+    
+    <span class="kw">return</span> detections  <span class="cm"># list of all detected persons in this frame</span></pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 06 — CONFIDENCE SCORES
+═══════════════════════════════════════════════════ -->
+<section class="section" id="confidence">
+  <div class="section-tag">Section 06 — Confidence Scores</div>
+  <h2>What is a <em>Confidence Score?</em></h2>
+  <p class="lead">Every AI prediction comes with a number between 0 and 1 that says "how sure am I?". This applies to person detection, face matching, weight reading — everything. Understanding confidence scores is fundamental to understanding how the system makes decisions.</p>
+
+  <p>Think of it like a human saying "I'm pretty sure that's Matt" vs "I think that might be Matt" vs "I have no idea who that is." The confidence score is the AI's way of expressing the same thing — as a number you can act on.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> CONFIDENCE SCORE EXPLORER — Face ID Decision System</div>
+      <div class="demo-subtitle">Drag the slider to see what the system does at each confidence level</div>
+    </div>
+    <div class="demo-body">
+      <div class="slider-row">
+        <span class="slider-label">Confidence Score</span>
+        <input type="range" id="conf-slider" min="0" max="100" value="85" oninput="updateConf(this.value)" style="flex:1">
+        <span class="slider-val" id="conf-val">0.85</span>
+      </div>
+      <div style="height:32px;background:var(--border);border-radius:8px;overflow:hidden;margin:12px 0">
+        <div id="conf-bar" style="height:100%;width:85%;background:var(--yellow);border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;transition:all 0.3s;font-size:13px;font-weight:700;color:#000">0.85</div>
+      </div>
+      <div class="conf-zones">
+        <div class="conf-zone" id="cz-high">
+          <div class="zone-range" style="color:var(--green)">≥ 0.95</div>
+          <div class="zone-action">Auto-confirm<br>Session opens</div>
+        </div>
+        <div class="conf-zone" id="cz-med">
+          <div class="zone-range" style="color:var(--yellow)">0.80 – 0.94</div>
+          <div class="zone-action">Tap card<br>to confirm</div>
+        </div>
+        <div class="conf-zone" id="cz-low">
+          <div class="zone-range" style="color:var(--red)">0.60 – 0.79</div>
+          <div class="zone-action">Please tap<br>your card</div>
+        </div>
+        <div class="conf-zone" id="cz-unknown">
+          <div class="zone-range" style="color:#6b7280">< 0.60</div>
+          <div class="zone-action">Unknown<br>person</div>
+        </div>
+      </div>
+      <div class="callout callout-yellow" id="conf-callout" style="margin-top:16px">
+        <div class="callout-label" id="conf-label">⚠ Medium Confidence</div>
+        <p id="conf-text">The face looks familiar but we're not certain enough to open a session automatically.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Why Not Just Ask Everyone to Tap Every Time?</h3>
+  <p>Because <strong>friction kills engagement</strong>. Every extra step a member has to take is a reason to skip logging. The goal is zero friction. The confidence system lets us be smart about when we ask — only when we genuinely need to. And every time we do ask, we get better training data. This is the flywheel (explained in Section 16).</p>
+</section>
+</main>
+</body>
+</html>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 07 — TRACKING PROBLEM
+═══════════════════════════════════════════════════ -->
+<section class="section" id="tracking-problem" style="display:block">
+  <div class="section-tag">Section 07 — Layer 2: Tracking</div>
+  <h2>The <em>Tracking Problem</em></h2>
+  <p class="lead">YOLO detects people in a single frame. But video is a sequence of frames. Without tracking, YOLO has no memory — it sees 30 completely fresh images every second. This creates a critical problem.</p>
+
+  <p>Imagine you're watching a security camera. Every second, someone wipes your memory. You see people, but you don't know if the person in front of you is the same person you saw a moment ago. That's YOLO without tracking. It detects people, but it can't follow them.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> WITHOUT TRACKING vs WITH TRACKING</div>
+      <div class="demo-subtitle">Watch how IDs change without DeepSORT</div>
+    </div>
+    <div class="demo-body-split">
+      <div>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" id="track-toggle" onclick="toggleTracking()">Toggle Tracking OFF</button>
+          <button class="btn btn-secondary btn-sm" onclick="resetTracking()">↺ Reset</button>
+        </div>
+        <canvas id="track-canvas" width="480" height="300" style="width:100%"></canvas>
+      </div>
+      <div>
+        <div id="track-status" style="padding:16px;background:var(--surface);border-radius:10px;border:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <div id="track-indicator" style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>
+            <span id="track-state" style="font-size:13px;font-weight:700;color:var(--green)">Tracking: ON</span>
+          </div>
+          <p id="track-desc" style="font-size:12px;color:var(--muted);margin:0">With DeepSORT active, each person keeps their ID number as they move. Person #1 stays Person #1 across all frames.</p>
+        </div>
+        <div style="margin-top:16px">
+          <h4>Why This Matters</h4>
+          <p style="font-size:13px;color:var(--muted2)">If Person #7 changes ID every frame, we can't link their face to their reps. We can't link their reps to their weight. The entire system falls apart. <strong style="color:var(--text)">Persistent IDs are the foundation of everything.</strong></p>
+        </div>
+        <div style="margin-top:16px">
+          <h4>ID Stability Score</h4>
+          <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:8px">
+            <div id="stability-bar" style="height:100%;width:95%;background:var(--green);border-radius:4px;transition:all 0.5s"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px">
+            <span>Unstable</span><span id="stability-val" style="color:var(--green);font-weight:700">95% stable</span><span>Perfect</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 08 — DEEPSORT
+═══════════════════════════════════════════════════ -->
+<section class="section" id="deepsort">
+  <div class="section-tag">Section 08 — DeepSORT</div>
+  <h2>How <em>DeepSORT</em> Keeps Track</h2>
+  <p class="lead">DeepSORT solves the tracking problem using two simultaneous strategies: predict where a person will be next frame, and check if the new detection looks the same as the tracked person. Both must agree for an ID to be maintained.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> DEEPSORT — 3 COMPONENTS EXPLAINED</div>
+    </div>
+    <div class="tabs" id="deepsort-tabs">
+      <button class="tab-btn active" onclick="switchTab('deepsort','kalman',this)">1. Kalman Filter</button>
+      <button class="tab-btn" onclick="switchTab('deepsort','appearance',this)">2. Appearance Match</button>
+      <button class="tab-btn" onclick="switchTab('deepsort','hungarian',this)">3. Hungarian Algorithm</button>
+      <button class="tab-btn" onclick="switchTab('deepsort','result',this)">4. The Result</button>
+    </div>
+
+    <div id="deepsort-kalman" class="tab-content active">
+      <h4>Kalman Filter — "Where Will They Be Next Frame?"</h4>
+      <p style="font-size:14px;color:var(--muted2)">A Kalman Filter is a mathematical prediction algorithm. Given a person's current position and velocity, it predicts where they'll be in the next frame. This prediction is used to pre-match new detections before even looking at appearance.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:16px">
+        <div>
+          <canvas id="kalman-canvas" width="340" height="240" style="width:100%"></canvas>
+          <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">Dashed = Kalman prediction. Solid = actual position. The filter learns velocity and corrects itself.</p>
+        </div>
+        <div>
+          <pre style="font-size:11px"><span class="cm"># Kalman Filter — simplified concept</span>
+<span class="cm"># Current state: where is Person #7 right now?</span>
+<span class="var">current_position</span> = (<span class="num">340</span>, <span class="num">210</span>)
+<span class="var">current_velocity</span> = (<span class="num">-2</span>, <span class="num">0</span>)  <span class="cm"># moving 2px left/frame</span>
+
+<span class="cm"># Prediction: where will they be NEXT frame?</span>
+<span class="var">predicted_next</span> = (
+  <span class="var">current_position</span>[<span class="num">0</span>] + <span class="var">current_velocity</span>[<span class="num">0</span>],
+  <span class="var">current_position</span>[<span class="num">1</span>] + <span class="var">current_velocity</span>[<span class="num">1</span>]
+)
+<span class="cm"># predicted_next = (338, 210)</span>
+
+<span class="cm"># DeepSORT pre-matches detections near (338, 210)</span>
+<span class="cm"># This dramatically reduces the search space</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="deepsort-appearance" class="tab-content">
+      <h4>Appearance Descriptor — "Does This Look Like the Same Person?"</h4>
+      <p style="font-size:14px;color:var(--muted2)">Even if the Kalman Filter predicts the right position, DeepSORT also checks: does the person in this new bounding box look like the same person we were tracking? It uses a small neural network to create a 128-number "appearance vector" for each detection.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:16px">
+        <div>
+          <canvas id="appear-canvas" width="340" height="200" style="width:100%"></canvas>
+          <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">Cosine similarity between appearance vectors. High = same person. Low = different person.</p>
+        </div>
+        <div>
+          <div id="appear-bars"></div>
+          <button class="btn btn-primary btn-sm" onclick="refreshAppear()" style="margin-top:12px">↺ New Comparison</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="deepsort-hungarian" class="tab-content">
+      <h4>Hungarian Algorithm — "Best Global Assignment"</h4>
+      <p style="font-size:14px;color:var(--muted2)">When there are multiple tracked people and multiple new detections, the Hungarian Algorithm finds the globally optimal assignment. It's not just "match the closest" — it considers all possible assignments and finds the one that minimises total error.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:16px">
+        <div>
+          <canvas id="hungarian-canvas" width="340" height="240" style="width:100%"></canvas>
+        </div>
+        <div>
+          <p style="font-size:13px;color:var(--muted2)">Left column = existing tracked IDs. Right column = new YOLO detections. Lines show the optimal assignment.</p>
+          <button class="btn btn-primary btn-sm" onclick="runHungarian()" style="margin-top:12px">▶ Solve Assignment</button>
+          <div id="hungarian-result" style="margin-top:12px;font-size:12px;color:var(--muted)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="deepsort-result" class="tab-content">
+      <h4>The Result — Persistent IDs Across All Frames</h4>
+      <p style="font-size:14px;color:var(--muted2)">Combining Kalman prediction + appearance matching + Hungarian assignment gives us stable, persistent IDs. Person #7 stays Person #7 for their entire gym session — even if they stand up, walk around, and sit back down.</p>
+      <pre style="font-size:11px"><span class="cm"># DeepSORT output — every frame</span>
+tracked_persons = [
+  { <span class="str">"id"</span>: <span class="num">7</span>,  <span class="str">"bbox"</span>: [<span class="num">340</span>, <span class="num">210</span>, <span class="num">80</span>, <span class="num">140</span>], <span class="str">"confidence"</span>: <span class="num">0.94</span> },
+  { <span class="str">"id"</span>: <span class="num">12</span>, <span class="str">"bbox"</span>: [<span class="num">580</span>, <span class="num">190</span>, <span class="num">75</span>, <span class="num">135</span>], <span class="str">"confidence"</span>: <span class="num">0.89</span> },
+  { <span class="str">"id"</span>: <span class="num">3</span>,  <span class="str">"bbox"</span>: [<span class="num">120</span>, <span class="num">240</span>, <span class="num">85</span>, <span class="num">145</span>], <span class="str">"confidence"</span>: <span class="num">0.91</span> },
+]
+<span class="cm"># These IDs are stable across ALL frames</span>
+<span class="cm"># Person #7 was #7 last frame, and will be #7 next frame</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 09 — ZONE MATCHING
+═══════════════════════════════════════════════════ -->
+<section class="section" id="zones">
+  <div class="section-tag">Section 09 — Zone Matching</div>
+  <h2>Which Machine Is <em>Person #7 At?</em></h2>
+  <p class="lead">We know Person #7 exists and where they are in the camera image. Now we need to know which machine they're at. Zone matching is the bridge between "a tracked person" and "a person at a specific machine."</p>
+
+  <p>Every machine has a <strong>zone polygon</strong> drawn around it in camera pixel coordinates. These are just rectangles (or irregular shapes) that represent the area where someone sitting at that machine would appear in the overhead camera image. If Person #7's centre point falls inside the lat_pulldown_01 polygon, they are assigned to that machine.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> ZONE MATCHING DEMO — Overhead Camera View</div>
+      <div class="demo-subtitle">Drag the person to different machines to see zone assignment</div>
+    </div>
+    <div class="demo-body-split">
+      <div>
+        <canvas id="zone-canvas" width="480" height="340" style="width:100%;cursor:grab"></canvas>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px">Drag the person (white dot) around the floor to see zone assignment change in real-time.</p>
+      </div>
+      <div>
+        <h4>Zone Assignment</h4>
+        <div id="zone-assignment" style="padding:16px;background:var(--surface);border-radius:10px;border:1px solid var(--border);margin-bottom:16px">
+          <div style="font-size:12px;color:var(--muted)">Person #7 is at:</div>
+          <div id="zone-machine" style="font-size:20px;font-weight:700;color:var(--purple-light);margin-top:4px">No machine</div>
+          <div id="zone-coords" style="font-size:11px;color:var(--muted);margin-top:4px">Position: —</div>
+        </div>
+        <pre style="font-size:11px"><span class="cm"># Zone config — set up once, never changes</span>
+machine_zones = {
+  <span class="str">"lat_pulldown_01"</span>: {
+    <span class="str">"polygon"</span>: [
+      (<span class="num">80</span>, <span class="num">60</span>), (<span class="num">180</span>, <span class="num">60</span>),
+      (<span class="num">180</span>, <span class="num">160</span>), (<span class="num">80</span>, <span class="num">160</span>)
+    ]
+  },
+  <span class="cm"># ... all 120 machines defined here</span>
+}
+
+<span class="cm"># Check which zone a person is in</span>
+<span class="kw">def</span> <span class="fn">get_machine</span>(person_centre):
+  <span class="kw">for</span> machine, zone <span class="kw">in</span> machine_zones.items():
+    <span class="kw">if</span> <span class="fn">point_in_polygon</span>(person_centre, zone[<span class="str">"polygon"</span>]):
+      <span class="kw">return</span> machine
+  <span class="kw">return</span> <span class="kw">None</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-green">
+    <div class="callout-label">✅ One-Time Setup</div>
+    <p>Zone polygons are defined once when the system is installed. You open a calibration tool, click around each machine on the overhead camera image, and save the polygon. This takes about 30 minutes for 120 machines. After that, the system never needs to be recalibrated unless machines are moved.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 10 — WHY POSE ESTIMATION
+═══════════════════════════════════════════════════ -->
+<section class="section" id="pose-why">
+  <div class="section-tag">Section 10 — Layer 3: Pose Estimation</div>
+  <h2>Why <em>Pose Estimation?</em></h2>
+  <p class="lead">We know who is at the machine. We know which machine it is. Now we need to count their reps and score their form. A bounding box alone can't do this — it just tells us a rectangle exists. Pose estimation goes deeper: it finds the exact position of every joint in the body, 30 times per second.</p>
+
+  <p>Think of it like an X-ray that updates 30 times per second. Instead of seeing a person as a rectangle, the AI sees them as a skeleton — 17 joints connected by bones. The elbow bends. The weight rises. The elbow extends. The weight lowers. That's a rep. You can only detect this pattern if you're tracking the elbow position over time.</p>
+
+  <div class="callout callout-purple">
+    <div class="callout-label">🎯 The Key Insight</div>
+    <p>A rep is a <strong>movement pattern</strong>. The elbow bends, the weight rises, the elbow extends, the weight lowers. To detect this pattern, you need to track the elbow position over time. Pose estimation gives you the elbow position. The LSTM neural network (next section) detects the pattern.</p>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">📍</div>
+      <h4>17 Body Landmarks</h4>
+      <p>Nose, eyes, ears, shoulders, elbows, wrists, hips, knees, ankles — every major joint tracked 30× per second.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📐</div>
+      <h4>Joint Angles</h4>
+      <p>From 3 points (shoulder, elbow, wrist) we calculate the elbow angle. A lat pulldown goes from ~160° extended to ~40° contracted.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎬</div>
+      <h4>Movement Sequences</h4>
+      <p>30 frames of joint positions = a movement sequence. The LSTM reads this sequence and classifies it as a rep, rest, or bad form.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h4>Why MoveNet?</h4>
+      <p>MoveNet Lightning runs in ~5ms per frame. OpenPose takes ~100ms. We have 33ms per frame at 30fps — MoveNet is the only option that fits.</p>
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Model</th><th>Speed</th><th>Accuracy</th><th>Our Choice?</th></tr>
+    <tr><td>MoveNet Lightning</td><td><span class="badge badge-green">~5ms</span></td><td>Good</td><td><span class="badge badge-green">✓ Yes</span></td></tr>
+    <tr><td>MoveNet Thunder</td><td><span class="badge badge-yellow">~15ms</span></td><td>Better</td><td><span class="badge badge-yellow">Fallback</span></td></tr>
+    <tr><td>MediaPipe Pose</td><td><span class="badge badge-yellow">~20ms</span></td><td>Better</td><td><span class="badge badge-yellow">Fallback</span></td></tr>
+    <tr><td>OpenPose</td><td><span class="badge badge-red">~100ms</span></td><td>Best</td><td><span class="badge badge-red">✗ Way too slow</span></td></tr>
+  </table>
+  <p style="font-size:12px;color:var(--muted)">At 30fps, we have 33ms per frame. MoveNet Lightning at 5ms leaves 28ms for everything else. OpenPose at 100ms would mean we can only process 10fps — not enough for smooth rep counting.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 11 — MOVENET LIVE DEMO
+═══════════════════════════════════════════════════ -->
+<section class="section" id="movenet">
+  <div class="section-tag">Section 11 — MoveNet Live Demo</div>
+  <h2>MoveNet <em>Live Pose Demo</em></h2>
+  <p class="lead">This is exactly what Camera 2 sees — a person's body with 17 keypoints tracked in real time. The green dots are joints. The lines connecting them are bones. Click any joint to learn what it tracks and why we use it.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> MOVENET POSE ESTIMATION — ANIMATED DEMO</div>
+      <div class="demo-subtitle">Click any joint to learn what it tracks. Use the exercise selector to change movement.</div>
+    </div>
+    <div class="demo-body-split">
+      <div>
+        <div class="btn-group">
+          <select id="exercise-select" onchange="changeExercise(this.value)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer">
+            <option value="lat_pulldown">Lat Pulldown</option>
+            <option value="chest_press">Chest Press</option>
+            <option value="leg_press">Leg Press</option>
+            <option value="bicep_curl">Bicep Curl</option>
+            <option value="shoulder_press">Shoulder Press</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" id="pose-pause-btn" onclick="togglePose()">⏸ Pause</button>
+        </div>
+        <canvas id="pose-canvas" width="360" height="480" style="width:100%;max-width:360px"></canvas>
+      </div>
+      <div>
+        <h4>Selected Joint</h4>
+        <div id="joint-info" style="padding:16px;background:var(--surface);border-radius:10px;border:1px solid var(--border);margin-bottom:16px;min-height:80px">
+          <p style="font-size:13px;color:var(--muted);margin:0">Click any joint on the pose to see its details</p>
+        </div>
+
+        <h4>Live Keypoint Data</h4>
+        <div id="live-kp" style="font-family:monospace;font-size:11px;color:var(--muted2);background:var(--bg);padding:12px;border-radius:8px;border:1px solid var(--border);line-height:2"></div>
+
+        <h4 style="margin-top:16px">Rep Counter</h4>
+        <div style="text-align:center;padding:16px;background:var(--surface);border-radius:10px;border:1px solid var(--border)">
+          <div id="rep-count" style="font-size:48px;font-weight:900;color:var(--purple-light)">0</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Reps</div>
+          <div style="margin-top:12px">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Elbow Angle</div>
+            <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+              <div id="angle-bar" style="height:100%;width:50%;background:var(--purple);border-radius:4px;transition:width 0.1s"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px">
+              <span>Contracted (40°)</span><span id="angle-val" style="color:var(--purple-light);font-weight:700">100°</span><span>Extended (160°)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>The 17 Keypoints — What Each One Does</h3>
+  <p>MoveNet outputs 17 (x, y, confidence) triplets per frame. For the gym, we only use the ones relevant to each exercise. Here's the full map:</p>
+  <div class="kp-grid" id="kp-grid"></div>
+  <div class="callout callout-yellow" style="margin-top:16px">
+    <div class="callout-label">💡 Exercise-Specific Keypoints</div>
+    <p>We don't use all 17 keypoints for every exercise. For a lat pulldown, we primarily use <strong>shoulders, elbows, and wrists</strong>. For a leg press, we use <strong>hips, knees, and ankles</strong>. Using only the relevant keypoints makes the model more accurate and faster.</p>
+  </div>
+
+  <h3>How We Calculate Joint Angles</h3>
+  <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">calculate_angle</span>(a, b, c):
+    <span class="str">"""
+    Calculate the angle at joint b, given three points a, b, c.
+    Example: a=shoulder, b=elbow, c=wrist → gives elbow angle
+    """</span>
+    a = np.<span class="fn">array</span>(a)  <span class="cm"># shoulder [x, y]</span>
+    b = np.<span class="fn">array</span>(b)  <span class="cm"># elbow    [x, y]</span>
+    c = np.<span class="fn">array</span>(c)  <span class="cm"># wrist    [x, y]</span>
+    
+    <span class="cm"># Vector from elbow to shoulder, and elbow to wrist</span>
+    radians = np.<span class="fn">arctan2</span>(c[<span class="num">1</span>]-b[<span class="num">1</span>], c[<span class="num">0</span>]-b[<span class="num">0</span>]) - \
+              np.<span class="fn">arctan2</span>(a[<span class="num">1</span>]-b[<span class="num">1</span>], a[<span class="num">0</span>]-b[<span class="num">0</span>])
+    
+    angle = np.<span class="fn">abs</span>(radians * <span class="num">180.0</span> / np.pi)
+    <span class="kw">if</span> angle > <span class="num">180.0</span>:
+        angle = <span class="num">360</span> - angle
+    
+    <span class="kw">return</span> angle  <span class="cm"># returns degrees, e.g. 45.3</span>
+
+<span class="cm"># Usage: lat pulldown elbow angle</span>
+elbow_angle = <span class="fn">calculate_angle</span>(
+    keypoints[<span class="str">'left_shoulder'</span>],
+    keypoints[<span class="str">'left_elbow'</span>],
+    keypoints[<span class="str">'left_wrist'</span>]
+)
+<span class="cm"># elbow_angle = 45.3 → arm is contracted (pulling down)</span>
+<span class="cm"># elbow_angle = 162.7 → arm is extended (top of movement)</span></pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 12 — LSTM REP COUNTER
+═══════════════════════════════════════════════════ -->
+<section class="section" id="lstm">
+  <div class="section-tag">Section 12 — LSTM Rep Counter</div>
+  <h2>How the LSTM <em>Counts Reps</em></h2>
+  <p class="lead">MoveNet gives us joint positions. But a single frame of joint positions doesn't tell us if a rep just happened. A rep is a <em>sequence</em> — extended → contracted → extended. The LSTM neural network reads sequences. That's its entire job.</p>
+
+  <p>LSTM stands for <strong>Long Short-Term Memory</strong>. It's a type of neural network designed specifically to understand sequences over time. Unlike a regular neural network that looks at one snapshot, an LSTM reads a window of 30 frames (1 second of movement) and asks: "What movement pattern just happened?"</p>
+
+  <div class="callout callout-yellow">
+    <div class="callout-label">🤔 Why LSTM and Not a Simple Angle Threshold?</div>
+    <p>You might think: "just count how many times the elbow angle crosses 90°." The problem is that people pause mid-rep, adjust their grip, or shift position. A simple threshold would count these as reps. The LSTM learns the <strong>full movement pattern</strong> — the speed, the range, the rhythm — and is far more robust to these edge cases.</p>
+  </div>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> LSTM SEQUENCE VISUALISER</div>
+      <div class="demo-subtitle">Watch the LSTM process a sequence of frames to detect a rep</div>
+    </div>
+    <div class="demo-body">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="runLSTM()">▶ Run Sequence</button>
+        <button class="btn btn-secondary" onclick="resetLSTM()">↺ Reset</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Input: 30 frames of elbow angle data</p>
+      <div class="lstm-frames" id="lstm-frames"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:20px">
+        <div style="text-align:center;padding:16px;background:var(--surface);border-radius:10px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">LSTM Output</div>
+          <div id="lstm-output" style="font-size:18px;font-weight:700;color:var(--purple-light)">—</div>
+        </div>
+        <div style="text-align:center;padding:16px;background:var(--surface);border-radius:10px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Confidence</div>
+          <div id="lstm-conf" style="font-size:18px;font-weight:700;color:var(--purple-light)">—</div>
+        </div>
+        <div style="text-align:center;padding:16px;background:var(--surface);border-radius:10px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Rep Count</div>
+          <div id="lstm-reps" style="font-size:18px;font-weight:700;color:var(--purple-light)">0</div>
+        </div>
+      </div>
+      <div id="lstm-callout" class="callout callout-purple" style="margin-top:16px;display:none">
+        <div class="callout-label">🧠 Processing...</div>
+        <p id="lstm-callout-text">Feed the sequence to see the LSTM classification.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>The 7 States the LSTM Classifies</h3>
+  <p>The LSTM doesn't just say "rep" or "no rep." It classifies every 30-frame window into one of 7 states. This gives us much richer data than a simple counter.</p>
+  <table>
+    <tr><th>State</th><th>What It Means</th><th>What We Do</th></tr>
+    <tr><td><span class="badge badge-green">good_rep</span></td><td>Full range of motion, controlled speed, proper form</td><td>Count rep, score 100%, log to leaderboard</td></tr>
+    <tr><td><span class="badge badge-yellow">bad_rep</span></td><td>Partial range, too fast, or compensating with wrong muscles</td><td>Count rep, score &lt;80%, show form warning on tablet</td></tr>
+    <tr><td><span class="badge badge-blue">user_seated_engaged</span></td><td>Person is at machine, actively moving</td><td>Keep session open, watch for rep pattern</td></tr>
+    <tr><td><span class="badge badge-blue">user_present_not_engaged</span></td><td>Person is at machine but not moving (resting between sets)</td><td>Start rest timer, keep session open</td></tr>
+    <tr><td><span class="badge badge-yellow">false_movement</span></td><td>Movement detected but not a rep (adjusting grip, coughing)</td><td>Ignore — do not count</td></tr>
+    <tr><td><span class="badge badge-purple">rest_time</span></td><td>Person is still, resting between sets</td><td>Log rest duration, suggest next set</td></tr>
+    <tr><td><span class="badge badge-red">no_user_present</span></td><td>Machine is empty</td><td>Close session, free the machine slot</td></tr>
+  </table>
+
+  <h3>The LSTM Architecture</h3>
+  <pre><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+
+<span class="cm"># Input: 30 frames × 17 keypoints × 3 values (x, y, confidence)</span>
+<span class="cm"># = 30 × 51 = 1,530 numbers per inference</span>
+
+model = tf.keras.Sequential([
+    <span class="cm"># First LSTM layer — reads the sequence</span>
+    tf.keras.layers.<span class="fn">LSTM</span>(<span class="num">128</span>, return_sequences=<span class="kw">True</span>,
+                          input_shape=(<span class="num">30</span>, <span class="num">51</span>)),
+    tf.keras.layers.<span class="fn">Dropout</span>(<span class="num">0.3</span>),
+    
+    <span class="cm"># Second LSTM layer — deeper pattern recognition</span>
+    tf.keras.layers.<span class="fn">LSTM</span>(<span class="num">64</span>),
+    tf.keras.layers.<span class="fn">Dropout</span>(<span class="num">0.3</span>),
+    
+    <span class="cm"># Dense layers — final classification</span>
+    tf.keras.layers.<span class="fn">Dense</span>(<span class="num">64</span>, activation=<span class="str">'relu'</span>),
+    tf.keras.layers.<span class="fn">Dense</span>(<span class="num">7</span>, activation=<span class="str">'softmax'</span>)  <span class="cm"># 7 states</span>
+])
+
+<span class="cm"># Output: [0.02, 0.94, 0.01, 0.01, 0.01, 0.00, 0.01]</span>
+<span class="cm">#          bad   good  seated  rest  false  rest  none</span>
+<span class="cm"># → good_rep at 94% confidence</span></pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 13 — WHY FACE ID
+═══════════════════════════════════════════════════ -->
+<section class="section" id="face-why">
+  <div class="section-tag">Section 13 — Layer 4: Face ID</div>
+  <h2>Why <em>Face ID?</em></h2>
+  <p class="lead">We know someone is at the lat pulldown. We know they're doing reps. But whose reps are they? This is where Face ID comes in. It's the link between an anonymous tracked person and a named member profile.</p>
+
+  <div class="card-grid">
+    <div class="card" style="border-color:var(--yellow)">
+      <div class="card-icon">🤔</div>
+      <h4 style="color:var(--yellow)">Why Not Just Use the NFC Card?</h4>
+      <p>Members tap their card at the entry gate — that tells us they're in the building. But once they're on the gym floor, we don't know which machine they're at. A member could be at any of 120 machines. Face ID is the bridge between "Matt is in the building" and "Matt is at machine #7 right now."</p>
+    </div>
+    <div class="card" style="border-color:var(--green)">
+      <div class="card-icon">🛡️</div>
+      <h4 style="color:var(--green)">The Fallback</h4>
+      <p>Face ID is not the only identification method — it's the <em>primary</em> one. If confidence is below 95%, the tablet shows "Tap card to confirm." This fallback means the system <strong>never fails to identify a member</strong>. And every card tap makes the face model smarter.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-blue">
+    <div class="callout-label">🔒 Privacy Note</div>
+    <p>The AI does not store photos of members. It stores <strong>mathematical vectors</strong> (512 numbers). You cannot reconstruct a photo from a vector. All face processing happens on the local Mac Mini — no face data ever leaves the gym. This is compliant with the Australian Privacy Act.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 14 — FACE EMBEDDINGS
+═══════════════════════════════════════════════════ -->
+<section class="section" id="embeddings">
+  <div class="section-tag">Section 14 — Face Embeddings</div>
+  <h2>What is a <em>Face Embedding?</em></h2>
+  <p class="lead">The AI doesn't store photos of members. It stores numbers. Specifically, 512 numbers that mathematically describe the unique geometry of a face. This is called an embedding. Two photos of the same person produce very similar 512-number vectors. Two photos of different people produce very different vectors.</p>
+
+  <p>Think of it like a fingerprint — but instead of ridges and whorls, it's measuring the distance between your eyes, the width of your nose, the shape of your jawline, the distance from your eye to your mouth. These geometric relationships stay consistent across different lighting, angles, and expressions.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> FACE EMBEDDING VISUALISER</div>
+      <div class="demo-subtitle">See how embeddings differ between people and stay consistent across photos</div>
+    </div>
+    <div class="demo-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px">
+        <div style="text-align:center">
+          <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:28px;border:3px solid var(--purple)">👨</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text)">Matt — Photo 1</div>
+          <div style="font-size:10px;color:var(--muted)">Enrolment day</div>
+        </div>
+        <div style="text-align:center">
+          <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:28px;border:3px solid var(--purple)">👨</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text)">Matt — Photo 2</div>
+          <div style="font-size:10px;color:var(--muted)">Different day, different lighting</div>
+        </div>
+        <div style="text-align:center">
+          <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#f87171);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:28px;border:3px solid var(--red)">👩</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text)">Sarah — Different Person</div>
+          <div style="font-size:10px;color:var(--muted)">Different member</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+        <div style="padding:16px;background:var(--surface);border-radius:10px;border:2px solid var(--green);text-align:center">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Matt Photo 1 vs Matt Photo 2</div>
+          <div style="font-size:32px;font-weight:900;color:var(--green)">0.97</div>
+          <div style="font-size:11px;color:var(--green)">✓ Same person — high similarity</div>
+        </div>
+        <div style="padding:16px;background:var(--surface);border-radius:10px;border:2px solid var(--red);text-align:center">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Matt Photo 1 vs Sarah</div>
+          <div style="font-size:32px;font-weight:900;color:var(--red)">0.23</div>
+          <div style="font-size:11px;color:var(--red)">✗ Different person — low similarity</div>
+        </div>
+      </div>
+
+      <h4>The 512 Embedding Dimensions (First 20 shown)</h4>
+      <div id="embed-bars-matt1" style="margin-bottom:12px">
+        <div style="font-size:11px;color:var(--purple-light);margin-bottom:6px;font-weight:700">Matt — Photo 1</div>
+      </div>
+      <div id="embed-bars-matt2" style="margin-bottom:12px">
+        <div style="font-size:11px;color:var(--purple-light);margin-bottom:6px;font-weight:700">Matt — Photo 2 (notice: very similar pattern)</div>
+      </div>
+      <div id="embed-bars-sarah">
+        <div style="font-size:11px;color:var(--red);margin-bottom:6px;font-weight:700">Sarah — Different person (notice: completely different pattern)</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="generateEmbeds()" style="margin-top:16px">↺ Generate New Embeddings</button>
+    </div>
+  </div>
+
+  <h3>The Enrolment Process</h3>
+  <pre><span class="cm"># Enrolment — run once per member when they join</span>
+<span class="kw">from</span> insightface.app <span class="kw">import</span> <span class="fn">FaceAnalysis</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+app = <span class="fn">FaceAnalysis</span>(providers=[<span class="str">'CoreMLExecutionProvider'</span>])  <span class="cm"># Mac M4 optimised</span>
+app.<span class="fn">prepare</span>(ctx_id=<span class="num">0</span>, det_size=(<span class="num">640</span>, <span class="num">640</span>))
+
+<span class="cm"># Take 5 photos of Matt, extract embeddings, average them</span>
+embeddings = []
+<span class="kw">for</span> photo_path <span class="kw">in</span> matt_photos:
+    img = cv2.<span class="fn">imread</span>(photo_path)
+    faces = app.<span class="fn">get</span>(img)
+    <span class="kw">if</span> faces:
+        embeddings.<span class="fn">append</span>(faces[<span class="num">0</span>].embedding)  <span class="cm"># 512-number vector</span>
+
+<span class="cm"># Average embedding is more robust than a single photo</span>
+matt_embedding = np.<span class="fn">mean</span>(embeddings, axis=<span class="num">0</span>)
+
+<span class="cm"># Store in Supabase</span>
+{ <span class="str">"member_id"</span>: <span class="str">"matt_mcArdle"</span>, <span class="str">"embedding"</span>: matt_embedding }</pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 15 — MATCHING DEMO
+═══════════════════════════════════════════════════ -->
+<section class="section" id="matching">
+  <div class="section-tag">Section 15 — Face Matching</div>
+  <h2>The <em>Matching Process</em></h2>
+  <p class="lead">Every time a new face is detected in a bounding box, the system extracts its embedding and compares it against every enrolled member. The comparison uses cosine similarity — a mathematical measure of how similar two vectors are.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> FACE MATCHING — LIVE DEMO</div>
+      <div class="demo-subtitle">Watch the system scan all members and find the best match</div>
+    </div>
+    <div class="demo-body">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="runFaceMatch()">▶ Run Face Match</button>
+        <button class="btn btn-secondary" onclick="resetFaceMatch()">↺ Reset</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;margin-top:16px">
+        <div>
+          <div style="text-align:center;padding:20px;background:var(--surface);border-radius:10px;border:1px solid var(--border)">
+            <div style="font-size:40px;margin-bottom:8px">❓</div>
+            <div style="font-size:12px;color:var(--muted)">Unknown face detected</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Person #7 at lat_pulldown_01</div>
+          </div>
+          <div id="match-result" style="margin-top:12px;padding:16px;background:var(--surface);border-radius:10px;border:1px solid var(--border);text-align:center;display:none">
+            <div style="font-size:28px;margin-bottom:4px">✅</div>
+            <div id="match-name" style="font-size:16px;font-weight:700;color:var(--green)"></div>
+            <div id="match-score" style="font-size:24px;font-weight:900;color:var(--green);margin:4px 0"></div>
+            <div style="font-size:11px;color:var(--muted)">Session opened automatically</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Scanning members...</div>
+          <div id="match-bars"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>The Matching Code</h3>
+  <pre><span class="kw">from</span> sklearn.metrics.pairwise <span class="kw">import</span> <span class="fn">cosine_similarity</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">identify_member</span>(live_embedding, enrolled_members):
+    best_match = <span class="kw">None</span>
+    best_score = <span class="num">0</span>
+    
+    <span class="kw">for</span> member <span class="kw">in</span> enrolled_members:
+        score = <span class="fn">cosine_similarity</span>(
+            live_embedding.<span class="fn">reshape</span>(<span class="num">1</span>, -<span class="num">1</span>),
+            member[<span class="str">'embedding'</span>].<span class="fn">reshape</span>(<span class="num">1</span>, -<span class="num">1</span>)
+        )[<span class="num">0</span>][<span class="num">0</span>]
+        
+        <span class="kw">if</span> score > best_score:
+            best_score = score
+            best_match = member
+    
+    <span class="cm"># Decision based on confidence</span>
+    <span class="kw">if</span> best_score >= <span class="num">0.95</span>:
+        <span class="kw">return</span> { <span class="str">"action"</span>: <span class="str">"auto_open"</span>, <span class="str">"member"</span>: best_match }
+    <span class="kw">elif</span> best_score >= <span class="num">0.80</span>:
+        <span class="kw">return</span> { <span class="str">"action"</span>: <span class="str">"tap_to_confirm"</span>, <span class="str">"member"</span>: best_match }
+    <span class="kw">elif</span> best_score >= <span class="num">0.60</span>:
+        <span class="kw">return</span> { <span class="str">"action"</span>: <span class="str">"please_tap_card"</span>, <span class="str">"member"</span>: <span class="kw">None</span> }
+    <span class="kw">else</span>:
+        <span class="kw">return</span> { <span class="str">"action"</span>: <span class="str">"unknown_person"</span>, <span class="str">"member"</span>: <span class="kw">None</span> }</pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 16 — DATA FLYWHEEL
+═══════════════════════════════════════════════════ -->
+<section class="section" id="flywheel">
+  <div class="section-tag">Section 16 — The Data Flywheel</div>
+  <h2>The System Gets <em>Smarter Every Day</em></h2>
+  <p class="lead">The most powerful thing about this system is not what it can do on day one — it's what it becomes over time. Every card tap creates a perfect training label. Every training label improves the model. A better model needs fewer card taps. Fewer card taps means less friction. Less friction means more data. More data means a better model. This is the flywheel.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> DATA FLYWHEEL — ACCURACY OVER TIME</div>
+      <div class="demo-subtitle">Drag the slider to see how the system improves week by week</div>
+    </div>
+    <div class="demo-body">
+      <div class="slider-row">
+        <span class="slider-label">Time since launch</span>
+        <input type="range" id="flywheel-slider" min="0" max="12" value="0" oninput="updateFlywheel(this.value)" style="flex:1">
+        <span class="slider-val" id="flywheel-time">Week 1</span>
+      </div>
+      <canvas id="flywheel-canvas" width="800" height="200" style="width:100%;margin:16px 0"></canvas>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div style="text-align:center;padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border)">
+          <div id="fw-accuracy" style="font-size:24px;font-weight:900;color:var(--purple-light)">75%</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Face ID Accuracy</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border)">
+          <div id="fw-taps" style="font-size:24px;font-weight:900;color:var(--yellow)">95%</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Sessions Need Card Tap</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border)">
+          <div id="fw-labels" style="font-size:24px;font-weight:900;color:var(--blue)">3</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Labels Per Member</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border)">
+          <div id="fw-friction" style="font-size:24px;font-weight:900;color:var(--red)">High</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Member Friction</div>
+        </div>
+      </div>
+      <div id="fw-callout" class="callout callout-purple" style="margin-top:16px">
+        <div class="callout-label">📅 Week 1 — System Launches</div>
+        <p>The face model has only 3–5 enrolment photos per member. Accuracy is moderate (~75%). Most members tap their card most sessions. Every tap creates a perfect training label: this face = this member_id. The model retrains nightly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 17 — WEIGHT STACK
+═══════════════════════════════════════════════════ -->
+<section class="section" id="weight">
+  <div class="section-tag">Section 17 — Layer 5: Weight Detection</div>
+  <h2>Reading the <em>Weight Stack</em></h2>
+  <p class="lead">Camera 3 faces the weight stack directly. The AI reads which weight is selected by detecting the position of the selector pin relative to the colour-coded weight plates. This is computer vision at its most practical.</p>
+
+  <p>Weight stacks use a pin that slides between plates. The pin position determines the weight. Camera 3 captures a clear view of the stack, and a trained YOLO model detects the pin position and reads the weight label on the selected plate.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> WEIGHT STACK DEMO — Click a plate to move the selector pin</div>
+    </div>
+    <div class="demo-body-split">
+      <div>
+        <div style="width:120px;margin:0 auto">
+          <div style="text-align:center;font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Weight Stack</div>
+          <div id="weight-stack"></div>
+        </div>
+      </div>
+      <div>
+        <h4>Camera 3 View</h4>
+        <canvas id="weight-canvas" width="340" height="300" style="width:100%;border-radius:10px"></canvas>
+        <div style="margin-top:12px;padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--muted)">AI Reading</div>
+          <div id="weight-reading" style="font-size:28px;font-weight:900;color:var(--purple-light)">60 kg</div>
+          <div id="weight-confidence" style="font-size:11px;color:var(--green)">Confidence: 98.2%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>How the Weight Detection Works</h3>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div><h4>Colour Segmentation</h4><p>Each weight plate is a different colour. The AI first identifies all plates by colour. This gives it a map of the entire stack.</p></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div><h4>Pin Detection</h4><p>A second YOLO model detects the selector pin — the small metal rod that slides between plates. Its vertical position determines the selected weight.</p></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div><h4>Weight Calculation</h4><p>The pin position is mapped to the weight stack configuration (stored in machine-config.js). If the pin is between plate 4 and plate 5, the weight is 60kg.</p></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <div><h4>Confidence Check</h4><p>If confidence is below 90%, the system flags the reading as uncertain and asks the member to confirm via the tablet.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 18 — FULL PIPELINE
+═══════════════════════════════════════════════════ -->
+<section class="section" id="pipeline">
+  <div class="section-tag">Section 18 — The Full System</div>
+  <h2>All Layers <em>Together</em></h2>
+  <p class="lead">Every 33 milliseconds (one video frame), all five layers run in parallel. Here's what happens from the moment a camera captures a frame to the moment a rep is logged in the database.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-title"><div class="dot"></div> FULL PIPELINE — PROCESS A FRAME</div>
+      <div class="demo-subtitle">Watch all 7 stages execute in sequence</div>
+    </div>
+    <div class="demo-body">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="runPipeline()">▶ Process Frame</button>
+        <button class="btn btn-secondary" onclick="resetPipeline()">↺ Reset</button>
+      </div>
+      <div id="pipeline-stages" style="margin-top:16px"></div>
+      <div id="pipeline-total" style="margin-top:16px;padding:16px;background:var(--surface);border-radius:10px;border:1px solid var(--border);display:none;text-align:center">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Total Pipeline Time</div>
+        <div style="font-size:36px;font-weight:900;color:var(--green)">46ms</div>
+        <div style="font-size:12px;color:var(--muted)">One video frame = 33ms. We process within 2 frames of the action happening.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 19 — CAMERAS
+═══════════════════════════════════════════════════ -->
+<section class="section" id="cameras">
+  <div class="section-tag">Section 19 — Physical Infrastructure</div>
+  <h2>Camera <em>Setup & Placement</em></h2>
+  <p class="lead">The AI is only as good as the images it receives. Camera placement is one of the most critical decisions in the entire system. Get it wrong and no amount of AI can fix bad angles.</p>
+
+  <div class="card-grid-3">
+    <div class="card" style="border-color:var(--blue)">
+      <div class="card-icon">📷</div>
+      <h4 style="color:var(--blue)">Camera 1 — Overhead</h4>
+      <p><strong>Position:</strong> Ceiling mount, fisheye lens, 3–4m height.<br><strong>Job:</strong> Person detection, tracking, zone matching.<br><strong>Why overhead?</strong> One camera covers 8–12 machines simultaneously. Occlusion is minimal from above.</p>
+    </div>
+    <div class="card" style="border-color:var(--purple)">
+      <div class="card-icon">📷</div>
+      <h4 style="color:var(--purple)">Camera 2 — Side Angle</h4>
+      <p><strong>Position:</strong> Column or wall mount, 1.5–2m height, side-on to machine.<br><strong>Job:</strong> Pose estimation, rep counting, form scoring.<br><strong>Why side?</strong> The full range of motion (elbow bend) is only visible from the side.</p>
+    </div>
+    <div class="card" style="border-color:var(--green)">
+      <div class="card-icon">📷</div>
+      <h4 style="color:var(--green)">Camera 3 — Weight Stack</h4>
+      <p><strong>Position:</strong> Direct facing mount, 0.5m from weight stack.<br><strong>Job:</strong> Weight detection, pin position reading.<br><strong>Why direct?</strong> Needs a clear, unobstructed view of the plates and pin.</p>
+    </div>
+  </div>
+
+  <h3>Recommended Hardware</h3>
+  <table>
+    <tr><th>Camera</th><th>Model</th><th>Resolution</th><th>Key Feature</th><th>Price</th></tr>
+    <tr><td>Camera 1</td><td>Hikvision DS-2CD2347G2-LU</td><td>4MP</td><td>Fisheye, 180° coverage</td><td>~$180</td></tr>
+    <tr><td>Camera 2</td><td>Hikvision DS-2CD2T47G2-L</td><td>4MP</td><td>Fixed lens, IR night vision</td><td>~$120</td></tr>
+    <tr><td>Camera 3</td><td>Hikvision DS-2CD2T27G2-L</td><td>2MP</td><td>Macro focus, close range</td><td>~$90</td></tr>
+  </table>
+  <p style="font-size:12px;color:var(--muted)">All cameras connect via PoE (Power over Ethernet) — one cable per camera for both power and video. No separate power supplies needed.</p>
+
+  <div class="callout callout-yellow">
+    <div class="callout-label">⚠ Phase 1 Simplification</div>
+    <p>In Phase 1 (first 3 machines), we use a single Camera 2 per machine and rely on card taps for identity. Camera 1 (overhead) and Camera 3 (weight) are added in Phase 2. This lets us validate the rep counting system before investing in the full rig.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 20 — SERVER
+═══════════════════════════════════════════════════ -->
+<section class="section" id="server">
+  <div class="section-tag">Section 20 — Server & Network</div>
+  <h2>The <em>Mac Mini M4 Pro</em></h2>
+  <p class="lead">All AI processing happens on a single Mac Mini M4 Pro, installed in a server cabinet at the gym. No cloud. No internet dependency. No latency. No ongoing cloud costs.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h4>38 TOPS Neural Engine</h4>
+      <p>The M4 Pro chip has a dedicated Neural Engine with 38 trillion operations per second. MoveNet, YOLO, and InsightFace all run natively on this hardware using Apple's CoreML framework.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔇</div>
+      <h4>Silent & Compact</h4>
+      <p>Fanless design, 20–40W power draw. Can sit in a server cabinet without noise or heat concerns. No data centre required.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔒</div>
+      <h4>Edge Processing</h4>
+      <p>Video never leaves the gym. All face data stays on the local machine. This is the only architecture that is compliant with the Australian Privacy Act for biometric data.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h4>Capacity</h4>
+      <p>One Mac Mini M4 Pro can handle all 120 machines simultaneously. Processing 30fps across 3 cameras per machine = 360 camera streams, all processed in real-time.</p>
+    </div>
+  </div>
+
+  <h3>Network Architecture</h3>
+  <pre><span class="cm"># Network layout</span>
+Internet
+    ↓
+Router (NBN/Fibre)
+    ↓
+PoE Switch (24-port, 1Gbps)
+    ├── Camera 1 (192.168.1.101) — RTSP stream
+    ├── Camera 2 (192.168.1.102) — RTSP stream
+    ├── Camera 3 (192.168.1.103) — RTSP stream
+    ├── Mac Mini M4 Pro (192.168.1.10) — AI processing
+    ├── Tablet (192.168.1.200) — member interface
+    └── Entry Gate NFC Reader (192.168.1.50)
+
+<span class="cm"># All camera traffic stays on VLAN 10 (isolated)</span>
+<span class="cm"># Mac Mini connects to Supabase cloud for data sync only</span>
+<span class="cm"># Video never leaves VLAN 10</span></pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 21 — BUILD PHASES
+═══════════════════════════════════════════════════ -->
+<section class="section" id="phases">
+  <div class="section-tag">Section 21 — Execution</div>
+  <h2>Build <em>Phases</em></h2>
+  <p class="lead">We don't build everything at once. We build in phases, validating each layer before adding the next. This reduces risk and gets us to a working system faster.</p>
+
+  <table>
+    <tr><th>Phase</th><th>Duration</th><th>What We Build</th><th>Success Criteria</th></tr>
+    <tr>
+      <td><span class="badge badge-purple">Phase 1</span></td>
+      <td>Weeks 1–4</td>
+      <td>3 machines, Camera 2 only, card tap identity, rep counting + form scoring</td>
+      <td>Rep counting accuracy ≥ 90% vs manual count. Zero false sessions.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-blue">Phase 2</span></td>
+      <td>Weeks 5–10</td>
+      <td>Add Camera 1 (overhead tracking), add Face ID, expand to 15 machines</td>
+      <td>Face ID accuracy ≥ 85%. Persistent IDs stable across full session.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-green">Phase 3</span></td>
+      <td>Weeks 11–18</td>
+      <td>Add Camera 3 (weight detection), full leaderboard, 40 machines</td>
+      <td>Weight detection accuracy ≥ 95%. Leaderboard live and trusted by members.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-yellow">Phase 4</span></td>
+      <td>Months 5–8</td>
+      <td>Full 120 machines, coaching dashboard, personalised recommendations</td>
+      <td>Full gym coverage. Coach adoption ≥ 80%. Member NPS improvement measurable.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 22 — IMPLEMENTATION PLAN
+═══════════════════════════════════════════════════ -->
+<section class="section" id="implementation">
+  <div class="section-tag">Section 22 — Implementation Plan</div>
+  <h2>Who Builds <em>What</em></h2>
+  <p class="lead">This system is built by Donkey and Manus, with Matt providing gym access, hardware procurement, and product decisions. Here's the complete task breakdown.</p>
+
+  <table>
+    <tr><th>Task</th><th>Owner</th><th>Est. Time</th><th>Depends On</th></tr>
+    <tr><td>YOLO person detection pipeline</td><td><span class="badge badge-purple">Manus</span></td><td>2 days</td><td>—</td></tr>
+    <tr><td>DeepSORT tracking integration</td><td><span class="badge badge-purple">Manus</span></td><td>2 days</td><td>YOLO pipeline</td></tr>
+    <tr><td>Zone polygon calibration tool</td><td><span class="badge badge-blue">Donkey</span></td><td>1 day</td><td>Camera 1 installed</td></tr>
+    <tr><td>MoveNet pose extraction</td><td><span class="badge badge-purple">Manus</span></td><td>1 day</td><td>—</td></tr>
+    <tr><td>LSTM training data collection</td><td><span class="badge badge-green">Matt</span></td><td>3 days</td><td>MoveNet running</td></tr>
+    <tr><td>LSTM model training</td><td><span class="badge badge-purple">Manus</span></td><td>2 days</td><td>Training data</td></tr>
+    <tr><td>InsightFace enrolment flow</td><td><span class="badge badge-blue">Donkey</span></td><td>1 day</td><td>—</td></tr>
+    <tr><td>Face matching + confidence logic</td><td><span class="badge badge-purple">Manus</span></td><td>1 day</td><td>Enrolment flow</td></tr>
+    <tr><td>Weight stack YOLO training</td><td><span class="badge badge-purple">Manus</span></td><td>3 days</td><td>Camera 3 installed</td></tr>
+    <tr><td>FastAPI orchestration server</td><td><span class="badge badge-blue">Donkey</span></td><td>2 days</td><td>All AI layers</td></tr>
+    <tr><td>Supabase schema + sync</td><td><span class="badge badge-blue">Donkey</span></td><td>1 day</td><td>—</td></tr>
+    <tr><td>Tablet UI (React)</td><td><span class="badge badge-blue">Donkey</span></td><td>3 days</td><td>FastAPI server</td></tr>
+    <tr><td>Leaderboard UI</td><td><span class="badge badge-blue">Donkey</span></td><td>2 days</td><td>Supabase schema</td></tr>
+    <tr><td>Camera hardware install</td><td><span class="badge badge-green">Matt</span></td><td>2 days</td><td>Hardware procured</td></tr>
+    <tr><td>Mac Mini setup + deployment</td><td><span class="badge badge-purple">Manus</span></td><td>1 day</td><td>Mac Mini procured</td></tr>
+  </table>
+
+  <div class="callout callout-green">
+    <div class="callout-label">✅ Library Stack — All Free, All Open Source</div>
+    <p>
+      <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px">pip install ultralytics</code> — YOLO v8 person detection<br>
+      <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px">pip install deep-sort-realtime</code> — DeepSORT tracking<br>
+      <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px">pip install tensorflow-macos tensorflow-metal</code> — LSTM (Apple Silicon optimised)<br>
+      <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px">pip install insightface onnxruntime-silicon</code> — Face embeddings (Apple Silicon)<br>
+      <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px">pip install fastapi uvicorn</code> — Orchestration API<br>
+      <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px">pip install supabase</code> — Database sync<br>
+      <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px">pip install opencv-python numpy scikit-learn</code> — Core utilities
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="brand">XL FITNESS | AI OVERSEER</div>
+  <p style="margin-top:8px">Master Plan Bible — Built by Donkey &amp; Manus</p>
+  <p style="margin-top:4px;font-size:11px">Every idea explored. Every decision justified. Every concept explained simply.</p>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════
+     ALL JAVASCRIPT
+═══════════════════════════════════════════════════ -->
+<script>
+// ─── UTILITIES ───────────────────────────────────────────────
+function rand(min, max) { return Math.random() * (max - min) + min; }
+function randInt(min, max) { return Math.floor(rand(min, max)); }
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+// ─── SIDEBAR ACTIVE STATE ─────────────────────────────────────
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.sidebar a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.sidebar a[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => observer.observe(s));
+
+// ─── PIPELINE CLICKABLE ───────────────────────────────────────
+function showPipe(el, text) {
+  document.querySelectorAll('.pipe-step').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  const info = document.getElementById('pipe-info');
+  document.getElementById('pipe-info-text').textContent = text;
+  info.style.display = 'block';
+}
+
+// ─── BOUNDING BOX DEMO ────────────────────────────────────────
+const bboxCanvas = document.getElementById('bbox-canvas');
+const bboxCtx = bboxCanvas.getContext('2d');
+let bboxes = [];
+const BBOX_COLORS = ['#10b981','#7c3aed','#f59e0b','#3b82f6','#ef4444','#06b6d4'];
+
+function drawBboxScene() {
+  const W = bboxCanvas.width, H = bboxCanvas.height;
+  bboxCtx.clearRect(0, 0, W, H);
+  // Background gym floor
+  bboxCtx.fillStyle = '#0d0d1a';
+  bboxCtx.fillRect(0, 0, W, H);
+  // Grid lines
+  bboxCtx.strokeStyle = '#1a1a2e';
+  bboxCtx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { bboxCtx.beginPath(); bboxCtx.moveTo(x,0); bboxCtx.lineTo(x,H); bboxCtx.stroke(); }
+  for (let y = 0; y < H; y += 40) { bboxCtx.beginPath(); bboxCtx.moveTo(0,y); bboxCtx.lineTo(W,y); bboxCtx.stroke(); }
+  // Draw bboxes
+  bboxes.forEach((b, i) => {
+    const col = BBOX_COLORS[i % BBOX_COLORS.length];
+    // Box
+    bboxCtx.strokeStyle = col;
+    bboxCtx.lineWidth = 2;
+    bboxCtx.strokeRect(b.x, b.y, b.w, b.h);
+    // Fill semi
+    bboxCtx.fillStyle = col + '15';
+    bboxCtx.fillRect(b.x, b.y, b.w, b.h);
+    // Label bg
+    bboxCtx.fillStyle = col;
+    bboxCtx.fillRect(b.x - 1, b.y - 22, 44, 22);
+    // ID text
+    bboxCtx.fillStyle = '#000';
+    bboxCtx.font = 'bold 12px monospace';
+    bboxCtx.fillText(`#${i+1}`, b.x + 4, b.y - 6);
+    // Confidence
+    bboxCtx.fillStyle = col;
+    bboxCtx.font = '10px monospace';
+    bboxCtx.fillText(`${(b.conf*100).toFixed(0)}%`, b.x + 2, b.y + b.h + 12);
+    // Centre dot
+    bboxCtx.fillStyle = col;
+    bboxCtx.beginPath();
+    bboxCtx.arc(b.x + b.w/2, b.y + b.h/2, 3, 0, Math.PI*2);
+    bboxCtx.fill();
+  });
+  // Instruction if empty
+  if (bboxes.length === 0) {
+    bboxCtx.fillStyle = '#2a2a44';
+    bboxCtx.font = '14px sans-serif';
+    bboxCtx.textAlign = 'center';
+    bboxCtx.fillText('Click to place a person detection', W/2, H/2);
+    bboxCtx.textAlign = 'left';
+  }
+}
+drawBboxScene();
+
+function addBboxAtClick(e) {
+  const rect = bboxCanvas.getBoundingClientRect();
+  const scaleX = bboxCanvas.width / rect.width;
+  const scaleY = bboxCanvas.height / rect.height;
+  const mx = (e.clientX - rect.left) * scaleX;
+  const my = (e.clientY - rect.top) * scaleY;
+  const w = randInt(60, 90), h = randInt(100, 140);
+  const x = Math.max(0, Math.min(bboxCanvas.width - w, mx - w/2));
+  const y = Math.max(0, Math.min(bboxCanvas.height - h, my - h/2));
+  const conf = parseFloat(rand(0.72, 0.98).toFixed(2));
+  bboxes.push({x, y, w, h, conf});
+  updateBboxUI();
+  drawBboxScene();
+}
+
+function addRandomBbox() {
+  const w = randInt(60, 90), h = randInt(100, 140);
+  const x = randInt(10, bboxCanvas.width - w - 10);
+  const y = randInt(10, bboxCanvas.height - h - 10);
+  const conf = parseFloat(rand(0.72, 0.98).toFixed(2));
+  bboxes.push({x, y, w, h, conf});
+  updateBboxUI();
+  drawBboxScene();
+}
+
+function clearBbox() {
+  bboxes = [];
+  document.getElementById('bx').textContent = '—';
+  document.getElementById('by').textContent = '—';
+  document.getElementById('bw').textContent = '—';
+  document.getElementById('bh').textContent = '—';
+  document.getElementById('bc').textContent = '—';
+  document.getElementById('bbox-list').textContent = 'Click the canvas to detect a person';
+  drawBboxScene();
+}
+
+function updateBboxUI() {
+  const b = bboxes[bboxes.length - 1];
+  document.getElementById('bx').textContent = Math.round(b.x);
+  document.getElementById('by').textContent = Math.round(b.y);
+  document.getElementById('bw').textContent = Math.round(b.w);
+  document.getElementById('bh').textContent = Math.round(b.h);
+  document.getElementById('bc').textContent = b.conf.toFixed(2);
+  document.getElementById('bbox-list').innerHTML = bboxes.map((bb, i) =>
+    `<div style="color:${BBOX_COLORS[i%BBOX_COLORS.length]};margin-bottom:4px">Person #${i+1}: [${Math.round(bb.x)}, ${Math.round(bb.y)}, ${Math.round(bb.w)}, ${Math.round(bb.h)}] conf=${bb.conf.toFixed(2)}</div>`
+  ).join('');
+}
+
+// ─── YOLO SIMULATOR ───────────────────────────────────────────
+const yoloCanvas = document.getElementById('yolo-canvas');
+const yoloCtx = yoloCanvas.getContext('2d');
+let yoloRunning = true, yoloFrame = 0, yoloThresh = 0.70;
+let yoloPeople = [];
+
+function initYoloPeople() {
+  yoloPeople = [
+    {x:80, y:80, vx:0.3, vy:0.1, conf:0.94, name:'Matt'},
+    {x:200, y:120, vx:-0.2, vy:0.15, conf:0.88, name:'Sarah'},
+    {x:350, y:60, vx:0.1, vy:0.2, conf:0.76, name:'James'},
+    {x:120, y:220, vx:0.25, vy:-0.1, conf:0.91, name:'Lisa'},
+    {x:400, y:200, vx:-0.15, vy:0.25, conf:0.65, name:'Unknown'},
+  ];
+}
+initYoloPeople();
+
+function drawYolo() {
+  const W = yoloCanvas.width, H = yoloCanvas.height;
+  yoloCtx.clearRect(0, 0, W, H);
+  yoloCtx.fillStyle = '#0d0d1a';
+  yoloCtx.fillRect(0, 0, W, H);
+  // Grid
+  yoloCtx.strokeStyle = '#1a1a2e';
+  yoloCtx.lineWidth = 1;
+  for (let x = 0; x < W; x += 48) { yoloCtx.beginPath(); yoloCtx.moveTo(x,0); yoloCtx.lineTo(x,H); yoloCtx.stroke(); }
+  for (let y = 0; y < H; y += 48) { yoloCtx.beginPath(); yoloCtx.moveTo(0,y); yoloCtx.lineTo(W,y); yoloCtx.stroke(); }
+  // Machines
+  const machines = [{x:40,y:40,w:100,h:80,label:'Lat Pull'},{x:180,y:40,w:100,h:80,label:'Chest Press'},{x:320,y:40,w:100,h:80,label:'Leg Press'},{x:40,y:180,w:100,h:80,label:'Bicep Curl'},{x:320,y:180,w:100,h:80,label:'Shoulder'}];
+  machines.forEach(m => {
+    yoloCtx.strokeStyle = '#2a2a44';
+    yoloCtx.lineWidth = 1;
+    yoloCtx.strokeRect(m.x, m.y, m.w, m.h);
+    yoloCtx.fillStyle = '#1a1a2e';
+    yoloCtx.fillRect(m.x, m.y, m.w, m.h);
+    yoloCtx.fillStyle = '#2a2a44';
+    yoloCtx.font = '10px sans-serif';
+    yoloCtx.textAlign = 'center';
+    yoloCtx.fillText(m.label, m.x + m.w/2, m.y + m.h/2 + 4);
+    yoloCtx.textAlign = 'left';
+  });
+  // Update positions
+  yoloPeople.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 20 || p.x > W-20) p.vx *= -1;
+    if (p.y < 20 || p.y > H-20) p.vy *= -1;
+  });
+  // Draw detections
+  let detected = 0;
+  const detHtml = [];
+  yoloPeople.forEach((p, i) => {
+    const bw = 50, bh = 80;
+    const bx = p.x - bw/2, by = p.y - bh/2;
+    const show = p.conf >= yoloThresh;
+    if (show) {
+      detected++;
+      const col = p.conf >= 0.9 ? '#10b981' : p.conf >= 0.75 ? '#f59e0b' : '#ef4444';
+      yoloCtx.strokeStyle = col;
+      yoloCtx.lineWidth = 2;
+      yoloCtx.strokeRect(bx, by, bw, bh);
+      yoloCtx.fillStyle = col + '18';
+      yoloCtx.fillRect(bx, by, bw, bh);
+      yoloCtx.fillStyle = col;
+      yoloCtx.fillRect(bx - 1, by - 18, 36, 18);
+      yoloCtx.fillStyle = '#000';
+      yoloCtx.font = 'bold 10px monospace';
+      yoloCtx.fillText(`#${i+1}`, bx + 3, by - 4);
+      yoloCtx.fillStyle = col;
+      yoloCtx.font = '9px monospace';
+      yoloCtx.fillText(`${(p.conf*100).toFixed(0)}%`, bx + 2, by + bh + 10);
+      detHtml.push(`<div style="color:${col};font-size:11px;margin-bottom:3px">#${i+1} ${p.name}: ${(p.conf*100).toFixed(0)}%</div>`);
+    }
+  });
+  document.getElementById('yolo-frame-num').textContent = yoloFrame;
+  document.getElementById('yolo-detected').textContent = detected;
+  document.getElementById('yolo-dets').innerHTML = detHtml.join('') || '<span style="color:var(--muted)">No detections above threshold</span>';
+}
+
+function yoloLoop() {
+  if (!yoloRunning) return;
+  yoloFrame++;
+  drawYolo();
+  requestAnimationFrame(yoloLoop);
+}
+yoloLoop();
+
+function toggleYolo() {
+  yoloRunning = !yoloRunning;
+  document.getElementById('yolo-btn').textContent = yoloRunning ? '⏸ Pause' : '▶ Resume';
+  if (yoloRunning) yoloLoop();
+}
+function resetYolo() { initYoloPeople(); yoloFrame = 0; }
+function updateYoloThresh(v) {
+  yoloThresh = v / 100;
+  document.getElementById('yolo-thresh-val').textContent = (v/100).toFixed(2);
+}
+
+// ─── CONFIDENCE DEMO ──────────────────────────────────────────
+function updateConf(v) {
+  const val = v / 100;
+  document.getElementById('conf-val').textContent = val.toFixed(2);
+  const bar = document.getElementById('conf-bar');
+  bar.style.width = v + '%';
+  bar.textContent = val.toFixed(2);
+  // Zones
+  ['cz-high','cz-med','cz-low','cz-unknown'].forEach(id => document.getElementById(id).classList.remove('active'));
+  let activeZone, label, text, color;
+  if (val >= 0.95) {
+    activeZone = 'cz-high'; label = '✅ High Confidence'; color = 'callout-green';
+    text = "The face matches a member with 95%+ confidence. The session opens automatically. The member doesn't need to do anything — they just sit down and train.";
+    bar.style.background = 'var(--green)'; bar.style.color = '#000';
+  } else if (val >= 0.80) {
+    activeZone = 'cz-med'; label = '⚠ Medium Confidence'; color = 'callout-yellow';
+    text = "The face looks familiar but we're not certain enough to open a session automatically. The tablet shows 'Tap card to confirm.' When the member taps, we get a perfect training label — we now know for certain who this face belongs to. The model retrains and next time it will be more confident.";
+    bar.style.background = 'var(--yellow)'; bar.style.color = '#000';
+  } else if (val >= 0.60) {
+    activeZone = 'cz-low'; label = '🔴 Low Confidence'; color = 'callout-red';
+    text = "The face doesn't match any member well. The tablet shows 'Please tap your card.' This is the fallback that ensures the system never fails to identify a member. Every tap improves the model.";
+    bar.style.background = 'var(--red)'; bar.style.color = '#fff';
+  } else {
+    activeZone = 'cz-unknown'; label = '❓ Unknown Person'; color = 'callout-purple';
+    text = "This person is not in the database at all. They may be a guest, a new member who hasn't enrolled, or someone who walked in from outside. The system logs an 'unknown visitor' event and keeps the machine slot available.";
+    bar.style.background = '#6b7280'; bar.style.color = '#fff';
+  }
+  document.getElementById(activeZone).classList.add('active');
+  const callout = document.getElementById('conf-callout');
+  callout.className = `callout ${color}`;
+  document.getElementById('conf-label').textContent = label;
+  document.getElementById('conf-text').textContent = text;
+}
+updateConf(85);
+
+// ─── TRACKING DEMO ────────────────────────────────────────────
+const trackCanvas = document.getElementById('track-canvas');
+const trackCtx = trackCanvas.getContext('2d');
+let trackingOn = true, trackRunning = true;
+let trackPeople = [];
+let trackFrame = 0;
+
+function initTrackPeople() {
+  trackPeople = [
+    {x:80, y:80, vx:0.8, vy:0.4, id:1, color:'#10b981'},
+    {x:200, y:150, vx:-0.6, vy:0.5, id:2, color:'#7c3aed'},
+    {x:350, y:60, vx:0.4, vy:0.7, id:3, color:'#f59e0b'},
+    {x:120, y:220, vx:0.7, vy:-0.4, id:4, color:'#3b82f6'},
+  ];
+}
+initTrackPeople();
+
+function drawTrack() {
+  const W = trackCanvas.width, H = trackCanvas.height;
+  trackCtx.clearRect(0, 0, W, H);
+  trackCtx.fillStyle = '#0d0d1a';
+  trackCtx.fillRect(0, 0, W, H);
+  trackCtx.strokeStyle = '#1a1a2e';
+  trackCtx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { trackCtx.beginPath(); trackCtx.moveTo(x,0); trackCtx.lineTo(x,H); trackCtx.stroke(); }
+  for (let y = 0; y < H; y += 40) { trackCtx.beginPath(); trackCtx.moveTo(0,y); trackCtx.lineTo(W,y); trackCtx.stroke(); }
+
+  trackPeople.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 20 || p.x > W-20) p.vx *= -1;
+    if (p.y < 20 || p.y > H-20) p.vy *= -1;
+    const bw = 50, bh = 70;
+    const bx = p.x - bw/2, by = p.y - bh/2;
+    // Without tracking: random IDs every frame
+    const displayId = trackingOn ? p.id : randInt(1, 20);
+    const col = trackingOn ? p.color : '#ef4444';
+    trackCtx.strokeStyle = col;
+    trackCtx.lineWidth = 2;
+    trackCtx.strokeRect(bx, by, bw, bh);
+    trackCtx.fillStyle = col + '18';
+    trackCtx.fillRect(bx, by, bw, bh);
+    trackCtx.fillStyle = col;
+    trackCtx.fillRect(bx - 1, by - 20, 38, 20);
+    trackCtx.fillStyle = '#000';
+    trackCtx.font = 'bold 11px monospace';
+    trackCtx.fillText(`#${displayId}`, bx + 3, by - 4);
+  });
+  trackFrame++;
+}
+
+function trackLoop() {
+  if (!trackRunning) return;
+  drawTrack();
+  requestAnimationFrame(trackLoop);
+}
+trackLoop();
+
+function toggleTracking() {
+  trackingOn = !trackingOn;
+  const btn = document.getElementById('track-toggle');
+  const ind = document.getElementById('track-indicator');
+  const state = document.getElementById('track-state');
+  const desc = document.getElementById('track-desc');
+  const bar = document.getElementById('stability-bar');
+  const val = document.getElementById('stability-val');
+  if (trackingOn) {
+    btn.textContent = 'Toggle Tracking OFF';
+    ind.style.background = 'var(--green)';
+    state.style.color = 'var(--green)';
+    state.textContent = 'Tracking: ON';
+    desc.textContent = 'With DeepSORT active, each person keeps their ID number as they move. Person #1 stays Person #1 across all frames.';
+    bar.style.width = '95%'; bar.style.background = 'var(--green)';
+    val.style.color = 'var(--green)'; val.textContent = '95% stable';
+  } else {
+    btn.textContent = 'Toggle Tracking ON';
+    ind.style.background = 'var(--red)';
+    state.style.color = 'var(--red)';
+    state.textContent = 'Tracking: OFF';
+    desc.textContent = 'Without DeepSORT, YOLO re-detects fresh every frame. IDs jump randomly. Person #1 becomes Person #7 becomes Person #12. Completely unusable.';
+    bar.style.width = '5%'; bar.style.background = 'var(--red)';
+    val.style.color = 'var(--red)'; val.textContent = '5% stable';
+  }
+}
+function resetTracking() { initTrackPeople(); }
+
+// ─── DEEPSORT TABS ────────────────────────────────────────────
+function switchTab(group, tab, btn) {
+  document.querySelectorAll(`#${group}-tabs .tab-btn`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll(`[id^="${group}-"]`).forEach(el => {
+    if (el.classList.contains('tab-content')) el.classList.remove('active');
+  });
+  const target = document.getElementById(`${group}-${tab}`);
+  if (target) target.classList.add('active');
+  if (tab === 'kalman') drawKalman();
+  if (tab === 'appearance') initAppear();
+  if (tab === 'hungarian') drawHungarian();
+}
+
+// Kalman canvas
+const kalmanCanvas = document.getElementById('kalman-canvas');
+const kalmanCtx = kalmanCanvas.getContext('2d');
+let kalmanT = 0, kalmanRunning = false;
+let kalmanPath = [], kalmanPred = [];
+
+function drawKalman() {
+  kalmanRunning = true;
+  kalmanPath = [{x:40, y:180}];
+  kalmanPred = [{x:40, y:180}];
+  kalmanT = 0;
+  kalmanAnimate();
+}
+
+function kalmanAnimate() {
+  if (!kalmanRunning) return;
+  const W = kalmanCanvas.width, H = kalmanCanvas.height;
+  kalmanCtx.clearRect(0, 0, W, H);
+  kalmanCtx.fillStyle = '#0d0d1a';
+  kalmanCtx.fillRect(0, 0, W, H);
+
+  // Actual path (sine wave)
+  const t = kalmanT;
+  const nx = 40 + t * 2.5;
+  const ny = 180 + Math.sin(t * 0.15) * 60 + (Math.random() - 0.5) * 8;
+  if (nx < W - 20) kalmanPath.push({x: nx, y: ny});
+
+  // Predicted path (smoothed)
+  const last = kalmanPred[kalmanPred.length - 1];
+  const px = last.x + 2.5;
+  const py = last.y + (ny - last.y) * 0.3;
+  if (px < W - 20) kalmanPred.push({x: px, y: py});
+
+  // Draw actual path
+  kalmanCtx.strokeStyle = '#10b981';
+  kalmanCtx.lineWidth = 2;
+  kalmanCtx.beginPath();
+  kalmanPath.forEach((p, i) => i === 0 ? kalmanCtx.moveTo(p.x, p.y) : kalmanCtx.lineTo(p.x, p.y));
+  kalmanCtx.stroke();
+
+  // Draw predicted path
+  kalmanCtx.strokeStyle = '#7c3aed';
+  kalmanCtx.lineWidth = 2;
+  kalmanCtx.setLineDash([5, 5]);
+  kalmanCtx.beginPath();
+  kalmanPred.forEach((p, i) => i === 0 ? kalmanCtx.moveTo(p.x, p.y) : kalmanCtx.lineTo(p.x, p.y));
+  kalmanCtx.stroke();
+  kalmanCtx.setLineDash([]);
+
+  // Current position dot
+  if (kalmanPath.length > 0) {
+    const cur = kalmanPath[kalmanPath.length - 1];
+    kalmanCtx.fillStyle = '#10b981';
+    kalmanCtx.beginPath();
+    kalmanCtx.arc(cur.x, cur.y, 6, 0, Math.PI*2);
+    kalmanCtx.fill();
+    // Prediction dot
+    const pred = kalmanPred[kalmanPred.length - 1];
+    kalmanCtx.fillStyle = '#7c3aed';
+    kalmanCtx.beginPath();
+    kalmanCtx.arc(pred.x, pred.y, 5, 0, Math.PI*2);
+    kalmanCtx.fill();
+  }
+
+  // Legend
+  kalmanCtx.fillStyle = '#10b981'; kalmanCtx.fillRect(10, 10, 12, 3);
+  kalmanCtx.fillStyle = '#94a3b8'; kalmanCtx.font = '11px sans-serif';
+  kalmanCtx.fillText('Actual position', 26, 16);
+  kalmanCtx.fillStyle = '#7c3aed'; kalmanCtx.fillRect(10, 26, 12, 3);
+  kalmanCtx.fillStyle = '#94a3b8';
+  kalmanCtx.fillText('Kalman prediction', 26, 32);
+
+  kalmanT++;
+  if (kalmanT < 120) requestAnimationFrame(kalmanAnimate);
+  else { kalmanT = 0; kalmanPath = [{x:40, y:180}]; kalmanPred = [{x:40, y:180}]; setTimeout(kalmanAnimate, 500); }
+}
+
+// Appearance bars
+function initAppear() {
+  refreshAppear();
+}
+function refreshAppear() {
+  const container = document.getElementById('appear-bars');
+  const baseVec = Array.from({length:8}, () => rand(0.2, 0.9));
+  const sameVec = baseVec.map(v => v + rand(-0.05, 0.05));
+  const diffVec = Array.from({length:8}, () => rand(0.2, 0.9));
+  const features = ['Eye distance','Nose width','Jaw angle','Brow height','Cheek width','Chin shape','Eye depth','Lip ratio'];
+  container.innerHTML = `
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--purple-light);margin-bottom:6px;font-weight:700">Matt — Photo 1 (reference)</div>
+      ${features.map((f,i) => `
+        <div class="embed-bar-wrap">
+          <div class="embed-bar-label"><span>${f}</span><span>${baseVec[i].toFixed(3)}</span></div>
+          <div class="embed-bar-track"><div class="embed-bar-fill" style="width:${baseVec[i]*100}%;background:var(--purple)"></div></div>
+        </div>`).join('')}
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--green);margin-bottom:6px;font-weight:700">Matt — Photo 2 (similarity: ${(0.94 + rand(-0.03,0.03)).toFixed(2)} ✓ Same person)</div>
+      ${features.map((f,i) => `
+        <div class="embed-bar-wrap">
+          <div class="embed-bar-label"><span>${f}</span><span>${sameVec[i].toFixed(3)}</span></div>
+          <div class="embed-bar-track"><div class="embed-bar-fill" style="width:${sameVec[i]*100}%;background:var(--green)"></div></div>
+        </div>`).join('')}
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--red);margin-bottom:6px;font-weight:700">Sarah — Different person (similarity: ${(0.18 + rand(-0.05,0.05)).toFixed(2)} ✗ Different)</div>
+      ${features.map((f,i) => `
+        <div class="embed-bar-wrap">
+          <div class="embed-bar-label"><span>${f}</span><span>${diffVec[i].toFixed(3)}</span></div>
+          <div class="embed-bar-track"><div class="embed-bar-fill" style="width:${diffVec[i]*100}%;background:var(--red)"></div></div>
+        </div>`).join('')}
+    </div>`;
+  // Draw appear canvas
+  const c = document.getElementById('appear-canvas');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, c.width, c.height);
+  ctx.fillStyle = '#0d0d1a';
+  ctx.fillRect(0, 0, c.width, c.height);
+  // Draw similarity bars
+  const pairs = [
+    {label:'Matt 1 vs Matt 2', score: 0.94 + rand(-0.03,0.03), color:'#10b981'},
+    {label:'Matt 1 vs Sarah', score: 0.18 + rand(-0.05,0.05), color:'#ef4444'},
+    {label:'Matt 1 vs James', score: 0.22 + rand(-0.04,0.04), color:'#ef4444'},
+    {label:'Matt 1 vs Lisa', score: 0.19 + rand(-0.03,0.03), color:'#ef4444'},
+  ];
+  pairs.forEach((p, i) => {
+    const y = 30 + i * 44;
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '11px sans-serif';
+    ctx.fillText(p.label, 10, y);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(10, y + 8, 280, 16);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(10, y + 8, 280 * p.score, 16);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText(p.score.toFixed(2), 296, y + 20);
+  });
+  ctx.fillStyle = '#2a2a44';
+  ctx.fillRect(10 + 280*0.95, 0, 1, c.height);
+  ctx.fillStyle = '#10b981';
+  ctx.font = '10px sans-serif';
+  ctx.fillText('0.95 threshold', 10 + 280*0.95 + 3, 14);
+}
+
+// Hungarian
+const hungCanvas = document.getElementById('hungarian-canvas');
+const hungCtx = hungCanvas.getContext('2d');
+let hungSolved = false;
+const hungTracked = [{id:1,y:40},{id:2,y:100},{id:3,y:160},{id:4,y:220}];
+const hungDetections = [{id:'A',y:60},{id:'B',y:120},{id:'C',y:180},{id:'D',y:240}];
+const hungAssignment = [{from:0,to:0},{from:1,to:1},{from:2,to:2},{from:3,to:3}];
+
+function drawHungarian() {
+  const W = hungCanvas.width, H = hungCanvas.height;
+  hungCtx.clearRect(0, 0, W, H);
+  hungCtx.fillStyle = '#0d0d1a';
+  hungCtx.fillRect(0, 0, W, H);
+  // Labels
+  hungCtx.fillStyle = '#64748b'; hungCtx.font = '11px sans-serif';
+  hungCtx.textAlign = 'center';
+  hungCtx.fillText('Tracked IDs', 70, 20);
+  hungCtx.fillText('New Detections', 270, 20);
+  hungCtx.textAlign = 'left';
+  // Tracked nodes
+  hungTracked.forEach(t => {
+    hungCtx.fillStyle = '#7c3aed';
+    hungCtx.beginPath();
+    hungCtx.arc(70, t.y, 16, 0, Math.PI*2);
+    hungCtx.fill();
+    hungCtx.fillStyle = '#fff';
+    hungCtx.font = 'bold 12px monospace';
+    hungCtx.textAlign = 'center';
+    hungCtx.fillText(`#${t.id}`, 70, t.y + 4);
+    hungCtx.textAlign = 'left';
+  });
+  // Detection nodes
+  hungDetections.forEach(d => {
+    hungCtx.fillStyle = '#3b82f6';
+    hungCtx.beginPath();
+    hungCtx.arc(270, d.y, 16, 0, Math.PI*2);
+    hungCtx.fill();
+    hungCtx.fillStyle = '#fff';
+    hungCtx.font = 'bold 12px monospace';
+    hungCtx.textAlign = 'center';
+    hungCtx.fillText(d.id, 270, d.y + 4);
+    hungCtx.textAlign = 'left';
+  });
+  if (hungSolved) {
+    hungAssignment.forEach(a => {
+      hungCtx.strokeStyle = '#10b981';
+      hungCtx.lineWidth = 2;
+      hungCtx.beginPath();
+      hungCtx.moveTo(86, hungTracked[a.from].y);
+      hungCtx.lineTo(254, hungDetections[a.to].y);
+      hungCtx.stroke();
+      const mx = 170, my = (hungTracked[a.from].y + hungDetections[a.to].y) / 2;
+      hungCtx.fillStyle = '#10b981';
+      hungCtx.font = '10px monospace';
+      hungCtx.textAlign = 'center';
+      hungCtx.fillText(`#${hungTracked[a.from].id}→${hungDetections[a.to].id}`, mx, my - 2);
+      hungCtx.textAlign = 'left';
+    });
+  }
+}
+drawHungarian();
+
+function runHungarian() {
+  hungSolved = true;
+  drawHungarian();
+  document.getElementById('hungarian-result').innerHTML = '<span style="color:var(--green)">✓ Optimal assignment found. All 4 IDs maintained with minimum total error.</span>';
+}
+
+// ─── ZONE MATCHING DEMO ───────────────────────────────────────
+const zoneCanvas = document.getElementById('zone-canvas');
+const zoneCtx = zoneCanvas.getContext('2d');
+let zonePerson = {x: 240, y: 170};
+let zoneDragging = false;
+
+const zonesMachines = [
+  {name:'lat_pulldown_01', x:40, y:40, w:120, h:90, color:'#7c3aed'},
+  {name:'chest_press_01', x:200, y:40, w:120, h:90, color:'#10b981'},
+  {name:'leg_press_01', x:360, y:40, w:100, h:90, color:'#f59e0b'},
+  {name:'bicep_curl_01', x:40, y:190, w:120, h:90, color:'#3b82f6'},
+  {name:'shoulder_press_01', x:200, y:190, w:120, h:90, color:'#06b6d4'},
+  {name:'cable_row_01', x:360, y:190, w:100, h:90, color:'#ef4444'},
+];
+
+function drawZones() {
+  const W = zoneCanvas.width, H = zoneCanvas.height;
+  zoneCtx.clearRect(0, 0, W, H);
+  zoneCtx.fillStyle = '#0d0d1a';
+  zoneCtx.fillRect(0, 0, W, H);
+  let activeMachine = null;
+  zonesMachines.forEach(m => {
+    const inside = zonePerson.x >= m.x && zonePerson.x <= m.x+m.w && zonePerson.y >= m.y && zonePerson.y <= m.y+m.h;
+    if (inside) activeMachine = m;
+    zoneCtx.strokeStyle = inside ? m.color : m.color + '60';
+    zoneCtx.lineWidth = inside ? 2 : 1;
+    zoneCtx.setLineDash(inside ? [] : [4,4]);
+    zoneCtx.strokeRect(m.x, m.y, m.w, m.h);
+    zoneCtx.fillStyle = inside ? m.color + '30' : m.color + '10';
+    zoneCtx.fillRect(m.x, m.y, m.w, m.h);
+    zoneCtx.setLineDash([]);
+    zoneCtx.fillStyle = inside ? m.color : m.color + '80';
+    zoneCtx.font = inside ? 'bold 11px sans-serif' : '10px sans-serif';
+    zoneCtx.textAlign = 'center';
+    zoneCtx.fillText(m.name.replace('_01','').replace(/_/g,' '), m.x + m.w/2, m.y + m.h/2 + 4);
+    zoneCtx.textAlign = 'left';
+  });
+  // Person dot
+  zoneCtx.fillStyle = '#fff';
+  zoneCtx.beginPath();
+  zoneCtx.arc(zonePerson.x, zonePerson.y, 10, 0, Math.PI*2);
+  zoneCtx.fill();
+  zoneCtx.fillStyle = activeMachine ? activeMachine.color : '#64748b';
+  zoneCtx.beginPath();
+  zoneCtx.arc(zonePerson.x, zonePerson.y, 7, 0, Math.PI*2);
+  zoneCtx.fill();
+  zoneCtx.fillStyle = '#fff';
+  zoneCtx.font = 'bold 9px monospace';
+  zoneCtx.textAlign = 'center';
+  zoneCtx.fillText('#7', zonePerson.x, zonePerson.y + 3);
+  zoneCtx.textAlign = 'left';
+  // Update UI
+  document.getElementById('zone-machine').textContent = activeMachine ? activeMachine.name : 'No machine';
+  document.getElementById('zone-machine').style.color = activeMachine ? activeMachine.color : 'var(--muted)';
+  document.getElementById('zone-coords').textContent = `Position: (${Math.round(zonePerson.x)}, ${Math.round(zonePerson.y)})`;
+}
+drawZones();
+
+zoneCanvas.addEventListener('mousedown', e => { zoneDragging = true; });
+zoneCanvas.addEventListener('mouseup', e => { zoneDragging = false; });
+zoneCanvas.addEventListener('mousemove', e => {
+  if (!zoneDragging) return;
+  const rect = zoneCanvas.getBoundingClientRect();
+  zonePerson.x = (e.clientX - rect.left) * (zoneCanvas.width / rect.width);
+  zonePerson.y = (e.clientY - rect.top) * (zoneCanvas.height / rect.height);
+  drawZones();
+});
+zoneCanvas.addEventListener('click', e => {
+  const rect = zoneCanvas.getBoundingClientRect();
+  zonePerson.x = (e.clientX - rect.left) * (zoneCanvas.width / rect.width);
+  zonePerson.y = (e.clientY - rect.top) * (zoneCanvas.height / rect.height);
+  drawZones();
+});
+
+// ─── POSE ESTIMATION DEMO ─────────────────────────────────────
+const poseCanvas = document.getElementById('pose-canvas');
+const poseCtx = poseCanvas.getContext('2d');
+let poseRunning = true, poseT = 0, poseReps = 0, poseAngle = 100;
+let currentExercise = 'lat_pulldown';
+let selectedJoint = null;
+
+const JOINTS = [
+  {name:'nose', idx:0, color:'#fff', desc:'Nose — used for head tracking and detecting if member is looking at the machine.'},
+  {name:'left_eye', idx:1, color:'#06b6d4', desc:'Left Eye — part of face detection bounding box for Face ID.'},
+  {name:'right_eye', idx:2, color:'#06b6d4', desc:'Right Eye — part of face detection bounding box for Face ID.'},
+  {name:'left_ear', idx:3, color:'#3b82f6', desc:'Left Ear — helps determine head orientation.'},
+  {name:'right_ear', idx:4, color:'#3b82f6', desc:'Right Ear — helps determine head orientation.'},
+  {name:'left_shoulder', idx:5, color:'#7c3aed', desc:'Left Shoulder — key joint for upper body exercises. Used as the anchor point for elbow angle calculation.'},
+  {name:'right_shoulder', idx:6, color:'#7c3aed', desc:'Right Shoulder — mirrors left shoulder. We use both to detect asymmetric movement (one side stronger than the other).'},
+  {name:'left_elbow', idx:7, color:'#a78bfa', desc:'Left Elbow — THE most important joint for upper body exercises. The elbow angle (shoulder→elbow→wrist) is the primary rep detection signal.'},
+  {name:'right_elbow', idx:8, color:'#a78bfa', desc:'Right Elbow — mirrors left elbow. For bilateral exercises like chest press, we average both elbows.'},
+  {name:'left_wrist', idx:9, color:'#10b981', desc:'Left Wrist — completes the elbow angle calculation. Also used to detect grip width and wrist deviation (form scoring).'},
+  {name:'right_wrist', idx:10, color:'#10b981', desc:'Right Wrist — mirrors left wrist.'},
+  {name:'left_hip', idx:11, color:'#f59e0b', desc:'Left Hip — used for lower body exercises (leg press, squat). Also used to detect if the member is seated vs standing.'},
+  {name:'right_hip', idx:12, color:'#f59e0b', desc:'Right Hip — mirrors left hip.'},
+  {name:'left_knee', idx:13, color:'#ef4444', desc:'Left Knee — key joint for leg exercises. Knee angle (hip→knee→ankle) is the primary signal for leg press rep counting.'},
+  {name:'right_knee', idx:14, color:'#ef4444', desc:'Right Knee — mirrors left knee.'},
+  {name:'left_ankle', idx:15, color:'#f97316', desc:'Left Ankle — completes the knee angle calculation for leg exercises.'},
+  {name:'right_ankle', idx:16, color:'#f97316', desc:'Right Ankle — mirrors left ankle.'},
+];
+
+const BONES = [[5,6],[5,7],[7,9],[6,8],[8,10],[5,11],[6,12],[11,12],[11,13],[13,15],[12,14],[14,16],[0,1],[0,2],[1,3],[2,4]];
+
+function getPoseKeypoints(t, exercise) {
+  const kp = Array(17).fill(null).map(() => ({x:0, y:0, conf:0.9}));
+  const W = poseCanvas.width, H = poseCanvas.height;
+  const cx = W/2, cy = H/2;
+  // Base skeleton (seated)
+  const phase = (Math.sin(t * 0.05) + 1) / 2; // 0 to 1
+  let elbowAngle;
+  if (exercise === 'lat_pulldown') {
+    elbowAngle = lerp(160, 40, phase);
+  } else if (exercise === 'chest_press') {
+    elbowAngle = lerp(170, 50, phase);
+  } else if (exercise === 'leg_press') {
+    elbowAngle = 90; // arms fixed
+  } else if (exercise === 'bicep_curl') {
+    elbowAngle = lerp(170, 30, phase);
+  } else {
+    elbowAngle = lerp(90, 170, phase); // shoulder press
+  }
+  poseAngle = Math.round(elbowAngle);
+  // Simplified skeleton positions
+  kp[0] = {x: cx, y: cy - 160, conf:0.95}; // nose
+  kp[1] = {x: cx-12, y: cy-168, conf:0.9};
+  kp[2] = {x: cx+12, y: cy-168, conf:0.9};
+  kp[3] = {x: cx-20, y: cy-162, conf:0.85};
+  kp[4] = {x: cx+20, y: cy-162, conf:0.85};
+  kp[5] = {x: cx-45, y: cy-110, conf:0.95}; // L shoulder
+  kp[6] = {x: cx+45, y: cy-110, conf:0.95}; // R shoulder
+  // Elbow positions based on angle
+  const rad = (elbowAngle * Math.PI) / 180;
+  if (exercise === 'lat_pulldown' || exercise === 'bicep_curl' || exercise === 'shoulder_press') {
+    kp[7] = {x: cx-45, y: cy - 110 + Math.cos(rad)*60, conf:0.92}; // L elbow
+    kp[8] = {x: cx+45, y: cy - 110 + Math.cos(rad)*60, conf:0.92}; // R elbow
+    kp[9] = {x: cx-45 + Math.sin(rad)*50, y: cy - 110 + Math.cos(rad)*60 + Math.sin(rad)*50, conf:0.88};
+    kp[10] = {x: cx+45 - Math.sin(rad)*50, y: cy - 110 + Math.cos(rad)*60 + Math.sin(rad)*50, conf:0.88};
+  } else if (exercise === 'chest_press') {
+    kp[7] = {x: cx-45 - Math.sin(rad)*50, y: cy - 110 + Math.cos(rad)*40, conf:0.92};
+    kp[8] = {x: cx+45 + Math.sin(rad)*50, y: cy - 110 + Math.cos(rad)*40, conf:0.92};
+    kp[9] = {x: cx-45 - Math.sin(rad)*80, y: cy - 110 + Math.cos(rad)*40, conf:0.88};
+    kp[10] = {x: cx+45 + Math.sin(rad)*80, y: cy - 110 + Math.cos(rad)*40, conf:0.88};
+  } else {
+    kp[7] = {x: cx-45, y: cy-110+40, conf:0.92};
+    kp[8] = {x: cx+45, y: cy-110+40, conf:0.92};
+    kp[9] = {x: cx-45, y: cy-110+40+50, conf:0.88};
+    kp[10] = {x: cx+45, y: cy-110+40+50, conf:0.88};
+  }
+  kp[11] = {x: cx-30, y: cy+20, conf:0.93}; // L hip
+  kp[12] = {x: cx+30, y: cy+20, conf:0.93}; // R hip
+  if (exercise === 'leg_press') {
+    const krad = lerp(0.5, 1.4, phase);
+    kp[13] = {x: cx-30 + Math.cos(krad)*60, y: cy+20 + Math.sin(krad)*60, conf:0.9};
+    kp[14] = {x: cx+30 - Math.cos(krad)*60, y: cy+20 + Math.sin(krad)*60, conf:0.9};
+    kp[15] = {x: cx-30 + Math.cos(krad)*60 + 20, y: cy+20 + Math.sin(krad)*60 + 50, conf:0.85};
+    kp[16] = {x: cx+30 - Math.cos(krad)*60 - 20, y: cy+20 + Math.sin(krad)*60 + 50, conf:0.85};
+  } else {
+    kp[13] = {x: cx-30, y: cy+90, conf:0.9};
+    kp[14] = {x: cx+30, y: cy+90, conf:0.9};
+    kp[15] = {x: cx-30, y: cy+160, conf:0.85};
+    kp[16] = {x: cx+30, y: cy+160, conf:0.85};
+  }
+  return kp;
+}
+
+let lastPhase = 0;
+function drawPose() {
+  const W = poseCanvas.width, H = poseCanvas.height;
+  poseCtx.clearRect(0, 0, W, H);
+  poseCtx.fillStyle = '#0d0d1a';
+  poseCtx.fillRect(0, 0, W, H);
+  // Machine silhouette
+  poseCtx.fillStyle = '#1a1a2e';
+  poseCtx.fillRect(W/2-80, 20, 160, 40);
+  poseCtx.fillStyle = '#2a2a44';
+  poseCtx.font = '10px sans-serif';
+  poseCtx.textAlign = 'center';
+  poseCtx.fillText(currentExercise.replace(/_/g,' ').toUpperCase(), W/2, 44);
+  poseCtx.textAlign = 'left';
+  // Seat
+  poseCtx.fillStyle = '#1a1a2e';
+  poseCtx.fillRect(W/2-40, H/2+30, 80, 15);
+
+  const kp = getPoseKeypoints(poseT, currentExercise);
+  // Draw bones
+  BONES.forEach(([a, b]) => {
+    if (!kp[a] || !kp[b]) return;
+    poseCtx.strokeStyle = selectedJoint !== null && (JOINTS[a]?.idx === selectedJoint || JOINTS[b]?.idx === selectedJoint) ? '#fff' : '#3b3b5c';
+    poseCtx.lineWidth = 2;
+    poseCtx.beginPath();
+    poseCtx.moveTo(kp[a].x, kp[a].y);
+    poseCtx.lineTo(kp[b].x, kp[b].y);
+    poseCtx.stroke();
+  });
+  // Draw joints
+  JOINTS.forEach(j => {
+    const p = kp[j.idx];
+    if (!p) return;
+    const isSelected = selectedJoint === j.idx;
+    poseCtx.fillStyle = isSelected ? '#fff' : j.color;
+    poseCtx.beginPath();
+    poseCtx.arc(p.x, p.y, isSelected ? 8 : 5, 0, Math.PI*2);
+    poseCtx.fill();
+    if (isSelected) {
+      poseCtx.strokeStyle = j.color;
+      poseCtx.lineWidth = 2;
+      poseCtx.stroke();
+    }
+  });
+  // Angle arc on elbow
+  const sh = kp[5], el = kp[7], wr = kp[9];
+  if (sh && el && wr) {
+    const a1 = Math.atan2(sh.y-el.y, sh.x-el.x);
+    const a2 = Math.atan2(wr.y-el.y, wr.x-el.x);
+    poseCtx.strokeStyle = '#a78bfa80';
+    poseCtx.lineWidth = 1.5;
+    poseCtx.beginPath();
+    poseCtx.arc(el.x, el.y, 20, a1, a2);
+    poseCtx.stroke();
+    poseCtx.fillStyle = '#a78bfa';
+    poseCtx.font = 'bold 10px monospace';
+    poseCtx.fillText(`${poseAngle}°`, el.x + 22, el.y - 4);
+  }
+  // Rep detection
+  const phase = (Math.sin(poseT * 0.05) + 1) / 2;
+  if (lastPhase > 0.95 && phase < 0.5) poseReps++;
+  lastPhase = phase;
+  document.getElementById('rep-count').textContent = poseReps;
+  document.getElementById('angle-val').textContent = poseAngle + '°';
+  const anglePct = (poseAngle - 40) / (160 - 40) * 100;
+  document.getElementById('angle-bar').style.width = anglePct + '%';
+  // Live keypoint data
+  const kpHtml = ['left_shoulder','left_elbow','left_wrist','left_hip','left_knee'].map(name => {
+    const j = JOINTS.find(j => j.name === name);
+    const p = kp[j.idx];
+    return `<span style="color:${j.color}">${name}:</span> (${Math.round(p.x)}, ${Math.round(p.y)}) conf=${p.conf.toFixed(2)}`;
+  }).join('<br>');
+  document.getElementById('live-kp').innerHTML = kpHtml;
+}
+
+function poseLoop() {
+  if (!poseRunning) return;
+  poseT++;
+  drawPose();
+  requestAnimationFrame(poseLoop);
+}
+poseLoop();
+
+function togglePose() {
+  poseRunning = !poseRunning;
+  document.getElementById('pose-pause-btn').textContent = poseRunning ? '⏸ Pause' : '▶ Resume';
+  if (poseRunning) poseLoop();
+}
+function changeExercise(val) {
+  currentExercise = val;
+  poseReps = 0;
+  lastPhase = 0;
+}
+
+// Keypoint grid
+const kpGrid = document.getElementById('kp-grid');
+if (kpGrid) {
+  kpGrid.innerHTML = JOINTS.map(j => `
+    <div class="kp-item" id="kp-${j.idx}" onclick="selectJoint(${j.idx})">
+      <div class="kp-dot" style="background:${j.color}"></div>
+      <span style="font-size:11px">${j.name.replace(/_/g,' ')}</span>
+    </div>`).join('');
+}
+
+function selectJoint(idx) {
+  selectedJoint = selectedJoint === idx ? null : idx;
+  document.querySelectorAll('.kp-item').forEach(el => el.classList.remove('selected'));
+  if (selectedJoint !== null) {
+    document.getElementById(`kp-${idx}`)?.classList.add('selected');
+    const j = JOINTS.find(j => j.idx === idx);
+    document.getElementById('joint-info').innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="width:12px;height:12px;border-radius:50%;background:${j.color}"></div>
+        <strong style="color:#fff">${j.name.replace(/_/g,' ')}</strong>
+      </div>
+      <p style="font-size:13px;color:var(--muted2);margin:0">${j.desc}</p>`;
+  } else {
+    document.getElementById('joint-info').innerHTML = '<p style="font-size:13px;color:var(--muted);margin:0">Click any joint on the pose to see its details</p>';
+  }
+}
+
+// ─── LSTM DEMO ────────────────────────────────────────────────
+const lstmFramesEl = document.getElementById('lstm-frames');
+let lstmRunning = false, lstmTotalReps = 0;
+
+function initLSTMFrames() {
+  lstmFramesEl.innerHTML = '';
+  for (let i = 0; i < 30; i++) {
+    const div = document.createElement('div');
+    div.className = 'lstm-frame';
+    div.id = `lf-${i}`;
+    const c = document.createElement('canvas');
+    c.width = 40; c.height = 40;
+    div.appendChild(c);
+    lstmFramesEl.appendChild(div);
+    // Draw mini skeleton
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#0d0d1a';
+    ctx.fillRect(0,0,40,40);
+    const t = i * (Math.PI * 2 / 30);
+    const angle = lerp(160, 40, (Math.sin(t)+1)/2);
+    const rad = angle * Math.PI / 180;
+    ctx.strokeStyle = '#3b3b5c';
+    ctx.lineWidth = 1;
+    // Simple stick figure
+    ctx.beginPath(); ctx.moveTo(20,5); ctx.lineTo(20,18); ctx.stroke(); // spine
+    ctx.beginPath(); ctx.moveTo(20,18); ctx.lineTo(20+Math.cos(rad)*12, 18+Math.sin(rad)*12); ctx.stroke(); // arm
+    ctx.fillStyle = '#a78bfa';
+    ctx.beginPath(); ctx.arc(20,5,2,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#7c3aed';
+    ctx.beginPath(); ctx.arc(20,18,2,0,Math.PI*2); ctx.fill();
+  }
+}
+initLSTMFrames();
+
+async function runLSTM() {
+  if (lstmRunning) return;
+  lstmRunning = true;
+  document.getElementById('lstm-output').textContent = '—';
+  document.getElementById('lstm-conf').textContent = '—';
+  const callout = document.getElementById('lstm-callout');
+  callout.style.display = 'block';
+  callout.className = 'callout callout-yellow';
+  callout.querySelector('.callout-label').textContent = '🧠 Processing...';
+  document.getElementById('lstm-callout-text').textContent = 'Feeding 30 frames into the LSTM...';
+
+  for (let i = 0; i < 30; i++) {
+    const frame = document.getElementById(`lf-${i}`);
+    if (frame) {
+      frame.classList.add('processing');
+      await new Promise(r => setTimeout(r, 40));
+      frame.classList.remove('processing');
+      frame.classList.add('done');
+    }
+  }
+  await new Promise(r => setTimeout(r, 300));
+  const conf = (0.88 + rand(0, 0.10)).toFixed(3);
+  document.getElementById('lstm-output').textContent = 'good_rep';
+  document.getElementById('lstm-output').style.color = 'var(--green)';
+  document.getElementById('lstm-conf').textContent = conf;
+  document.getElementById('lstm-conf').style.color = 'var(--green)';
+  lstmTotalReps++;
+  document.getElementById('lstm-reps').textContent = lstmTotalReps;
+  callout.className = 'callout callout-green';
+  callout.querySelector('.callout-label').textContent = '✅ good_rep detected';
+  document.getElementById('lstm-callout-text').textContent = `The LSTM read 30 frames of elbow angle data and classified the movement as a good_rep with ${(parseFloat(conf)*100).toFixed(1)}% confidence. Full range of motion, controlled speed, proper form. Rep counted and logged.`;
+  lstmRunning = false;
+}
+
+function resetLSTM() {
+  lstmTotalReps = 0;
+  document.getElementById('lstm-reps').textContent = '0';
+  document.getElementById('lstm-output').textContent = '—';
+  document.getElementById('lstm-conf').textContent = '—';
+  document.getElementById('lstm-callout').style.display = 'none';
+  initLSTMFrames();
+  lstmRunning = false;
+}
+
+// ─── FACE EMBEDDING DEMO ──────────────────────────────────────
+function generateEmbeds() {
+  const baseVec = Array.from({length:20}, () => rand(0.1, 0.9));
+  const sameVec = baseVec.map(v => Math.max(0, Math.min(1, v + rand(-0.04, 0.04))));
+  const diffVec = Array.from({length:20}, () => rand(0.1, 0.9));
+  ['embed-bars-matt1','embed-bars-matt2','embed-bars-sarah'].forEach((id, pi) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const vec = pi === 0 ? baseVec : pi === 1 ? sameVec : diffVec;
+    const col = pi === 2 ? 'var(--red)' : 'var(--purple)';
+    const bars = el.querySelector('.embed-bar-fill') ? el : el;
+    const existing = el.querySelectorAll('.embed-bar-wrap');
+    existing.forEach(e => e.remove());
+    vec.forEach((v, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'embed-bar-wrap';
+      wrap.innerHTML = `
+        <div class="embed-bar-label"><span>dim_${i+1}</span><span>${v.toFixed(3)}</span></div>
+        <div class="embed-bar-track"><div class="embed-bar-fill" style="width:${v*100}%;background:${col}"></div></div>`;
+      el.appendChild(wrap);
+    });
+  });
+}
+generateEmbeds();
+
+// ─── FACE MATCHING DEMO ───────────────────────────────────────
+const faceMembers = [
+  {name:'Sarah Chen', score: 0.18 + rand(-0.03,0.03)},
+  {name:'James Wilson', score: 0.22 + rand(-0.03,0.03)},
+  {name:'Matt McArdle', score: 0.97 + rand(-0.01,0.01)},
+  {name:'Lisa Park', score: 0.19 + rand(-0.03,0.03)},
+  {name:'Tom Brady', score: 0.21 + rand(-0.03,0.03)},
+];
+let faceRunning = false;
+
+function runFaceMatch() {
+  if (faceRunning) return;
+  faceRunning = true;
+  const container = document.getElementById('match-bars');
+  container.innerHTML = '';
+  document.getElementById('match-result').style.display = 'none';
+  faceMembers.forEach((m, i) => {
+    const div = document.createElement('div');
+    div.id = `mb-${i}`;
+    div.style.cssText = 'margin-bottom:10px';
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+        <span style="color:var(--muted2)">${m.name}</span>
+        <span id="ms-${i}" style="font-weight:700;color:var(--muted)">—</span>
+      </div>
+      <div style="height:10px;background:var(--border);border-radius:5px;overflow:hidden">
+        <div id="mb-fill-${i}" style="height:100%;width:0%;border-radius:5px;transition:width 0.5s;background:var(--muted)"></div>
+      </div>`;
+    container.appendChild(div);
+  });
+
+  faceMembers.forEach((m, i) => {
+    setTimeout(() => {
+      const isBest = m.name === 'Matt McArdle';
+      const col = isBest ? 'var(--green)' : m.score > 0.5 ? 'var(--yellow)' : 'var(--red)';
+      document.getElementById(`mb-fill-${i}`).style.width = (m.score * 100) + '%';
+      document.getElementById(`mb-fill-${i}`).style.background = col;
+      document.getElementById(`ms-${i}`).textContent = m.score.toFixed(3);
+      document.getElementById(`ms-${i}`).style.color = col;
+      if (i === faceMembers.length - 1) {
+        setTimeout(() => {
+          document.getElementById('match-result').style.display = 'block';
+          document.getElementById('match-name').textContent = 'Matt McArdle';
+          document.getElementById('match-score').textContent = faceMembers.find(m=>m.name==='Matt McArdle').score.toFixed(3);
+          faceRunning = false;
+        }, 400);
+      }
+    }, i * 350);
+  });
+}
+
+function resetFaceMatch() {
+  document.getElementById('match-bars').innerHTML = '';
+  document.getElementById('match-result').style.display = 'none';
+  faceRunning = false;
+}
+
+// ─── DATA FLYWHEEL ────────────────────────────────────────────
+const flywheelCanvas = document.getElementById('flywheel-canvas');
+const flywheelCtx = flywheelCanvas.getContext('2d');
+
+const flywheelData = [
+  {time:'Wk 1', accuracy:75, taps:95, labels:3, friction:'High', desc:'Week 1 — System Launches', text:'The face model has only 3–5 enrolment photos per member. Accuracy is moderate (~75%). Most members tap their card most sessions. Every tap creates a perfect training label: this face = this member_id. The model retrains nightly.'},
+  {time:'Wk 2', accuracy:79, taps:88, labels:8, friction:'High', desc:'Week 2 — First Retraining', text:'After one week, each member has ~8 face labels from card taps. The model retrains with this new data. Accuracy improves to ~79%. Slightly fewer card taps needed.'},
+  {time:'Wk 3', accuracy:83, taps:78, labels:15, friction:'Med', desc:'Week 3 — Momentum Builds', text:'15+ labels per member. The model is learning each person\'s face under gym lighting, from different angles, with different expressions. Accuracy reaches 83%.'},
+  {time:'Wk 4', accuracy:87, taps:65, labels:24, friction:'Med', desc:'Week 4 — Noticeable Improvement', text:'Members start noticing they tap less often. The system feels smoother. Accuracy at 87%. The flywheel is spinning.'},
+  {time:'Mo 2', accuracy:91, taps:40, labels:50, friction:'Low', desc:'Month 2 — High Confidence', text:'50+ labels per member. Accuracy reaches 91%. Only 40% of sessions need a card tap. Members comment that the system "just knows" who they are.'},
+  {time:'Mo 3', accuracy:95, taps:18, labels:90, friction:'Low', desc:'Month 3 — Near Automatic', text:'90+ labels per member. Accuracy hits 95% — the auto-confirm threshold. Only 18% of sessions need any card interaction. The system is essentially automatic.'},
+  {time:'Mo 4', accuracy:97, taps:8, labels:140, friction:'V Low', desc:'Month 4 — Fully Automatic', text:'140+ labels per member. Accuracy at 97%. Only 8% of sessions need a card tap (new angles, hats, etc.). The flywheel has reached full speed.'},
+  {time:'Mo 5', accuracy:98, taps:4, labels:200, friction:'V Low', desc:'Month 5 — Mature System', text:'200+ labels per member. Accuracy at 98%. The system handles hats, glasses, beards, and seasonal lighting changes. Nearly zero friction for all members.'},
+];
+
+function updateFlywheel(v) {
+  const idx = Math.min(parseInt(v), flywheelData.length - 1);
+  const d = flywheelData[idx];
+  document.getElementById('flywheel-time').textContent = d.time;
+  document.getElementById('fw-accuracy').textContent = d.accuracy + '%';
+  document.getElementById('fw-taps').textContent = d.taps + '%';
+  document.getElementById('fw-labels').textContent = d.labels;
+  document.getElementById('fw-friction').textContent = d.friction;
+  document.getElementById('fw-callout').querySelector('.callout-label').textContent = `📅 ${d.desc}`;
+  document.getElementById('fw-callout').querySelector('p').textContent = d.text;
+  drawFlywheel(idx);
+}
+
+function drawFlywheel(currentIdx) {
+  const W = flywheelCanvas.width, H = flywheelCanvas.height;
+  flywheelCtx.clearRect(0, 0, W, H);
+  flywheelCtx.fillStyle = '#0d0d1a';
+  flywheelCtx.fillRect(0, 0, W, H);
+  const pad = 40, chartW = W - pad*2, chartH = H - pad*2;
+  // Grid
+  flywheelCtx.strokeStyle = '#1a1a2e';
+  flywheelCtx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad + (chartH / 4) * i;
+    flywheelCtx.beginPath(); flywheelCtx.moveTo(pad, y); flywheelCtx.lineTo(W-pad, y); flywheelCtx.stroke();
+    flywheelCtx.fillStyle = '#2a2a44';
+    flywheelCtx.font = '10px monospace';
+    flywheelCtx.fillText((100 - i*25) + '%', 2, y + 4);
+  }
+  // X labels
+  flywheelData.forEach((d, i) => {
+    const x = pad + (chartW / (flywheelData.length-1)) * i;
+    flywheelCtx.fillStyle = i === currentIdx ? '#fff' : '#2a2a44';
+    flywheelCtx.font = i === currentIdx ? 'bold 10px monospace' : '10px monospace';
+    flywheelCtx.textAlign = 'center';
+    flywheelCtx.fillText(d.time, x, H - 6);
+    flywheelCtx.textAlign = 'left';
+  });
+  // Accuracy line
+  flywheelCtx.strokeStyle = '#7c3aed';
+  flywheelCtx.lineWidth = 2;
+  flywheelCtx.beginPath();
+  flywheelData.slice(0, currentIdx+1).forEach((d, i) => {
+    const x = pad + (chartW / (flywheelData.length-1)) * i;
+    const y = pad + chartH * (1 - d.accuracy/100);
+    i === 0 ? flywheelCtx.moveTo(x, y) : flywheelCtx.lineTo(x, y);
+  });
+  flywheelCtx.stroke();
+  // Taps line
+  flywheelCtx.strokeStyle = '#f59e0b';
+  flywheelCtx.lineWidth = 2;
+  flywheelCtx.setLineDash([5,5]);
+  flywheelCtx.beginPath();
+  flywheelData.slice(0, currentIdx+1).forEach((d, i) => {
+    const x = pad + (chartW / (flywheelData.length-1)) * i;
+    const y = pad + chartH * (1 - d.taps/100);
+    i === 0 ? flywheelCtx.moveTo(x, y) : flywheelCtx.lineTo(x, y);
+  });
+  flywheelCtx.stroke();
+  flywheelCtx.setLineDash([]);
+  // Current point
+  const cur = flywheelData[currentIdx];
+  const cx = pad + (chartW / (flywheelData.length-1)) * currentIdx;
+  flywheelCtx.fillStyle = '#7c3aed';
+  flywheelCtx.beginPath();
+  flywheelCtx.arc(cx, pad + chartH * (1 - cur.accuracy/100), 6, 0, Math.PI*2);
+  flywheelCtx.fill();
+  flywheelCtx.fillStyle = '#f59e0b';
+  flywheelCtx.beginPath();
+  flywheelCtx.arc(cx, pad + chartH * (1 - cur.taps/100), 6, 0, Math.PI*2);
+  flywheelCtx.fill();
+  // Legend
+  flywheelCtx.fillStyle = '#7c3aed'; flywheelCtx.fillRect(pad, 8, 20, 3);
+  flywheelCtx.fillStyle = '#94a3b8'; flywheelCtx.font = '11px sans-serif';
+  flywheelCtx.fillText('Face ID Accuracy', pad+24, 14);
+  flywheelCtx.fillStyle = '#f59e0b'; flywheelCtx.fillRect(pad+160, 8, 20, 3);
+  flywheelCtx.fillStyle = '#94a3b8';
+  flywheelCtx.fillText('Sessions needing card tap', pad+184, 14);
+}
+drawFlywheel(0);
+
+// ─── WEIGHT STACK DEMO ────────────────────────────────────────
+const weightCanvas = document.getElementById('weight-canvas');
+const weightCtx = weightCanvas.getContext('2d');
+const weightStack = document.getElementById('weight-stack');
+const plates = [
+  {kg:10,color:'#ef4444'},{kg:15,color:'#f97316'},{kg:20,color:'#f59e0b'},
+  {kg:25,color:'#10b981'},{kg:30,color:'#3b82f6'},{kg:40,color:'#7c3aed'},
+  {kg:50,color:'#a78bfa'},{kg:60,color:'#06b6d4'},{kg:70,color:'#ec4899'},
+  {kg:80,color:'#64748b'},{kg:90,color:'#94a3b8'},{kg:100,color:'#cbd5e1'},
+];
+let selectedPlate = 7; // 60kg
+
+function buildWeightStack() {
+  weightStack.innerHTML = '';
+  plates.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'stack-plate';
+    div.style.cssText = `background:${p.color};width:${100 - i*2}px;opacity:${i === selectedPlate ? 1 : 0.5};border:${i === selectedPlate ? '2px solid #fff' : '2px solid transparent'}`;
+    div.innerHTML = `${p.kg}kg ${i === selectedPlate ? '◄' : ''}`;
+    div.onclick = () => { selectedPlate = i; buildWeightStack(); drawWeightCamera(); };
+    weightStack.appendChild(div);
+  });
+}
+
+function drawWeightCamera() {
+  const W = weightCanvas.width, H = weightCanvas.height;
+  weightCtx.clearRect(0, 0, W, H);
+  weightCtx.fillStyle = '#0d0d1a';
+  weightCtx.fillRect(0, 0, W, H);
+  // Camera frame effect
+  weightCtx.strokeStyle = '#2a2a44';
+  weightCtx.lineWidth = 1;
+  for (let x = 0; x < W; x += 30) { weightCtx.beginPath(); weightCtx.moveTo(x,0); weightCtx.lineTo(x,H); weightCtx.stroke(); }
+  for (let y = 0; y < H; y += 30) { weightCtx.beginPath(); weightCtx.moveTo(0,y); weightCtx.lineTo(W,y); weightCtx.stroke(); }
+  // Draw weight stack
+  const stackX = 80, stackW = 180;
+  plates.forEach((p, i) => {
+    const y = 20 + i * 22;
+    const h = 18;
+    const w = stackW - i * 4;
+    const x = stackX + i * 2;
+    weightCtx.fillStyle = p.color + (i === selectedPlate ? 'ff' : '60');
+    weightCtx.fillRect(x, y, w, h);
+    weightCtx.fillStyle = '#000';
+    weightCtx.font = 'bold 10px monospace';
+    weightCtx.textAlign = 'center';
+    weightCtx.fillText(`${p.kg}kg`, x + w/2, y + 12);
+    weightCtx.textAlign = 'left';
+    // Pin indicator
+    if (i === selectedPlate) {
+      weightCtx.fillStyle = '#fff';
+      weightCtx.fillRect(x - 15, y + 4, 12, 10);
+      weightCtx.fillStyle = '#000';
+      weightCtx.font = 'bold 8px monospace';
+      weightCtx.fillText('PIN', x - 14, y + 11);
+      // Detection box
+      weightCtx.strokeStyle = '#10b981';
+      weightCtx.lineWidth = 2;
+      weightCtx.strokeRect(x - 20, y - 2, w + 24, h + 4);
+    }
+  });
+  // AI reading overlay
+  weightCtx.fillStyle = '#10b98140';
+  weightCtx.fillRect(0, H - 50, W, 50);
+  weightCtx.fillStyle = '#10b981';
+  weightCtx.font = 'bold 14px monospace';
+  weightCtx.textAlign = 'center';
+  weightCtx.fillText(`AI READING: ${plates[selectedPlate].kg}kg`, W/2, H - 28);
+  weightCtx.fillStyle = '#94a3b8';
+  weightCtx.font = '11px monospace';
+  weightCtx.fillText(`Confidence: ${(96 + rand(-2,2)).toFixed(1)}%`, W/2, H - 10);
+  weightCtx.textAlign = 'left';
+  document.getElementById('weight-reading').textContent = plates[selectedPlate].kg + ' kg';
+  document.getElementById('weight-confidence').textContent = `Confidence: ${(96 + rand(-2,2)).toFixed(1)}%`;
+}
+buildWeightStack();
+drawWeightCamera();
+
+// ─── FULL PIPELINE DEMO ───────────────────────────────────────
+const pipelineStages = [
+  {name:'Camera Capture', icon:'📷', time:'0ms', color:'#3b82f6', desc:'Camera 1 captures a 1920×1080 frame from the overhead fisheye lens. The image is de-warped (fisheye correction) and sent to YOLO.'},
+  {name:'YOLO Detection', icon:'📦', time:'+15ms', color:'#7c3aed', desc:'YOLO scans the entire frame in one pass. Finds 3 people. Returns bounding boxes with confidence scores. Filters out anything below 0.70.'},
+  {name:'DeepSORT Tracking', icon:'🔢', time:'+5ms', color:'#a78bfa', desc:'DeepSORT assigns persistent IDs. Person #7 is confirmed as the same person from the last frame. Kalman filter updates position prediction.'},
+  {name:'Zone Matching', icon:'📍', time:'+1ms', color:'#10b981', desc:'Person #7\'s centre point (380, 245) is checked against all machine polygons. Match found: lat_pulldown_01.'},
+  {name:'Face ID', icon:'👤', time:'+25ms', color:'#f59e0b', desc:'Face crop extracted from Person #7\'s bounding box. InsightFace generates 512-number embedding. Cosine similarity: Matt McArdle at 0.97. Auto-confirm.'},
+  {name:'Pose + Reps', icon:'🦾', time:'+30ms', color:'#06b6d4', desc:'Camera 2 runs MoveNet. 17 keypoints extracted. LSTM reads 30-frame window. Classification: good_rep at 94.2%. Rep count: 8.'},
+  {name:'Log + Fire', icon:'⚡', time:'+1ms', color:'#ef4444', desc:'FastAPI server receives event: {member: matt_mcArdle, machine: lat_pulldown_01, weight: 60kg, reps: 8, form: good}. Supabase updated. Leaderboard refreshed.'},
+];
+
+function initPipelineStages() {
+  const container = document.getElementById('pipeline-stages');
+  container.innerHTML = pipelineStages.map((s, i) => `
+    <div id="ps-${i}" style="display:flex;align-items:flex-start;gap:16px;padding:14px;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;opacity:0.3;transition:all 0.4s">
+      <div style="width:40px;height:40px;border-radius:10px;background:${s.color}20;border:1px solid ${s.color}40;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${s.icon}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="font-size:13px;font-weight:700;color:#fff">${s.name}</div>
+          <div style="font-size:11px;color:${s.color};font-weight:700">${s.time}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted)">${s.desc}</div>
+      </div>
+      <div id="ps-check-${i}" style="font-size:20px;opacity:0">✅</div>
+    </div>`).join('');
+}
+initPipelineStages();
+
+async function runPipeline() {
+  initPipelineStages();
+  document.getElementById('pipeline-total').style.display = 'none';
+  for (let i = 0; i < pipelineStages.length; i++) {
+    const el = document.getElementById(`ps-${i}`);
+    el.style.opacity = '1';
+    el.style.borderColor = pipelineStages[i].color;
+    el.style.background = pipelineStages[i].color + '10';
+    await new Promise(r => setTimeout(r, 350));
+    document.getElementById(`ps-check-${i}`).style.opacity = '1';
+  }
+  document.getElementById('pipeline-total').style.display = 'block';
+}
+
+function resetPipeline() {
+  initPipelineStages();
+  document.getElementById('pipeline-total').style.display = 'none';
+}
+</script>
+</body>
+</html>
