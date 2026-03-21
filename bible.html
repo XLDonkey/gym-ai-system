@@ -88,7 +88,7 @@
     .section h3 { font-size: 19px; font-weight: 700; color: #fff; margin: 40px 0 12px; }
     .lead { font-size: 17px; color: var(--text2); line-height: 1.75; margin-bottom: 28px; max-width: 780px; }
     p { color: var(--text2); margin-bottom: 16px; max-width: 780px; line-height: 1.75; }
-    .img-block { border-radius: 12px; overflow: hidden; border: 1px solid var(--border2); background: var(--surface2); margin: 24px auto; width: 75%; }
+    .img-block { border-radius: 12px; overflow: hidden; border: 1px solid var(--border2); background: var(--surface2); margin: 24px auto; width: 55%; }
     .img-block img { width: 100%; display: block; object-fit: contain; }
     .img-caption { padding: 10px 14px; font-size: 11px; color: var(--muted); font-style: italic; border-top: 1px solid var(--border); background: var(--surface3); }
     .img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
@@ -179,6 +179,16 @@
     .code-toggle-btn.open .ct-arr { transform: rotate(180deg); }
     .code-toggle-body { display: none; margin-top: 8px; }
     .code-toggle-body.open { display: block; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 28px 0; }
+    .col-card { background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 22px 24px; }
+    .col-card-title { font-size: 13px; font-weight: 700; color: var(--purple); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+    .col-card p { font-size: 14px; color: var(--muted); line-height: 1.6; margin: 0; }
+    .spec-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 13px; }
+    .spec-table th { background: var(--surface2); color: var(--muted); text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border2); }
+    .spec-table td { padding: 10px 14px; border-bottom: 1px solid var(--border1); color: var(--text); vertical-align: top; }
+    .spec-table tr:last-child td { border-bottom: none; }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
     @media (max-width: 900px) {
       .sidebar { display: none; }
       .hero { padding: 48px 24px; }
@@ -208,10 +218,10 @@
   <div class="nav-group">Software</div>
   <a class="nav-link" href="#software">09 — The Full Software Stack</a>
   <a class="nav-link" href="#yolo">10 — YOLO Detection</a>
-  <a class="nav-link" href="#deepsort">11 — DeepSORT Tracking</a>
-  <a class="nav-link" href="#movenet">12 — MoveNet Pose</a>
-  <a class="nav-link" href="#lstm">13 — LSTM Rep Counter</a>
-  <a class="nav-link" href="#faceid">14 — Face Embeddings</a>
+  <a class="nav-link" href="#deepsort">11 — People Tracking</a>
+  <a class="nav-link" href="#movenet">12 — Pose Estimation</a>
+  <a class="nav-link" href="#lstm">13 — Rep Counting</a>
+  <a class="nav-link" href="#faceid">14 — Face Recognition</a>
   <a class="nav-link" href="#weight">15 — Weight Detection</a>
   <div class="nav-group">The Full System</div>
   <a class="nav-link" href="#pipeline">16 — The 46ms Pipeline</a>
@@ -837,223 +847,382 @@ results = model.predict(
 </section>
 
 <section class="section" id="deepsort">
-  <div class="section-tag">Section 11 — Software</div>
-  <h2>DeepSORT <em>Tracking</em></h2>
-  <p class="lead">YOLO finds people in each frame independently. It has no memory — it doesn't know that the person in frame 1 is the same person in frame 2. DeepSORT solves this by assigning a persistent ID to each person and tracking them across frames.</p>
+  <div class="section-tag">Section 11 — Deep Dive</div>
+  <h2>People <em>Tracking</em></h2>
+  <p class="lead">Detecting a person in a single frame is easy. The hard problem is keeping track of the <em>same person</em> across hundreds of frames as they move around the gym, sit down, stand up, and occasionally walk behind a machine. This is the job of DeepSORT.</p>
+
   <div class="img-block">
-    <img src="img/deepsort-tracking.jpg" alt="DeepSORT tracking">
-    <div class="img-caption">DeepSORT maintains persistent IDs (numbers above bounding boxes) even as people move, overlap, and temporarily disappear.</div>
+    <img src="img/deepsort-tracking.jpg" alt="DeepSORT multi-person tracking">
+    <div class="img-caption">DeepSORT in action — each person gets a persistent numbered ID that follows them across frames, even through occlusion.</div>
   </div>
-  <p>DeepSORT combines two techniques: a <strong>Kalman filter</strong> that predicts where a bounding box will be in the next frame based on its current velocity, and a <strong>deep appearance descriptor</strong> (a small neural network) that extracts a visual fingerprint from the person's appearance. When a person is temporarily occluded by a pillar or another person, DeepSORT can re-identify them when they reappear.</p>
+
+  <h3>How DeepSORT Works</h3>
+  <p>DeepSORT (Deep Simple Online and Realtime Tracking) combines two things: a <strong>Kalman filter</strong> that predicts where a person will be in the next frame based on their current velocity, and a <strong>deep appearance descriptor</strong> — a neural network that generates a visual fingerprint of each person based on their clothing, body shape, and colour. When YOLO detects people in a new frame, DeepSORT matches each detection to an existing tracked person using both their predicted position and their appearance.</p>
+
+  <div class="img-block">
+    <img src="img/deepsort-architecture.jpg" alt="DeepSORT architecture diagram">
+    <div class="img-caption">The DeepSORT architecture: YOLO detections feed into the Kalman filter predictor and appearance matcher, which together assign persistent IDs.</div>
+  </div>
+
+  <h3>The Tracking ID Problem</h3>
+  <p>Every person who enters the camera frame gets assigned a tracking ID — for example, "Person 42". This ID is maintained even when the person is briefly occluded (hidden behind a machine or another person). If someone disappears for more than ~2 seconds, DeepSORT holds the ID in a "lost" state. If they reappear in a similar location with a similar appearance, the same ID is reassigned. If too much time passes, the ID is retired and a new one issued when they reappear.</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Phase 1 — Single Camera</div>
+      <p>With one camera covering a small zone, tracking is straightforward. Each person stays in frame for their entire workout. ID persistence is high. The Kalman filter handles brief occlusions easily.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Phase 3 — Multi-Camera</div>
+      <p>When a person walks from one camera zone to another, they get a new tracking ID in the new camera. We solve this with cross-camera re-identification — matching appearance descriptors between cameras to link the two IDs to the same person.</p>
+    </div>
+  </div>
+
+  <div class="img-block">
+    <img src="img/person-reid-tracking.jpg" alt="Person re-identification across cameras">
+    <div class="img-caption">Person re-identification: the same person is matched across multiple camera views using their appearance embedding, linking tracking IDs between zones.</div>
+  </div>
+
+  <h3>What the System Knows About Each Person</h3>
+  <p>At any given moment, DeepSORT maintains a live record for every tracked person on the floor: their current bounding box position, their velocity vector (direction and speed of movement), their appearance embedding, the machine zone they are currently in, and how long they have been there. This structured data is what the downstream AI models — pose estimation, rep counting, face recognition — operate on.</p>
+
+  <div class="callout info">
+    <div class="ct">Phase 1 Goal</div>
+    <p>Reliably track 4–6 people simultaneously in a single camera zone with no ID switches during a normal workout. An ID switch (where the system confuses two people) is the primary failure mode to eliminate first.</p>
+  </div>
+
   <div class="code-toggle">
-      <button class="code-toggle-btn" onclick="toggleCode(this)">
-        <span>&#128196;&nbsp; deepsort_tracking.py</span>
-        <span class="ct-arr">&#9660;</span>
-      </button>
-      <div class="code-toggle-body">
+    <button class="code-toggle-btn" onclick="toggleCode(this)">
+      <span>&#128196;&nbsp; deepsort_tracking.py</span>
+      <span class="ct-arr">&#9660;</span>
+    </button>
+    <div class="code-toggle-body">
 <div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">deepsort_tracking.py</span></div>
     <pre><span class="kw">from</span> deep_sort_realtime.deepsort_tracker <span class="kw">import</span> DeepSort
-
-tracker = DeepSort(
-    max_age=<span class="nm">30</span>,    <span class="cm"># Keep track alive for 30 frames after last detection</span>
-    n_init=<span class="nm">3</span>,     <span class="cm"># Require 3 consecutive detections to confirm a track</span>
-    nn_budget=<span class="nm">100</span> <span class="cm"># Max appearance descriptors to store per track</span>
-)
-
-detections = []
-<span class="kw">for</span> box <span class="kw">in</span> yolo_results[<span class="nm">0</span>].boxes:
-    x1, y1, x2, y2 = box.xyxy[<span class="nm">0</span>].tolist()
-    conf = box.conf[<span class="nm">0</span>].item()
-    detections.append(([x1, y1, x2-x1, y2-y1], conf, <span class="st">'person'</span>))
-
-tracks = tracker.update_tracks(detections, frame=frame)
-
-<span class="kw">for</span> track <span class="kw">in</span> tracks:
-    <span class="kw">if not</span> track.is_confirmed():
-        <span class="kw">continue</span>
-    track_id = track.track_id  <span class="cm"># Persistent ID, e.g., 42</span>
-    bbox = track.to_ltrb()     <span class="cm"># Left, Top, Right, Bottom</span></pre>
+tracker = DeepSort(max_age=<span class="nm">30</span>, n_init=<span class="nm">3</span>, nms_max_overlap=<span class="nm">1.0</span>)
+<span class="kw">def</span> <span class="fn">track_people</span>(frame, yolo_detections):
+    <span class="cm"># Convert YOLO boxes to DeepSORT format: [x1,y1,w,h,conf]</span>
+    bbs = [[*det[<span class="st">'bbox'</span>], det[<span class="st">'conf'</span>]] <span class="kw">for</span> det <span class="kw">in</span> yolo_detections]
+    tracks = tracker.update_tracks(bbs, frame=frame)
+    results = []
+    <span class="kw">for</span> track <span class="kw">in</span> tracks:
+        <span class="kw">if not</span> track.is_confirmed(): <span class="kw">continue</span>
+        results.append({
+            <span class="st">'id'</span>: track.track_id,
+            <span class="st">'bbox'</span>: track.to_ltrb(),
+            <span class="st">'zone'</span>: get_machine_zone(track.to_ltrb())
+        })
+    <span class="kw">return</span> results</pre>
   </div>
-      </div>
     </div>
-  <div class="img-block">
-    <img src="img/deepsort-pipeline.jpg" alt="DeepSORT pipeline">
-    <div class="img-caption">The DeepSORT pipeline: detection then feature extraction then Kalman prediction then Hungarian algorithm assignment.</div>
   </div>
 </section>
-
 <section class="section" id="movenet">
-  <div class="section-tag">Section 12 — Software</div>
-  <h2>MoveNet <em>Pose Estimation</em></h2>
-  <p class="lead">Once we have a tracked bounding box, we crop that region of the frame and send it to MoveNet — Google's ultra-fast pose estimation model. MoveNet identifies the (x, y, confidence) coordinates of 17 key body joints.</p>
+  <div class="section-tag">Section 12 — Deep Dive</div>
+  <h2>Pose <em>Estimation</em></h2>
+  <p class="lead">Once we know <em>who</em> is in the frame and <em>where</em> they are, we need to understand what their body is doing. Pose estimation maps 17 key joints — from nose to ankles — onto each tracked person, giving us a real-time skeleton we can analyse for movement patterns.</p>
+
   <div class="img-block">
-    <img src="img/movenet-keypoints.png" alt="MoveNet 17 keypoints">
-    <div class="img-caption">The 17 keypoints MoveNet detects: nose, eyes, ears, shoulders, elbows, wrists, hips, knees, and ankles.</div>
+    <img src="img/pose-squat-skeleton.png" alt="Pose estimation on barbell squat">
+    <div class="img-caption">MoveNet maps 17 body keypoints onto a person performing a barbell squat — shoulders, elbows, wrists, hips, knees, and ankles are all tracked in real time.</div>
   </div>
+
+  <h3>The 17 Keypoints</h3>
+  <p>MoveNet outputs 17 (x, y, confidence) coordinates per person, per frame. These cover the full body: nose, left/right eye, left/right ear, left/right shoulder, left/right elbow, left/right wrist, left/right hip, left/right knee, and left/right ankle. From these 17 points, we can calculate any joint angle in the body.</p>
+
   <div class="img-block">
-    <img src="img/pose-fitness-ai.jpg" alt="Pose estimation in gym">
-    <div class="img-caption">Pose estimation overlaid on a person exercising — joint positions are used to calculate depth, range of motion, and rep completion.</div>
+    <img src="img/movenet-keypoint-diagram.png" alt="MoveNet 17 keypoint diagram">
+    <div class="img-caption">The 17 keypoints MoveNet tracks — numbered 0–16, covering the full body from nose to ankles.</div>
   </div>
+
+  <h3>Calculating Joint Angles</h3>
+  <p>The raw keypoints are just pixel coordinates. The real value comes from calculating the angles between joints. For a bicep curl, we calculate the angle at the elbow — the angle formed by the shoulder, elbow, and wrist keypoints. A fully extended arm is ~170 degrees. A fully contracted curl is ~30 degrees. The transition from high to low to high is one rep.</p>
+
+  <div class="img-block">
+    <img src="img/pose-multi-person.png" alt="Pose estimation multi-person">
+    <div class="img-caption">Pose estimation running on multiple people simultaneously — each person gets their own independent skeleton overlay.</div>
+  </div>
+
+  <h3>Why Camera Angle Matters for Pose</h3>
+  <p>MoveNet was trained primarily on side-on and front-on views of people. A pure top-down (bird's eye) view — where you are looking straight down at someone's head — makes pose estimation unreliable because limbs overlap and the model cannot distinguish left from right. Our ceiling cameras are mounted with a <strong>10–20 degree forward tilt</strong> from vertical. This gives a clear view of the body from above-and-slightly-in-front, which is the sweet spot for both pose accuracy and machine coverage.</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">MoveNet Lightning</div>
+      <p>The fast variant — runs at 50+ FPS on a GPU. Lower accuracy on complex poses. Used in Phase 1 where speed matters more than precision. Runs comfortably on a Mac Mini M4.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">MoveNet Thunder</div>
+      <p>The accurate variant — runs at ~30 FPS. Higher accuracy on difficult poses (squats, deadlifts, complex movements). Used in Phase 2+ when we have GPU server capacity.</p>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="ct">Key Insight</div>
+    <p>Pose estimation does not need to run on every frame. Running it at 15 FPS (every other frame) is sufficient for rep counting and gives us headroom to process more cameras simultaneously. The LSTM model handles the temporal smoothing.</p>
+  </div>
+
   <div class="code-toggle">
-      <button class="code-toggle-btn" onclick="toggleCode(this)">
-        <span>&#128196;&nbsp; movenet_inference.py</span>
-        <span class="ct-arr">&#9660;</span>
-      </button>
-      <div class="code-toggle-body">
+    <button class="code-toggle-btn" onclick="toggleCode(this)">
+      <span>&#128196;&nbsp; movenet_inference.py</span>
+      <span class="ct-arr">&#9660;</span>
+    </button>
+    <div class="code-toggle-body">
 <div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">movenet_inference.py</span></div>
     <pre><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
 <span class="kw">import</span> numpy <span class="kw">as</span> np
-
-interpreter = tf.lite.Interpreter(model_path=<span class="st">"movenet_lightning.tflite"</span>)
-interpreter.allocate_tensors()
-
-<span class="kw">def</span> <span class="fn">run_movenet</span>(person_crop):
+model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
+<span class="kw">def</span> <span class="fn">get_keypoints</span>(person_crop):
     img = tf.image.resize_with_pad(person_crop, <span class="nm">192</span>, <span class="nm">192</span>)
     img = tf.cast(img, dtype=tf.int32)
-    interpreter.set_tensor(input_details[<span class="nm">0</span>][<span class="st">'index'</span>], img.numpy()[np.newaxis])
-    interpreter.invoke()
-    <span class="cm"># Output: [y, x, confidence] for each of 17 keypoints</span>
-    <span class="kw">return</span> interpreter.get_tensor(output_details[<span class="nm">0</span>][<span class="st">'index'</span>])[<span class="nm">0</span>][<span class="nm">0</span>]
-
-<span class="kw">def</span> <span class="fn">calc_angle</span>(a, b, c):
-    <span class="cm"># a=shoulder, b=elbow, c=wrist -- calculates elbow angle</span>
-    ba = a - b
-    bc = c - b
+    outputs = model.signatures[<span class="st">'serving_default'</span>](input=tf.expand_dims(img, <span class="nm">0</span>))
+    keypoints = outputs[<span class="st">'output_0'</span>].numpy()[<span class="nm">0</span>][<span class="nm">0</span>]  <span class="cm"># shape: [17, 3]</span>
+    <span class="kw">return</span> keypoints  <span class="cm"># [y, x, confidence] for each of 17 joints</span>
+<span class="kw">def</span> <span class="fn">calculate_angle</span>(a, b, c):
+    <span class="cm"># Angle at joint b, formed by points a-b-c</span>
+    ba = np.array(a) - np.array(b)
+    bc = np.array(c) - np.array(b)
     cosine = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
     <span class="kw">return</span> np.degrees(np.arccos(np.clip(cosine, -<span class="nm">1.0</span>, <span class="nm">1.0</span>)))</pre>
   </div>
-      </div>
     </div>
-</section>
-
-<section class="section" id="lstm">
-  <div class="section-tag">Section 13 — Software</div>
-  <h2>LSTM <em>Rep Counter</em></h2>
-  <p class="lead">Knowing the joint positions in a single frame is not enough to count reps. A rep is a temporal event — it happens over time. We need to look at a sequence of frames and recognise the pattern of movement that constitutes a completed repetition.</p>
-  <div class="img-block">
-    <img src="img/lstm-diagram.png" alt="LSTM diagram">
-    <div class="img-caption">An LSTM processes sequences of data, maintaining a memory of previous inputs — perfect for recognising movement patterns over time.</div>
   </div>
-  <p>We use an LSTM (Long Short-Term Memory) neural network, a type of recurrent network designed specifically for sequential data. We feed it a sliding window of the last 30 frames (1 second at 30 FPS) of joint angle data, and it outputs a probability that a rep just completed.</p>
+</section>
+<section class="section" id="lstm">
+  <div class="section-tag">Section 13 — Deep Dive</div>
+  <h2>Rep <em>Counting</em></h2>
+  <p class="lead">A rep is not a single frame — it is a movement pattern that unfolds over time. The LSTM (Long Short-Term Memory) network watches the sequence of joint angles across many frames and learns to recognise the rhythmic pattern of a completed repetition.</p>
+
+  <div class="img-block">
+    <img src="img/joint-angle-graph.png" alt="Joint angle graph over time">
+    <div class="img-caption">Joint angles plotted over time during a set of exercises — each wave is one rep. The LSTM learns to detect these waveforms and count them.</div>
+  </div>
+
+  <h3>From Keypoints to Rep Count</h3>
+  <p>Every 15 frames (roughly 0.5 seconds at 30 FPS), we take the current joint angles for a tracked person and add them to a rolling window of the last 30 readings — representing the last ~15 seconds of movement. The LSTM processes this sequence and outputs a probability that a rep has just been completed. When that probability crosses a threshold, we increment the rep counter.</p>
+
+  <div class="img-block">
+    <img src="img/lstm-diagram.png" alt="LSTM sequence model diagram">
+    <div class="img-caption">The LSTM processes a sequence of joint angle readings over time, learning the temporal pattern of a rep — the down phase, the transition, and the up phase.</div>
+  </div>
+
+  <h3>Exercise Classification First</h3>
+  <p>Before we can count reps, we need to know what exercise the person is doing. We train a separate classifier that takes the current pose and machine zone and outputs an exercise label: "bench press", "lat pulldown", "bicep curl", etc. This classification determines which joint angles the LSTM should focus on — for a bench press it watches elbow angle; for a squat it watches knee and hip angle.</p>
+
+  <div class="img-block">
+    <img src="img/elbow-angle-waveform.png" alt="Elbow angle waveform during curl">
+    <div class="img-caption">Elbow angle during a bicep curl set — the regular oscillation between ~170 degrees (extended) and ~30 degrees (contracted) is the rep signal the LSTM learns to count.</div>
+  </div>
+
+  <h3>Handling Partial Reps and Pauses</h3>
+  <p>Real gym-goers do not perform perfect textbook reps. They pause mid-set, they do partial reps, they rest between sets. The LSTM handles this naturally because it is a sequence model — it only fires when it sees a complete movement pattern, not just any movement. A partial rep does not trigger a count. A pause between sets does not trigger a count. Only a full range-of-motion movement matching the learned pattern counts.</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Phase 1 — Pre-trained Models</div>
+      <p>We start with pre-trained LSTM models from academic research (e.g., the RepCount dataset). These work reasonably well out of the box for common exercises like squats, curls, and bench press.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Phase 3 — Fine-tuned on Our Data</div>
+      <p>Once we have collected real workout data from the gym, we fine-tune the LSTM on our specific equipment, camera angles, and member movement patterns. This dramatically improves accuracy.</p>
+    </div>
+  </div>
+
+  <div class="callout warning">
+    <div class="ct">The Hard Problem</div>
+    <p>The most difficult exercises to count are compound movements like deadlifts and rows, where multiple joints move simultaneously and the movement pattern varies significantly between people. These will be tackled in Phase 2 after the simpler isolation exercises are working reliably.</p>
+  </div>
+
   <div class="code-toggle">
-      <button class="code-toggle-btn" onclick="toggleCode(this)">
-        <span>&#128196;&nbsp; lstm_rep_counter.py</span>
-        <span class="ct-arr">&#9660;</span>
-      </button>
-      <div class="code-toggle-body">
+    <button class="code-toggle-btn" onclick="toggleCode(this)">
+      <span>&#128196;&nbsp; lstm_rep_counter.py</span>
+      <span class="ct-arr">&#9660;</span>
+    </button>
+    <div class="code-toggle-body">
 <div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">lstm_rep_counter.py</span></div>
     <pre><span class="kw">import</span> torch
-<span class="kw">import</span> torch.nn <span class="kw">as</span> nn
-
-<span class="kw">class</span> <span class="fn">RepCounterLSTM</span>(nn.Module):
-    <span class="kw">def</span> <span class="fn">__init__</span>(self):
-        super().__init__()
-        <span class="cm"># Input: 17 keypoints x 3 values (x, y, conf) = 51 features</span>
-        self.lstm = nn.LSTM(
-            input_size=<span class="nm">51</span>,
-            hidden_size=<span class="nm">128</span>,
-            num_layers=<span class="nm">2</span>,
-            batch_first=<span class="kw">True</span>,
-            dropout=<span class="nm">0.3</span>
-        )
-        self.classifier = nn.Sequential(
-            nn.Linear(<span class="nm">128</span>, <span class="nm">64</span>),
-            nn.ReLU(),
-            nn.Linear(<span class="nm">64</span>, <span class="nm">1</span>),
-            nn.Sigmoid()  <span class="cm"># Output: 0-1 probability of rep completion</span>
-        )
-    
-    <span class="kw">def</span> <span class="fn">forward</span>(self, x):
-        <span class="cm"># x shape: (batch, 30 frames, 51 features)</span>
-        lstm_out, _ = self.lstm(x)
-        <span class="kw">return</span> self.classifier(lstm_out[:, -<span class="nm">1</span>, :])</pre>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> collections <span class="kw">import</span> deque
+<span class="kw">class</span> <span class="fn">RepCounter</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, window=<span class="nm">30</span>):
+        self.window = deque(maxlen=window)
+        self.model = torch.load(<span class="st">'rep_counter_lstm.pt'</span>)
+        self.rep_count = <span class="nm">0</span>
+        self.in_rep = <span class="kw">False</span>
+    <span class="kw">def</span> <span class="fn">update</span>(self, joint_angles):
+        self.window.append(joint_angles)
+        <span class="kw">if</span> len(self.window) &lt; <span class="nm">30</span>: <span class="kw">return</span> self.rep_count
+        seq = torch.tensor(np.array(self.window), dtype=torch.float32)
+        prob = self.model(seq.unsqueeze(<span class="nm">0</span>)).item()
+        <span class="kw">if</span> prob &gt; <span class="nm">0.8</span> <span class="kw">and not</span> self.in_rep:
+            self.rep_count += <span class="nm">1</span>
+            self.in_rep = <span class="kw">True</span>
+        <span class="kw">elif</span> prob &lt; <span class="nm">0.3</span>:
+            self.in_rep = <span class="kw">False</span>
+        <span class="kw">return</span> self.rep_count</pre>
   </div>
-      </div>
     </div>
-</section>
-
-<section class="section" id="faceid">
-  <div class="section-tag">Section 14 — Software</div>
-  <h2>Face <em>Embeddings</em></h2>
-  <p class="lead">At this point, the system knows that "Person ID 42" did 10 reps of bench press. But who is Person 42? We use face recognition to link the anonymous tracking ID to a registered gym member.</p>
-  <div class="img-block">
-    <img src="img/face-embedding-pipeline.jpeg" alt="Face embedding pipeline">
-    <div class="img-caption">The face recognition pipeline: detect face then extract 512-dim embedding then compare to database then identify member.</div>
   </div>
-  <p>We use FaceNet (or its successor, ArcFace) to extract a 512-dimensional numerical vector — called an embedding — from a person's face. This vector uniquely describes the geometry of their face. Two photos of the same person will produce very similar vectors; two different people will produce very different vectors.</p>
+</section>
+<section class="section" id="faceid">
+  <div class="section-tag">Section 14 — Deep Dive</div>
+  <h2>Face <em>Recognition</em></h2>
+  <p class="lead">DeepSORT gives every person an anonymous tracking ID. Face recognition is what converts that anonymous ID into a real member profile. Once we know who someone is, every rep they do gets logged to their account automatically.</p>
+
+  <div class="img-block">
+    <img src="img/face-recognition-pipeline.png" alt="Face recognition pipeline">
+    <div class="img-caption">The face recognition pipeline: detect the face region, align it, extract a 512-dimensional embedding vector, then compare against the member database to find the closest match.</div>
+  </div>
+
+  <h3>How Face Embeddings Work</h3>
+  <p>We use <strong>ArcFace</strong> (or FaceNet) — a deep neural network that takes a cropped, aligned face image and outputs a 512-dimensional vector of numbers. This vector is called an <em>embedding</em>. It encodes the geometry of the face — the distances between eyes, the shape of the jawline, the proportions of the nose — in a way that is consistent across different lighting conditions, angles, and expressions.</p>
+
+  <div class="img-block">
+    <img src="img/face-embedding-process.jpg" alt="Face embedding extraction process">
+    <div class="img-caption">The embedding extraction process: the face is detected, cropped, normalised to a standard size and orientation, then passed through the neural network to produce the 512-dim vector.</div>
+  </div>
+
+  <h3>Member Registration</h3>
+  <p>When a new member joins the gym, we capture 5–10 photos of their face from slightly different angles using a tablet at the front desk. Each photo is processed through ArcFace to produce an embedding. These embeddings are averaged and stored in the PostgreSQL database alongside the member's profile. This registration process takes about 30 seconds.</p>
+
+  <div class="img-block">
+    <img src="img/face-recognition.webp" alt="Face recognition in action">
+    <div class="img-caption">Face recognition in action — each detected face is matched against the member database and labelled with the member's name and confidence score.</div>
+  </div>
+
+  <h3>Matching at the Door vs. Matching on the Floor</h3>
+  <p>We use face recognition in two contexts. At the <strong>entry point</strong> — when a member walks through the door — we get a clean, well-lit, front-on face shot that gives us a high-confidence identification. We then link their tracking ID to their profile for the rest of their session. On the <strong>gym floor</strong>, faces are often at odd angles, partially occluded, or far from the camera. Floor-based recognition is used as a secondary confirmation, not the primary identification method.</p>
+
+  <div class="two-col">
+    <div class="col-card">
+      <div class="col-card-title">Privacy Approach</div>
+      <p>Face embeddings are stored as numerical vectors, not photos. The original photos are deleted after registration. A vector alone cannot be reverse-engineered back into a face image. Members can request deletion of their embedding at any time.</p>
+    </div>
+    <div class="col-card">
+      <div class="col-card-title">Confidence Threshold</div>
+      <p>We only log a workout to a member's profile if the face match confidence exceeds 92%. Below this threshold, the workout is logged as "unidentified session" and can be manually claimed by the member later via the app.</p>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="ct">Phase 1 Simplification</div>
+    <p>In Phase 1, we skip real-time face recognition entirely. Instead, members check in at a kiosk when they arrive and are manually assigned a tracking ID. This lets us validate the rep counting and weight detection without the complexity of face matching.</p>
+  </div>
+
   <div class="code-toggle">
-      <button class="code-toggle-btn" onclick="toggleCode(this)">
-        <span>&#128196;&nbsp; face_recognition.py</span>
-        <span class="ct-arr">&#9660;</span>
-      </button>
-      <div class="code-toggle-body">
+    <button class="code-toggle-btn" onclick="toggleCode(this)">
+      <span>&#128196;&nbsp; face_recognition.py</span>
+      <span class="ct-arr">&#9660;</span>
+    </button>
+    <div class="code-toggle-body">
 <div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">face_recognition.py</span></div>
     <pre><span class="kw">import</span> face_recognition
 <span class="kw">import</span> numpy <span class="kw">as</span> np
-
 <span class="kw">def</span> <span class="fn">enrol_member</span>(member_id, face_image):
     encoding = face_recognition.face_encodings(face_image)[<span class="nm">0</span>]
     db.store_face_embedding(member_id, encoding.tolist())
-
 <span class="kw">def</span> <span class="fn">identify_person</span>(face_crop, known_embeddings, member_ids):
     unknown_encoding = face_recognition.face_encodings(face_crop)[<span class="nm">0</span>]
     distances = face_recognition.face_distance(known_embeddings, unknown_encoding)
     best_match_idx = np.argmin(distances)
-    <span class="cm"># Threshold: 0.45 = ~95% confidence</span>
     <span class="kw">if</span> distances[best_match_idx] &lt; <span class="nm">0.45</span>:
         <span class="kw">return</span> member_ids[best_match_idx]
-    <span class="kw">return</span> <span class="kw">None</span>  <span class="cm"># Unknown person</span></pre>
+    <span class="kw">return</span> <span class="kw">None</span></pre>
   </div>
-      </div>
     </div>
-  <div class="img-block">
-    <img src="img/face-recognition.webp" alt="Face recognition">
-    <div class="img-caption">Face recognition in action — each face gets a bounding box and is matched against the member database.</div>
   </div>
 </section>
-
 <section class="section" id="weight">
-  <div class="section-tag">Section 15 — Software</div>
+  <div class="section-tag">Section 15 — Deep Dive</div>
   <h2>Weight <em>Detection</em></h2>
-  <p class="lead">Counting reps is only half the story. To make the workout log genuinely useful, we need to know the weight. For cable machines and stack-based machines, we detect the position of the weight selector pin using computer vision.</p>
+  <p class="lead">Counting reps is only half the story. A workout log without the weight is almost useless. We detect weight in two completely different ways depending on the equipment: <strong>colour-coded plate recognition</strong> for barbells and dumbbells, and <strong>pin position detection</strong> for cable and stack machines.</p>
+
+  <h3>Method 1: Colour-Coded Plate Recognition</h3>
+  <p>The International Weightlifting Federation (IWF) standardised a colour coding system for Olympic weight plates that is now used in virtually every commercial gym worldwide. The colours are internationally consistent: <strong>red = 25kg</strong>, <strong>blue = 20kg</strong>, <strong>yellow = 15kg</strong>, <strong>green = 10kg</strong>, <strong>white = 5kg</strong>. Smaller fractional plates follow the same colour pattern at smaller sizes.</p>
+
   <div class="img-block">
-    <img src="img/weight-stack-pin.jpg" alt="Weight stack pin">
-    <div class="img-caption">The weight selector pin — our camera reads its position to determine the weight being lifted.</div>
+    <img src="img/plate-colour-chart.png" alt="Olympic plate colour coding chart">
+    <div class="img-caption">The IWF standard colour coding for Olympic weight plates — the same system used in every commercial gym worldwide. Red = 25kg, Blue = 20kg, Yellow = 15kg, Green = 10kg, White = 5kg.</div>
   </div>
-  <p>The weight stack has numbered plates. The pin is inserted between plates to select the weight. From above, the camera can see which plate the pin is in. We train a custom YOLO model on images of weight stacks to detect the pin position and read the number on the selected plate using OCR.</p>
+
+  <div class="img-block">
+    <img src="img/colour-bumper-plates.png" alt="Colour coded bumper plates on a barbell">
+    <div class="img-caption">A loaded barbell with IWF colour-coded bumper plates — from the camera above, we can see the outermost plate on each side of the bar and read the total weight.</div>
+  </div>
+
+  <h3>How the Camera Reads Plate Colours</h3>
+  <p>From the overhead camera, we can see the barbell from above. The outermost plate on each side of the bar is visible as a coloured ring. We crop the region around the barbell, run a colour segmentation model to identify the dominant colour of the outermost plate, and look up the corresponding weight. Since plates are always loaded symmetrically, we read one side and double it, then add the bar weight (20kg for a standard Olympic bar).</p>
+
+  <div class="img-block">
+    <img src="img/yolo-detection.png" alt="YOLO detection on barbell plates">
+    <div class="img-caption">YOLO detecting and classifying the coloured plates on a loaded barbell — each plate gets a bounding box and a colour/weight classification label.</div>
+  </div>
+
+  <h3>Method 2: Weight Stack Pin Detection</h3>
+  <p>Cable machines and selectorised machines use a numbered weight stack with a selector pin. The pin is inserted between two plates to select the weight. From above, the camera can see the top of the weight stack and identify which gap the pin is in. We train a custom YOLO model on images of weight stacks to detect the pin position, then use OCR to read the number printed on the selected plate.</p>
+
+  <div class="img-block">
+    <img src="img/weight-stack-closeup.jpg" alt="Weight stack numbered plates close-up">
+    <div class="img-caption">The numbered weight stack on a cable machine — the selector pin is visible between two plates. The camera reads the number on the plate immediately above the pin to determine the selected weight.</div>
+  </div>
+
+  <div class="img-block">
+    <img src="img/weight-stack-numbered.jpg" alt="Weight stack with coloured position markers">
+    <div class="img-caption">Some weight stacks include coloured position markers alongside the numbers — a secondary visual signal that makes pin detection more reliable in low-contrast lighting conditions.</div>
+  </div>
+
+  <h3>Colour Strip Enhancement (Our Innovation)</h3>
+  <p>Standard weight stacks have black plates with white numbers — low contrast and difficult to read from above in variable gym lighting. Our plan is to apply a <strong>colour-coded adhesive strip</strong> to each plate position on the weight stack, using the same IWF colour system. This gives the camera a large, high-contrast colour signal to detect instead of trying to read small white numbers on black plates. A red strip at the 50kg position, a blue strip at the 40kg position, and so on. The camera reads the colour of the strip immediately above the pin.</p>
+
+  <div class="callout info">
+    <div class="ct">Phase 1 Approach</div>
+    <p>In Phase 1, we focus on a single cable machine with the colour strip system applied. We train a simple colour classifier (not even a neural network — just HSV colour thresholding) to identify which strip is at the pin position. This is the fastest path to a working weight detection demo.</p>
+  </div>
+
+  <table class="spec-table">
+    <thead><tr><th>Equipment Type</th><th>Detection Method</th><th>Accuracy Target</th><th>Phase</th></tr></thead>
+    <tbody>
+      <tr><td>Olympic Barbell</td><td>Plate colour recognition (YOLO + colour classifier)</td><td>&gt;95%</td><td>Phase 2</td></tr>
+      <tr><td>Cable Machine</td><td>Colour strip + pin position (HSV thresholding)</td><td>&gt;98%</td><td>Phase 1</td></tr>
+      <tr><td>Dumbbells</td><td>Colour band + weight label OCR</td><td>&gt;90%</td><td>Phase 2</td></tr>
+      <tr><td>Plate-loaded machines</td><td>Plate colour recognition (side camera)</td><td>&gt;92%</td><td>Phase 3</td></tr>
+    </tbody>
+  </table>
+
   <div class="code-toggle">
-      <button class="code-toggle-btn" onclick="toggleCode(this)">
-        <span>&#128196;&nbsp; weight_detection.py</span>
-        <span class="ct-arr">&#9660;</span>
-      </button>
-      <div class="code-toggle-body">
+    <button class="code-toggle-btn" onclick="toggleCode(this)">
+      <span>&#128196;&nbsp; weight_detection.py</span>
+      <span class="ct-arr">&#9660;</span>
+    </button>
+    <div class="code-toggle-body">
 <div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">weight_detection.py</span></div>
     <pre><span class="kw">import</span> cv2
-<span class="kw">import</span> pytesseract
-
-<span class="kw">def</span> <span class="fn">read_weight_stack</span>(stack_crop):
-    gray = cv2.cvtColor(stack_crop, cv2.COLOR_BGR2GRAY)
-    enhanced = cv2.equalizeHist(gray)
-    thresh = cv2.adaptiveThreshold(
-        enhanced, <span class="nm">255</span>,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY, <span class="nm">11</span>, <span class="nm">2</span>
-    )
-    text = pytesseract.image_to_string(
-        thresh,
-        config=<span class="st">'--psm 6 -c tessedit_char_whitelist=0123456789'</span>
-    )
-    <span class="kw">return</span> parse_weight(text)  <span class="cm"># Returns weight in kg</span></pre>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="cm"># IWF colour strip mapping (HSV ranges)</span>
+COLOUR_WEIGHTS = {
+    <span class="st">'red'</span>:    (<span class="nm">25</span>, [(<span class="nm">0</span>,<span class="nm">120</span>,<span class="nm">70</span>), (<span class="nm">10</span>,<span class="nm">255</span>,<span class="nm">255</span>)]),
+    <span class="st">'blue'</span>:   (<span class="nm">20</span>, [(<span class="nm">100</span>,<span class="nm">100</span>,<span class="nm">70</span>), (<span class="nm">130</span>,<span class="nm">255</span>,<span class="nm">255</span>)]),
+    <span class="st">'yellow'</span>: (<span class="nm">15</span>, [(<span class="nm">20</span>,<span class="nm">100</span>,<span class="nm">100</span>), (<span class="nm">35</span>,<span class="nm">255</span>,<span class="nm">255</span>)]),
+    <span class="st">'green'</span>:  (<span class="nm">10</span>, [(<span class="nm">40</span>,<span class="nm">50</span>,<span class="nm">50</span>), (<span class="nm">80</span>,<span class="nm">255</span>,<span class="nm">255</span>)]),
+    <span class="st">'white'</span>:  (<span class="nm">5</span>,  [(<span class="nm">0</span>,<span class="nm">0</span>,<span class="nm">200</span>), (<span class="nm">180</span>,<span class="nm">30</span>,<span class="nm">255</span>)]),
+}
+<span class="kw">def</span> <span class="fn">detect_plate_colour</span>(plate_crop):
+    hsv = cv2.cvtColor(plate_crop, cv2.COLOR_BGR2HSV)
+    best_colour, best_count = <span class="kw">None</span>, <span class="nm">0</span>
+    <span class="kw">for</span> colour, (weight, (lo, hi)) <span class="kw">in</span> COLOUR_WEIGHTS.items():
+        mask = cv2.inRange(hsv, np.array(lo), np.array(hi))
+        <span class="kw">if</span> mask.sum() &gt; best_count:
+            best_count, best_colour = mask.sum(), colour
+    <span class="kw">return</span> COLOUR_WEIGHTS[best_colour][<span class="nm">0</span>] <span class="kw">if</span> best_colour <span class="kw">else</span> <span class="kw">None</span></pre>
   </div>
-      </div>
     </div>
+  </div>
 </section>
-
 <section class="section" id="pipeline">
   <div class="section-tag">Section 16 — The Full System</div>
   <h2>The <em>46ms Pipeline</em></h2>
