@@ -1461,6 +1461,7 @@
       <li><a href="#new-developer">17. New Developer</a></li>
       <li><a href="#phase4-github">18. Phase 4</a></li>
       <li><a href="#troubleshooting">19. Troubleshooting</a></li>
+      <li><a href="#accounts-ownership">20. Accounts &amp; Ownership</a></li>
     </ul>
   </div>
 </nav>
@@ -1561,6 +1562,10 @@
       <a href="#troubleshooting" class="toc-item">
         <div class="toc-num">SECTION 19</div>
         <div class="toc-title">Troubleshooting — When Things Go Wrong</div>
+      </a>
+      <a href="#accounts-ownership" class="toc-item">
+        <div class="toc-num">SECTION 20</div>
+        <div class="toc-title">GitHub Accounts, Ownership &amp; Access Control</div>
       </a>
     </div>
   </div>
@@ -5355,6 +5360,522 @@
     </div>
 
   </div><!-- /section 19 -->
+
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 20 — ACCOUNTS, OWNERSHIP & ACCESS CONTROL
+  ════════════════════════════════════════════ -->
+  <div class="section" id="accounts-ownership">
+    <span class="section-number">Section 20</span>
+    <h2>GitHub Accounts, Ownership &amp; Access Control</h2>
+    <p class="section-subtitle">Who owns what, who can do what, and how to make sure this project stays under Matt's control — not just Donkey's.</p>
+
+    <div class="callout purple">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Read This Section Carefully</strong>
+        <p>This is one of the most important sections in the guide. Everything else is about understanding what GitHub is and how it works. This section is about making sure the project is genuinely yours — that you, Matt, have real control, not just assumed control.</p>
+      </div>
+    </div>
+
+    <!-- PART 1 -->
+    <h3>Part 1: The Two Accounts Explained</h3>
+
+    <p>Right now, there are two relevant GitHub identities for this project:</p>
+
+    <div class="callout info">
+      <span class="callout-icon">🐙</span>
+      <div class="callout-body">
+        <strong>XLDonkey — <a href="https://github.com/XLDonkey" style="color:var(--purple-lt);">github.com/XLDonkey</a></strong>
+        <p>This is the project's operational GitHub account. All code, all repos, and all GitHub Pages deployments live here. Donkey uses this account to commit code, push changes, and deploy the demo to the live URL. The SSH key and personal access token for this account are stored on the Mac Mini.</p>
+        <p style="margin-bottom:0;"><strong>Think of XLDonkey like the company's operations account</strong> — it does all the day-to-day work.</p>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">👤</span>
+      <div class="callout-body">
+        <strong>Matt's Personal GitHub Account — To Be Created</strong>
+        <p>This would be Matt's own GitHub identity. Once created and added as an Owner or Admin, Matt has full administrative control — can manage repos, add or remove collaborators, change settings, transfer repos, or take over completely if needed.</p>
+        <p style="margin-bottom:0;"><strong>Think of Matt's account like the managing director</strong> — oversight and ultimate authority, even if they don't touch the day-to-day work.</p>
+      </div>
+    </div>
+
+    <!-- PART 2 -->
+    <h3>Part 2: Why Matt Should Have His Own GitHub Account</h3>
+
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Ownership Protection</h4>
+          <p>Right now, the entire project lives inside the XLDonkey account which Donkey operates. If something happened — Donkey was unavailable, credentials were lost, or the arrangement changed — Matt would need access to take control. Without his own GitHub account linked as an admin, there's a real recovery risk. The code is safe, but access to manage it would be blocked.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Seeing Everything in Real Time</h4>
+          <p>With his own GitHub account added as a collaborator, Matt can log into <a href="https://github.com">github.com</a> and see every file in the repo, read every commit ever made (with timestamps and notes), see what's on the main branch vs the dev branch, and download any file directly from the browser. <strong>No technical knowledge required — it's just a website.</strong></p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Adding New Team Members Himself</h4>
+          <p>When a new developer joins, when Manus needs access, when a contractor needs to review the code — Matt can invite them directly through GitHub without needing to go through Donkey. Settings → Collaborators → Add people. Full control, zero dependency on Donkey for this action.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Transfer of Ownership</h4>
+          <p>If XL Fitness ever wanted to move the codebase to a proper company account (e.g. a GitHub Organisation like <code>github.com/XLFitnessAI</code>), Owner access is required to authorise the transfer. Without it, the repo stays tied to whoever controls XLDonkey. Matt having his own account and Owner-level access is the insurance policy.</p>
+        </div>
+      </li>
+    </ol>
+
+    <!-- PART 3 -->
+    <h3>Part 3: GitHub Account Types Explained</h3>
+
+    <p>GitHub has three types of accounts. Here's what each one is:</p>
+
+    <div class="callout info">
+      <span class="callout-icon">👤</span>
+      <div class="callout-body">
+        <strong>Personal Account (Free)</strong>
+        <p>An individual person's GitHub identity. You get a URL like <code>github.com/YourName</code>. Can own repos, create organisations, and be invited to other people's repos. Unlimited public and private repos. <strong>Cost: $0.</strong> This is what Matt would create for himself.</p>
+      </div>
+    </div>
+
+    <div class="callout purple">
+      <span class="callout-icon">🏢</span>
+      <div class="callout-body">
+        <strong>Organisation Account</strong>
+        <p>A shared account for a team or company. URL looks like <code>github.com/OrganisationName</code>. Members can be added with different permission levels. All repos belong to the organisation — not to any individual person. If a member leaves, the repos stay. Free tier: unlimited public repos with limited team features. Pro/Team tier: ~$4/month per member. <strong>Best for: companies where the codebase should outlive any individual contributor.</strong></p>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <span class="callout-icon">🏛️</span>
+      <div class="callout-body">
+        <strong>GitHub Enterprise</strong>
+        <p>For large organisations with on-premises or cloud-hosted infrastructure. Not relevant for XL Fitness at this stage.</p>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">✅</span>
+      <div class="callout-body">
+        <strong>Our Recommendation: Create a GitHub Organisation</strong>
+        <p>The professional structure for XL Fitness is a GitHub Organisation — something like <code>github.com/XLFitnessAI</code>. Here's how it would be set up:</p>
+        <ul>
+          <li><strong>Matt</strong> → Owner (full control, ultimate authority)</li>
+          <li><strong>XLDonkey</strong> → Admin member (needs full access to deploy and push code)</li>
+          <li><strong>Manus</strong> → Member with Write access (can push branches, open PRs)</li>
+          <li><strong>Future developers</strong> → Member with Write access</li>
+          <li><strong>External reviewers / investors</strong> → Read access</li>
+        </ul>
+        <p style="margin-bottom:0;">In this structure, the repos belong to the <strong>organisation</strong> — to XL Fitness as a company — not to any individual account. This is the correct long-term setup.</p>
+      </div>
+    </div>
+
+    <!-- PART 4 -->
+    <h3>Part 4: Permission Levels Explained</h3>
+
+    <p>When someone is added to a GitHub repo or organisation, they get assigned a permission level. Each level controls what they can and can't do. Here's the full breakdown:</p>
+
+    <div style="overflow-x:auto; margin: 28px 0;">
+      <table class="glossary-table" style="min-width:600px;">
+        <thead>
+          <tr>
+            <th>Permission Level</th>
+            <th style="text-align:center;">Read Code</th>
+            <th style="text-align:center;">Comment</th>
+            <th style="text-align:center;">Push Changes</th>
+            <th style="text-align:center;">Merge PRs</th>
+            <th style="text-align:center;">Manage Settings</th>
+            <th style="text-align:center;">Delete Repo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="term">Read</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">❌</td>
+            <td style="text-align:center;">❌</td>
+            <td style="text-align:center;">❌</td>
+            <td style="text-align:center;">❌</td>
+          </tr>
+          <tr>
+            <td class="term">Triage</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">❌</td>
+            <td style="text-align:center;">❌</td>
+            <td style="text-align:center;">❌</td>
+            <td style="text-align:center;">❌</td>
+          </tr>
+          <tr>
+            <td class="term">Write</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">❌</td>
+            <td style="text-align:center;">❌</td>
+            <td style="text-align:center;">❌</td>
+          </tr>
+          <tr>
+            <td class="term">Maintain</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">⚠️ Limited</td>
+            <td style="text-align:center;">❌</td>
+          </tr>
+          <tr>
+            <td class="term" style="color:var(--green);">Admin</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+            <td style="text-align:center;">✅</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Here's the recommended permission level for each person involved in the project:</p>
+
+    <ul>
+      <li><strong>Matt</strong> → <span style="color:var(--green);">Admin</span> — Full control over every aspect of the repo and organisation</li>
+      <li><strong>XLDonkey (Donkey)</strong> → <span style="color:var(--green);">Admin</span> — Needs full access to deploy, push code, and manage GitHub Pages</li>
+      <li><strong>Manus</strong> → <span style="color:var(--yellow);">Write</span> — Can push to their own branches and open PRs, can't change repo settings</li>
+      <li><strong>New developers</strong> → <span style="color:var(--yellow);">Write</span> — Can work on feature branches and open PRs</li>
+      <li><strong>External contractors / investors reviewing code</strong> → <span style="color:var(--blue-lt, #58a6ff);">Read</span> — Can see everything, can't change anything</li>
+    </ul>
+
+    <!-- PART 5 -->
+    <h3>Part 5: How to Set This Up — Step by Step</h3>
+
+    <p>Here's exactly what to do, in the right order:</p>
+
+    <h4 style="margin-top:28px; color:var(--purple-lt);">Step 1: Matt Creates a GitHub Personal Account</h4>
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Go to GitHub</h4>
+          <p>Open a browser and go to <a href="https://github.com">github.com</a>. Click <strong>"Sign up"</strong> in the top right corner.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Use a Professional Email</h4>
+          <p>Use Matt's XL Fitness email address (not personal Gmail). This keeps the account tied to the business, not a personal email that could change.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Choose a Username</h4>
+          <p>Suggested options: <code>MattXLFitness</code>, <code>XLFitnessAustralia</code>, or <code>MattMcArdle</code>. The username becomes part of your GitHub URL, so keep it professional.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Complete Verification and Done</h4>
+          <p>Follow the prompts, complete the email verification, and Matt now has his own GitHub account. The whole process takes about 3 minutes.</p>
+        </div>
+      </li>
+    </ol>
+
+    <h4 style="margin-top:36px; color:var(--purple-lt);">Step 2 (Option A): Add Matt to the Existing Repo as Admin</h4>
+    <p><em>Simpler and faster — good for immediate protection right now.</em></p>
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Open Repo Settings</h4>
+          <p>Donkey goes to: <a href="https://github.com/XLDonkey/gym-ai-system/settings/access">github.com/XLDonkey/gym-ai-system → Settings → Collaborators</a></p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Add Matt</h4>
+          <p>Click <strong>"Add people"</strong>. Enter Matt's GitHub username. Select <strong>"Admin"</strong> as the permission level.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Matt Accepts the Invitation</h4>
+          <p>Matt receives an email invitation from GitHub. He clicks "Accept invitation". Done — Matt now has full Admin access to the repo.</p>
+        </div>
+      </li>
+    </ol>
+
+    <h4 style="margin-top:36px; color:var(--purple-lt);">Step 3 (Option B): Create a GitHub Organisation (Recommended Long-Term)</h4>
+    <p><em>More professional — the correct structure for a real company codebase.</em></p>
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Matt Creates the Organisation</h4>
+          <p>Matt logs into his new GitHub account. Clicks the <strong>+</strong> icon in the top right → <strong>"New organisation"</strong>. Chooses a name like <code>XLFitnessAI</code> or <code>XLFitness-AI</code>. Selects the Free plan.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Add XLDonkey as an Admin Member</h4>
+          <p>From the organisation settings, Matt invites <code>XLDonkey</code> as a member and sets their role to <strong>Admin</strong>. This lets Donkey continue pushing code and managing deployments.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Transfer the Repo to the Organisation</h4>
+          <p>Go to the repo → <strong>Settings</strong> → scroll to the "Danger Zone" → <strong>"Transfer"</strong>. Enter the organisation name. Confirm. The repo is now at <code>github.com/XLFitnessAI/gym-ai-system</code>. GitHub automatically redirects the old URL, so nothing breaks immediately.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Update GitHub Pages URL</h4>
+          <p>After the transfer, the GitHub Pages URL changes to: <code>xlfitnessai.github.io/gym-ai-system/</code>. Donkey updates all internal links and the demo URL in the documentation.</p>
+        </div>
+      </li>
+    </ol>
+
+    <h4 style="margin-top:36px; color:var(--purple-lt);">Step 4: Add Manus</h4>
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Go to Collaborator Settings</h4>
+          <p>In the repo (or organisation): <strong>Settings → Collaborators and teams → Add people</strong>.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Add Manus with Write Access</h4>
+          <p>Enter Manus's GitHub username. Set permission to <strong>Write</strong>. They can now read all code, push to their own branches, and open pull requests — but can't touch settings or merge to main without approval.</p>
+        </div>
+      </li>
+    </ol>
+
+    <!-- PART 6 -->
+    <h3>Part 6: What Matt Can Do on GitHub (No Technical Knowledge Needed)</h3>
+
+    <p>Once Matt has his account and Admin access, here's what he can do directly on <a href="https://github.com">github.com</a> — no coding required, no terminal, just a browser:</p>
+
+    <div class="callout info">
+      <span class="callout-icon">📁</span>
+      <div class="callout-body">
+        <strong>Browse the Codebase</strong>
+        <p>Click through every folder and file in the repo. Read the documentation (the Bible, this guide, everything in <code>docs/</code>). Click on any HTML file and GitHub shows a link to the live GitHub Pages version. It's like browsing a file manager online.</p>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">📜</span>
+      <div class="callout-body">
+        <strong>Read the Full Commit History</strong>
+        <p>Go to: <a href="https://github.com/XLDonkey/gym-ai-system/commits/main" style="color:var(--purple-lt);">github.com/XLDonkey/gym-ai-system/commits/main</a></p>
+        <p>Every change ever made is listed — who made it, when, and what the commit message said. Click any commit to see a line-by-line diff of exactly what changed. Green lines were added, red lines were removed. This is the full audit trail.</p>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">🌿</span>
+      <div class="callout-body">
+        <strong>Check Branches — See Work in Progress</strong>
+        <p>At the top left of the file list, there's a branch dropdown (currently shows "main"). Click it, select "dev", and the entire file list updates to show what's on the dev branch — work in progress that hasn't been merged to main yet. Switch back to main at any time.</p>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">👥</span>
+      <div class="callout-body">
+        <strong>Add New Collaborators Yourself</strong>
+        <p>Settings → Collaborators → Add people. Enter anyone's GitHub username, choose their permission level, send the invite. You don't need Donkey for this. When a new developer joins the team, Matt can give them access directly.</p>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">⬇️</span>
+      <div class="callout-body">
+        <strong>Download Any File</strong>
+        <p>Click on any file in the repo. In the top right of the file view, click the download icon (or click "Raw" then right-click → Save Page As). Any document, any configuration file, any HTML page — downloadable directly from the browser.</p>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">📊</span>
+      <div class="callout-body">
+        <strong>See Repository Statistics</strong>
+        <p>Click the <strong>Insights</strong> tab in the repo (next to Settings). You'll find:</p>
+        <ul>
+          <li><strong>Traffic</strong> — how many people have viewed the repo and the live demo</li>
+          <li><strong>Contributors</strong> — who has made the most commits and when</li>
+          <li><strong>Code frequency</strong> — how much code was added or removed each week</li>
+          <li><strong>Commits</strong> — commit volume over time, showing development activity</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">🏷️</span>
+      <div class="callout-body">
+        <strong>Create Releases — Milestone Checkpoints</strong>
+        <p>When a major milestone is complete (Phase 1 done, Phase 2 done, ready for investor demo), Matt can create a GitHub Release. On the right sidebar of the repo, click <strong>"Create a new release"</strong>. Tag it with a version number like <code>v1.0.0</code> or <code>v2.0.0</code>. Add notes about what the release includes. This creates a permanent, named checkpoint in the project history — like a save point in a game.</p>
+      </div>
+    </div>
+
+    <!-- PART 7 -->
+    <h3>Part 7: The "Bus Factor" — What Happens If Donkey Is Unavailable</h3>
+
+    <div class="callout warning">
+      <span class="callout-icon">🚌</span>
+      <div class="callout-body">
+        <strong>What Is the "Bus Factor"?</strong>
+        <p>The "bus factor" is a software development term: how many people would need to be hit by a bus before the project is in serious trouble? A bus factor of 1 means the project depends entirely on one person. That's a risk. The goal is to raise it — so the project can survive any individual being unavailable.</p>
+      </div>
+    </div>
+
+    <p><strong>With the current setup (only XLDonkey account, no Matt admin access):</strong></p>
+    <ul>
+      <li>The code is still on GitHub — nothing is lost</li>
+      <li>But Matt can't access the account to make changes or add new developers</li>
+      <li>A new developer would need the XLDonkey credentials to push changes</li>
+      <li>Recovery is possible but requires locating credentials and potentially re-setting up the Mac Mini</li>
+    </ul>
+
+    <p><strong>With Matt having Admin access:</strong></p>
+    <ul>
+      <li>Matt can immediately add any new developer as a collaborator — no credentials needed from anyone</li>
+      <li>The new developer clones the repo and reads the documentation</li>
+      <li>All commit history, all decisions, all architecture documentation is preserved</li>
+      <li>The code is fully self-documenting — the Bible explains every decision and every system</li>
+    </ul>
+
+    <div class="callout success">
+      <span class="callout-icon">⏱️</span>
+      <div class="callout-body">
+        <strong>The 48-Hour Recovery Scenario</strong>
+        <p>If Donkey was suddenly unavailable, a skilled developer with access to the repo could:</p>
+        <ul>
+          <li><strong>Hours 1–4:</strong> Read the Bible, the Deep Dive, and this GitHub guide end-to-end</li>
+          <li><strong>Hours 4–8:</strong> Clone the repo, run the demo locally, understand the full architecture</li>
+          <li><strong>Hours 8–24:</strong> Make their first fix or feature change independently</li>
+          <li><strong>Hours 24–48:</strong> Operating and shipping changes fully independently</li>
+        </ul>
+        <p style="margin-bottom:0;">This is why documentation is treated as seriously as code. The Bible isn't just for stakeholders — it's the handover document. Every decision is written down. Every system is explained. The project can survive any individual.</p>
+      </div>
+    </div>
+
+    <!-- PART 8 -->
+    <h3>Part 8: Connecting Matt's Uploads to GitHub</h3>
+
+    <p>A common question: <em>"Can Matt upload videos or files directly to GitHub?"</em></p>
+
+    <div class="callout warning">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Not Recommended for Large Files</strong>
+        <p>GitHub repos are designed for code — text files, HTML, JSON, configuration, Markdown. Large binary files (videos, images over a few MB) cause real problems: they slow the repo down permanently, bloat the clone size for every developer, and eventually hit GitHub's storage limits (1GB soft limit, 5GB hard limit per repo). Once a large file is committed to history, it's surprisingly hard to remove cleanly.</p>
+      </div>
+    </div>
+
+    <p>Here's the right tool for each file type in the XL Fitness project:</p>
+
+    <div style="overflow-x:auto; margin: 28px 0;">
+      <table class="glossary-table" style="min-width:520px;">
+        <thead>
+          <tr>
+            <th>File Type</th>
+            <th>Where It Lives</th>
+            <th>Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="term">Code (HTML, JS, JSON, Python)</td>
+            <td class="plain">GitHub</td>
+            <td class="plain">Version controlled, deployable, belongs in the repo</td>
+          </tr>
+          <tr>
+            <td class="term">Documentation (HTML, Markdown)</td>
+            <td class="plain">GitHub</td>
+            <td class="plain">Lives alongside the code, versioned with it</td>
+          </tr>
+          <tr>
+            <td class="term">Gym photos (small JPGs under 1MB)</td>
+            <td class="plain">GitHub (<code>docs/images/</code>)</td>
+            <td class="plain">Small enough, used directly in HTML documents</td>
+          </tr>
+          <tr>
+            <td class="term">Training videos (MOV, MP4)</td>
+            <td class="plain">Google Drive</td>
+            <td class="plain">Too large for GitHub — processed locally then discarded</td>
+          </tr>
+          <tr>
+            <td class="term">Raw label JSON files</td>
+            <td class="plain">Google Drive → Mac Mini</td>
+            <td class="plain">Processed locally, results committed — raw files not needed in repo</td>
+          </tr>
+          <tr>
+            <td class="term">Trained model weights (if under 10MB)</td>
+            <td class="plain">GitHub</td>
+            <td class="plain">Small enough to include; larger models would need Git LFS or Drive</td>
+          </tr>
+          <tr>
+            <td class="term">Member face embeddings</td>
+            <td class="plain">Mac Mini only — never online</td>
+            <td class="plain">Sensitive biometric data — must stay local, never uploaded anywhere</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout success">
+      <span class="callout-icon">📱</span>
+      <div class="callout-body">
+        <strong>The Workflow Matt Uses Today — And It Already Works</strong>
+        <p>Matt doesn't need to touch GitHub directly for the training data workflow. Here's how it works:</p>
+        <ol style="margin:12px 0 0 0; padding-left: 20px;">
+          <li>Matt films a training video on his phone</li>
+          <li>Uploads the video to Google Drive</li>
+          <li>Shares the Google Drive link with Donkey via Telegram</li>
+          <li>Donkey downloads the video, processes it, extracts training data, and commits the results to GitHub</li>
+          <li>The updated model deploys automatically via GitHub Pages</li>
+        </ol>
+        <p style="margin-bottom:0; margin-top:12px;">Matt never needs to open GitHub, run a terminal, or touch any code for this to work. It all happens through Telegram.</p>
+      </div>
+    </div>
+
+    <div class="callout purple">
+      <span class="callout-icon">🎯</span>
+      <div class="callout-body">
+        <strong>Summary: The Three Actions Matt Should Take</strong>
+        <ol style="margin: 12px 0 0 0; padding-left: 20px;">
+          <li><strong>Create a GitHub personal account</strong> — takes 5 minutes, free, use the XL Fitness email</li>
+          <li><strong>Get added as Admin to the current repo</strong> — Donkey does this once Matt has a username</li>
+          <li><strong>Consider creating a GitHub Organisation</strong> — for long-term proper company structure (can do this later)</li>
+        </ol>
+        <p style="margin-bottom:0; margin-top:12px;">Steps 1 and 2 should happen now. Step 3 can happen when the project expands or when Matt is ready. The most important thing is that Matt has genuine access — not just assumed access — to the codebase his company is building.</p>
+      </div>
+    </div>
+
+  </div><!-- /section 20 -->
 
 
   <!-- ─────────────────────────────────────────────
