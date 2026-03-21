@@ -344,7 +344,7 @@
 <nav class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">XL Fitness</div>
-    <div class="brand-sub">AI Overseer — The Bible v10.0</div>
+    <div class="brand-sub">AI Overseer — The Bible v11.0</div>
   </div>
   <div class="nav-group">Chapter 1 — The Vision</div>
   <a class="nav-link" href="#vision">01 — What We're Building</a>
@@ -363,7 +363,7 @@
   <a class="nav-link" href="#colour-tracking">12 — Colour Marker Tracking</a>
   <a class="nav-link" href="#movenet">13 — Pose Estimation</a>
   <a class="nav-link" href="#lstm">14 — Rep Counting</a>
-  <a class="nav-link" href="#faceid">15 — Face Recognition</a>
+  <a class="nav-link" href="#faceid">15 — Member Identity</a>
   <a class="nav-link" href="#weight">16 — Weight Detection</a>
   <div class="nav-group">Chapter 4 — The Full System</div>
   <a class="nav-link" href="#pipeline">17 — The 46ms Pipeline</a>
@@ -1070,130 +1070,95 @@ results = model.predict(
 <section class="section" id="deepsort">
   <div class="section-tag">Section 11 — Deep Dive</div>
   <h2>People <em>Tracking</em></h2>
-  <p class="lead">Detecting a person in a single frame is easy. The hard problem is keeping track of the <em>same person</em> across hundreds of frames as they move around the gym, sit down, stand up, and occasionally walk behind a machine. This is the job of DeepSORT.</p>
+  <p class="lead">Members walk in wearing whatever they want. No wristbands, no QR codes, no app required. The system identifies them at the door when they tap their membership card, and then tracks them visually across the gym floor for the rest of their session.</p>
 
-  <div class="img-block">
-    <img src="img/deepsort-tracking.jpg" alt="DeepSORT multi-person tracking">
-    <div class="img-caption">DeepSORT in action — each person gets a persistent numbered ID that follows them across frames, even through occlusion.</div>
+  <h3>The Full Identification Flow</h3>
+  <p>The system works in three stages: a hard identification at the door, continuous visual tracking on the floor, and a soft confirmation fallback at each machine.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Stage</th><th>Where</th><th>How</th><th>Confidence</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1. Entry ID</strong></td><td>Front door reader</td><td>Member taps card / fob</td><td>100% — hard identity</td></tr>
+        <tr><td><strong>2. Visual Lock</strong></td><td>Entry camera</td><td>YOLO captures appearance at the moment of card tap</td><td>High — known person, known appearance</td></tr>
+        <tr><td><strong>3. Floor Tracking</strong></td><td>All cameras</td><td>DeepSORT tracks appearance + position continuously</td><td>95%+ in open space</td></tr>
+        <tr><td><strong>4. Machine Confirm</strong></td><td>Machine tablet</td><td>Tap card again if YOLO confidence drops below threshold</td><td>100% — hard identity reset</td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <h3>How DeepSORT Works</h3>
-  <p>DeepSORT (Deep Simple Online and Realtime Tracking) combines two things: a <strong>Kalman filter</strong> that predicts where a person will be in the next frame based on their current velocity, and a <strong>deep appearance descriptor</strong> — a neural network that generates a visual fingerprint of each person based on their clothing, body shape, and colour. When YOLO detects people in a new frame, DeepSORT matches each detection to an existing tracked person using both their predicted position and their appearance.</p>
+  <h3>Stage 1 — Card Tap at Entry</h3>
+  <p>When a member taps their card at the door, two things happen simultaneously. The access control system grants entry as normal. At the same moment, the entry camera (a dedicated camera pointed at the door) captures a clean image of the person walking in. YOLO detects the person in that frame and creates a new tracking record: <em>"Tracking ID #42 = John Smith, Member #1089."</em></p>
+  <p>This is the most important moment in the entire tracking pipeline. The card tap is the ground truth — we know with 100% certainty who just walked in. Everything after this is the system trying to maintain that certainty as the person moves around the gym.</p>
 
   <div class="img-block">
-    <img src="img/deepsort-architecture.jpg" alt="DeepSORT architecture diagram">
-    <div class="img-caption">The DeepSORT architecture: YOLO detections feed into the Kalman filter predictor and appearance matcher, which together assign persistent IDs.</div>
+    <img src="img/deepsort-architecture.jpg" alt="DeepSORT tracking architecture">
+    <div class="img-caption">DeepSORT maintains a persistent tracking ID for each person by combining their predicted position (Kalman filter) with their visual appearance (deep embedding). The card tap at entry is what ties a tracking ID to a real member identity.</div>
   </div>
 
-  <h3>The Tracking ID Problem</h3>
-  <p>Every person who enters the camera frame gets assigned a tracking ID — for example, "Person 42". This ID is maintained even when the person is briefly occluded (hidden behind a machine or another person). If someone disappears for more than ~2 seconds, DeepSORT holds the ID in a "lost" state. If they reappear in a similar location with a similar appearance, the same ID is reassigned. If too much time passes, the ID is retired and a new one issued when they reappear.</p>
+  <h3>Stage 2 — Visual Appearance Lock</h3>
+  <p>At the moment of card tap, YOLO extracts an <strong>appearance embedding</strong> — a mathematical fingerprint of what that person looks like today. This includes their clothing colours, body shape, and proportions. This embedding is stored against their member ID for the duration of the session.</p>
+  <p>This is why the system works without face recognition. We don't need to identify their face — we already know who they are from the card tap. The appearance embedding is only used to <em>maintain</em> that identity as they move through the gym, not to establish it.</p>
+
+  <h3>Stage 3 — Continuous Floor Tracking</h3>
+  <p>As the member moves through the gym, DeepSORT tracks them frame by frame. The tracker uses two signals simultaneously: their predicted position (based on their last known velocity) and their appearance embedding (are they still wearing the same blue shirt?). As long as both signals match, the tracking ID is maintained with high confidence.</p>
 
   <div class="two-col">
     <div class="col-card">
-      <div class="col-card-title">Phase 1 — Single Camera</div>
-      <p>With one camera covering a small zone, tracking is straightforward. Each person stays in frame for their entire workout. ID persistence is high. The Kalman filter handles brief occlusions easily.</p>
+      <div class="col-card-title">Change Room Dead Zone</div>
+      <p>The change rooms are a deliberate blind spot — no cameras inside. When a member walks into the change room, their tracking ID is suspended. When they emerge, the system attempts to re-identify them by appearance. If they changed clothes, the appearance embedding no longer matches and confidence drops. This triggers Stage 4.</p>
     </div>
     <div class="col-card">
-      <div class="col-card-title">Phase 3 — Multi-Camera</div>
-      <p>When a person walks from one camera zone to another, they get a new tracking ID in the new camera. We solve this with cross-camera re-identification — matching appearance descriptors between cameras to link the two IDs to the same person.</p>
+      <div class="col-card-title">Occlusion Handling</div>
+      <p>If someone walks behind a machine or another person briefly, DeepSORT holds the tracking ID in a "lost" state for up to 2 seconds. If they reappear in a similar location with a similar appearance, the same ID is restored. If too much time passes, the ID is retired and a new one issued.</p>
     </div>
+  </div>
+
+  <h3>Stage 4 — Tablet Confirmation Fallback</h3>
+  <p>Every machine in the gym has a small tablet mounted to it. When a member sits down at a machine, the system checks its confidence that the person at the machine is who it thinks they are. If confidence is above the threshold (~92%), the session is logged automatically with no interruption. If confidence drops below the threshold — because they changed clothes, came from the change room, or look similar to another member — the tablet displays a simple prompt: <em>"Please tap your card to confirm."</em></p>
+  <p>This is not an error state — it is a designed feature. The tap takes one second and resets the identity to 100% certainty. The member's workout is never interrupted for more than a moment, and the data integrity is maintained.</p>
+
+  <div class="callout info">
+    <div class="ct">Design Principle</div>
+    <p>The system is designed so that members never need to think about it. They tap their card once at the door (which they already do for access control), work out normally, and occasionally tap at a machine if asked. There are no apps, no wristbands, no QR codes, and no face scanning.</p>
   </div>
 
   <div class="img-block">
     <img src="img/person-reid-tracking.jpg" alt="Person re-identification across cameras">
-    <div class="img-caption">Person re-identification: the same person is matched across multiple camera views using their appearance embedding, linking tracking IDs between zones.</div>
-  </div>
-
-  <h3>What the System Knows About Each Person</h3>
-  <p>At any given moment, DeepSORT maintains a live record for every tracked person on the floor: their current bounding box position, their velocity vector (direction and speed of movement), their appearance embedding, the machine zone they are currently in, and how long they have been there. This structured data is what the downstream AI models — pose estimation, rep counting, face recognition — operate on.</p>
-
-  <div class="callout info">
-    <div class="ct">Phase 1 Goal</div>
-    <p>Reliably track 4–6 people simultaneously in a single camera zone with no ID switches during a normal workout. An ID switch (where the system confuses two people) is the primary failure mode to eliminate first.</p>
-  </div>
-
-  <div class="code-toggle">
-    <button class="code-toggle-btn" onclick="toggleCode(this)">
-      <span>&#128196;&nbsp; deepsort_tracking.py</span>
-      <span class="ct-arr">&#9660;</span>
-    </button>
-    <div class="code-toggle-body">
-<div class="code-block">
-    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">deepsort_tracking.py</span></div>
-    <pre><span class="kw">from</span> deep_sort_realtime.deepsort_tracker <span class="kw">import</span> DeepSort
-tracker = DeepSort(max_age=<span class="nm">30</span>, n_init=<span class="nm">3</span>, nms_max_overlap=<span class="nm">1.0</span>)
-<span class="kw">def</span> <span class="fn">track_people</span>(frame, yolo_detections):
-    <span class="cm"># Convert YOLO boxes to DeepSORT format: [x1,y1,w,h,conf]</span>
-    bbs = [[*det[<span class="st">'bbox'</span>], det[<span class="st">'conf'</span>]] <span class="kw">for</span> det <span class="kw">in</span> yolo_detections]
-    tracks = tracker.update_tracks(bbs, frame=frame)
-    results = []
-    <span class="kw">for</span> track <span class="kw">in</span> tracks:
-        <span class="kw">if not</span> track.is_confirmed(): <span class="kw">continue</span>
-        results.append({
-            <span class="st">'id'</span>: track.track_id,
-            <span class="st">'bbox'</span>: track.to_ltrb(),
-            <span class="st">'zone'</span>: get_machine_zone(track.to_ltrb())
-        })
-    <span class="kw">return</span> results</pre>
-  </div>
-    </div>
+    <div class="img-caption">Cross-camera re-identification: when a member moves from one camera zone to another, their appearance embedding is used to link the new tracking ID to their existing member record — no second card tap required.</div>
   </div>
 </section>
 <section class="section" id="colour-tracking">
   <div class="section-tag">Section 12 — Deep Dive</div>
-  <h2>Colour Marker <em>Tracking</em></h2>
-  <p class="lead">Pose estimation models like YOLO Pose and MoveNet are powerful but they can struggle in a gym environment — people wearing baggy clothing, similar-coloured outfits, or exercising in low-contrast lighting. Our solution is a simple, low-tech enhancement: <strong>colour-coded wristbands and ankle straps</strong> that give the AI a bright, unambiguous signal for each joint.</p>
+  <h2>Colour Tracking — <em>Weight Plates Only</em></h2>
+  <p class="lead">Colour tracking in this system has one job and one job only: reading the weight on a barbell. We are not using colour bands or wristbands for person tracking or pose estimation. Members wear whatever they want.</p>
+
+  <h3>What Colour Tracking Is (and Is Not)</h3>
+  <p>Some AI gym systems use coloured wristbands and ankle straps to help the pose model find joints. We are not doing this. It requires members to wear specific gear, which breaks the "walk in freely" design principle. Modern pose estimation models (YOLO Pose, RTMPose) are accurate enough on their own without colour markers on the body.</p>
+  <p>Colour tracking in our system is exclusively applied to the <strong>weight plates on barbells</strong>. The AlphaFit plates have thick, brightly coloured stripes on their edges. These stripes are the colour signal the AI reads. The member's body is never colour-tracked.</p>
 
   <div class="img-block">
-    <img src="img/colour-wristbands.jpg" alt="Colour coded silicone wristbands">
-    <div class="img-caption">Bright silicone wristbands in distinct colours — worn at the wrist and ankle, they give the camera a high-contrast, easy-to-detect marker at each key joint position.</div>
+    <img src="img/alphafit-colour-plates.webp" alt="AlphaFit colour coded bumper plates">
+    <div class="img-caption">The AlphaFit bumper plates with colour-coded edge stripes. This is the only colour tracking in the system — reading the plate colours to determine barbell weight. No wristbands, no body markers.</div>
   </div>
 
-  <h3>The Concept</h3>
-  <p>This idea is borrowed directly from professional motion capture studios. In traditional mocap, actors wear suits with reflective markers at every joint. Our gym version is simpler and cheaper: members wear a set of coloured silicone bands — one colour per joint position. The camera can detect these bands using basic colour segmentation (HSV thresholding) even before the neural network runs, giving us a reliable joint position estimate that the pose model can use as an anchor.</p>
+  <h3>How the Plate Colour Detection Works</h3>
+  <p>A dedicated YOLOv11 object detection model is trained specifically to find and classify these coloured plate stripes. The camera (mounted on the frame at a side angle to the barbell) looks along the sleeve of the bar. It sees a stack of coloured rings — one per plate. The model draws a bounding box around each ring and classifies it by colour, which maps directly to a weight value.</p>
 
-  <div class="img-block">
-    <img src="img/colour-marker-mocap.png" alt="Colour marker motion capture reference">
-    <div class="img-caption">Professional motion capture with colour markers at each joint — our system uses the same principle with simple silicone wristbands instead of retroreflective markers.</div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Stripe Colour</th><th>Weight Per Plate</th><th>Detection Method</th></tr></thead>
+      <tbody>
+        <tr><td style="color:#e74c3c;font-weight:bold;">Red</td><td>25 kg</td><td>YOLOv11 colour classifier</td></tr>
+        <tr><td style="color:#3498db;font-weight:bold;">Blue</td><td>20 kg</td><td>YOLOv11 colour classifier</td></tr>
+        <tr><td style="color:#f1c40f;font-weight:bold;">Yellow</td><td>15 kg</td><td>YOLOv11 colour classifier</td></tr>
+        <tr><td style="color:#2ecc71;font-weight:bold;">Green</td><td>10 kg</td><td>YOLOv11 colour classifier</td></tr>
+        <tr><td style="color:#95a5a6;font-weight:bold;">White</td><td>5 kg</td><td>YOLOv11 colour classifier</td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <h3>Colour Assignment</h3>
-  <div class="colour-band-grid">
-    <div class="colour-band cb-red"><div class="cb-label">RED</div><div class="cb-joint">Right Wrist</div></div>
-    <div class="colour-band cb-blue"><div class="cb-label">BLUE</div><div class="cb-joint">Left Wrist</div></div>
-    <div class="colour-band cb-green"><div class="cb-label">GREEN</div><div class="cb-joint">Right Ankle</div></div>
-    <div class="colour-band cb-yellow"><div class="cb-label">YELLOW</div><div class="cb-joint">Left Ankle</div></div>
-    <div class="colour-band cb-white"><div class="cb-label">GREY</div><div class="cb-joint">Optional: Elbow</div></div>
-  </div>
-
-  <p>The colours are chosen to be maximally distinct in HSV colour space — red, blue, green, and yellow are far apart in hue, making them easy to separate even under mixed gym lighting. The bands are ~25mm wide silicone wristbands and ankle straps, available in bulk for under $1 each.</p>
-
-  <div class="img-block">
-    <img src="img/colour-ankle-strap.jpg" alt="Neon ankle strap on shoe">
-    <div class="img-caption">A neon ankle strap in use — bright, high-contrast, and clearly visible from an overhead camera even during fast movement.</div>
-  </div>
-
-  <h3>How It Integrates with the AI Pipeline</h3>
-  <p>The colour tracking runs as a <strong>parallel pre-processing step</strong> alongside YOLO Pose. For each frame, we run a fast HSV colour segmentation pass that takes under 1ms per camera. This produces a set of coloured blob positions — "red blob at (x=450, y=320), blue blob at (x=380, y=315)". These positions are fed into the pose estimation model as <em>hint keypoints</em> — the model uses them to anchor its skeleton fitting, dramatically improving accuracy in difficult cases like baggy clothing or partial occlusion.</p>
-
-  <div class="two-col">
-    <div class="col-card">
-      <div class="col-card-title">Without Colour Bands</div>
-      <p>YOLO Pose estimates joint positions purely from body shape and clothing texture. In a gym with dark clothing and similar body shapes, it can confuse left and right limbs, lose track of wrists during fast movements, or place keypoints on clothing folds rather than actual joints.</p>
-    </div>
-    <div class="col-card">
-      <div class="col-card-title">With Colour Bands</div>
-      <p>The colour segmentation gives the model a ground-truth anchor for the four most important joints — the wrists and ankles. These are exactly the joints that matter most for rep counting. The model's accuracy on these joints improves from ~85% to ~97% in our testing.</p>
-    </div>
-  </div>
-
-  <h3>Phase Rollout</h3>
-  <p>In <strong>Phase 1</strong>, colour band tracking is mandatory — every test subject wears the full set of four bands. This is fine for a controlled lab environment. In <strong>Phase 2</strong>, bands are optional but recommended — the system works without them but logs a lower-confidence score for sessions without bands. In <strong>Phase 3+</strong>, the AI is fine-tuned on enough real-world data that bands become optional for most exercises, but remain available for members who want maximum tracking accuracy.</p>
-
-  <div class="callout info">
-    <div class="ct">Cost</div>
-    <p>A set of 4 silicone bands (wrist x2, ankle x2) costs under $2 per set in bulk. For a gym with 100 members, the total cost of the colour band system is under $200. They are washed and reused. This is the cheapest component in the entire system and one of the highest-impact accuracy improvements.</p>
-  </div>
+  <p>The total weight is calculated by summing all detected plates on both sleeves, then adding the standard barbell weight (20kg Olympic bar). This calculation happens in real time, every second, so the logged weight is always current — even if the member adds or removes plates mid-session.</p>
 </section>
 <section class="section" id="movenet">
   <div class="section-tag">Section 13 — Deep Dive</div>
@@ -1387,71 +1352,42 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
 </section>
 <section class="section" id="faceid">
   <div class="section-tag">Section 15 — Deep Dive</div>
-  <h2>Face <em>Recognition</em></h2>
-  <p class="lead">DeepSORT gives every person an anonymous tracking ID. Face recognition is what converts that anonymous ID into a real member profile. Once we know who someone is, every rep they do gets logged to their account automatically.</p>
+  <h2>Member Identity — <em>Card Tap System</em></h2>
+  <p class="lead">The primary identity system is the membership card tap at the door. Face recognition is not required and is not used in Phase 1 or Phase 2. It may be added as an optional enhancement in Phase 3 for the specific use case of re-identifying members who have changed clothes after the change room.</p>
 
-  <div class="img-block">
-    <img src="img/face-recognition-pipeline.png" alt="Face recognition pipeline">
-    <div class="img-caption">The face recognition pipeline: detect the face region, align it, extract a 512-dimensional embedding vector, then compare against the member database to find the closest match.</div>
+  <h3>Why Not Face Recognition as the Primary System?</h3>
+  <p>Face recognition as the primary identification method creates significant problems: it requires members to consent to biometric data collection, it raises serious privacy concerns, it fails when members wear caps or sunglasses, and it requires a front-facing camera at every machine. The card tap system avoids all of these issues.</p>
+  <p>The card tap is already part of the gym's access control infrastructure. Members already tap their card to enter. We are simply connecting that tap event to the AI tracking system — no new hardware, no new member behaviour, no biometric data.</p>
+
+  <h3>The Identity Lifecycle During a Session</h3>
+  <p>A member's identity is managed through four events during a typical gym visit:</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Event</th><th>Identity State</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>Card tap at door</td><td>100% confirmed</td><td>Tracking ID created, appearance embedding captured</td></tr>
+        <tr><td>Moving through gym</td><td>95%+ confidence</td><td>DeepSORT maintains ID automatically</td></tr>
+        <tr><td>Enters change room</td><td>Suspended</td><td>Tracking ID held in "lost" state</td></tr>
+        <tr><td>Exits change room</td><td>Uncertain (may have changed clothes)</td><td>System prompts card tap at next machine</td></tr>
+        <tr><td>Taps card at machine tablet</td><td>100% confirmed</td><td>Tracking ID re-linked to member, new appearance embedding captured</td></tr>
+        <tr><td>Leaves gym</td><td>Session closed</td><td>Workout data finalised and saved</td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <h3>How Face Embeddings Work</h3>
-  <p>We use <strong>ArcFace</strong> (or FaceNet) — a deep neural network that takes a cropped, aligned face image and outputs a 512-dimensional vector of numbers. This vector is called an <em>embedding</em>. It encodes the geometry of the face — the distances between eyes, the shape of the jawline, the proportions of the nose — in a way that is consistent across different lighting conditions, angles, and expressions.</p>
-
-  <div class="img-block">
-    <img src="img/face-embedding-process.jpg" alt="Face embedding extraction process">
-    <div class="img-caption">The embedding extraction process: the face is detected, cropped, normalised to a standard size and orientation, then passed through the neural network to produce the 512-dim vector.</div>
-  </div>
-
-  <h3>Member Registration</h3>
-  <p>When a new member joins the gym, we capture 5–10 photos of their face from slightly different angles using a tablet at the front desk. Each photo is processed through ArcFace to produce an embedding. These embeddings are averaged and stored in the PostgreSQL database alongside the member's profile. This registration process takes about 30 seconds.</p>
-
-  <div class="img-block">
-    <img src="img/face-recognition.webp" alt="Face recognition in action">
-    <div class="img-caption">Face recognition in action — each detected face is matched against the member database and labelled with the member's name and confidence score.</div>
-  </div>
-
-  <h3>Matching at the Door vs. Matching on the Floor</h3>
-  <p>We use face recognition in two contexts. At the <strong>entry point</strong> — when a member walks through the door — we get a clean, well-lit, front-on face shot that gives us a high-confidence identification. We then link their tracking ID to their profile for the rest of their session. On the <strong>gym floor</strong>, faces are often at odd angles, partially occluded, or far from the camera. Floor-based recognition is used as a secondary confirmation, not the primary identification method.</p>
-
-  <div class="two-col">
-    <div class="col-card">
-      <div class="col-card-title">Privacy Approach</div>
-      <p>Face embeddings are stored as numerical vectors, not photos. The original photos are deleted after registration. A vector alone cannot be reverse-engineered back into a face image. Members can request deletion of their embedding at any time.</p>
-    </div>
-    <div class="col-card">
-      <div class="col-card-title">Confidence Threshold</div>
-      <p>We only log a workout to a member's profile if the face match confidence exceeds 92%. Below this threshold, the workout is logged as "unidentified session" and can be manually claimed by the member later via the app.</p>
-    </div>
-  </div>
+  <h3>The Tablet Confirmation Prompt</h3>
+  <p>The machine tablet serves a dual purpose: it displays the member's current workout data (sets, reps, weight), and it acts as an identity confirmation point when needed. The prompt only appears when the system's confidence drops below 92%. In practice, this happens in two scenarios: after the change room (new clothing), or when two members with very similar appearances are in the same zone.</p>
+  <p>The prompt is designed to be frictionless. It shows the member's name and photo (from their membership profile) and asks them to tap their card to confirm. If the displayed name is wrong, they tap and the system corrects itself. The whole interaction takes under 3 seconds.</p>
 
   <div class="callout info">
-    <div class="ct">Phase 1 Simplification</div>
-    <p>In Phase 1, we skip real-time face recognition entirely. Instead, members check in at a kiosk when they arrive and are manually assigned a tracking ID. This lets us validate the rep counting and weight detection without the complexity of face matching.</p>
+    <div class="ct">Phase 3 Optional Enhancement</div>
+    <p>In Phase 3, we may add face recognition as a supplementary re-identification tool — specifically to help re-identify members who have changed clothes after the change room without requiring a card tap. This would use ArcFace embeddings stored at enrolment. It is an enhancement, not a core requirement, and will only be implemented if the card tap fallback proves insufficient in practice.</p>
   </div>
 
-  <div class="code-toggle">
-    <button class="code-toggle-btn" onclick="toggleCode(this)">
-      <span>&#128196;&nbsp; face_recognition.py</span>
-      <span class="ct-arr">&#9660;</span>
-    </button>
-    <div class="code-toggle-body">
-<div class="code-block">
-    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">face_recognition.py</span></div>
-    <pre><span class="kw">import</span> face_recognition
-<span class="kw">import</span> numpy <span class="kw">as</span> np
-<span class="kw">def</span> <span class="fn">enrol_member</span>(member_id, face_image):
-    encoding = face_recognition.face_encodings(face_image)[<span class="nm">0</span>]
-    db.store_face_embedding(member_id, encoding.tolist())
-<span class="kw">def</span> <span class="fn">identify_person</span>(face_crop, known_embeddings, member_ids):
-    unknown_encoding = face_recognition.face_encodings(face_crop)[<span class="nm">0</span>]
-    distances = face_recognition.face_distance(known_embeddings, unknown_encoding)
-    best_match_idx = np.argmin(distances)
-    <span class="kw">if</span> distances[best_match_idx] &lt; <span class="nm">0.45</span>:
-        <span class="kw">return</span> member_ids[best_match_idx]
-    <span class="kw">return</span> <span class="kw">None</span></pre>
-  </div>
-    </div>
+  <div class="img-block">
+    <img src="img/face-recognition-pipeline.jpg" alt="Face recognition pipeline">
+    <div class="img-caption">If face recognition is added in Phase 3, it works as a supplementary re-identification tool. The member's face embedding is captured at enrolment and compared against detections when the card-tap confidence system requests a re-check.</div>
   </div>
 </section>
 <section class="section" id="weight">
