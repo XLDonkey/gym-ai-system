@@ -89,11 +89,11 @@
     .lead { font-size: 17px; color: var(--text2); line-height: 1.75; margin-bottom: 28px; max-width: 780px; }
     p { color: var(--text2); margin-bottom: 16px; max-width: 780px; line-height: 1.75; }
     .img-block { border-radius: 12px; overflow: hidden; border: 1px solid var(--border2); background: var(--surface2); margin: 24px 0; }
-    .img-block img { width: 100%; display: block; object-fit: cover; max-height: 380px; }
+    .img-block img { width: 100%; display: block; }
     .img-caption { padding: 10px 14px; font-size: 11px; color: var(--muted); font-style: italic; border-top: 1px solid var(--border); background: var(--surface3); }
     .img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
     .img-grid .img-block { margin: 0; }
-    .img-grid .img-block img { max-height: 260px; }
+    .img-grid .img-block img { width: 100%; display: block; }
     .code-block { background: #050510; border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; margin: 20px 0; }
     .code-header { background: var(--surface3); border-bottom: 1px solid var(--border); padding: 8px 16px; display: flex; align-items: center; gap: 6px; }
     .code-dot { width: 10px; height: 10px; border-radius: 50%; }
@@ -165,6 +165,20 @@
     .stat-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 16px 20px; min-width: 130px; text-align: center; }
     .stat-box .sn { font-size: 28px; font-weight: 900; color: var(--purple-light); line-height: 1; }
     .stat-box .sl { font-size: 10px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+    .code-toggle { margin: 20px 0; }
+    .code-toggle-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      color: var(--muted); font-size: 12px; font-weight: 600;
+      padding: 7px 14px; border-radius: 6px; cursor: pointer;
+      transition: all 0.15s; font-family: inherit; letter-spacing: 0.02em;
+    }
+    .code-toggle-btn:hover { color: var(--text); border-color: var(--purple); background: var(--purple-dim); }
+    .code-toggle-btn .ct-arr { transition: transform 0.2s; font-size: 10px; display: inline-block; }
+    .code-toggle-btn.open .ct-arr { transform: rotate(180deg); }
+    .code-toggle-body { display: none; margin-top: 8px; }
+    .code-toggle-body.open { display: block; }
     @media (max-width: 900px) {
       .sidebar { display: none; }
       .hero { padding: 48px 24px; }
@@ -239,7 +253,13 @@
   <div class="section-tag">Section 02 — The Problem</div>
   <h2>The Core <em>Problem</em></h2>
   <p class="lead">Gyms are data black holes. Members walk in, lift weights, and leave. The only way to track progress today is to manually enter data into an app — which breaks the flow of the workout. Over 90% of gym-goers abandon workout tracking within the first month.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; the-current-broken-loop.txt</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">the-current-broken-loop.txt</span></div>
     <pre><span class="cm">// The current broken loop:</span>
 1. Do a set of bench press
@@ -251,6 +271,8 @@
 7. Get distracted by a notification
 8. Give up on tracking after 3 weeks</pre>
   </div>
+      </div>
+    </div>
   <p>For gym owners, the problem is even worse. They have no data on which machines are popular, when bottlenecks occur, how long members spend on each machine, or who is at risk of churning. Every business decision is made on gut feel.</p>
   <div class="callout warning">
     <div class="ct">The Opportunity</div>
@@ -355,7 +377,13 @@
   </div>
   <h3>The Frame System</h3>
   <p>Most gyms have exposed structural steel beams or Unistrut channels running across the ceiling. We attach a <strong>Unistrut P1000 channel</strong> perpendicular to the main beams, creating a grid of mounting points. From each mounting point, we drop a <strong>telescopic pendant arm</strong> (adjustable from 6" to 24") that positions the camera at the correct height.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; mounting-hardware-per-camera.txt</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">mounting-hardware-per-camera.txt</span></div>
     <pre><span class="cm">// Mounting hardware per camera position:</span>
 1x  Unistrut P1000 channel (3m length)       ~$25 AUD
@@ -370,6 +398,8 @@ Option A: Bolt directly to structural I-beam (strongest)
 Option B: Clamp to Unistrut channel (no drilling required)
 Option C: Drop from threaded rod hangers (most flexible)</pre>
   </div>
+      </div>
+    </div>
   <h3>Optimal Camera Positioning Per Machine Type</h3>
   <div class="tbl">
     <table>
@@ -401,7 +431,13 @@ Option C: Drop from threaded rod hangers (most flexible)</pre>
   </div>
   <h3>The Cable Run Process</h3>
   <p>From each camera, a Cat6 cable runs through the pendant mount arm, along the Unistrut channel, into an overhead wire mesh cable tray, and back to the server rack. The cable tray is suspended from the ceiling using threaded rod hangers every 1.5 metres.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; cable-run-cost.txt</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">cable-run-cost.txt</span></div>
     <pre><span class="cm">// Cable run per camera (example: 20m run):</span>
 Cat6 cable (20m)                           ~$8  AUD
@@ -414,6 +450,8 @@ Cable tray share (pro-rated)               ~$15 AUD
 <span class="cm">// Typical gym run: 15-40m — well within limits</span>
 <span class="cm">// Use Cat6A for runs over 55m to maintain 10Gbps</span></pre>
   </div>
+      </div>
+    </div>
   <h3>PoE Switch Selection</h3>
   <div class="img-block">
     <img src="img/poe-switch.jpg" alt="PoE Gigabit Switch">
@@ -434,7 +472,13 @@ Cable tray share (pro-rated)               ~$15 AUD
     <div class="ct">PoE Power Budget Calculation</div>
     <p>Each Hikvision 4K dome camera draws ~7.5W. A 24-port switch with a 250W budget can safely power 30 cameras (250W / 7.5W = 33, with headroom). Always leave 20% headroom for startup surges when the power comes on.</p>
   </div>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; network-topology.txt</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">network-topology.txt</span></div>
     <pre><span class="cm">// Physical network layout:</span>
 
@@ -455,6 +499,8 @@ AI Server:    192.168.10.1 (gateway)
 <span class="cm">// VLANs separate cameras from office network</span>
 <span class="cm">// Cameras cannot reach the internet -- security best practice</span></pre>
   </div>
+      </div>
+    </div>
 </section>
 
 <section class="section" id="streaming">
@@ -467,7 +513,13 @@ AI Server:    192.168.10.1 (gateway)
   </div>
   <h3>Step 1: The RTSP URL</h3>
   <p>Every IP camera exposes one or more RTSP streams. The URL format is standardised across manufacturers. The camera streams H.265 compressed video, which must be decoded before the AI can process it.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; rtsp-url-format.py</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">rtsp-url-format.py</span></div>
     <pre><span class="cm"># Hikvision RTSP URL format:</span>
 rtsp://[username]:[password]@[camera_ip]:554/Streaming/Channels/101
@@ -482,9 +534,17 @@ rtsp://admin:XLFitness2024@192.168.10.101:554/Streaming/Channels/101
 ffprobe -v quiet -print_format json -show_streams \
   "rtsp://admin:pass@192.168.10.101:554/Streaming/Channels/101"</pre>
   </div>
+      </div>
+    </div>
   <h3>Step 2: Hardware-Accelerated Decoding</h3>
   <p>Decoding 4K H.265 video on the CPU is expensive — a single stream can consume 30-40% of a CPU core. With 20 cameras, that's impossible. Instead, we use the GPU's dedicated video decoder (NVDEC on NVIDIA, VideoToolbox on Apple Silicon) to decode all streams in parallel at near-zero CPU cost.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; camera_capture.py</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">camera_capture.py</span></div>
     <pre><span class="kw">import</span> cv2
 <span class="kw">import</span> threading
@@ -514,9 +574,17 @@ ffprobe -v quiet -print_format json -show_streams \
     <span class="kw">def</span> <span class="fn">get_frame</span>(self):
         <span class="kw">return</span> self.frame_queue.get(timeout=<span class="nm">1.0</span>)</pre>
   </div>
+      </div>
+    </div>
   <h3>Step 3: Multi-Camera GPU Batching</h3>
   <p>We do not process cameras one by one. Each camera has a dedicated capture thread that reads frames and pushes them into a thread-safe queue. A GPU inference worker pulls frames from multiple queues and processes them in a batch — dramatically more efficient than processing one frame at a time.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; multi-camera-architecture.txt</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">multi-camera-architecture.txt</span></div>
     <pre>Thread 1:  Camera 01 capture --&gt; Queue 01
 Thread 2:  Camera 02 capture --&gt; Queue 02
@@ -532,6 +600,8 @@ GPU Worker 4: Runs FaceNet on face crops (when faces visible)
 <span class="cm"># Processing 8 frames simultaneously is 6x faster than 8x 1 frame</span>
 <span class="cm"># This is why GPU batching is critical to the whole system</span></pre>
   </div>
+      </div>
+    </div>
   <div class="img-block">
     <img src="img/ffmpeg-pipeline.jpg" alt="FFmpeg pipeline diagram">
     <div class="img-caption">FFmpeg's internal pipeline: demux then decode then filter. We use only the decode stage, then hand raw frames to our AI models.</div>
@@ -563,7 +633,13 @@ GPU Worker 4: Runs FaceNet on face crops (when faces visible)
     <img src="img/mac-mini-m4.jpeg" alt="Mac Mini M4 Pro">
     <div class="img-caption">The Mac Mini M4 Pro — compact, silent, and powerful enough for Phase 1 (4 cameras, full pipeline, 30W power draw).</div>
   </div>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; phase1-server-spec.txt</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">phase1-server-spec.txt</span></div>
     <pre><span class="cm"># Mac Mini M4 Pro -- Phase 1 Server:</span>
 Neural Engine:    16 cores, 38 TOPS (Tera Operations Per Second)
@@ -578,13 +654,21 @@ Cost:             ~$2,500 AUD
 device = torch.device(<span class="st">"mps"</span>)  <span class="cm"># Apple Silicon GPU</span>
 model = model.to(device)</pre>
   </div>
+      </div>
+    </div>
   <h3>Phase 2: RTX 4090 GPU Server</h3>
   <p>When we move to 10-20 cameras, we need a dedicated GPU server. The NVIDIA RTX 4090 is the most powerful consumer GPU available, with 16,384 CUDA cores and 24GB of VRAM. A single RTX 4090 can process approximately 12 camera streams at 30 FPS through the full pipeline.</p>
   <div class="img-block">
     <img src="img/rtx4090-server.png" alt="RTX 4090 GPU server build">
     <div class="img-caption">Multiple RTX 4090 GPUs — the Phase 2/3 workhorse for running 20+ camera streams simultaneously at 30 FPS.</div>
   </div>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; phase2-server-spec.txt</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">phase2-server-spec.txt</span></div>
     <pre><span class="cm"># Phase 2 Custom GPU Server:</span>
 CPU:    AMD Ryzen 9 7950X (16 cores / 32 threads)
@@ -601,6 +685,8 @@ Cost:   ~$12,000 AUD (self-built)
 device = torch.device(<span class="st">"cuda:0"</span>)  <span class="cm"># First GPU</span>
 model = torch.compile(model)     <span class="cm"># PyTorch 2.0 compilation</span></pre>
   </div>
+      </div>
+    </div>
   <h3>Phase 3: Full Server Rack</h3>
   <p>For 40+ cameras covering an entire gym floor, we deploy a full server rack with multiple GPU nodes. Each node handles a zone of cameras, and a load balancer distributes streams dynamically based on GPU utilisation.</p>
   <div class="img-grid">
@@ -703,7 +789,13 @@ model = torch.compile(model)     <span class="cm"># PyTorch 2.0 compilation</spa
     <div class="img-caption">YOLO detecting people in a busy scene — each person gets a bounding box with a confidence score in milliseconds.</div>
   </div>
   <p>YOLO processes the entire image in a single forward pass through the neural network. Unlike older two-stage detectors that first propose regions then classify them, YOLO does both simultaneously — hence "You Only Look Once". This makes it dramatically faster.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; yolo_inference.py</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">yolo_inference.py</span></div>
     <pre><span class="kw">from</span> ultralytics <span class="kw">import</span> YOLO
 <span class="kw">import</span> torch
@@ -725,6 +817,8 @@ results = model.predict(
     confidence = box.conf[<span class="nm">0</span>].item()
     print(<span class="st">f"Person at ({x1:.0f},{y1:.0f}) conf={confidence:.2f}"</span>)</pre>
   </div>
+      </div>
+    </div>
   <div class="img-block">
     <img src="img/yolo-detection.png" alt="YOLO detection diagram">
     <div class="img-caption">YOLOv8 divides the image into a grid and predicts bounding boxes and class probabilities for each cell simultaneously.</div>
@@ -751,7 +845,13 @@ results = model.predict(
     <div class="img-caption">DeepSORT maintains persistent IDs (numbers above bounding boxes) even as people move, overlap, and temporarily disappear.</div>
   </div>
   <p>DeepSORT combines two techniques: a <strong>Kalman filter</strong> that predicts where a bounding box will be in the next frame based on its current velocity, and a <strong>deep appearance descriptor</strong> (a small neural network) that extracts a visual fingerprint from the person's appearance. When a person is temporarily occluded by a pillar or another person, DeepSORT can re-identify them when they reappear.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; deepsort_tracking.py</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">deepsort_tracking.py</span></div>
     <pre><span class="kw">from</span> deep_sort_realtime.deepsort_tracker <span class="kw">import</span> DeepSort
 
@@ -775,6 +875,8 @@ tracks = tracker.update_tracks(detections, frame=frame)
     track_id = track.track_id  <span class="cm"># Persistent ID, e.g., 42</span>
     bbox = track.to_ltrb()     <span class="cm"># Left, Top, Right, Bottom</span></pre>
   </div>
+      </div>
+    </div>
   <div class="img-block">
     <img src="img/deepsort-pipeline.jpg" alt="DeepSORT pipeline">
     <div class="img-caption">The DeepSORT pipeline: detection then feature extraction then Kalman prediction then Hungarian algorithm assignment.</div>
@@ -793,7 +895,13 @@ tracks = tracker.update_tracks(detections, frame=frame)
     <img src="img/pose-fitness-ai.jpg" alt="Pose estimation in gym">
     <div class="img-caption">Pose estimation overlaid on a person exercising — joint positions are used to calculate depth, range of motion, and rep completion.</div>
   </div>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; movenet_inference.py</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">movenet_inference.py</span></div>
     <pre><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
 <span class="kw">import</span> numpy <span class="kw">as</span> np
@@ -816,6 +924,8 @@ interpreter.allocate_tensors()
     cosine = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
     <span class="kw">return</span> np.degrees(np.arccos(np.clip(cosine, -<span class="nm">1.0</span>, <span class="nm">1.0</span>)))</pre>
   </div>
+      </div>
+    </div>
 </section>
 
 <section class="section" id="lstm">
@@ -827,7 +937,13 @@ interpreter.allocate_tensors()
     <div class="img-caption">An LSTM processes sequences of data, maintaining a memory of previous inputs — perfect for recognising movement patterns over time.</div>
   </div>
   <p>We use an LSTM (Long Short-Term Memory) neural network, a type of recurrent network designed specifically for sequential data. We feed it a sliding window of the last 30 frames (1 second at 30 FPS) of joint angle data, and it outputs a probability that a rep just completed.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; lstm_rep_counter.py</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">lstm_rep_counter.py</span></div>
     <pre><span class="kw">import</span> torch
 <span class="kw">import</span> torch.nn <span class="kw">as</span> nn
@@ -855,6 +971,8 @@ interpreter.allocate_tensors()
         lstm_out, _ = self.lstm(x)
         <span class="kw">return</span> self.classifier(lstm_out[:, -<span class="nm">1</span>, :])</pre>
   </div>
+      </div>
+    </div>
 </section>
 
 <section class="section" id="faceid">
@@ -866,7 +984,13 @@ interpreter.allocate_tensors()
     <div class="img-caption">The face recognition pipeline: detect face then extract 512-dim embedding then compare to database then identify member.</div>
   </div>
   <p>We use FaceNet (or its successor, ArcFace) to extract a 512-dimensional numerical vector — called an embedding — from a person's face. This vector uniquely describes the geometry of their face. Two photos of the same person will produce very similar vectors; two different people will produce very different vectors.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; face_recognition.py</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">face_recognition.py</span></div>
     <pre><span class="kw">import</span> face_recognition
 <span class="kw">import</span> numpy <span class="kw">as</span> np
@@ -884,6 +1008,8 @@ interpreter.allocate_tensors()
         <span class="kw">return</span> member_ids[best_match_idx]
     <span class="kw">return</span> <span class="kw">None</span>  <span class="cm"># Unknown person</span></pre>
   </div>
+      </div>
+    </div>
   <div class="img-block">
     <img src="img/face-recognition.webp" alt="Face recognition">
     <div class="img-caption">Face recognition in action — each face gets a bounding box and is matched against the member database.</div>
@@ -899,7 +1025,13 @@ interpreter.allocate_tensors()
     <div class="img-caption">The weight selector pin — our camera reads its position to determine the weight being lifted.</div>
   </div>
   <p>The weight stack has numbered plates. The pin is inserted between plates to select the weight. From above, the camera can see which plate the pin is in. We train a custom YOLO model on images of weight stacks to detect the pin position and read the number on the selected plate using OCR.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; weight_detection.py</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">weight_detection.py</span></div>
     <pre><span class="kw">import</span> cv2
 <span class="kw">import</span> pytesseract
@@ -918,13 +1050,21 @@ interpreter.allocate_tensors()
     )
     <span class="kw">return</span> parse_weight(text)  <span class="cm"># Returns weight in kg</span></pre>
   </div>
+      </div>
+    </div>
 </section>
 
 <section class="section" id="pipeline">
   <div class="section-tag">Section 16 — The Full System</div>
   <h2>The <em>46ms Pipeline</em></h2>
   <p class="lead">Every component runs in sequence for every frame, on every camera. The entire pipeline must complete in under 33ms to maintain 30 FPS. We achieve this through GPU batching, asynchronous I/O, and careful optimisation.</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; pipeline-timing.txt</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">pipeline-timing.txt</span></div>
     <pre>TIME BUDGET PER FRAME (RTX 4090, batch of 8 cameras):
 -----------------------------------------------------
@@ -943,6 +1083,8 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 <span class="cm"># Step 8 is async -- does not block the pipeline</span>
 <span class="cm"># Effective throughput: 8 cameras x 30 FPS = 240 frames/sec</span></pre>
   </div>
+      </div>
+    </div>
   <div class="callout success">
     <div class="ct">Why 46ms is Fine</div>
     <p>The human eye perceives motion as smooth at 24 FPS (41ms per frame). Our 46ms latency means we are processing at ~21 FPS, which is perfectly smooth for workout tracking. The member doesn't see the video feed — they only see the final logged data. A 46ms delay is imperceptible.</p>
@@ -953,7 +1095,13 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
   <div class="section-tag">Section 17 — The Full System</div>
   <h2>Data &amp; <em>Database Design</em></h2>
   <p class="lead">Every rep the system detects gets written to a PostgreSQL database. The schema is designed for both real-time queries (what is happening right now?) and historical analysis (how has this member progressed over 6 months?).</p>
-  <div class="code-block">
+  <div class="code-toggle">
+      <button class="code-toggle-btn" onclick="toggleCode(this)">
+        <span>&#128196;&nbsp; schema.sql</span>
+        <span class="ct-arr">&#9660;</span>
+      </button>
+      <div class="code-toggle-body">
+<div class="code-block">
     <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">schema.sql</span></div>
     <pre><span class="kw">CREATE TABLE</span> members (
     id          UUID <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
@@ -978,6 +1126,8 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 <span class="kw">CREATE INDEX</span> idx_sets_member_time
     <span class="kw">ON</span> workout_sets(member_id, started_at <span class="kw">DESC</span>);</pre>
   </div>
+      </div>
+    </div>
 </section>
 
 <section class="section" id="phases">
@@ -1215,6 +1365,11 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, { rootMargin: '-20% 0px -70% 0px' });
 sections.forEach(s => { if (s.id) observer.observe(s); });
+
+function toggleCode(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
 
 function toggleAcc(btn) {
   const item = btn.closest('.acc-item');
