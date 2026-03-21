@@ -344,7 +344,7 @@
 <nav class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">XL Fitness</div>
-    <div class="brand-sub">AI Overseer — The Bible v12.0</div>
+    <div class="brand-sub">AI Overseer — The Bible v13.0</div>
   </div>
   <div class="nav-group">Chapter 1 — The Vision</div>
   <a class="nav-link" href="#vision">01 — What We're Building</a>
@@ -1166,57 +1166,83 @@ results = model.predict(
   <p><strong>The Problem:</strong> DeepSORT's internal Kalman filter assumes linear, constant-velocity movement (like a car driving down a road). Gym movements are explosive, non-linear, and vertical. A person dropping into a burpee completely breaks the Kalman filter's prediction model, causing the tracking ID to detach and float away.</p>
   <p><strong>The Solution:</strong> We modify the state space of the Kalman filter. Instead of tracking the bounding box center (x, y) and aspect ratio (a, h), we track the bottom-center point of the bounding box (the feet). Because the feet remain relatively stationary on the floor during most exercises (even burpees or squats), the Kalman filter's spatial prediction remains stable while the bounding box expands and contracts above it.</p>
 
+
+  <h3>Code Implementation: Tuning for the Gym</h3>
+  <p>To solve the occlusion and dynamic confidence problems discussed above, we wrap the standard YOLO and DeepSORT libraries in a custom pipeline class. This allows us to define "machine zones" where the rules change dynamically.</p>
+
   <div class="code-toggle">
     <button class="code-toggle-btn" onclick="toggleCode(this)">
-      <span>&#128196;&nbsp; yolo_deepsort_pipeline.py</span>
+      <span>&#128196;&nbsp; gym_tracker.py (Dynamic Confidence & max_age)</span>
       <span class="ct-arr">&#9660;</span>
     </button>
     <div class="code-toggle-body">
 <div class="code-block">
-    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">yolo_deepsort_pipeline.py</span></div>
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">gym_tracker.py</span></div>
     <pre><span class="kw">from</span> ultralytics <span class="kw">import</span> YOLO
 <span class="kw">from</span> deep_sort_realtime.deepsort_tracker <span class="kw">import</span> DeepSort
 
-<span class="cm"># Initialize YOLO (Detector) and DeepSORT (Tracker)</span>
-detector = YOLO(<span class="st">'yolov11m.pt'</span>)
-tracker = DeepSort(
-    max_age=<span class="nm">90</span>,              <span class="cm"># Hold lost IDs for 3 seconds (occlusion fix)</span>
-    n_init=<span class="nm">3</span>,                <span class="cm"># Require 3 consecutive detections to confirm new ID</span>
-    nms_max_overlap=<span class="nm">1.0</span>,
-    max_cosine_distance=<span class="nm">0.3</span>, <span class="cm"># Stricter appearance matching</span>
-    nn_budget=<span class="nm">100</span>            <span class="cm"># Keep last 100 appearance vectors per ID</span>
-)
+<span class="kw">class</span> <span class="fn">GymTracker</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        <span class="cm"># 1. Initialize YOLOv11 Medium</span>
+        self.detector = YOLO(<span class="st">'yolov11m.pt'</span>)
+        
+        <span class="cm"># 2. Initialize DeepSORT with Gym-Specific Tuning</span>
+        self.tracker = DeepSort(
+            max_age=<span class="nm">90</span>,              <span class="cm"># Hold lost IDs for 3 seconds (30fps * 3s)</span>
+            n_init=<span class="nm">3</span>,                <span class="cm"># Require 3 consecutive hits to confirm</span>
+            nms_max_overlap=<span class="nm">1.0</span>,
+            max_cosine_distance=<span class="nm">0.4</span>, <span class="cm"># Looser appearance matching</span>
+            nn_budget=<span class="nm">150</span>            <span class="cm"># Deep memory bank for appearance vectors</span>
+        )
+        
+        <span class="cm"># 3. Define Machine Zones (x1, y1, x2, y2)</span>
+        <span class="cm"># Inside these zones, occlusion is high (squat racks, cables)</span>
+        self.high_occlusion_zones = [
+            [<span class="nm">100</span>, <span class="nm">200</span>, <span class="nm">400</span>, <span class="nm">800</span>],  <span class="cm"># Squat Rack 1</span>
+            [<span class="nm">800</span>, <span class="nm">150</span>, <span class="nm">1100</span>, <span class="nm">600</span>]  <span class="cm"># Cable Crossover</span>
+        ]
 
-<span class="kw">def</span> <span class="fn">process_frame</span>(frame):
-    <span class="cm"># 1. YOLO Detection (Find the people)</span>
-    results = detector(frame, classes=[<span class="nm">0</span>], conf=<span class="nm">0.45</span>) <span class="cm"># Class 0 = Person</span>
-    
-    <span class="cm"># Format detections for DeepSORT: [[x, y, w, h], confidence, class_id]</span>
-    detections = []
-    <span class="kw">for</span> box <span class="kw">in</span> results[<span class="nm">0</span>].boxes:
-        x1, y1, x2, y2 = box.xyxy[<span class="nm">0</span>].tolist()
-        conf = box.conf[<span class="nm">0</span>].item()
-        detections.append([[x1, y1, x2-x1, y2-y1], conf, <span class="nm">0</span>])
+    <span class="kw">def</span> <span class="fn">is_in_zone</span>(self, box, zones):
+        <span class="cm"># Check if the bottom-center (feet) of the box is inside any zone</span>
+        x1, y1, x2, y2 = box
+        feet_x = (x1 + x2) / <span class="nm">2</span>
+        feet_y = y2
         
-    <span class="cm"># 2. DeepSORT Tracking (Connect them across time)</span>
-    <span class="cm"># DeepSORT internally extracts the appearance features from the frame crops</span>
-    tracks = tracker.update_tracks(detections, frame=frame)
-    
-    <span class="cm"># 3. Output the persistent tracked objects</span>
-    tracked_people = []
-    <span class="kw">for</span> track <span class="kw">in</span> tracks:
-        <span class="kw">if not</span> track.is_confirmed() <span class="kw">or</span> track.time_since_update > <span class="nm">1</span>:
-            <span class="kw">continue</span>
+        <span class="kw">for</span> z <span class="kw">in</span> zones:
+            zx1, zy1, zx2, zy2 = z
+            <span class="kw">if</span> zx1 &lt; feet_x &lt; zx2 <span class="kw">and</span> zy1 &lt; feet_y &lt; zy2:
+                <span class="kw">return</span> <span class="kw">True</span>
+        <span class="kw">return</span> <span class="kw">False</span>
+
+    <span class="kw">def</span> <span class="fn">process_frame</span>(self, frame):
+        <span class="cm"># Run YOLO with a very low baseline confidence</span>
+        <span class="cm"># We will filter the results manually based on location</span>
+        raw_results = self.detector(frame, classes=[<span class="nm">0</span>], conf=<span class="nm">0.20</span>)
+        
+        detections = []
+        <span class="kw">for</span> box <span class="kw">in</span> raw_results[<span class="nm">0</span>].boxes:
+            x1, y1, x2, y2 = box.xyxy[<span class="nm">0</span>].tolist()
+            conf = box.conf[<span class="nm">0</span>].item()
             
-        tracked_people.append({
-            <span class="st">'track_id'</span>: track.track_id,
-            <span class="st">'bbox'</span>: track.to_ltrb() <span class="cm"># [x1, y1, x2, y2]</span>
-        })
-        
-    <span class="kw">return</span> tracked_people</pre>
+            <span class="cm"># DYNAMIC CONFIDENCE THRESHOLDING</span>
+            <span class="cm"># If they are in a squat rack, accept a messy 25% confidence detection</span>
+            <span class="cm"># If they are in open floor space, demand a clean 60% confidence detection</span>
+            in_rack = self.is_in_zone([x1, y1, x2, y2], self.high_occlusion_zones)
+            
+            <span class="kw">if</span> in_rack <span class="kw">and</span> conf > <span class="nm">0.25</span>:
+                detections.append([[x1, y1, x2-x1, y2-y1], conf, <span class="nm">0</span>])
+            <span class="kw">elif not</span> in_rack <span class="kw">and</span> conf > <span class="nm">0.60</span>:
+                detections.append([[x1, y1, x2-x1, y2-y1], conf, <span class="nm">0</span>])
+                
+        <span class="cm"># Pass the filtered detections to DeepSORT</span>
+        tracks = self.tracker.update_tracks(detections, frame=frame)
+        <span class="kw">return</span> tracks</pre>
   </div>
     </div>
   </div>
+  
+  <p>Notice how the dynamic threshold works: in open floor space, we demand a high confidence score (60%) from YOLO before we accept the detection. This prevents false positives (like a punching bag being detected as a person). But when a person steps inside the coordinates of the Squat Rack zone, we drop the required confidence to 25%. This means even if YOLO only sees an arm and half a torso through the steel uprights, it still registers the detection, keeping the DeepSORT track alive.</p>
+
 </section>
 <section class="section" id="colour-tracking">
   <div class="section-tag">Section 14 — Deep Dive</div>
