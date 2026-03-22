@@ -570,7 +570,7 @@
       <thead><tr><th>Specification</th><th>Value</th><th>Why It Matters</th></tr></thead>
       <tbody>
         <tr><td>Model</td><td class="td-purple">Hikvision DS-2CD2183G2-I</td><td>Widely available, excellent RTSP support, proven reliability</td></tr>
-        <tr><td>Resolution</td><td class="td-purple">4K / 8 Megapixel</td><td>Enough detail to read weight pin positions from 12ft overhead</td></tr>
+        <tr><td>Resolution</td><td class="td-purple">4K / 8 Megapixel</td><td>Enough detail to read AlphaFit plate colour stripes from 12ft overhead</td></tr>
         <tr><td>Frame Rate</td><td class="td-purple">30 FPS</td><td>Minimum for smooth pose estimation; sufficient for rep counting</td></tr>
         <tr><td>Lens</td><td class="td-purple">2.8mm (100° HFOV)</td><td>Covers 3–4 machines from a single ceiling position at 3m height</td></tr>
         <tr><td>Compression</td><td class="td-purple">H.265+ (HEVC)</td><td>~50% bandwidth saving vs H.264 — critical at 20+ cameras</td></tr>
@@ -1509,7 +1509,7 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
 <section class="section" id="weight">
   <div class="section-tag">Section 18 — Deep Dive</div>
   <h2>Weight <em>Detection</em></h2>
-  <p class="lead">Counting reps is useless if we don't know how much weight is being lifted. The system uses two entirely different visual methods to read weight: Colour-coded stripe detection for barbells (AlphaFit plates), and OCR/Bounding box detection for fixed weight stacks.</p>
+  <p class="lead">Counting reps is useless if we don't know how much weight is being lifted. For barbells, the system uses colour-coded stripe detection on AlphaFit plates. For cable machines, we are building a custom electric weight stack with brushless motors — the weight is always known digitally, no camera detection required.</p>
 
   <h3>Can We Read Plates from the Side?</h3>
   <p>Yes — and for barbells, the side view is actually <em>better</em> than top-down. The coloured stripe runs around the full circumference of the plate edge. From the side, the camera sees a clean, thick coloured band — no perspective distortion, no occlusion from the bar itself. The challenge is that a person standing at the bar can block one side. The solution is simple: <strong>two cameras per barbell station</strong>, one on each side. At least one camera will always have a clear view of the loaded sleeve.</p>
@@ -1542,22 +1542,25 @@ model = tf.saved_model.load(<span class="st">'movenet_lightning'</span>)
     </table>
   </div>
 
-  <h3>Method 2: Fixed Weight Stacks (Cable Machines)</h3>
-  <p>Cable machines don't use coloured plates. They use a stack of black iron plates with numbers printed on them, and a selector pin. To read these, the Neural Network uses a different approach.</p>
-
-  <div class="img-block">
-    <img src="img/fixed-weight-plates.webp" alt="Fixed weight stack with numbers">
-    <div class="img-caption">A standard fixed weight stack. The AI must detect where the selector pin is inserted, and then read the white number printed on that specific plate using Optical Character Recognition (OCR).</div>
+  <h3>Method 2: Custom Electric Weight Stacks (Cable Machines)</h3>
+  <p>Traditional cable machines use a pin-loaded iron stack — a mechanical system that would require the camera to detect where the pin is inserted and read a number. We are not building that. All cable machines in the gym will be fitted with a <strong>custom-built electric weight stack</strong> driven by brushless motors. This is a separate hardware project running in parallel with the AI system.</p>
+  <div class="callout info">
+    <div class="ct">Why This Changes Everything</div>
+    <p>With an electric stack, the weight is selected electronically — either by the member on the tablet, or by the system itself. The motor drives to the correct position and locks. The system always knows the exact weight because it commanded it. There is no ambiguity, no camera required, no OCR, no pin detection. The weight value is read directly from the motor controller over the local network and logged to the database automatically.</p>
   </div>
-
-  <p><strong>The Stack Pipeline:</strong></p>
-  <ol>
-    <li><strong>Pin Detection:</strong> A YOLO model is trained specifically to find the selector pin handle.</li>
-    <li><strong>Plate Cropping:</strong> Once the pin is found, the system crops the image tightly around the plate the pin is inserted into.</li>
-    <li><strong>OCR Reading:</strong> A text-recognition model (like PaddleOCR) reads the white painted number on that plate (e.g., "20" or "50").</li>
-  </ol>
-  
-  <p><em>Enhancement:</em> If the white numbers wear off over time, we will apply brightly coloured adhesive stickers to the pin-hole area of each plate, converting the stack into a colour-reading problem just like the barbells.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Aspect</th><th>Traditional Pin Stack</th><th>Our Electric Stack</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Weight Detection</strong></td><td>Camera + OCR or pin detection</td><td>Motor controller API — always exact</td></tr>
+        <tr><td><strong>Accuracy</strong></td><td>85–95% (lighting dependent)</td><td>100% (digital readout)</td></tr>
+        <tr><td><strong>Weight Increments</strong></td><td>Fixed plate intervals (e.g. 5kg)</td><td>Programmable — can do 1kg increments</td></tr>
+        <tr><td><strong>Member Experience</strong></td><td>Walk up, pull pin, insert pin</td><td>Select weight on tablet, motor adjusts</td></tr>
+        <tr><td><strong>AI Complexity</strong></td><td>Requires a trained camera detection model</td><td>Zero — weight is a direct API data read</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The motor controller exposes a simple local API endpoint. When the AI system detects that a member has begun a set on a cable machine, it calls this endpoint to retrieve the current weight. This value is merged with the rep count and pose data to produce the complete set record. The electric stack is out of scope for Phase 1 and will be integrated in Phase 2.</p>
 </section>
 <div class="chapter-divider" id="ch-system">
   <div class="ch-inner">
@@ -1733,7 +1736,7 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
 
   <div class="img-block">
     <img src="img/roboflow-annotation.jpg" alt="Roboflow bounding box annotation tool">
-    <div class="img-caption">A manual annotation tool. A human draws a box around the object and assigns a class label. We will do this for thousands of frames of gym footage — boxing weight plates, selector pins, and people.</div>
+    <div class="img-caption">A manual annotation tool. A human draws a box around the object and assigns a class label. We will do this for thousands of frames of gym footage — boxing weight plates, people, and joint keypoints.</div>
   </div>
 
   <h3>The Training Loop</h3>
@@ -1842,7 +1845,7 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
           <div class="phase-card-title">Software Goals</div>
           <ul>
             <li>DeepSORT tracking across zone transitions</li>
-            <li>Weight stack detection for cable machines</li>
+            <li>Electric weight stack integration for cable machines</li>
             <li>Member app (iOS/Android) showing live logs</li>
             <li>Gym owner dashboard with occupancy data</li>
             <li>Automated alerts for machine hogging</li>
