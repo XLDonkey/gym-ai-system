@@ -1658,342 +1658,128 @@ TOTAL PIPELINE LATENCY:                 46.0 ms
     </div>
 </section>
 
-<div class="chapter-divider" id="ch-roadmap">
+
+<div class="chapter-divider" id="ch-roadmap-new">
   <div class="ch-inner">
     <div class="ch-num">Chapter 06</div>
-    <h1>The <em>Roadmap</em></h1>
-    <p class="ch-desc">The four phases of development — from a single-camera lab prototype to a full multi-gym commercial deployment. Each phase has defined hardware, software goals, success criteria, and budget. Nothing in Phase 2 starts until Phase 1 is working. Each phase gate is a real checkpoint, not a suggestion.</p>
+    <h1>Project <em>Roadmap</em></h1>
+    <p class="ch-desc">A detailed breakdown of Phase 1 and Phase 2 milestones, deliverables, and dependencies — with a specific focus on the electric weight stack integration.</p>
     <div class="ch-sections">
-      <span class="ch-pill">23 — Interactive Roadmap</span>
-      <span class="ch-pill">24 — Cost Breakdown</span>
-    </div>
-    <div class="ch-prereqs">
-      <div class="ch-prereqs-title">Phase gate summary</div>
-      <div class="ch-prereq-list">
-        <div class="ch-prereq"><span class="prereq-icon prereq-needed">1→2</span>Phase 1 working: reps counted, weight read, 1 person tracked</div>
-        <div class="ch-prereq"><span class="prereq-icon prereq-future">2→3</span>Phase 2 working: full zone, face ID, 10+ people tracked</div>
-        <div class="ch-prereq"><span class="prereq-icon prereq-future">3→4</span>Phase 3 working: full gym floor, 95%+ accuracy across all machines</div>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="chapter-divider" id="ch-neural-network">
-  <div class="ch-inner">
-    <div class="ch-num">Chapter 05</div>
-    <h1>The <em>Neural Network</em></h1>
-    <p class="ch-desc">The core intelligence of the system. This chapter explains exactly how the AI works under the hood — why we use multiple specialist networks instead of one giant one, how we train them using manual annotations, and how transfer learning allows us to build a world-class system without millions of dollars of compute. This is the most important chapter in the document.</p>
-    <div class="ch-sections">
-      <span class="ch-pill">20 — One Network vs Many</span>
-      <span class="ch-pill">21 — Training &amp; Annotations</span>
-      <span class="ch-pill">22 — Transfer Learning</span>
-    </div>
-    <div class="ch-prereqs">
-      <div class="ch-prereqs-title">Before training can begin</div>
-      <div class="ch-prereq-list">
-        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Minimum 2,000 annotated frames per model (plates, people, poses)</div>
-        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>GPU available for training (RTX 3080 or better, or cloud GPU)</div>
-        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Pre-trained base models downloaded (YOLOv11, RTMPose)</div>
-        <div class="ch-prereq"><span class="prereq-icon prereq-needed">→</span>Annotation tool set up (Roboflow or CVAT)</div>
-      </div>
+      <span class="ch-pill">25 — Phase 1: Foundation</span>
+      <span class="ch-pill">26 — Phase 2: Automation</span>
     </div>
   </div>
 </div>
 
-<section class="section" id="nn-architecture">
-  <div class="section-tag">Section 20 — Deep Dive</div>
-  <h2>One Network vs <em>Many</em></h2>
-  <p class="lead">A common question is: <em>"Do we build one giant Neural Network (NN) that does everything, or multiple smaller ones?"</em> The answer is definitively <strong>Multiple Specialist Networks</strong>. Here is exactly how it works and why.</p>
-
-  <h3>The Problem with "One Giant Brain"</h3>
-  <p>If you try to train a single Neural Network to detect faces, count reps, find weight plates, and track people all at once, it will fail. A network forced to learn everything becomes a "jack of all trades, master of none." It requires massive amounts of compute power (costing millions of dollars) and runs too slowly for real-time video.</p>
-
-  <h3>The Solution: A Pipeline of Experts</h3>
-  <p>Instead of one giant NN, our system is a <strong>Pipeline</strong> of 5 small, highly specialized NNs. Each network does exactly one job, does it perfectly, and passes the result to the next network in line.</p>
+<section class="section" id="phase1">
+  <div class="section-tag">Section 25</div>
+  <h2>Phase 1: <em>Foundation & Tracking</em></h2>
+  <p class="lead">Phase 1 establishes the core infrastructure. The goal is a working "eyes-on" system that can track people, count reps, and read barbell weights. Cable machines remain manual in this phase.</p>
 
   <div class="tbl">
     <table>
-      <thead><tr><th>Network</th><th>Model Type</th><th>Its Only Job</th><th>Input &rarr; Output</th></tr></thead>
+      <thead><tr><th>Milestone</th><th>Key Deliverables</th><th>Dependencies</th></tr></thead>
       <tbody>
-        <tr><td><strong>1. Detector</strong></td><td class="td-purple">YOLOv11</td><td>Find people and plates</td><td>Video Frame &rarr; Bounding Boxes</td></tr>
-        <tr><td><strong>2. Tracker</strong></td><td class="td-purple">DeepSORT</td><td>Remember who is who</td><td>Boxes &rarr; Persistent IDs (Person #4)</td></tr>
-        <tr><td><strong>3. Pose</strong></td><td class="td-purple">RTMPose</td><td>Find the joints</td><td>Person Box &rarr; 17 X/Y Coordinates</td></tr>
-        <tr><td><strong>4. Rep Counter</strong></td><td class="td-purple">LSTM</td><td>Count the movement</td><td>Stream of Joints &rarr; "1 Squat Completed"</td></tr>
-        <tr><td><strong>5. Face ID</strong></td><td class="td-purple">ArcFace</td><td>Recognize the member</td><td>Face Crop &rarr; "John Smith"</td></tr>
+        <tr>
+          <td><strong>1. Infrastructure</strong></td>
+          <td>
+            • Ceiling grid frame installed<br>
+            • 4x Hikvision Dome cameras mounted<br>
+            • PoE Switch and Mac Mini M4 configured<br>
+            • RTSP streams verified
+          </td>
+          <td>Floor plan finalized</td>
+        </tr>
+        <tr>
+          <td><strong>2. Member Identity</strong></td>
+          <td>
+            • Card-tap entry system operational<br>
+            • Tablet confirmation UI built<br>
+            • YOLO + DeepSORT tracking pipeline active
+          </td>
+          <td>Infrastructure complete</td>
+        </tr>
+        <tr>
+          <td><strong>3. Barbell AI</strong></td>
+          <td>
+            • YOLO model trained on AlphaFit plates<br>
+            • Pose estimation (RTMPose) running<br>
+            • LSTM rep counter achieving >90% accuracy
+          </td>
+          <td>2,000 annotated frames</td>
+        </tr>
+        <tr>
+          <td><strong>4. Data Pipeline</strong></td>
+          <td>
+            • Redis message queue handling 30fps stream<br>
+            • PostgreSQL saving structured workout logs<br>
+            • Basic member dashboard showing set history
+          </td>
+          <td>Barbell AI complete</td>
+        </tr>
       </tbody>
     </table>
   </div>
-
-  <p>This pipeline approach means if the Rep Counter is making mistakes on bench press, we only have to retrain the small LSTM network. We don't have to touch the Face ID or the Plate Detector. It makes the system modular, debuggable, and incredibly fast.</p>
-</section>
-
-<section class="section" id="nn-training">
-  <div class="section-tag">Section 21 — Deep Dive</div>
-  <h2>Training &amp; <em>Annotations</em></h2>
-  <p class="lead">A Neural Network is just a mathematical formula with millions of blank variables. "Training" is the process of showing the network thousands of examples until it learns the correct values for those variables. To teach it, we have to manually show it the answers first.</p>
-
-  <h3>What is Manual Annotation?</h3>
-  <p>Before the AI can find an AlphaFit yellow plate on its own, a human has to draw a box around a yellow plate in a photo and label it "Yellow 15kg". We use software tools like <strong>CVAT</strong>, <strong>LabelMe</strong>, or <strong>Roboflow</strong> to do this.</p>
-
-  <div class="img-block">
-    <img src="img/roboflow-annotation.jpg" alt="Roboflow bounding box annotation tool">
-    <div class="img-caption">A manual annotation tool. A human draws a box around the object and assigns a class label. We will do this for thousands of frames of gym footage — boxing weight plates, people, and joint keypoints.</div>
-  </div>
-
-  <h3>The Training Loop</h3>
-  <ol>
-    <li><strong>Data Collection:</strong> We record 10 hours of video from the gym ceiling cameras.</li>
-    <li><strong>Frame Extraction:</strong> We pull out 5,000 individual still images from that video.</li>
-    <li><strong>Manual Annotation:</strong> Humans sit at computers and draw boxes around every barbell plate in those 5,000 images.</li>
-    <li><strong>Training (Forward Pass):</strong> We feed an image into the blank Neural Network. It guesses where the plates are (it will be wrong at first).</li>
-    <li><strong>Loss Calculation:</strong> The system compares the Network's guess to the Human's manual annotation. The difference is called the "Loss".</li>
-    <li><strong>Backpropagation:</strong> The system uses calculus to adjust the network's internal variables (weights) to make the guess slightly better next time.</li>
-  </ol>
-  <p>We repeat steps 4-6 millions of times on a powerful GPU. Slowly, the network learns what a plate looks like.</p>
-
-  <div class="img-block">
-    <img src="img/training-loss-curve.png" alt="Neural network training loss curve">
-    <div class="img-caption">A training loss curve. The blue line represents how "wrong" the network is. As training progresses over hours or days, the network learns from the manual annotations, and the error drops toward zero.</div>
+  <div class="callout info">
+    <div class="ct">Phase 1 Gate</div>
+    <p>Before moving to Phase 2, the system must successfully log 100 consecutive barbell workouts with less than a 5% error rate in rep counting and weight detection.</p>
   </div>
 </section>
 
-<section class="section" id="nn-transfer">
-  <div class="section-tag">Section 22 — Deep Dive</div>
-  <h2>Transfer <em>Learning</em></h2>
-  <p class="lead">Training a Neural Network entirely from scratch takes millions of images and months of supercomputer time. We don't do that. We use a technique called <strong>Transfer Learning</strong>.</p>
+<section class="section" id="phase2">
+  <div class="section-tag">Section 26</div>
+  <h2>Phase 2: <em>Electric Automation</em></h2>
+  <p class="lead">Phase 2 introduces the custom electric weight stack for cable machines. The AI stops trying to "see" the weight and instead talks directly to the hardware.</p>
 
-  <h3>Standing on the Shoulders of Giants</h3>
-  <p>Companies like Google, Meta, and Ultralytics have already spent millions training base models (like YOLO) on datasets containing millions of general images (cars, dogs, people, chairs). These base models already understand fundamental visual concepts: edges, shapes, shadows, and textures.</p>
-
-  <div class="img-block">
-    <img src="img/transfer-learning-diagram.png" alt="Transfer learning diagram">
-    <div class="img-caption">Transfer Learning: We take a pre-trained model (which already knows how to see shapes and edges) and we "freeze" its core layers. We only train the final output layer on our specific custom dataset (AlphaFit plates).</div>
-  </div>
-
-  <h3>How We Apply It</h3>
-  <p>Instead of starting with a blank network, we download a pre-trained YOLOv11 model. It already knows how to find "people" perfectly. But it doesn't know what an "AlphaFit 20kg Blue Plate" is.</p>
-  <p>We take our 5,000 manually annotated gym images and we <strong>Fine-Tune</strong> the model. Because the model already understands shapes and colours, it only takes a few hours on a single GPU for it to learn our specific gym equipment. This is the secret to building enterprise-grade AI on a startup budget.</p>
-</section>
-<section class="section" id="phases">
-  <div class="section-tag">Section 23 — Phase Roadmap</div>
-  <h2>Interactive <em>Phase Roadmap</em></h2>
-  <p class="lead">The system is built in four phases, each proving the previous phase works before committing to the next level of investment. Click through the phases to see the full plan.</p>
-  <div class="phase-wrapper">
-    <div class="phase-tabs">
-      <button class="phase-tab active" onclick="switchPhase(1)">Phase 1<br>Lab Proof</button>
-      <button class="phase-tab" onclick="switchPhase(2)">Phase 2<br>Single Zone</button>
-      <button class="phase-tab" onclick="switchPhase(3)">Phase 3<br>Full Floor</button>
-      <button class="phase-tab" onclick="switchPhase(4)">Phase 4<br>Multi-Gym</button>
-    </div>
-    <div class="phase-pane active" id="pp-1">
-      <h3>Phase 1 — Proof of Concept (2 Machines)</h3>
-      <div class="phase-cards">
-        <div class="phase-card">
-          <div class="phase-card-title">Hardware</div>
-          <ul>
-            <li>4x Hikvision DS-2CD2183G2-I cameras</li>
-            <li>1x Mac Mini M4 Pro (24GB)</li>
-            <li>1x Ubiquiti 8-port PoE switch</li>
-            <li>Temporary C-stand mounts (no drilling)</li>
-            <li>50m Cat6 cable</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Software Goals</div>
-          <ul>
-            <li>RTSP stream capture working</li>
-            <li>YOLO detecting people reliably</li>
-            <li>MoveNet pose estimation running</li>
-            <li>LSTM counting reps (bench + squat)</li>
-            <li>Face ID matching 5 test members</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Success Criteria</div>
-          <ul>
-            <li>95%+ rep count accuracy</li>
-            <li>Face ID match in under 2 seconds</li>
-            <li>Zero crashes over 8-hour test</li>
-            <li>Data visible in simple web dashboard</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Budget</div>
-          <ul>
-            <li>Cameras (4x): <strong>~$480 AUD</strong></li>
-            <li>Mac Mini M4 Pro: <strong>~$2,500 AUD</strong></li>
-            <li>Switch + cables: <strong>~$350 AUD</strong></li>
-            <li>Mounts: <strong>~$200 AUD</strong></li>
-            <li><strong>Total: ~$3,530 AUD</strong></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="phase-pane" id="pp-2">
-      <h3>Phase 2 — Single Zone (10 Machines)</h3>
-      <div class="phase-cards">
-        <div class="phase-card">
-          <div class="phase-card-title">Hardware</div>
-          <ul>
-            <li>12x Hikvision dome cameras</li>
-            <li>1x Dual RTX 4090 server (custom build)</li>
-            <li>1x Ubiquiti 24-port PoE switch</li>
-            <li>Permanent Unistrut + pendant mounts</li>
-            <li>Wire mesh cable trays installed</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Software Goals</div>
-          <ul>
-            <li>DeepSORT tracking across zone transitions</li>
-            <li>Electric weight stack integration for cable machines</li>
-            <li>Member app (iOS/Android) showing live logs</li>
-            <li>Gym owner dashboard with occupancy data</li>
-            <li>Automated alerts for machine hogging</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Success Criteria</div>
-          <ul>
-            <li>System runs 24/7 for 30 days without restart</li>
-            <li>100+ members enrolled in face ID</li>
-            <li>Weight detection 90%+ accurate</li>
-            <li>App used by 50%+ of enrolled members</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Budget</div>
-          <ul>
-            <li>Cameras (12x): <strong>~$1,800 AUD</strong></li>
-            <li>GPU Server: <strong>~$12,000 AUD</strong></li>
-            <li>Switch + cabling: <strong>~$1,200 AUD</strong></li>
-            <li>Mounts + installation: <strong>~$2,500 AUD</strong></li>
-            <li><strong>Total: ~$17,500 AUD</strong></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="phase-pane" id="pp-3">
-      <h3>Phase 3 — Full Floor (40+ Machines)</h3>
-      <div class="phase-cards">
-        <div class="phase-card">
-          <div class="phase-card-title">Hardware</div>
-          <ul>
-            <li>40-50x Dahua dome cameras</li>
-            <li>4x GPU server nodes in rack</li>
-            <li>2x 48-port PoE switches</li>
-            <li>10GbE core switch</li>
-            <li>UPS backup (2kVA)</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Software Goals</div>
-          <ul>
-            <li>Full gym coverage, all machines tracked</li>
-            <li>Cross-camera person tracking (handoff)</li>
-            <li>AI form feedback (injury prevention alerts)</li>
-            <li>Predictive churn model for gym owners</li>
-            <li>Automated monthly progress reports</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Success Criteria</div>
-          <ul>
-            <li>All 40+ machines covered</li>
-            <li>500+ members enrolled</li>
-            <li>99.5% uptime over 90 days</li>
-            <li>NPS score 8+ from member survey</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Budget</div>
-          <ul>
-            <li>Cameras (50x): <strong>~$5,500 AUD</strong></li>
-            <li>Server rack + 4 nodes: <strong>~$45,000 AUD</strong></li>
-            <li>Networking: <strong>~$5,000 AUD</strong></li>
-            <li>Installation: <strong>~$8,000 AUD</strong></li>
-            <li><strong>Total: ~$63,500 AUD</strong></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="phase-pane" id="pp-4">
-      <h3>Phase 4 — Multi-Gym Enterprise</h3>
-      <div class="phase-cards">
-        <div class="phase-card">
-          <div class="phase-card-title">Hardware</div>
-          <ul>
-            <li>Packaged "Overseer Box" per gym</li>
-            <li>Edge inference (NVIDIA Jetson Orin)</li>
-            <li>Central cloud database (AWS/GCP)</li>
-            <li>Standardised camera kit per gym</li>
-            <li>Remote monitoring + management</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Software Goals</div>
-          <ul>
-            <li>Cross-gym member profiles</li>
-            <li>SaaS dashboard for gym operators</li>
-            <li>Automated installation wizard</li>
-            <li>API for third-party integrations</li>
-            <li>White-label app for gym brands</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Success Criteria</div>
-          <ul>
-            <li>5+ gyms running simultaneously</li>
-            <li>New gym deployable in under 2 days</li>
-            <li>Revenue from SaaS subscriptions</li>
-            <li>Patent filed on core tracking method</li>
-          </ul>
-        </div>
-        <div class="phase-card">
-          <div class="phase-card-title">Revenue Model</div>
-          <ul>
-            <li>Hardware kit: <strong>~$20,000 per gym</strong></li>
-            <li>SaaS fee: <strong>~$500/month per gym</strong></li>
-            <li>10 gyms = $5,000/month recurring</li>
-            <li>50 gyms = $25,000/month recurring</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="costs">
-  <div class="section-tag">Section 25 — Cost Breakdown</div>
-  <h2>Full <em>Cost Breakdown</em></h2>
-  <p class="lead">A complete summary of hardware costs across all phases, from the initial proof-of-concept to full enterprise deployment.</p>
   <div class="tbl">
     <table>
-      <thead><tr><th>Item</th><th>Phase 1</th><th>Phase 2</th><th>Phase 3</th></tr></thead>
+      <thead><tr><th>Milestone</th><th>Key Deliverables</th><th>Dependencies</th></tr></thead>
       <tbody>
-        <tr><td>Cameras</td><td>$480</td><td>$1,800</td><td>$5,500</td></tr>
-        <tr><td>Server / Compute</td><td>$2,500</td><td>$12,000</td><td>$45,000</td></tr>
-        <tr><td>Networking (switches)</td><td>$200</td><td>$650</td><td>$6,800</td></tr>
-        <tr><td>Cabling &amp; cable trays</td><td>$150</td><td>$550</td><td>$3,200</td></tr>
-        <tr><td>Mounts &amp; hardware</td><td>$200</td><td>$2,500</td><td>$8,000</td></tr>
-        <tr><td>Software / licences</td><td>$0</td><td>$500</td><td>$2,000</td></tr>
-        <tr><td><strong>Total (AUD)</strong></td><td class="td-green"><strong>~$3,530</strong></td><td class="td-green"><strong>~$18,000</strong></td><td class="td-green"><strong>~$70,500</strong></td></tr>
+        <tr>
+          <td><strong>1. Electric Stack Hardware</strong></td>
+          <td>
+            • Brushless motor assemblies installed on cable machines<br>
+            • Motor controllers wired to local network<br>
+            • Physical safety limits and locking mechanisms tested
+          </td>
+          <td>Custom fabrication complete</td>
+        </tr>
+        <tr>
+          <td><strong>2. Stack API & Firmware</strong></td>
+          <td>
+            • Local API endpoint exposed by motor controller<br>
+            • Two-way communication: <code>GET /weight</code> and <code>POST /set_weight</code><br>
+            • Latency tested under 10ms
+          </td>
+          <td>Hardware installed</td>
+        </tr>
+        <tr>
+          <td><strong>3. AI Integration</strong></td>
+          <td>
+            • AI pipeline updated: when person enters Cable Zone, query API instead of YOLO weight model<br>
+            • Pose estimation mapped to cable exercises (e.g. tricep pushdown)<br>
+            • LSTM trained on cable movement waveforms
+          </td>
+          <td>Stack API live</td>
+        </tr>
+        <tr>
+          <td><strong>4. Member UX</strong></td>
+          <td>
+            • Machine-mounted tablets deployed<br>
+            • UI for digital weight selection built<br>
+            • Auto-progression logic (system suggests next weight based on history)
+          </td>
+          <td>AI Integration complete</td>
+        </tr>
       </tbody>
     </table>
   </div>
+  
   <div class="callout purple">
-    <div class="ct">The Investment Logic</div>
-    <p>Phase 1 costs less than a single commercial treadmill. If the proof of concept works, Phase 2 is funded by the data and differentiation it creates. Phase 3 is a capital investment that turns XL Fitness into a technology company, not just a gym.</p>
-  </div>
-  <div class="stat-row">
-    <div class="stat-box"><div class="sn">$3.5k</div><div class="sl">Phase 1 Cost</div></div>
-    <div class="stat-box"><div class="sn">$18k</div><div class="sl">Phase 2 Cost</div></div>
-    <div class="stat-box"><div class="sn">$70k</div><div class="sl">Phase 3 Cost</div></div>
-    <div class="stat-box"><div class="sn">$500</div><div class="sl">Monthly SaaS / Gym</div></div>
+    <div class="ct">The Electric Handshake</div>
+    <p>In Phase 2, the workflow becomes completely seamless. John taps his card at the door. DeepSORT tracks him to the Cable Crossover. The AI knows John's last tricep pushdown was 25kg. It sends a <code>POST /set_weight {"weight": 25}</code> to the motor controller. The brushless motor whirs, locking the stack at 25kg before John even touches the handle. He does 12 reps. The LSTM counts them. The system logs 25kg x 12 reps to his profile.</p>
   </div>
 </section>
-
-</div>
-
 <script>
 const sections = document.querySelectorAll('.section, .hero');
 const navLinks = document.querySelectorAll('.nav-link');
