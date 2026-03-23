@@ -1865,11 +1865,11 @@ function switchPhase(num) {
 
   <div class="callout what">
     <div class="ct">// THE DECISION</div>
-    <p>Build a compact, self-contained prototype using <strong>Raspberry Pi 5 (4GB)</strong> units and <strong>Pi Camera Module 3 Wide</strong> cameras. Three Pis, one per task, all feeding data to Donkey Runs (Mac Mini M4). This system will be used to validate the AI models, collect training data, and demonstrate the full pipeline to stakeholders before committing to the production camera infrastructure.</p>
+    <p>Build a compact, self-contained prototype using <strong>Raspberry Pi 5 (4GB)</strong> units and <strong>Pi Camera Module 3 Wide</strong> cameras. <strong>Three Pis are mounted together above a single machine station</strong> — each Pi handles one task for that station. All three feed data to Donkey Runs (Mac Mini M4). This system will be used to validate the AI models, collect training data, and demonstrate the full pipeline to stakeholders before committing to the production camera infrastructure.</p>
   </div>
 
   <h3>Why Raspberry Pi 5?</h3>
-  <p>The Pi 5 is the right choice for this prototype for three reasons. First, it is compact enough to mount directly on the truss frame alongside the camera — no separate enclosure needed. Second, it is powerful enough to run lightweight AI inference (YOLOv8n at 15 FPS, MoveNet Lightning at 22 FPS) without a GPU. Third, if we later move to a different camera system (Hikvision dome, Axis box camera, or a dedicated machine vision camera), the Pi can be repurposed for other tasks in the gym — controlling the electric weight stack motors, running the tablet UI, or acting as a network relay.</p>
+  <p>The Pi 5 is the right choice for this prototype for three reasons. First, it is compact enough to mount directly on the truss frame alongside the camera — all three Pis and their cameras sit above a single machine station without dominating the space. Second, it is powerful enough to run lightweight AI inference (YOLOv8n at 15 FPS, MoveNet Lightning at 22 FPS) without a GPU. Third, and most importantly, the Pi is a <strong>camera-agnostic mount</strong>. If we later move to a better camera — a Hikvision dome, an Axis box camera, or a dedicated machine vision sensor — we simply unplug the Pi Camera Module 3 and connect the new camera. The Pi stays on the truss, the software stays on the Pi, only the camera hardware changes. The training data collected with the Pi camera remains valid and reusable.</p>
 
   <h3>Pi 5 4GB vs 8GB — The Honest Answer</h3>
   <div class="tbl">
@@ -1932,6 +1932,7 @@ function switchPhase(num) {
         <tr><td>Week 2–3</td><td>🟠 Third</td><td>Annotate Pi 3 training frames in Roboflow (500+ frames)</td><td>Annotation takes 45–90 minutes with auto-label assist</td></tr>
         <tr><td>Week 3</td><td>🟠 Third</td><td>Train YOLOv8n on annotated plate dataset on Mac Mini</td><td>~2 hours training time on Mac Mini M4</td></tr>
         <tr><td>Week 3</td><td>🟢 Final</td><td>Deploy trained weights to Pi 3 — end-to-end test</td><td>Full system test: one person, one barbell, one set logged correctly</td></tr>
+        <tr><td>Week 4+</td><td>🔵 Scale</td><td>Add a second 3-Pi cluster for a second machine station</td><td>Proves the cluster architecture scales — same code, new hardware</td></tr>
       </tbody>
     </table>
   </div>
@@ -1945,7 +1946,7 @@ function switchPhase(num) {
 <section class="section" id="proto-overview">
   <div class="section-tag">// SECTION 26 — CHAPTER 07</div>
   <h2>MVP Prototype <em>Overview</em></h2>
-  <p class="lead">The MVP has one job: prove that a camera can watch a person do a barbell set and correctly log who they are, how much weight is on the bar, and how many reps they completed. Nothing more.</p>
+  <p class="lead">The MVP has one job: prove that a cluster of three cameras above a single machine station can watch a person do a barbell set and correctly log who they are, how much weight is on the bar, and how many reps they completed. Nothing more.</p>
 
   <div class="callout what">
     <div class="ct">// THE MVP GOAL</div>
@@ -1957,25 +1958,26 @@ function switchPhase(num) {
     <div class="img-caption">// The truss-mounted camera rig — this is the aesthetic and mounting approach for the prototype frame</div>
   </div>
 
-  <h3>Why Three Raspberry Pis?</h3>
-  <p>The prototype deliberately uses three separate Raspberry Pi 5 units rather than one powerful machine. This is intentional — it forces us to solve the distributed network problem early. In the full production system, multiple edge nodes will send data to a central server. Building that architecture now, even at small scale, means we discover the real problems (latency, dropped frames, ID synchronisation) before we have 20 cameras and 200 members depending on it.</p>
-  <p>Each Pi handles exactly one task. This mirrors the production architecture where each AI model is a specialist. If Pi 3 (weight detection) fails, the other two keep running. The system degrades gracefully rather than crashing entirely.</p>
+  <h3>The 3-Pi Station Cluster</h3>
+  <p>Three Raspberry Pi 5 units are mounted together on the truss directly above a single machine station. They are a cluster — all three point at the same person and the same equipment from different angles. Pi 1 looks straight down for tracking, Pi 2 looks at a 20–30° angle to see the full body for pose estimation, and Pi 3 looks side-on at barbell height to read the plate colours. Together they cover everything needed to log a complete set.</p>
+  <p>Each Pi handles exactly one task. This is intentional — it mirrors the production architecture where each AI model is a specialist. If Pi 3 (weight detection) fails, the other two keep running. The system degrades gracefully rather than crashing entirely. When the gym scales to multiple machine stations, each station gets its own 3-Pi cluster. Donkey Runs receives data from all clusters simultaneously.</p>
+  <p>The Pis are also <strong>camera-agnostic</strong>. The camera connects to the Pi via a ribbon cable. If a better camera becomes available — higher resolution, better low-light performance, wider lens — it is swapped in without touching the Pi, the software, or the training data. The upgrade path is always: swap the camera, fine-tune with 50–100 new frames, redeploy. Nothing else changes.</p>
 
   <div class="tbl">
     <table>
-      <thead><tr><th>Node</th><th>Device</th><th>Task</th><th>Camera Position</th><th>Sends to Donkey Runs</th></tr></thead>
+      <thead><tr><th>Node</th><th>Device</th><th>Task</th><th>Mount Position (all above same station)</th><th>Sends to Donkey Runs</th></tr></thead>
       <tbody>
-        <tr><td><strong>Pi 1</strong></td><td>Raspberry Pi 5 (4GB)</td><td>People Tracking (YOLO + DeepSORT)</td><td>Overhead, wide angle — full zone view</td><td>Bounding boxes + Tracking IDs (JSON over UDP)</td></tr>
-        <tr><td><strong>Pi 2</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Pose Estimation + Rep Counting</td><td>Overhead, angled — full body visible</td><td>17-point skeleton + Rep events (JSON over UDP)</td></tr>
-        <tr><td><strong>Pi 3</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Barbell Plate Colour Detection</td><td>Side-on — barbell sleeve clearly visible</td><td>Plate colour array + Weight total (JSON over UDP)</td></tr>
-        <tr><td><strong>Donkey Runs</strong></td><td>Mac Mini M4 (16GB)</td><td>Data Fusion + Logging + Dashboard</td><td>N/A — server only</td><td>Receives from all 3 Pis, writes to PostgreSQL</td></tr>
+        <tr><td><strong>Pi 1</strong></td><td>Raspberry Pi 5 (4GB)</td><td>People Tracking (YOLO + DeepSORT)</td><td>Straight down — full floor zone view of the station</td><td>Bounding boxes + Tracking IDs (JSON over UDP)</td></tr>
+        <tr><td><strong>Pi 2</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Pose Estimation + Rep Counting</td><td>20–30° tilt — full body and limbs visible</td><td>17-point skeleton + Rep events (JSON over UDP)</td></tr>
+        <tr><td><strong>Pi 3</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Barbell Plate Colour Detection</td><td>Side-on at barbell sleeve height — plate edges clearly visible</td><td>Plate colour array + Weight total (JSON over UDP)</td></tr>
+        <tr><td><strong>Donkey Runs</strong></td><td>Mac Mini M4 (16GB)</td><td>Data Fusion + Logging + Dashboard</td><td>N/A — central server, not on the truss</td><td>Receives from all station clusters, writes to PostgreSQL</td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="callout how">
     <div class="ct">// WHY THIS IS THE BEST WAY TO BUILD AN MVP</div>
-    <p>Running everything on one machine (a laptop or the Mac Mini directly) would be faster to set up but would teach us nothing about the real system. The distributed Pi architecture forces us to solve the actual hard problems: network synchronisation, frame timestamps, ID handoff between nodes, and graceful failure handling. These problems do not get easier when you scale up — they get harder. Solve them at small scale now.</p>
+    <p>Running everything on one machine (a laptop or the Mac Mini directly) would be faster to set up but would teach us nothing about the real system. The 3-Pi station cluster forces us to solve the actual hard problems at small scale: network synchronisation, frame timestamps, ID handoff between nodes, and graceful failure handling. When the system scales to 10 machine stations (30 Pis), these problems are already solved. Scaling is just adding more clusters — the architecture does not change.</p>
   </div>
 
   <div class="img-block">
@@ -2173,7 +2175,7 @@ function switchPhase(num) {
 
   <div class="callout analogy">
     <div class="ct">// THINK OF IT LIKE THIS</div>
-    <p>The three Pis are like three different specialists watching the same workout from different angles and calling out what they see. Pi 1 says "John is at the squat rack." Pi 2 says "He just completed rep 4." Pi 3 says "The bar has 80kg on it." Donkey Runs is the coach sitting at a desk who hears all three, writes it down, and builds the complete picture: "John did 4 reps of squat at 80kg."</p>
+    <p>The three Pis above a station are like three specialists watching the same workout from different angles and calling out what they see. Pi 1 says "John is at the squat rack." Pi 2 says "He just completed rep 4." Pi 3 says "The bar has 80kg on it." Donkey Runs is the coach at a central desk who hears all three, writes it down, and builds the complete picture: "John did 4 reps of squat at 80kg." When there are 10 stations, there are 10 sets of three specialists — all reporting back to the same coach.</p>
   </div>
 
   <h3>The Data Fusion Problem</h3>
