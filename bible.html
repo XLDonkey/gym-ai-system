@@ -1831,7 +1831,7 @@ function switchPhase(num) {
   <div class="ch-inner">
     <div class="ch-num">// CHAPTER 07</div>
     <h1>The <em>Prototype</em></h1>
-    <p class="ch-desc">Before we build the full system, we prove the core concepts work in the real world. This chapter documents the MVP prototype — three Raspberry Pi nodes each handling one major task, feeding data back to Donkey Runs (Mac Mini M4). This is where the theory becomes hardware.</p>
+    <p class="ch-desc">One machine. Full system. No shortcuts. This chapter documents the MVP prototype — a single machine station instrumented with the complete 3-Pi cluster running every capability: person tracking, pose estimation, rep counting, and weight detection. The training data is collected from these exact cameras in these exact mounted positions. This is where the theory becomes hardware.</p>
     <div class="ch-sections">
       <span class="ch-pill">25 — MVP Overview</span>
       <span class="ch-pill">26 — Hardware List</span>
@@ -1865,7 +1865,7 @@ function switchPhase(num) {
 
   <div class="callout what">
     <div class="ct">// THE DECISION</div>
-    <p>Build a compact, self-contained prototype using <strong>Raspberry Pi 5 (4GB)</strong> units and <strong>Pi Camera Module 3 Wide</strong> cameras. <strong>Three Pis are mounted together above a single machine station</strong> — each Pi handles one task for that station. All three feed data to Donkey Runs (Mac Mini M4). This system will be used to validate the AI models, collect training data, and demonstrate the full pipeline to stakeholders before committing to the production camera infrastructure.</p>
+    <p>Build a compact, self-contained prototype using <strong>Raspberry Pi 5 (4GB)</strong> units and <strong>Pi Camera Module 3 Wide</strong> cameras. <strong>One machine station. Three Pis mounted above it. Full system — every bell and whistle.</strong> Person tracking, pose estimation, rep counting, and weight detection all running simultaneously on a single station. All training data is collected from these exact cameras in these exact mounted positions — not from stock footage, not from a different angle, not approximated. The model learns what it will actually see. All three Pis feed data to Donkey Runs (Mac Mini M4).</p>
   </div>
 
   <h3>Why Raspberry Pi 5?</h3>
@@ -1910,12 +1910,13 @@ function switchPhase(num) {
 
   <p>The Wide variant's 102° field of view is the key advantage. From a truss mounting height of 2.5–3.5 metres, the standard 66° lens covers roughly a 3×3 metre floor area. The Wide lens covers roughly a 5×5 metre area — enough to capture a full barbell station including the person, the bar, and both loaded sleeves in a single frame without repositioning.</p>
 
-  <h3>Training Data Portability — A Critical Advantage</h3>
-  <p>One of the most important decisions in this plan is that the training data collected during the prototype phase is fully reusable regardless of what camera system is used in production. The YOLO model trained to detect AlphaFit plate colours learns the relationship between colour and weight — it does not learn anything specific about the Pi Camera Module 3's sensor characteristics. When the production system uses Hikvision dome cameras or Axis box cameras, the model can be fine-tuned with a small number of new frames (50–100) from the new camera angle to account for any differences in colour rendering or perspective. The core 500+ frame training dataset remains valid and does not need to be recollected.</p>
+  <h3>Training From the Exact Camera Position — Why This Matters</h3>
+  <p>All training data for the weight detection model (Pi 3) is collected from the Pi Camera Module 3 Wide mounted in its final position on the truss, at the exact height and angle it will operate at permanently. This is not a shortcut — it is the correct approach. A model trained on footage from a different angle, a different height, or a different camera will have a distribution mismatch when deployed. Training in-situ means the model learns exactly the lighting conditions, perspective distortion, and plate appearance it will encounter every time it runs.</p>
+  <p>The same principle applies to Pi 2 (pose estimation). The LSTM rep counter is trained on footage of real people performing exercises at this station, captured by Pi 2's camera at its mounted angle. The joint angle patterns it learns are specific to this viewpoint. When the system scales to additional stations, each new station's cameras are used to collect a small fine-tuning dataset (~200 frames) to account for any differences in angle or lighting. The core model transfers — only the fine-tuning is new.</p>
 
   <div class="callout how">
-    <div class="ct">// WHY THIS MATTERS FOR STAKEHOLDERS</div>
-    <p>The time invested in annotating training data during the prototype phase is not wasted when the system scales up. Every annotated frame of an AlphaFit plate is a permanent asset. The same applies to the pose estimation LSTM training data — rep patterns learned from the Pi camera footage transfer directly to the production camera system. Build the dataset now, use it forever.</p>
+    <div class="ct">// THE RULE: TRAIN WHERE YOU DEPLOY</div>
+    <p>Never train on footage from a different camera or position than the one the model will run on. The Pi Camera Module 3 Wide footage collected at this station is the ground truth. When cameras are upgraded in production, a small fine-tuning dataset (50–100 frames) from the new camera is sufficient to adapt the model — the core training data remains valid. Build the dataset in the real environment, and it will work in the real environment.</p>
   </div>
 
   <h3>Recommended Build Order</h3>
@@ -1932,25 +1933,25 @@ function switchPhase(num) {
         <tr><td>Week 2–3</td><td>🟠 Third</td><td>Annotate Pi 3 training frames in Roboflow (500+ frames)</td><td>Annotation takes 45–90 minutes with auto-label assist</td></tr>
         <tr><td>Week 3</td><td>🟠 Third</td><td>Train YOLOv8n on annotated plate dataset on Mac Mini</td><td>~2 hours training time on Mac Mini M4</td></tr>
         <tr><td>Week 3</td><td>🟢 Final</td><td>Deploy trained weights to Pi 3 — end-to-end test</td><td>Full system test: one person, one barbell, one set logged correctly</td></tr>
-        <tr><td>Week 4+</td><td>🔵 Scale</td><td>Add a second 3-Pi cluster for a second machine station</td><td>Proves the cluster architecture scales — same code, new hardware</td></tr>
+        <tr><td>Week 4</td><td>🔵 Validate</td><td>Run 50 test sets with different people and weights — log accuracy results</td><td>Must hit 90% accuracy across all three metrics before stakeholder demo</td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="callout success">
     <div class="ct">// MVP SUCCESS CRITERIA</div>
-    <p>The prototype is considered successful when the system correctly logs a complete set with: <strong>correct member identity</strong> (from card tap), <strong>correct weight</strong> (within ±2.5kg), and <strong>correct rep count</strong> (within ±1 rep) — for 9 out of 10 consecutive test sets. This is the gate before presenting to stakeholders for Phase 1 approval.</p>
+    <p>The prototype is considered successful when the full system — all three Pis running simultaneously — correctly logs a complete set with: <strong>correct member identity</strong> (from card tap), <strong>correct weight</strong> (within ±2.5kg), and <strong>correct rep count</strong> (within ±1 rep) — for <strong>9 out of 10 consecutive test sets</strong>, performed by different people, with different weights loaded. This is the gate before presenting to stakeholders for Phase 1 approval and expansion to additional stations.</p>
   </div>
 </section>
 
 <section class="section" id="proto-overview">
   <div class="section-tag">// SECTION 26 — CHAPTER 07</div>
   <h2>MVP Prototype <em>Overview</em></h2>
-  <p class="lead">The MVP has one job: prove that a cluster of three cameras above a single machine station can watch a person do a barbell set and correctly log who they are, how much weight is on the bar, and how many reps they completed. Nothing more.</p>
+  <p class="lead">The MVP has one job: prove that the complete system works on a single machine station. All three Pis active. All four AI tasks running. Real training data from the real cameras in the real positions. If it works here, it works everywhere.</p>
 
   <div class="callout what">
     <div class="ct">// THE MVP GOAL</div>
-    <p>One person. One barbell. One set. The system must correctly log: <strong>Member ID</strong>, <strong>Weight on bar</strong>, and <strong>Rep count</strong> — with greater than 90% accuracy before we scale to the full gym.</p>
+    <p><strong>One machine. One person. One set. Full system.</strong> The prototype is not a simplified version — it is the complete system running on a single station. Person tracking, pose estimation, rep counting, and weight detection all active simultaneously. The system must correctly log: <strong>Member ID</strong>, <strong>Weight on bar</strong>, and <strong>Rep count</strong> — with greater than 90% accuracy. Only then do we scale to additional stations.</p>
   </div>
 
   <div class="img-block">
