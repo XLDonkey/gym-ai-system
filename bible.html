@@ -344,8 +344,7 @@
 <nav class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">XL Fitness</div>
-    <div class="brand-sub">AI Overseer — The Bible</div>
-    <a href="prototype.html" style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:7px 14px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.4);border-radius:6px;font-size:11px;font-weight:700;color:#a78bfa;text-decoration:none;letter-spacing:0.04em;" onmouseover="this.style.background='rgba(139,92,246,0.22)'" onmouseout="this.style.background='rgba(139,92,246,0.12)'">&#9889; Prototype Log &rarr;</a>
+    <div class="brand-sub">AI Overseer — The Bible v13.0</div>
   </div>
   <div class="nav-group">Chapter 1 — The Vision</div>
   <a class="nav-link" href="#vision">01 — What We're Building</a>
@@ -376,6 +375,14 @@
   <div class="nav-group">Chapter 6 — Roadmap</div>
   <a class="nav-link" href="#phases">23 — Interactive Roadmap</a>
   <a class="nav-link" href="#costs">24 — Cost Breakdown</a>
+  <div class="nav-group">Chapter 7 — Prototyping</div>
+  <a class="nav-link" href="#proto-overview">25 — MVP Prototype Overview</a>
+  <a class="nav-link" href="#proto-hardware">26 — Prototype Hardware</a>
+  <a class="nav-link" href="#proto-pi1">27 — Pi 1: People Tracker</a>
+  <a class="nav-link" href="#proto-pi2">28 — Pi 2: Rep Counter</a>
+  <a class="nav-link" href="#proto-pi3">29 — Pi 3: Weight Reader</a>
+  <a class="nav-link" href="#proto-donkey">30 — Donkey Runs (Server)</a>
+  <a class="nav-link" href="#proto-log">31 — Build Log</a>
 </nav>
 
 <div class="main">
@@ -1815,6 +1822,337 @@ function switchPhase(num) {
   document.querySelectorAll('.phase-tab')[num - 1].classList.add('active');
 }
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     CHAPTER 7 — PROTOTYPING
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="chapter-divider" id="ch-prototyping">
+  <div class="ch-inner">
+    <div class="ch-num">// CHAPTER 07</div>
+    <h1>The <em>Prototype</em></h1>
+    <p class="ch-desc">Before we build the full system, we prove the core concepts work in the real world. This chapter documents the MVP prototype — three Raspberry Pi nodes each handling one major task, feeding data back to Donkey Runs (Mac Mini M4). This is where the theory becomes hardware.</p>
+    <div class="ch-sections">
+      <span class="ch-pill">25 — MVP Overview</span>
+      <span class="ch-pill">26 — Hardware List</span>
+      <span class="ch-pill">27 — Pi 1: People Tracker</span>
+      <span class="ch-pill">28 — Pi 2: Rep Counter</span>
+      <span class="ch-pill">29 — Pi 3: Weight Reader</span>
+      <span class="ch-pill">30 — Donkey Runs</span>
+      <span class="ch-pill">31 — Build Log</span>
+    </div>
+    <div class="ch-prereqs">
+      <div class="ch-prereqs-title">// Prerequisites before starting</div>
+      <div class="ch-prereq-list">
+        <span class="ch-prereq needed">3x Raspberry Pi 5 (4GB)</span>
+        <span class="ch-prereq needed">3x Pi Camera Module 3 Wide</span>
+        <span class="ch-prereq needed">Truss frame section built</span>
+        <span class="ch-prereq needed">Mac Mini (Donkey Runs) on local network</span>
+        <span class="ch-prereq needed">AlphaFit barbell + plates available</span>
+        <span class="ch-prereq future">Full camera grid (Phase 1)</span>
+        <span class="ch-prereq future">GPU inference server (Phase 2)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Section 25: MVP Overview ─────────────────────────────────────── -->
+<section class="section" id="proto-overview">
+  <div class="section-tag">// SECTION 25 — CHAPTER 07</div>
+  <h2>MVP Prototype <em>Overview</em></h2>
+  <p class="lead">The MVP has one job: prove that a camera can watch a person do a barbell set and correctly log who they are, how much weight is on the bar, and how many reps they completed. Nothing more.</p>
+
+  <div class="callout what">
+    <div class="ct">// THE MVP GOAL</div>
+    <p>One person. One barbell. One set. The system must correctly log: <strong>Member ID</strong>, <strong>Weight on bar</strong>, and <strong>Rep count</strong> — with greater than 90% accuracy before we scale to the full gym.</p>
+  </div>
+
+  <div class="img-block">
+    <img src="img/truss-camera-mount.webp" alt="Truss camera mount — the prototype frame reference">
+    <div class="img-caption">// The truss-mounted camera rig — this is the aesthetic and mounting approach for the prototype frame</div>
+  </div>
+
+  <h3>Why Three Raspberry Pis?</h3>
+  <p>The prototype deliberately uses three separate Raspberry Pi 5 units rather than one powerful machine. This is intentional — it forces us to solve the distributed network problem early. In the full production system, multiple edge nodes will send data to a central server. Building that architecture now, even at small scale, means we discover the real problems (latency, dropped frames, ID synchronisation) before we have 20 cameras and 200 members depending on it.</p>
+  <p>Each Pi handles exactly one task. This mirrors the production architecture where each AI model is a specialist. If Pi 3 (weight detection) fails, the other two keep running. The system degrades gracefully rather than crashing entirely.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Node</th><th>Device</th><th>Task</th><th>Camera Position</th><th>Sends to Donkey Runs</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pi 1</strong></td><td>Raspberry Pi 5 (4GB)</td><td>People Tracking (YOLO + DeepSORT)</td><td>Overhead, wide angle — full zone view</td><td>Bounding boxes + Tracking IDs (JSON over UDP)</td></tr>
+        <tr><td><strong>Pi 2</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Pose Estimation + Rep Counting</td><td>Overhead, angled — full body visible</td><td>17-point skeleton + Rep events (JSON over UDP)</td></tr>
+        <tr><td><strong>Pi 3</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Barbell Plate Colour Detection</td><td>Side-on — barbell sleeve clearly visible</td><td>Plate colour array + Weight total (JSON over UDP)</td></tr>
+        <tr><td><strong>Donkey Runs</strong></td><td>Mac Mini M4 (16GB)</td><td>Data Fusion + Logging + Dashboard</td><td>N/A — server only</td><td>Receives from all 3 Pis, writes to PostgreSQL</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout how">
+    <div class="ct">// WHY THIS IS THE BEST WAY TO BUILD AN MVP</div>
+    <p>Running everything on one machine (a laptop or the Mac Mini directly) would be faster to set up but would teach us nothing about the real system. The distributed Pi architecture forces us to solve the actual hard problems: network synchronisation, frame timestamps, ID handoff between nodes, and graceful failure handling. These problems do not get easier when you scale up — they get harder. Solve them at small scale now.</p>
+  </div>
+
+  <div class="img-block">
+    <img src="img/overhead-camera-rig.jpg" alt="Overhead camera rig showing multiple camera positions">
+    <div class="img-caption">// Overhead camera rig — each Pi camera will be mounted on the truss frame at a specific angle for its task</div>
+  </div>
+</section>
+
+<!-- ─── Section 26: Prototype Hardware ───────────────────────────────── -->
+<section class="section" id="proto-hardware">
+  <div class="section-tag">// SECTION 26 — CHAPTER 07</div>
+  <h2>Prototype <em>Hardware</em></h2>
+  <p class="lead">The full hardware list for the 3-Pi MVP prototype. Total estimated cost is under $800 AUD — a small investment to validate the entire system architecture before committing to the full production build.</p>
+
+  <h3>Camera Selection — Why Not the OV5647?</h3>
+  <p>The OV5647 5MP camera with IR LEDs (commonly sold as a "Raspberry Pi Night Vision Camera") is a popular choice but has three specific problems for this application. First, the infrared LED illuminators wash out colour information — the IR light reflects off the coloured plate stripes and makes them appear white or grey, destroying the colour detection. Second, 5 megapixels at a typical mounting height of 3–4 metres gives insufficient resolution to reliably distinguish between yellow (15kg) and green (10kg) stripes. Third, the fixed or manually-adjusted focus will drift if the truss frame is bumped during setup.</p>
+
+  <div class="callout warning">
+    <div class="ct">// DO NOT USE</div>
+    <p>The OV5647 IR camera is not suitable for Pi 3 (weight detection). The IR LEDs will destroy colour accuracy. It can be used for Pi 1 (people tracking) in a pinch since colour is not needed there, but the Pi Camera Module 3 is strongly preferred for all three nodes.</p>
+  </div>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Item</th><th>Qty</th><th>Spec</th><th>Use</th><th>Est. AUD</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Raspberry Pi 5 (4GB)</strong></td><td>3</td><td>ARM Cortex-A76, 4GB LPDDR4X, PCIe 2.0</td><td>One per task node</td><td>~$130 each</td></tr>
+        <tr><td><strong>Pi Camera Module 3 Wide</strong></td><td>3</td><td>12MP IMX708, 120° FoV, autofocus, HDR</td><td>One per Pi — Pi 3 must use this, not OV5647</td><td>~$50 each</td></tr>
+        <tr><td><strong>Camera ribbon cable (500mm)</strong></td><td>3</td><td>22-pin FPC, Pi 5 compatible</td><td>Extended reach to truss mount position</td><td>~$8 each</td></tr>
+        <tr><td><strong>SanDisk Extreme 64GB microSD</strong></td><td>3</td><td>A2 rated, 160MB/s read</td><td>OS + model weights per Pi</td><td>~$22 each</td></tr>
+        <tr><td><strong>PoE HAT for Pi 5</strong></td><td>3</td><td>802.3af PoE, 5V/5A output</td><td>Power Pi from the same Cat6 cable as data</td><td>~$35 each</td></tr>
+        <tr><td><strong>Truss clamp + ball head mount</strong></td><td>3</td><td>35mm clamp, 1/4" thread ball head</td><td>Attach Pi + camera to truss rail</td><td>~$25 each</td></tr>
+        <tr><td><strong>Cat6 cable (10m runs)</strong></td><td>3</td><td>Shielded, 550MHz</td><td>PoE power + data to each Pi</td><td>~$15 each</td></tr>
+        <tr><td><strong>8-port PoE switch</strong></td><td>1</td><td>802.3af/at, gigabit</td><td>Powers all 3 Pis + connects to Mac Mini</td><td>~$120</td></tr>
+        <tr><td><strong>Aluminium truss section (2m)</strong></td><td>2</td><td>Box truss, 290mm, load rated</td><td>Prototype frame — 2 sections joined</td><td>~$180 each</td></tr>
+        <tr><td colspan="4"><strong>Total Prototype Hardware</strong></td><td><strong>~$1,150</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="img-grid">
+    <div class="img-block">
+      <img src="img/raspberry-pi5-board.jpg" alt="Raspberry Pi 5 board">
+      <div class="img-caption">// Raspberry Pi 5 (4GB) — the compute node for each task</div>
+    </div>
+    <div class="img-block">
+      <img src="img/pi-camera-module3-wide.jpg" alt="Pi Camera Module 3 Wide">
+      <div class="img-caption">// Pi Camera Module 3 Wide — 12MP, 120° FoV, autofocus</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Section 27: Pi 1 — People Tracker ────────────────────────────── -->
+<section class="section" id="proto-pi1">
+  <div class="section-tag">// SECTION 27 — CHAPTER 07</div>
+  <h2>Pi 1 — <em>People Tracker</em></h2>
+  <p class="lead">Pi 1 is responsible for detecting and tracking the person in the prototype zone. It runs YOLO for detection and DeepSORT for persistent ID assignment, then streams bounding box data to Donkey Runs over UDP.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Parameter</th><th>Value</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>Camera position</td><td>Overhead, centre of zone, ~3m height</td><td>Maximum body coverage, minimal occlusion</td></tr>
+        <tr><td>Camera angle</td><td>Straight down (0° tilt) or slight angle (15°)</td><td>Straight down gives cleanest top-down bounding boxes</td></tr>
+        <tr><td>Detection model</td><td>YOLOv8n (nano) — person class only</td><td>Runs at ~15 FPS on Pi 5 without GPU acceleration</td></tr>
+        <tr><td>Tracking model</td><td>DeepSORT with <code>max_age=90</code></td><td>Holds ID for 3 seconds through occlusion</td></tr>
+        <tr><td>Output format</td><td>JSON: <code>&#123;"id":42,"x":320,"y":280,"w":180,"h":420,"conf":0.91&#125;</code></td><td>Lightweight, parseable by Donkey Runs fusion engine</td></tr>
+        <tr><td>Transmission</td><td>UDP to Donkey Runs port 5001</td><td>Low latency, acceptable packet loss at this scale</td></tr>
+        <tr><td>Target FPS</td><td>10–15 FPS</td><td>Sufficient for tracking at walking/exercise speed</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Build Checklist — Pi 1</h3>
+  <ul class="checklist">
+    <li><span class="check-icon todo">○</span>Flash Raspberry Pi OS (64-bit) to microSD</li>
+    <li><span class="check-icon todo">○</span>Install Python 3.11, pip, ultralytics, deep-sort-realtime</li>
+    <li><span class="check-icon todo">○</span>Mount Pi + Camera Module 3 Wide to truss clamp</li>
+    <li><span class="check-icon todo">○</span>Connect PoE HAT — verify Pi powers on via Cat6</li>
+    <li><span class="check-icon todo">○</span>Run <code>libcamera-hello</code> to confirm camera feed is live</li>
+    <li><span class="check-icon todo">○</span>Run tracker script — verify bounding boxes appear on test frame</li>
+    <li><span class="check-icon todo">○</span>Confirm UDP packets arriving at Donkey Runs port 5001</li>
+  </ul>
+</section>
+
+<!-- ─── Section 28: Pi 2 — Rep Counter ───────────────────────────────── -->
+<section class="section" id="proto-pi2">
+  <div class="section-tag">// SECTION 28 — CHAPTER 07</div>
+  <h2>Pi 2 — <em>Rep Counter</em></h2>
+  <p class="lead">Pi 2 watches the person's body and counts repetitions. It runs MoveNet Lightning for pose estimation (17 keypoints) and a pre-trained LSTM for rep detection, streaming rep events to Donkey Runs.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Parameter</th><th>Value</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>Camera position</td><td>Overhead, slightly angled (20–30° tilt)</td><td>Pure top-down breaks pose estimation — slight angle gives limb visibility</td></tr>
+        <tr><td>Camera angle</td><td>20–30° from vertical, aimed at barbell station</td><td>Elbow and knee joints visible from this angle</td></tr>
+        <tr><td>Pose model</td><td>MoveNet Lightning (TFLite, int8 quantised)</td><td>~22 FPS on Pi 5 — fast enough for real-time rep detection</td></tr>
+        <tr><td>Rep model</td><td>LSTM (pre-trained on barbell curl, squat, press)</td><td>Watches 60-frame rolling window of joint angles</td></tr>
+        <tr><td>Output format</td><td>JSON: <code>&#123;"event":"rep","exercise":"curl","count":3,"conf":0.94&#125;</code></td><td>Event-driven — only sends on rep completion, not every frame</td></tr>
+        <tr><td>Transmission</td><td>UDP to Donkey Runs port 5002</td><td>Event-driven so packet loss is acceptable</td></tr>
+        <tr><td>Target FPS</td><td>20–25 FPS pose, rep events as triggered</td><td>Higher FPS needed to catch fast concentric phases</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Build Checklist — Pi 2</h3>
+  <ul class="checklist">
+    <li><span class="check-icon todo">○</span>Flash Raspberry Pi OS (64-bit) to microSD</li>
+    <li><span class="check-icon todo">○</span>Install Python 3.11, TensorFlow Lite runtime, numpy</li>
+    <li><span class="check-icon todo">○</span>Download MoveNet Lightning TFLite model (int8)</li>
+    <li><span class="check-icon todo">○</span>Mount Pi + Camera at 20–30° tilt on truss</li>
+    <li><span class="check-icon todo">○</span>Run pose test — verify 17 keypoints detected on live feed</li>
+    <li><span class="check-icon todo">○</span>Load pre-trained LSTM — run barbell curl test, verify rep count increments</li>
+    <li><span class="check-icon todo">○</span>Confirm rep event UDP packets arriving at Donkey Runs port 5002</li>
+  </ul>
+</section>
+
+<!-- ─── Section 29: Pi 3 — Weight Reader ─────────────────────────────── -->
+<section class="section" id="proto-pi3">
+  <div class="section-tag">// SECTION 29 — CHAPTER 07</div>
+  <h2>Pi 3 — <em>Weight Reader</em></h2>
+  <p class="lead">Pi 3 reads the weight on the barbell by detecting the colour stripes on the AlphaFit bumper plates. It uses a custom-trained YOLOv8n model to identify each plate's colour from the side, then calculates the total load.</p>
+
+  <div class="img-block">
+    <img src="img/alphafit-colour-plates.webp" alt="AlphaFit colour-coded bumper plates">
+    <div class="img-caption">// AlphaFit colour-coded bumper plates — the yellow/green/red/blue stripes are what Pi 3 reads from the side</div>
+  </div>
+
+  <div class="callout what">
+    <div class="ct">// HOW THE COLOUR READING WORKS</div>
+    <p>From the side, each plate shows a thick coloured stripe running around its circumference. Pi 3's camera is positioned at barbell height, aimed at the sleeve end of the bar. The YOLO model detects each visible plate as a bounding box and classifies its colour. The system then maps colour → weight using the AlphaFit standard and sums the plates on both sides.</p>
+  </div>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Stripe Colour</th><th>Weight (AlphaFit)</th><th>Detection Confidence Target</th></tr></thead>
+      <tbody>
+        <tr><td>🔴 Red</td><td>25 kg</td><td>&gt;95%</td></tr>
+        <tr><td>🔵 Blue</td><td>20 kg</td><td>&gt;95%</td></tr>
+        <tr><td>🟡 Yellow</td><td>15 kg</td><td>&gt;92%</td></tr>
+        <tr><td>🟢 Green</td><td>10 kg</td><td>&gt;92%</td></tr>
+        <tr><td>⚪ White</td><td>5 kg</td><td>&gt;88%</td></tr>
+        <tr><td>⚫ Black (no stripe)</td><td>Collar / 2.5 kg</td><td>&gt;85%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="img-block">
+    <img src="img/weight-detection-demo.webp" alt="Weight detection demo showing colour plate identification">
+    <div class="img-caption">// Working proof of concept — Blue 20kg + Yellow 10kg × 2 = 50kg total detected and labelled in real time</div>
+  </div>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Parameter</th><th>Value</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>Camera position</td><td>Side-on, barbell sleeve height (~0.9m from floor)</td><td>Plate edge stripes are clearly visible from the side</td></tr>
+        <tr><td>Camera angle</td><td>Perpendicular to bar, slight upward tilt (5–10°)</td><td>Maximises visible plate edge area</td></tr>
+        <tr><td>Detection model</td><td>YOLOv8n — custom trained on AlphaFit plates</td><td>Lightweight, fast, trained specifically on our plates</td></tr>
+        <tr><td>Training data</td><td>500+ annotated frames of AlphaFit plates</td><td>Minimum viable training set for colour classification</td></tr>
+        <tr><td>Annotation tool</td><td>Roboflow (free tier)</td><td>Browser-based, exports YOLO format directly</td></tr>
+        <tr><td>Output format</td><td>JSON: <code>&#123;"plates":["blue_20","yellow_10","yellow_10"],"total_kg":50&#125;</code></td><td>Pre-summed total sent to Donkey Runs</td></tr>
+        <tr><td>Transmission</td><td>UDP to Donkey Runs port 5003</td><td>Sends on change only — weight doesn't change mid-set</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Training the Weight Detection Model</h3>
+  <p>Pi 3 is the only node that requires a custom-trained model from scratch (the other two use pre-trained models). The training process is straightforward but requires collecting good data first. The steps are: film 30–60 minutes of footage of the AlphaFit plates being loaded and unloaded on the barbell from the side-on camera angle. Extract frames at 1 FPS (giving ~1,800–3,600 frames). Upload to Roboflow and annotate each plate with a bounding box and colour label. Export in YOLOv8 format. Train YOLOv8n on a laptop or the Mac Mini for ~2 hours. Deploy the trained weights to Pi 3.</p>
+
+  <div class="callout tip">
+    <div class="ct">// PRO TIP — ANNOTATION EFFICIENCY</div>
+    <p>Use Roboflow's auto-labelling feature to pre-annotate the frames using a general object detection model, then manually correct the labels. This reduces annotation time from ~4 hours to ~45 minutes for 500 frames. Focus annotation effort on edge cases: partially obscured plates, plates at the edge of the frame, and low-light conditions.</p>
+  </div>
+
+  <h3>Build Checklist — Pi 3</h3>
+  <ul class="checklist">
+    <li><span class="check-icon todo">○</span>Flash Raspberry Pi OS (64-bit) to microSD</li>
+    <li><span class="check-icon todo">○</span>Install Python 3.11, ultralytics, opencv-python</li>
+    <li><span class="check-icon todo">○</span>Mount Pi + Camera Module 3 Wide at barbell sleeve height, side-on</li>
+    <li><span class="check-icon todo">○</span>Film 45 min of plate loading footage from mounted position</li>
+    <li><span class="check-icon todo">○</span>Annotate 500+ frames in Roboflow — label each plate colour</li>
+    <li><span class="check-icon todo">○</span>Train YOLOv8n on annotated dataset — target mAP &gt;0.90</li>
+    <li><span class="check-icon todo">○</span>Deploy trained weights to Pi 3 — verify colour detection live</li>
+    <li><span class="check-icon todo">○</span>Confirm weight JSON packets arriving at Donkey Runs port 5003</li>
+  </ul>
+</section>
+
+<!-- ─── Section 30: Donkey Runs ───────────────────────────────────────── -->
+<section class="section" id="proto-donkey">
+  <div class="section-tag">// SECTION 30 — CHAPTER 07</div>
+  <h2>Donkey Runs — <em>The Server</em></h2>
+  <p class="lead">Donkey Runs is the Mac Mini M4 that receives data from all three Pis, fuses it into a coherent workout log, and serves the dashboard. It is the brain of the prototype — the Pis are just its eyes.</p>
+
+  <div class="callout analogy">
+    <div class="ct">// THINK OF IT LIKE THIS</div>
+    <p>The three Pis are like three different specialists watching the same workout from different angles and calling out what they see. Pi 1 says "John is at the squat rack." Pi 2 says "He just completed rep 4." Pi 3 says "The bar has 80kg on it." Donkey Runs is the coach sitting at a desk who hears all three, writes it down, and builds the complete picture: "John did 4 reps of squat at 80kg."</p>
+  </div>
+
+  <h3>The Data Fusion Problem</h3>
+  <p>The hardest part of the server is not receiving the data — it is correlating three independent streams that have slightly different timestamps and frame rates. Pi 1 sends at 15 FPS, Pi 2 at 22 FPS, Pi 3 only when the weight changes. Donkey Runs must match a rep event from Pi 2 (timestamped 14:32:07.441) with the correct tracking ID from Pi 1 (last seen at 14:32:07.388) and the weight reading from Pi 3 (last updated at 14:32:05.002). The fusion engine uses a 500ms sliding window — any events within 500ms of each other are considered simultaneous and merged into a single log entry.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Component</th><th>Technology</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td>UDP Listener</td><td>Python asyncio socket server</td><td>Receives JSON packets from all 3 Pis on ports 5001–5003</td></tr>
+        <tr><td>Fusion Engine</td><td>Python — sliding window correlator</td><td>Matches tracking IDs, rep events, and weight readings by timestamp</td></tr>
+        <tr><td>Database</td><td>PostgreSQL (local)</td><td>Stores every set: member_id, exercise, weight_kg, reps, timestamp</td></tr>
+        <tr><td>Dashboard</td><td>FastAPI + simple HTML</td><td>Live view of current session — accessible from any device on the local network</td></tr>
+        <tr><td>Member lookup</td><td>SQLite (simple for prototype)</td><td>Maps tracking ID to member name after card-tap confirmation</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Network Configuration</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Device</th><th>Static IP</th><th>Port</th><th>Connection</th></tr></thead>
+      <tbody>
+        <tr><td>Donkey Runs (Mac Mini M4)</td><td>192.168.1.10</td><td>5001, 5002, 5003 (UDP in) / 8080 (dashboard)</td><td>Gigabit Ethernet to PoE switch</td></tr>
+        <tr><td>Pi 1 — People Tracker</td><td>192.168.1.21</td><td>Sends to 5001</td><td>PoE Cat6 to switch</td></tr>
+        <tr><td>Pi 2 — Rep Counter</td><td>192.168.1.22</td><td>Sends to 5002</td><td>PoE Cat6 to switch</td></tr>
+        <tr><td>Pi 3 — Weight Reader</td><td>192.168.1.23</td><td>Sends to 5003</td><td>PoE Cat6 to switch</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Build Checklist — Donkey Runs</h3>
+  <ul class="checklist">
+    <li><span class="check-icon todo">○</span>Install PostgreSQL — create <code>gym_prototype</code> database and <code>sets</code> table</li>
+    <li><span class="check-icon todo">○</span>Write UDP listener — confirm packets received from all 3 Pis</li>
+    <li><span class="check-icon todo">○</span>Write fusion engine — 500ms sliding window correlator</li>
+    <li><span class="check-icon todo">○</span>Write to PostgreSQL — verify set entries appear after a test rep</li>
+    <li><span class="check-icon todo">○</span>Build FastAPI dashboard — live view at http://192.168.1.10:8080</li>
+    <li><span class="check-icon todo">○</span>End-to-end test: do 5 reps of barbell curl — verify correct log entry</li>
+  </ul>
+</section>
+
+<!-- ─── Section 31: Build Log ─────────────────────────────────────────── -->
+<section class="section" id="proto-log">
+  <div class="section-tag">// SECTION 31 — CHAPTER 07</div>
+  <h2>Prototype <em>Build Log</em></h2>
+  <p class="lead">A running record of prototype milestones, decisions, and discoveries. Updated as the build progresses.</p>
+
+  <div class="callout info">
+    <div class="ct">// HOW TO USE THIS LOG</div>
+    <p>Add a new entry each time a significant milestone is reached, a key decision is made, or an unexpected problem is discovered and solved. This log becomes the institutional memory of the prototype — useful when onboarding new team members and when debugging issues in the production system that may have roots in prototype decisions.</p>
+  </div>
+
+  <div class="log-entry">
+    <div class="log-date">// MAR 2026 — WEEK 1</div>
+    <div class="log-title">Prototype Architecture Defined</div>
+    <div class="log-body">Decision made to use 3 Raspberry Pi 5 units as distributed edge nodes rather than a single machine. Each Pi handles one task (tracking, rep counting, weight detection). Data fused on Donkey Runs (Mac Mini M4). Hardware list finalised. AlphaFit barbell plates confirmed as the target for colour-based weight detection.</div>
+  </div>
+
+  <div class="log-entry" style="border-left-color: var(--border); opacity: 0.4;">
+    <div class="log-date">// PENDING — NEXT ENTRY</div>
+    <div class="log-title">Hardware Received & First Boot</div>
+    <div class="log-body">Update this entry when Pi units arrive and first boot is confirmed. Note any setup issues, OS version used, and initial network configuration.</div>
+  </div>
+</section>
 
 </body>
 </html>
