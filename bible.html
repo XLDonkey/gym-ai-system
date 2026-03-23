@@ -385,7 +385,8 @@
   <a class="nav-link" href="#proto-data">31 — Data Collection Pipeline</a>
   <a class="nav-link" href="#proto-live">32 — The Live Loop Test</a>
   <a class="nav-link" href="#proto-donkey">33 — Donkey Runs (Server)</a>
-  <a class="nav-link" href="#proto-log">34 — Build Log</a>
+  <a class="nav-link" href="#proto-risk">34 — Risk Assessment</a>
+  <a class="nav-link" href="#proto-log">35 — Build Log</a>
 </nav>
 
 <div class="main">
@@ -1871,19 +1872,18 @@ function switchPhase(num) {
   </div>
 
   <h3>Why Raspberry Pi 5?</h3>
-  <p>The Pi 5 is the right choice for this prototype for three reasons. First, it is compact enough to mount directly on the truss frame alongside the camera — all three Pis and their cameras sit above a single machine station without dominating the space. Second, it is powerful enough to run lightweight AI inference (YOLOv8n at 15 FPS, MoveNet Lightning at 22 FPS) without a GPU. Third, and most importantly, the Pi is a <strong>camera-agnostic mount</strong>. If we later move to a better camera — a Hikvision dome, an Axis box camera, or a dedicated machine vision sensor — we simply unplug the Pi Camera Module 3 and connect the new camera. The Pi stays on the truss, the software stays on the Pi, only the camera hardware changes. The training data collected with the Pi camera remains valid and reusable.</p>
+  <p>The Pi 5 is the right choice for this prototype for three reasons. First, it is compact enough to mount directly on the truss frame alongside the camera — all three Pis and their cameras sit above a single machine station without dominating the space. Second, it is powerful enough to handle H.265 hardware encoding at 1080p/30fps with minimal CPU usage — leaving the network stream clean and consistent. Third, and most importantly, the Pi is a <strong>camera-agnostic mount</strong>. If we later move to a better camera — a Hikvision dome, an Axis box camera, or a dedicated machine vision sensor — we simply unplug the Pi Camera Module 3 and connect the new camera. The Pi stays on the truss, the software stays on the Pi, only the camera hardware changes. The training data collected with the Pi camera remains valid and reusable.</p>
 
   <h3>Pi 5 4GB vs 8GB — The Honest Answer</h3>
   <div class="tbl">
     <table>
       <thead><tr><th>Spec</th><th>Pi 5 4GB (~$130 AUD)</th><th>Pi 5 8GB (~$175 AUD)</th></tr></thead>
       <tbody>
-        <tr><td>YOLOv8n inference (people tracking)</td><td>✅ Runs fine at 15 FPS</td><td>✅ Runs fine at 15 FPS</td></tr>
-        <tr><td>MoveNet Lightning (pose estimation)</td><td>✅ Runs fine at 22 FPS</td><td>✅ Runs fine at 22 FPS</td></tr>
-        <tr><td>YOLOv8n custom (weight detection)</td><td>✅ Runs fine at 12 FPS</td><td>✅ Runs fine at 12 FPS</td></tr>
-        <tr><td>Running two models simultaneously</td><td>⚠️ Tight — possible but not recommended</td><td>✅ Comfortable</td></tr>
-        <tr><td>One task per Pi (our architecture)</td><td>✅ Ideal — no wasted RAM</td><td>✅ Fine but overkill</td></tr>
-        <tr><td><strong>Verdict</strong></td><td><strong>✅ Use this — one task per Pi</strong></td><td>Only if combining tasks on one Pi</td></tr>
+        <tr><td>H.265 hardware encoding at 1080p/30fps</td><td>✅ Handled by hardware encoder</td><td>✅ Handled by hardware encoder</td></tr>
+        <tr><td>RTSP streaming to Mac Mini</td><td>✅ Runs fine — minimal CPU</td><td>✅ Runs fine — minimal CPU</td></tr>
+        <tr><td>Running <code>picamera2</code> + RTSP server</td><td>✅ Idle CPU ~15%</td><td>✅ Idle CPU ~15%</td></tr>
+        <tr><td>Running AI inference on the Pi</td><td>❌ Not required — all inference on Mac Mini</td><td>❌ Not required — all inference on Mac Mini</td></tr>
+        <tr><td><strong>Verdict</strong></td><td><strong>✅ Use this — 4GB is more than enough for capture-only</strong></td><td>Overkill for this role</td></tr>
       </tbody>
     </table>
   </div>
@@ -2103,7 +2103,7 @@ function switchPhase(num) {
 <section class="section" id="proto-pi3">
   <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
   <h2>Pi 3 — <em>Weight Reader</em></h2>
-  <p class="lead">Pi 3 reads the weight on the barbell by detecting the colour stripes on the AlphaFit bumper plates. It uses a custom-trained YOLOv8n model to identify each plate's colour from the side, then calculates the total load.</p>
+  <p class="lead">Pi 3 is a pure capture device. Mounted at barbell height, it streams a side-on view of the loaded plates to Donkey Runs. All colour detection and weight calculation runs on the Mac Mini. The custom-trained YOLOv8n weight model runs on Donkey Runs, not on the Pi.</p>
 
   <div class="img-block">
     <img src="img/alphafit-colour-plates.webp" alt="AlphaFit colour-coded bumper plates">
@@ -2140,11 +2140,11 @@ function switchPhase(num) {
       <tbody>
         <tr><td>Camera position</td><td>Side-on, barbell sleeve height (~0.9m from floor)</td><td>Plate edge stripes are clearly visible from the side</td></tr>
         <tr><td>Camera angle</td><td>Perpendicular to bar, slight upward tilt (5–10°)</td><td>Maximises visible plate edge area</td></tr>
-        <tr><td>Detection model</td><td>YOLOv8n — custom trained on AlphaFit plates</td><td>Lightweight, fast, trained specifically on our plates</td></tr>
+        <tr><td>Inference location</td><td>Donkey Runs (Mac Mini M4) — not on the Pi</td><td>Pi stays cool and maintains 30 FPS indefinitely</td></tr>
         <tr><td>Training data</td><td>500+ annotated frames of AlphaFit plates</td><td>Minimum viable training set for colour classification</td></tr>
         <tr><td>Annotation tool</td><td>Roboflow (free tier)</td><td>Browser-based, exports YOLO format directly</td></tr>
-        <tr><td>Output format</td><td>JSON: <code>&#123;"plates":["blue_20","yellow_10","yellow_10"],"total_kg":50&#125;</code></td><td>Pre-summed total sent to Donkey Runs</td></tr>
-        <tr><td>Transmission</td><td>UDP to Donkey Runs port 5003</td><td>Sends on change only — weight doesn't change mid-set</td></tr>
+        <tr><td>Output format</td><td>H.265 RTSP video stream at 1080p/30fps</td><td>Mac Mini processes the stream and outputs the weight JSON</td></tr>
+        <tr><td>Transmission</td><td>RTSP H.265 stream to Donkey Runs</td><td>Continuous live stream — Mac Mini decides when weight changed</td></tr>
       </tbody>
     </table>
   </div>
@@ -2287,7 +2287,7 @@ function switchPhase(num) {
 <section class="section" id="proto-donkey">
   <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
   <h2>Donkey Runs — <em>The Server</em></h2>
-  <p class="lead">Donkey Runs is the Mac Mini M4 that receives data from all three Pis, fuses it into a coherent workout log, and serves the dashboard. It is the brain of the prototype — the Pis are just its eyes.</p>
+  <p class="lead">Donkey Runs is the brain of the entire system. It receives three live RTSP video streams from the Pis and runs all AI inference — YOLO person detection, DeepSORT tracking, MoveNet pose estimation, LSTM rep counting, and weight plate colour detection — entirely on the Mac Mini M4 Neural Engine. The Pis are pure capture devices. Donkey Runs does everything else.</p>
 
   <div class="callout analogy">
     <div class="ct">// THINK OF IT LIKE THIS</div>
