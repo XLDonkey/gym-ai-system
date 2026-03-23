@@ -376,17 +376,11 @@
   <a class="nav-link" href="#phases">23 — Interactive Roadmap</a>
   <a class="nav-link" href="#costs">24 — Cost Breakdown</a>
   <div class="nav-group">Chapter 7 — Prototyping</div>
-  <a class="nav-link" href="#proto-decision">25 — Stakeholder MVP Decision</a>
-  <a class="nav-link" href="#proto-overview">26 — MVP Architecture Overview</a>
-  <a class="nav-link" href="#proto-hardware">27 — Prototype Hardware</a>
-  <a class="nav-link" href="#proto-pi1">28 — Pi 1: People Tracker</a>
-  <a class="nav-link" href="#proto-pi2">29 — Pi 2: Rep Counter</a>
-  <a class="nav-link" href="#proto-pi3">30 — Pi 3: Weight Reader</a>
-  <a class="nav-link" href="#proto-data">31 — Data Collection Pipeline</a>
-  <a class="nav-link" href="#proto-live">32 — The Live Loop Test</a>
-  <a class="nav-link" href="#proto-donkey">33 — Donkey Runs (Server)</a>
-  <a class="nav-link" href="#proto-risk">34 — Risk Assessment</a>
-  <a class="nav-link" href="#proto-log">35 — Build Log</a>
+  <a class="nav-link" href="#proto-overview">25 — MVP Architecture Overview</a>
+  <a class="nav-link" href="#proto-hardware">26 — Hardware & Network</a>
+  <a class="nav-link" href="#proto-donkey">27 — Brief for Donkey Runs</a>
+  <a class="nav-link" href="#proto-build">28 — Step-by-Step Build Order</a>
+  <a class="nav-link" href="#proto-risk">29 — Risk Assessment</a>
 </nav>
 
 <div class="main">
@@ -1832,532 +1826,215 @@ function switchPhase(num) {
 ═══════════════════════════════════════════════════════════════════════ -->
 <div class="chapter-divider" id="ch-prototyping">
   <div class="ch-inner">
-    <div class="ch-num">// CHAPTER 07</div>
-    <h1>The <em>Prototype</em></h1>
-    <p class="ch-desc">One machine. Full system. No shortcuts. This chapter documents the MVP prototype — a single machine station instrumented with the complete 3-Pi cluster running every capability: person tracking, pose estimation, rep counting, and weight detection. The training data is collected from these exact cameras in these exact mounted positions. This is where the theory becomes hardware.</p>
-    <div class="ch-sections">
-      <span class="ch-pill">25 — MVP Overview</span>
-      <span class="ch-pill">26 — Hardware List</span>
-      <span class="ch-pill">28 — Pi 1: People Tracker</span>
-      <span class="ch-pill">29 — Pi 2: Rep Counter</span>
-      <span class="ch-pill">30 — Pi 3: Weight Reader</span>
-      <span class="ch-pill">30 — Donkey Runs</span>
-      <span class="ch-pill">32 — Build Log</span>
+    <div class="ch-num">07</div>
+    <div class="ch-title">Prototyping</div>
+    <div class="ch-desc">One machine. Full system. No shortcuts. The blueprint for building the MVP prototype.</div>
+    <div class="ch-pills">
+      <span class="pill">MVP Architecture</span>
+      <span class="pill">Hardware List</span>
+      <span class="pill">The 3-Pi Cluster</span>
+      <span class="pill">Brief for Donkey Runs</span>
+      <span class="pill">Build Order</span>
     </div>
-    <div class="ch-prereqs">
-      <div class="ch-prereqs-title">// Prerequisites before starting</div>
-      <div class="ch-prereq-list">
-        <span class="ch-prereq needed">3x Raspberry Pi 5 (4GB)</span>
-        <span class="ch-prereq needed">3x Pi Camera Module 3 Wide</span>
-        <span class="ch-prereq needed">Truss frame section built</span>
-        <span class="ch-prereq needed">Mac Mini (Donkey Runs) on local network</span>
-        <span class="ch-prereq needed">AlphaFit barbell + plates available</span>
-        <span class="ch-prereq future">Full camera grid (Phase 1)</span>
-        <span class="ch-prereq future">GPU inference server (Phase 2)</span>
+    <div class="ch-prereq">
+      <div class="prereq-title">// PREREQUISITES TO START CHAPTER 07</div>
+      <div class="prereq-list">
+        <div class="prereq-item done"><span class="status"></span>MVP scope defined and approved by stakeholders</div>
+        <div class="prereq-item done"><span class="status"></span>Donkey Runs (Mac Mini M4) available and on the local network</div>
+        <div class="prereq-item active"><span class="status"></span>Hardware ordered (3× Pi 5, cameras, PoE switch)</div>
+        <div class="prereq-item active"><span class="status"></span>Truss assembled and mounted above the station</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ─── Section 25: MVP Overview ─────────────────────────────────────── -->
-<!-- ─── Section 25: Stakeholder MVP Decision ─────────────────────────── -->
-<section class="section" id="proto-decision">
-  <div class="section-tag">// SECTION 25 — CHAPTER 07</div>
-  <h2>Stakeholder <em>MVP Decision</em></h2>
-  <p class="lead">After seeing the demo, stakeholders have approved a real working MVP covering all three core capabilities: pose tracking, person tracking, and weight detection. This section documents the hardware decisions, the reasoning behind them, and the exact build order.</p>
-
-  <div class="callout what">
-    <div class="ct">// THE DECISION</div>
-    <p>Build a compact, self-contained prototype using <strong>Raspberry Pi 5 (4GB)</strong> units and <strong>Pi Camera Module 3 Wide</strong> cameras. <strong>One machine station. Three Pis mounted above it. Full system — every bell and whistle.</strong> Person tracking, pose estimation, rep counting, and weight detection all running simultaneously on a single station. All training data is collected from these exact cameras in these exact mounted positions — not from stock footage, not from a different angle, not approximated. The model learns what it will actually see. All three Pis feed data to Donkey Runs (Mac Mini M4).</p>
-  </div>
-
-  <h3>Why Raspberry Pi 5?</h3>
-  <p>The Pi 5 is the right choice for this prototype for three reasons. First, it is compact enough to mount directly on the truss frame alongside the camera — all three Pis and their cameras sit above a single machine station without dominating the space. Second, it is powerful enough to handle H.265 hardware encoding at 1080p/30fps with minimal CPU usage — leaving the network stream clean and consistent. Third, and most importantly, the Pi is a <strong>camera-agnostic mount</strong>. If we later move to a better camera — a Hikvision dome, an Axis box camera, or a dedicated machine vision sensor — we simply unplug the Pi Camera Module 3 and connect the new camera. The Pi stays on the truss, the software stays on the Pi, only the camera hardware changes. The training data collected with the Pi camera remains valid and reusable.</p>
-
-  <h3>Pi 5 4GB vs 8GB — The Honest Answer</h3>
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Spec</th><th>Pi 5 4GB (~$130 AUD)</th><th>Pi 5 8GB (~$175 AUD)</th></tr></thead>
-      <tbody>
-        <tr><td>H.265 hardware encoding at 1080p/30fps</td><td>✅ Handled by hardware encoder</td><td>✅ Handled by hardware encoder</td></tr>
-        <tr><td>RTSP streaming to Mac Mini</td><td>✅ Runs fine — minimal CPU</td><td>✅ Runs fine — minimal CPU</td></tr>
-        <tr><td>Running <code>picamera2</code> + RTSP server</td><td>✅ Idle CPU ~15%</td><td>✅ Idle CPU ~15%</td></tr>
-        <tr><td>Running AI inference on the Pi</td><td>❌ Not required — all inference on Mac Mini</td><td>❌ Not required — all inference on Mac Mini</td></tr>
-        <tr><td><strong>Verdict</strong></td><td><strong>✅ Use this — 4GB is more than enough for capture-only</strong></td><td>Overkill for this role</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <p>Since the architecture assigns exactly one task to each Pi, the 4GB model is the correct choice. The extra RAM in the 8GB model only becomes relevant if you try to run two models on the same Pi simultaneously — which we are not doing. Save the $45 per unit ($135 total across 3 Pis) and put it toward better mounting hardware or a spare Pi.</p>
-
-  <h3>Camera Selection — Pi Camera Module 3 Wide</h3>
-  <p>The camera choice matters enormously for Pi 3 (weight detection) and significantly for Pi 2 (pose estimation). The wrong camera will make the weight detection model unreliable regardless of how well it is trained.</p>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Camera</th><th>Sensor</th><th>Field of View</th><th>Autofocus</th><th>IR LEDs</th><th>Verdict</th></tr></thead>
-      <tbody>
-        <tr><td>OV5647 5MP (IR version)</td><td>5MP — old, noisy</td><td>54°</td><td>Manual only</td><td>Yes — destroys colour</td><td>❌ Do not use for Pi 3</td></tr>
-        <tr><td>Pi Camera Module 3 (standard)</td><td>12MP IMX708</td><td>66°</td><td>Yes</td><td>No</td><td>✅ Good</td></tr>
-        <tr><td><strong>Pi Camera Module 3 Wide</strong></td><td><strong>12MP IMX708</strong></td><td><strong>102°</strong></td><td><strong>Yes</strong></td><td><strong>No</strong></td><td><strong>✅ Best choice</strong></td></tr>
-        <tr><td>Arducam 12MP IMX477</td><td>12MP IMX477</td><td>63°</td><td>Manual</td><td>No</td><td>✅ Good but manual focus</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="callout warning">
-    <div class="ct">// DO NOT USE THE OV5647 IR CAMERA FOR PI 3</div>
-    <p>The infrared LED illuminators on the OV5647 IR camera reflect off the coloured plate stripes and render them white or grey under the IR light. The colour detection model will fail. The OV5647 can be used for Pi 1 (people tracking) in a pinch since colour is irrelevant for bounding boxes, but the Pi Camera Module 3 Wide is strongly preferred for all three nodes for consistency.</p>
-  </div>
-
-  <p>The Wide variant's 102° field of view is the key advantage. From a truss mounting height of 2.5–3.5 metres, the standard 66° lens covers roughly a 3×3 metre floor area. The Wide lens covers roughly a 5×5 metre area — enough to capture a full barbell station including the person, the bar, and both loaded sleeves in a single frame without repositioning.</p>
-
-  <h3>Training From the Exact Camera Position — Why This Matters</h3>
-  <p>All training data for the weight detection model (Pi 3) is collected from the Pi Camera Module 3 Wide mounted in its final position on the truss, at the exact height and angle it will operate at permanently. This is not a shortcut — it is the correct approach. A model trained on footage from a different angle, a different height, or a different camera will have a distribution mismatch when deployed. Training in-situ means the model learns exactly the lighting conditions, perspective distortion, and plate appearance it will encounter every time it runs.</p>
-  <p>The same principle applies to Pi 2 (pose estimation). The LSTM rep counter is trained on footage of real people performing exercises at this station, captured by Pi 2's camera at its mounted angle. The joint angle patterns it learns are specific to this viewpoint. When the system scales to additional stations, each new station's cameras are used to collect a small fine-tuning dataset (~200 frames) to account for any differences in angle or lighting. The core model transfers — only the fine-tuning is new.</p>
-
-  <div class="callout how">
-    <div class="ct">// THE RULE: TRAIN WHERE YOU DEPLOY</div>
-    <p>Never train on footage from a different camera or position than the one the model will run on. The Pi Camera Module 3 Wide footage collected at this station is the ground truth. When cameras are upgraded in production, a small fine-tuning dataset (50–100 frames) from the new camera is sufficient to adapt the model — the core training data remains valid. Build the dataset in the real environment, and it will work in the real environment.</p>
-  </div>
-
-  <h3>Recommended Build Order</h3>
-  <p>The three Pis should not be built in parallel. Pi 3 (weight detection) requires custom model training which takes the longest, so it should be started first. Pi 1 and Pi 2 use pre-trained models and can be set up quickly once the hardware arrives.</p>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Week</th><th>Priority</th><th>Task</th><th>Why This Order</th></tr></thead>
-      <tbody>
-        <tr><td>Week 1</td><td>🔴 First</td><td>Buy hardware, build truss section, mount all 3 Pis</td><td>Everything depends on the physical setup being stable</td></tr>
-        <tr><td>Week 1–2</td><td>🔴 First</td><td>Start filming Pi 3 training data (plate loading footage)</td><td>Training takes time — start the data pipeline immediately</td></tr>
-        <tr><td>Week 2</td><td>🟡 Second</td><td>Set up Pi 1 — RTSP stream live, confirmed on Donkey Runs</td><td>Pre-trained model — fast to deploy, validates the network pipeline</td></tr>
-        <tr><td>Week 2</td><td>🟡 Second</td><td>Set up Pi 2 — MoveNet pose + LSTM rep counting live</td><td>Pre-trained models — fast to deploy once Pi 1 network is proven</td></tr>
-        <tr><td>Week 2–3</td><td>🟠 Third</td><td>Annotate Pi 3 training frames in Roboflow (500+ frames)</td><td>Annotation takes 45–90 minutes with auto-label assist</td></tr>
-        <tr><td>Week 3</td><td>🟠 Third</td><td>Train YOLOv8n on annotated plate dataset on Mac Mini</td><td>~2 hours training time on Mac Mini M4</td></tr>
-        <tr><td>Week 3</td><td>🟢 Final</td><td>Deploy trained weights to Pi 3 — end-to-end test</td><td>Full system test: one person, one barbell, one set logged correctly</td></tr>
-        <tr><td>Week 4</td><td>🔵 Validate</td><td>Run 50 test sets with different people and weights — log accuracy results</td><td>Must hit 90% accuracy across all three metrics before stakeholder demo</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="callout success">
-    <div class="ct">// MVP SUCCESS CRITERIA</div>
-    <p>The prototype is considered successful when the full system — all three Pis running simultaneously — correctly logs a complete set with: <strong>correct member identity</strong> (from card tap), <strong>correct weight</strong> (within ±2.5kg), and <strong>correct rep count</strong> (within ±1 rep) — for <strong>9 out of 10 consecutive test sets</strong>, performed by different people, with different weights loaded. This is the gate before presenting to stakeholders for Phase 1 approval and expansion to additional stations.</p>
-  </div>
-</section>
-
+<!-- ─── Section 25: MVP Architecture Overview ─────────────────────────── -->
 <section class="section" id="proto-overview">
-  <div class="section-tag">// SECTION 26 — CHAPTER 07</div>
-  <h2>MVP Prototype <em>Overview</em></h2>
-  <p class="lead">The MVP has one job: prove that the complete system works on a single machine station. All three Pis active. All four AI tasks running. Real training data from the real cameras in the real positions. If it works here, it works everywhere.</p>
-
+  <div class="section-tag">// SECTION 25 — CHAPTER 07</div>
+  <h2>MVP Architecture <em>Overview</em></h2>
+  <p class="lead">The goal of the MVP is to prove the full system works end-to-end on a single station before scaling. The architecture is deliberately split into "Dumb Edge" (the Pis) and "Smart Server" (Donkey Runs) to ensure high performance and easy scaling.</p>
   <div class="callout what">
-    <div class="ct">// THE MVP GOAL</div>
-    <p><strong>One machine. One person. One set. Full system.</strong> The prototype is not a simplified version — it is the complete system running on a single station. Person tracking, pose estimation, rep counting, and weight detection all active simultaneously. The system must correctly log: <strong>Member ID</strong>, <strong>Weight on bar</strong>, and <strong>Rep count</strong> — with greater than 90% accuracy. Only then do we scale to additional stations.</p>
+    <div class="ct">// THE PROTOTYPE IN ONE SENTENCE</div>
+    <p>Three Raspberry Pis stream live video from a single barbell station to Donkey Runs (the Mac Mini), which runs all the Neural Networks and sends the results — who is lifting, how much weight, how many reps — to a tablet mounted at the station in real time.</p>
   </div>
-
-  <div class="img-block">
-    <img src="img/truss-camera-mount.webp" alt="Truss camera mount — the prototype frame reference">
-    <div class="img-caption">// The truss-mounted camera rig — this is the aesthetic and mounting approach for the prototype frame</div>
+  
+  <div class="callout what">
+    <div class="ct">// THE PROTOTYPE FLOW: FROM LIFT TO LOG</div>
+    <ol>
+      <li><strong>Capture:</strong> Three Raspberry Pis (the cluster) capture video of the station from three different angles.</li>
+      <li><strong>Stream:</strong> The Pis encode the video to H.265 and stream it live over the local network via RTSP/TCP.</li>
+      <li><strong>Receive:</strong> Donkey Runs (the Mac Mini) receives all three streams and decodes them using Apple hardware acceleration.</li>
+      <li><strong>Inference:</strong> Donkey Runs runs the Neural Networks (YOLO, DeepSORT, MoveNet, LSTM) on the decoded frames.</li>
+      <li><strong>Fusion:</strong> Donkey Runs merges the results (Who is it? What weight? How many reps?) into a single JSON state.</li>
+      <li><strong>Display:</strong> The JSON state is pushed via WebSocket to a tablet mounted at the station, updating in real-time.</li>
+    </ol>
   </div>
 
   <h3>The 3-Pi Station Cluster</h3>
-  <p>Three Raspberry Pi 5 units are mounted together on the truss directly above a single machine station. They are a cluster — all three point at the same person and the same equipment from different angles. Pi 1 looks straight down for tracking, Pi 2 looks at a 20–30° angle to see the full body for pose estimation, and Pi 3 looks side-on at barbell height to read the plate colours. Together they cover everything needed to log a complete set.</p>
-  <p>Each Pi handles exactly one task. This is intentional — it mirrors the production architecture where each AI model is a specialist. If Pi 3 (weight detection) fails, the other two keep running. The system degrades gracefully rather than crashing entirely. When the gym scales to multiple machine stations, each station gets its own 3-Pi cluster. Donkey Runs receives data from all clusters simultaneously.</p>
-  <p>The Pis are also <strong>camera-agnostic</strong>. The camera connects to the Pi via a ribbon cable. If a better camera becomes available — higher resolution, better low-light performance, wider lens — it is swapped in without touching the Pi, the software, or the training data. The upgrade path is always: swap the camera, fine-tune with 50–100 new frames, redeploy. Nothing else changes.</p>
-
+  <p>All three Pis mount on the truss directly above <strong>one machine station</strong>. They are a tight group, each pointing at the same person and the same equipment from a different angle. When you scale to 10 stations later, you simply build 9 more of these identical 3-Pi clusters.</p>
   <div class="tbl">
     <table>
-      <thead><tr><th>Node</th><th>Device</th><th>Task</th><th>Mount Position (all above same station)</th><th>Sends to Donkey Runs</th></tr></thead>
+      <thead><tr><th>Node</th><th>Role</th><th>Hardware</th><th>Output to Donkey Runs</th></tr></thead>
       <tbody>
-        <tr><td><strong>Pi 1</strong></td><td>Raspberry Pi 5 (4GB)</td><td>People Tracking (YOLO + DeepSORT)</td><td>Straight down — full floor zone view of the station</td><td>H.265 RTSP stream over TCP → Donkey Runs</td></tr>
-        <tr><td><strong>Pi 2</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Pose Estimation + Rep Counting</td><td>20–30° tilt — full body and limbs visible</td><td>H.265 RTSP stream over TCP → Donkey Runs</td></tr>
-        <tr><td><strong>Pi 3</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Barbell Plate Colour Detection</td><td>Side-on at barbell sleeve height — plate edges clearly visible</td><td>H.265 RTSP stream over TCP → Donkey Runs</td></tr>
-        <tr><td><strong>Donkey Runs</strong></td><td>Mac Mini M4 (16GB)</td><td>Data Fusion + Logging + Dashboard</td><td>N/A — central server, not on the truss</td><td>Receives from all station clusters, writes to PostgreSQL</td></tr>
+        <tr><td><strong>Pi 1</strong></td><td>People Tracker</td><td>Pi 5 + Camera Module 3 Wide (Straight down)</td><td>H.265 RTSP stream (TCP port 8554)</td></tr>
+        <tr><td><strong>Pi 2</strong></td><td>Rep Counter</td><td>Pi 5 + Camera Module 3 Wide (20–30° tilt)</td><td>H.265 RTSP stream (TCP port 8554)</td></tr>
+        <tr><td><strong>Pi 3</strong></td><td>Weight Reader</td><td>Pi 5 + Camera Module 3 Standard (Side-on)</td><td>H.265 RTSP stream (TCP port 8554)</td></tr>
+        <tr><td><strong>Donkey Runs</strong></td><td>The Brain</td><td>Mac Mini M4 Pro</td><td>WebSocket JSON to Tablet</td></tr>
       </tbody>
     </table>
   </div>
-
-  <div class="callout how">
-    <div class="ct">// WHY THIS IS THE BEST WAY TO BUILD AN MVP</div>
-    <p>Running everything on one machine (a laptop or the Mac Mini directly) would be faster to set up but would teach us nothing about the real system. The 3-Pi station cluster forces us to solve the actual hard problems at small scale: network synchronisation, frame timestamps, ID handoff between nodes, and graceful failure handling. When the system scales to 10 machine stations (30 Pis), these problems are already solved. Scaling is just adding more clusters — the architecture does not change.</p>
-  </div>
-
-  <div class="img-block">
-    <img src="img/overhead-camera-rig.jpg" alt="Overhead camera rig showing multiple camera positions">
-    <div class="img-caption">// Overhead camera rig — each Pi camera will be mounted on the truss frame at a specific angle for its task</div>
-  </div>
 </section>
 
-<!-- ─── Section 26: Prototype Hardware ───────────────────────────────── -->
+<!-- ─── Section 26: Hardware & Network ────────────────────────────────── -->
 <section class="section" id="proto-hardware">
   <div class="section-tag">// SECTION 26 — CHAPTER 07</div>
-  <h2>Prototype <em>Hardware</em></h2>
-  <p class="lead">The full hardware list for the 3-Pi MVP prototype. Total estimated cost is under $800 AUD — a small investment to validate the entire system architecture before committing to the full production build.</p>
-
-  <h3>Camera Selection — Why Not the OV5647?</h3>
-  <p>The OV5647 5MP camera with IR LEDs (commonly sold as a "Raspberry Pi Night Vision Camera") is a popular choice but has three specific problems for this application. First, the infrared LED illuminators wash out colour information — the IR light reflects off the coloured plate stripes and makes them appear white or grey, destroying the colour detection. Second, 5 megapixels at a typical mounting height of 3–4 metres gives insufficient resolution to reliably distinguish between yellow (15kg) and green (10kg) stripes. Third, the fixed or manually-adjusted focus will drift if the truss frame is bumped during setup.</p>
-
-  <div class="callout warning">
-    <div class="ct">// DO NOT USE</div>
-    <p>The OV5647 IR camera is not suitable for Pi 3 (weight detection). The IR LEDs will destroy colour accuracy. It can be used for Pi 1 (people tracking) in a pinch since colour is not needed there, but the Pi Camera Module 3 is strongly preferred for all three nodes.</p>
-  </div>
-
+  <h2>Hardware &amp; <em>Network</em></h2>
+  <p class="lead">The exact shopping list and network configuration required to build the MVP prototype tomorrow.</p>
+  
+  <h3>The Shopping List</h3>
   <div class="tbl">
     <table>
-      <thead><tr><th>Item</th><th>Qty</th><th>Spec</th><th>Use</th><th>Est. AUD</th></tr></thead>
+      <thead><tr><th>Item</th><th>Qty</th><th>Unit Cost</th><th>Total (AUD)</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td><strong>Raspberry Pi 5 (4GB)</strong></td><td>3</td><td>ARM Cortex-A76, 4GB LPDDR4X, PCIe 2.0</td><td>One per task node</td><td>~$130 each</td></tr>
-        <tr><td><strong>Pi Camera Module 3 Wide</strong></td><td>3</td><td>12MP IMX708, 120° FoV, autofocus, HDR</td><td>One per Pi — Pi 3 must use this, not OV5647</td><td>~$50 each</td></tr>
-        <tr><td><strong>Camera ribbon cable (500mm)</strong></td><td>3</td><td>22-pin FPC, Pi 5 compatible</td><td>Extended reach to truss mount position</td><td>~$8 each</td></tr>
-        <tr><td><strong>SanDisk Extreme 64GB microSD</strong></td><td>3</td><td>A2 rated, 160MB/s read</td><td>OS + model weights per Pi</td><td>~$22 each</td></tr>
-        <tr><td><strong>PoE HAT for Pi 5</strong></td><td>3</td><td>802.3af PoE, 5V/5A output</td><td>Power Pi from the same Cat6 cable as data</td><td>~$35 each</td></tr>
-        <tr><td><strong>Truss clamp + ball head mount</strong></td><td>3</td><td>35mm clamp, 1/4" thread ball head</td><td>Attach Pi + camera to truss rail</td><td>~$25 each</td></tr>
-        <tr><td><strong>Cat6 cable (10m runs)</strong></td><td>3</td><td>Shielded, 550MHz</td><td>PoE power + data to each Pi</td><td>~$15 each</td></tr>
-        <tr><td><strong>8-port PoE switch</strong></td><td>1</td><td>802.3af/at, gigabit</td><td>Powers all 3 Pis + connects to Mac Mini</td><td>~$120</td></tr>
-        <tr><td><strong>Aluminium truss section (2m)</strong></td><td>2</td><td>Box truss, 290mm, load rated</td><td>Prototype frame — 2 sections joined</td><td>~$180 each</td></tr>
-        <tr><td colspan="4"><strong>Total Prototype Hardware</strong></td><td><strong>~$1,150</strong></td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="img-grid">
-    <div class="img-block">
-      <img src="img/raspberry-pi5-board.jpg" alt="Raspberry Pi 5 board">
-      <div class="img-caption">// Raspberry Pi 5 (4GB) — the compute node for each task</div>
-    </div>
-    <div class="img-block">
-      <img src="img/pi-camera-module3-wide.jpg" alt="Pi Camera Module 3 Wide">
-      <div class="img-caption">// Pi Camera Module 3 Wide — 12MP, 120° FoV, autofocus</div>
-    </div>
-  </div>
-</section>
-
-<!-- ─── Section 27: Pi 1 — People Tracker ────────────────────────────── -->
-<section class="section" id="proto-pi1">
-  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
-  <h2>Pi 1 — <em>People Tracker</em></h2>
-  <p class="lead">Pi 1 is a pure capture device. It streams a live 1080p H.265 video feed to Donkey Runs over RTSP/TCP. All YOLO detection and DeepSORT tracking inference runs on the Mac Mini. The Pi does nothing except encode and stream.</p>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Parameter</th><th>Value</th><th>Reason</th></tr></thead>
-      <tbody>
-        <tr><td>Camera position</td><td>Overhead, centre of zone, ~3m height</td><td>Maximum body coverage, minimal occlusion</td></tr>
-        <tr><td>Camera angle</td><td>Straight down (0° tilt) or slight angle (15°)</td><td>Straight down gives cleanest top-down bounding boxes</td></tr>
-        <tr><td>Detection model</td><td>YOLOv8n (nano) — person class only</td><td>Runs at ~15 FPS on Pi 5 without GPU acceleration</td></tr>
-        <tr><td>Tracking model</td><td>DeepSORT with <code>max_age=90</code></td><td>Holds ID for 3 seconds through occlusion</td></tr>
-        <tr><td>Output format</td><td>JSON: <code>&#123;"id":42,"x":320,"y":280,"w":180,"h":420,"conf":0.91&#125;</code></td><td>Lightweight, parseable by Donkey Runs fusion engine</td></tr>
-        <tr><td>Transmission</td><td>RTSP over TCP — <code>rtsp://192.168.1.11:8554/stream</code></td><td>TCP guarantees frame delivery on local wired network</td></tr>
-        <tr><td>Target FPS</td><td>10–15 FPS</td><td>Sufficient for tracking at walking/exercise speed</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>Build Checklist — Pi 1</h3>
-  <ul class="checklist">
-    <li><span class="check-icon todo">○</span>Flash Raspberry Pi OS (64-bit) to microSD</li>
-    <li><span class="check-icon todo">○</span>Install Python 3.11, pip, ultralytics, deep-sort-realtime</li>
-    <li><span class="check-icon todo">○</span>Mount Pi + Camera Module 3 Wide to truss clamp</li>
-    <li><span class="check-icon todo">○</span>Connect PoE HAT — verify Pi powers on via Cat6</li>
-    <li><span class="check-icon todo">○</span>Run <code>libcamera-hello</code> to confirm camera feed is live</li>
-    <li><span class="check-icon todo">○</span>Run tracker script — verify bounding boxes appear on test frame</li>
-    <li><span class="check-icon todo">○</span>Confirm RTSP stream opening cleanly on Donkey Runs (<code>gst-launch-1.0 rtspsrc location=rtsp://192.168.1.11:8554/stream</code>)</li>
-  </ul>
-</section>
-
-<!-- ─── Section 28: Pi 2 — Rep Counter ───────────────────────────────── -->
-<section class="section" id="proto-pi2">
-  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
-  <h2>Pi 2 — <em>Rep Counter</em></h2>
-  <p class="lead">Pi 2 watches the person's body and counts repetitions. It runs MoveNet Lightning for pose estimation (17 keypoints) and a pre-trained LSTM for rep detection, streaming rep events to Donkey Runs.</p>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Parameter</th><th>Value</th><th>Reason</th></tr></thead>
-      <tbody>
-        <tr><td>Camera position</td><td>Overhead, slightly angled (20–30° tilt)</td><td>Pure top-down breaks pose estimation — slight angle gives limb visibility</td></tr>
-        <tr><td>Camera angle</td><td>20–30° from vertical, aimed at barbell station</td><td>Elbow and knee joints visible from this angle</td></tr>
-        <tr><td>Pose model</td><td>MoveNet Lightning (TFLite, int8 quantised)</td><td>~22 FPS on Pi 5 — fast enough for real-time rep detection</td></tr>
-        <tr><td>Rep model</td><td>LSTM (pre-trained on barbell curl, squat, press)</td><td>Watches 60-frame rolling window of joint angles</td></tr>
-        <tr><td>Output format</td><td>JSON: <code>&#123;"event":"rep","exercise":"curl","count":3,"conf":0.94&#125;</code></td><td>Event-driven — only sends on rep completion, not every frame</td></tr>
-        <tr><td>Transmission</td><td>RTSP over TCP — <code>rtsp://192.168.1.12:8554/stream</code></td><td>TCP guarantees frame delivery on local wired network</td></tr>
-        <tr><td>Target FPS</td><td>20–25 FPS pose, rep events as triggered</td><td>Higher FPS needed to catch fast concentric phases</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>Build Checklist — Pi 2</h3>
-  <ul class="checklist">
-    <li><span class="check-icon todo">○</span>Flash Raspberry Pi OS (64-bit) to microSD</li>
-    <li><span class="check-icon todo">○</span>Install Python 3.11, TensorFlow Lite runtime, numpy</li>
-    <li><span class="check-icon todo">○</span>Download MoveNet Lightning TFLite model (int8)</li>
-    <li><span class="check-icon todo">○</span>Mount Pi + Camera at 20–30° tilt on truss</li>
-    <li><span class="check-icon todo">○</span>Run pose test — verify 17 keypoints detected on live feed</li>
-    <li><span class="check-icon todo">○</span>Load pre-trained LSTM — run barbell curl test, verify rep count increments</li>
-    <li><span class="check-icon todo">○</span>Confirm RTSP stream opening cleanly on Donkey Runs (<code>rtsp://192.168.1.12:8554/stream</code>)</li>
-  </ul>
-</section>
-
-<!-- ─── Section 29: Pi 3 — Weight Reader ─────────────────────────────── -->
-<section class="section" id="proto-pi3">
-  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
-  <h2>Pi 3 — <em>Weight Reader</em></h2>
-  <p class="lead">Pi 3 is a pure capture device. Mounted at barbell height, it streams a side-on view of the loaded plates to Donkey Runs. All colour detection and weight calculation runs on the Mac Mini. The custom-trained YOLOv8n weight model runs on Donkey Runs, not on the Pi.</p>
-
-  <div class="img-block">
-    <img src="img/alphafit-colour-plates.webp" alt="AlphaFit colour-coded bumper plates">
-    <div class="img-caption">// AlphaFit colour-coded bumper plates — the yellow/green/red/blue stripes are what Pi 3 reads from the side</div>
-  </div>
-
-  <div class="callout what">
-    <div class="ct">// HOW THE COLOUR READING WORKS</div>
-    <p>From the side, each plate shows a thick coloured stripe running around its circumference. Pi 3's camera is positioned at barbell height, aimed at the sleeve end of the bar. The YOLO model detects each visible plate as a bounding box and classifies its colour. The system then maps colour → weight using the AlphaFit standard and sums the plates on both sides.</p>
-  </div>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Stripe Colour</th><th>Weight (AlphaFit)</th><th>Detection Confidence Target</th></tr></thead>
-      <tbody>
-        <tr><td>🔴 Red</td><td>25 kg</td><td>&gt;95%</td></tr>
-        <tr><td>🔵 Blue</td><td>20 kg</td><td>&gt;95%</td></tr>
-        <tr><td>🟡 Yellow</td><td>15 kg</td><td>&gt;92%</td></tr>
-        <tr><td>🟢 Green</td><td>10 kg</td><td>&gt;92%</td></tr>
-        <tr><td>⚪ White</td><td>5 kg</td><td>&gt;88%</td></tr>
-        <tr><td>⚫ Black (no stripe)</td><td>Collar / 2.5 kg</td><td>&gt;85%</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="img-block">
-    <img src="img/weight-detection-demo.webp" alt="Weight detection demo showing colour plate identification">
-    <div class="img-caption">// Working proof of concept — Blue 20kg + Yellow 10kg × 2 = 50kg total detected and labelled in real time</div>
-  </div>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Parameter</th><th>Value</th><th>Reason</th></tr></thead>
-      <tbody>
-        <tr><td>Camera position</td><td>Side-on, barbell sleeve height (~0.9m from floor)</td><td>Plate edge stripes are clearly visible from the side</td></tr>
-        <tr><td>Camera angle</td><td>Perpendicular to bar, slight upward tilt (5–10°)</td><td>Maximises visible plate edge area</td></tr>
-        <tr><td>Inference location</td><td>Donkey Runs (Mac Mini M4) — not on the Pi</td><td>Pi stays cool and maintains 30 FPS indefinitely</td></tr>
-        <tr><td>Training data</td><td>500+ annotated frames of AlphaFit plates</td><td>Minimum viable training set for colour classification</td></tr>
-        <tr><td>Annotation tool</td><td>Roboflow (free tier)</td><td>Browser-based, exports YOLO format directly</td></tr>
-        <tr><td>Output format</td><td>H.265 RTSP video stream at 1080p/30fps</td><td>Mac Mini processes the stream and outputs the weight JSON</td></tr>
-        <tr><td>Transmission</td><td>RTSP H.265 stream to Donkey Runs</td><td>Continuous live stream — Mac Mini decides when weight changed</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>Training the Weight Detection Model</h3>
-  <p>Pi 3 is the only node that requires a custom-trained model from scratch (the other two use pre-trained models). The training process is straightforward but requires collecting good data first. The steps are: film 30–60 minutes of footage of the AlphaFit plates being loaded and unloaded on the barbell from the side-on camera angle. Extract frames at 1 FPS (giving ~1,800–3,600 frames). Upload to Roboflow and annotate each plate with a bounding box and colour label. Export in YOLOv8 format. Train YOLOv8n on a laptop or the Mac Mini for ~2 hours. Deploy the trained weights to Pi 3.</p>
-
-  <div class="callout tip">
-    <div class="ct">// PRO TIP — ANNOTATION EFFICIENCY</div>
-    <p>Use Roboflow's auto-labelling feature to pre-annotate the frames using a general object detection model, then manually correct the labels. This reduces annotation time from ~4 hours to ~45 minutes for 500 frames. Focus annotation effort on edge cases: partially obscured plates, plates at the edge of the frame, and low-light conditions.</p>
-  </div>
-
-  <h3>Build Checklist — Pi 3</h3>
-  <ul class="checklist">
-    <li><span class="check-icon todo">○</span>Flash Raspberry Pi OS (64-bit) to microSD</li>
-    <li><span class="check-icon todo">○</span>Install Python 3.11, ultralytics, opencv-python</li>
-    <li><span class="check-icon todo">○</span>Mount Pi + Camera Module 3 Wide at barbell sleeve height, side-on</li>
-    <li><span class="check-icon todo">○</span>Film 45 min of plate loading footage from mounted position</li>
-    <li><span class="check-icon todo">○</span>Annotate 500+ frames in Roboflow — label each plate colour</li>
-    <li><span class="check-icon todo">○</span>Train YOLOv8n on annotated dataset — target mAP &gt;0.90</li>
-    <li><span class="check-icon todo">○</span>Deploy trained weights to Pi 3 — verify colour detection live</li>
-    <li><span class="check-icon todo">○</span>Confirm RTSP stream opening cleanly on Donkey Runs (<code>rtsp://192.168.1.13:8554/stream</code>)</li>
-  </ul>
-</section>
-
-<!-- ─── Section 30: Donkey Runs ───────────────────────────────────────── -->
-<!-- ─── Section 31: Data Collection Pipeline ──────────────────────────── -->
-<section class="section" id="proto-data">
-  <div class="section-tag">// SECTION 31 — CHAPTER 07</div>
-  <h2>Data Collection <em>Pipeline</em></h2>
-  <p class="lead">Before the models can run live, they need training data. This section documents the automated pipeline for capturing, transferring, and filtering training footage from all three Pis without manual intervention.</p>
-
-  <div class="callout what">
-    <div class="ct">// THE GOAL</div>
-    <p>Capture real, in-situ training data from all three cameras simultaneously whenever the station is in use, without filling up hard drives with empty gym footage, and without requiring someone to press "record".</p>
-  </div>
-
-  <h3>The Three Approaches to Recording</h3>
-  <p>When setting up the Pis to record training data, there are three possible approaches. Only one works reliably for a gym environment:</p>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Approach</th><th>How it works</th><th>Verdict</th></tr></thead>
-      <tbody>
-        <tr><td><strong>1. Continuous</strong></td><td>Record 24/7 to the Pi's SD card.</td><td>❌ <strong>Fail:</strong> SD card fills up in hours. 90% of footage is an empty gym.</td></tr>
-        <tr><td><strong>2. Motion-triggered</strong></td><td>Pi starts recording when pixels change.</td><td>⚠️ <strong>Risky:</strong> Slow eccentric reps often fail to trigger motion thresholds, resulting in clips that cut out mid-set.</td></tr>
-        <tr><td><strong>3. Rolling Clips + Filter</strong></td><td>Pi records continuous 2-min clips. Server filters them.</td><td>✅ <strong>Winner:</strong> Zero gaps, no empty footage saved, fully automated.</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>The Rolling Clip Architecture</h3>
-  <p>The solution is a two-part system: dumb capture on the edge, smart filtering on the server.</p>
-
-  <p><strong>On the Pi (Dumb Capture):</strong><br>
-  A Python script using <code>picamera2</code> runs automatically on boot via <code>systemd</code>. It records continuously in 2-minute chunks (e.g., <code>pi2_1430.mp4</code>, <code>pi2_1432.mp4</code>). It maintains a 5-second overlap between clips so no movement is ever lost at the cut point. As soon as a clip finishes, a background thread uses <code>rsync</code> to push it over the network to Donkey Runs (the Mac Mini), then deletes it from the Pi's SD card. The Pi never runs out of space.</p>
-
-  <p><strong>On Donkey Runs (Smart Filtering):</strong><br>
-  A watcher script monitors the incoming folder. When a new 2-minute clip arrives, Donkey Runs runs a high-speed YOLOv8n pass over it (checking 1 frame per second). 
-  <br>• If YOLO detects a person in the frame, the clip is moved to the <code>/training_data/</code> folder.
-  <br>• If the clip is just an empty gym, it is immediately deleted.</p>
-
-  <div class="callout how">
-    <div class="ct">// WHY THIS IS ELEGANT</div>
-    <p>The Pis do zero AI processing during data collection — they just act as dumb IP cameras, ensuring maximum framerate and zero thermal throttling. The Mac Mini's M4 chip can process a 2-minute clip in under 10 seconds, meaning it easily keeps up with three Pis sending clips simultaneously. You end up with a perfectly curated folder of training data containing only active sets.</p>
-  </div>
-
-  <h3>What Each Pi Captures</h3>
-  <p>All three Pis run the exact same rolling-clip script, but the footage they capture is used for different training pipelines:</p>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Node</th><th>Footage Type</th><th>What we do with it on Donkey Runs</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Pi 1 (Tracker)</strong></td><td>Overhead, straight down</td><td>Extract frames, annotate bounding boxes for YOLO fine-tuning (handling gym-specific occlusion).</td></tr>
-        <tr><td><strong>Pi 2 (Pose)</strong></td><td>Overhead, 20–30° tilt</td><td>Run MoveNet to extract joint angles, manually label the start/end of reps to train the LSTM rep counter.</td></tr>
-        <tr><td><strong>Pi 3 (Weight)</strong></td><td>Side-on, barbell height</td><td>Extract frames when plates are being loaded/unloaded, annotate colours in Roboflow for YOLO weight detection.</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>Implementation Steps</h3>
-  <ul class="checklist">
-    <li><span class="check-icon todo">○</span>Write <code>rolling_capture.py</code> for the Pis (2-min chunks, 5s overlap, h264 encoding)</li>
-    <li><span class="check-icon todo">○</span>Set up SSH keys so Pis can <code>rsync</code> to Mac Mini without passwords</li>
-    <li><span class="check-icon todo">○</span>Create <code>systemd</code> service on Pis so capture starts automatically on boot</li>
-    <li><span class="check-icon todo">○</span>Write <code>smart_filter.py</code> for Mac Mini (YOLO person detection, 1 FPS scan rate)</li>
-    <li><span class="check-icon todo">○</span>Set up cron job on Mac Mini to run filter script every 5 minutes</li>
-  </ul>
-</section>
-
-<!-- ─── Section 32: The Live Loop Test ──────────────────────────── -->
-<section class="section" id="proto-live">
-  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
-  <h2>The Live <em>Loop Test</em></h2>
-  <p class="lead">Once the models are trained on the recorded clips, stakeholders need to see the system work in real time. This section documents the critical "Live Loop" milestone: streaming live video from the Pis, processing it on the Mac Mini, and displaying the results instantly on the station tablet.</p>
-
-  <div class="callout what">
-    <div class="ct">// THE STAKEHOLDER DEMO</div>
-    <p>A person walks up to the station, taps their card, loads a plate, and starts lifting. The tablet mounted on the machine instantly displays their name, the weight they loaded, and counts their reps as they happen. No delays, no offline processing.</p>
-  </div>
-
-  <h3>The Real-Time Architecture</h3>
-  <p>To achieve the Live Loop, the system shifts from "dumb recording" to "live streaming." The architecture looks like this:</p>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Step</th><th>Component</th><th>Protocol</th><th>Target Latency</th></tr></thead>
-      <tbody>
-        <tr><td><strong>1. Capture</strong></td><td>3× Raspberry Pis capture 1080p@30fps and encode to H.265</td><td>Hardware Encoder</td><td>&lt;20ms</td></tr>
-        <tr><td><strong>2. Stream</strong></td><td>Pis stream the live video to the Mac Mini</td><td>RTSP over TCP</td><td>&lt;10ms</td></tr>
-        <tr><td><strong>3. Inference</strong></td><td>Mac Mini decodes stream and runs YOLO + Pose + LSTM</td><td>GStreamer + PyTorch</td><td>~60ms</td></tr>
-        <tr><td><strong>4. Fusion</strong></td><td>Mac Mini merges the 3 results into a single "State" JSON</td><td>Python (Redis)</td><td>&lt;5ms</td></tr>
-        <tr><td><strong>5. Display</strong></td><td>Mac Mini pushes the JSON state to the tablet browser UI</td><td>WebSocket</td><td>&lt;10ms</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>Key Technical Challenges</h3>
-  <p>Running the Live Loop exposes three specific bottlenecks that offline processing hides:</p>
-
-  <p><strong>1. The RTSP Delay</strong><br>
-  Standard RTSP streaming introduces a 2–3 second buffer delay. For a live rep counter, a 3-second delay means the person finishes the rep before the tablet counts it — breaking the illusion of a live system. <br>
-  <em>Solution:</em> Configure the GStreamer pipeline on the Mac Mini with <code>latency=0</code> and <code>drop-on-latency=true</code>. We prefer dropping a frame over falling behind real-time.</p>
-
-  <p><strong>2. Mac Mini Hardware Decoding</strong><br>
-  If the Mac Mini tries to decode three 1080p H.265 streams using the CPU, it will choke. <br>
-  <em>Solution:</em> The inference pipeline must use Apple's <code>VideoToolbox</code> framework to offload the video decoding to the M4's dedicated media engine, leaving the CPU/GPU free for the neural networks.</p>
-
-  <p><strong>3. The Visual Feedback Loop</strong><br>
-  Stakeholders want to see what the AI sees. The tablet UI should not just show numbers; it should show the live camera feed with the YOLO bounding boxes and MoveNet skeleton overlaid on top of the video.<br>
-  <em>Solution:</em> The Mac Mini draws the bounding boxes and skeletons onto the frames, encodes a low-res (720p) composite video stream, and sends it to the tablet via WebRTC.</p>
-
-  <div class="callout success">
-    <div class="ct">// LIVE LOOP SUCCESS CRITERIA</div>
-    <p>The Live Loop test passes when the "Glass-to-Glass" latency (the time from a physical movement occurring in front of the camera to the skeleton updating on the tablet screen) is <strong>under 150 milliseconds</strong>. This feels instantaneous to the human eye.</p>
-  </div>
-</section>
-
-<section class="section" id="proto-donkey">
-  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
-  <h2>Donkey Runs — <em>The Server</em></h2>
-  <p class="lead">Donkey Runs is the brain of the entire system. It receives three live RTSP video streams from the Pis and runs all AI inference — YOLO person detection, DeepSORT tracking, MoveNet pose estimation, LSTM rep counting, and weight plate colour detection — entirely on the Mac Mini M4 Neural Engine. The Pis are pure capture devices. Donkey Runs does everything else.</p>
-
-  <div class="callout analogy">
-    <div class="ct">// THINK OF IT LIKE THIS</div>
-    <p>The three Pis above a station are like three specialists watching the same workout from different angles and calling out what they see. Pi 1 says "John is at the squat rack." Pi 2 says "He just completed rep 4." Pi 3 says "The bar has 80kg on it." Donkey Runs is the coach at a central desk who hears all three, writes it down, and builds the complete picture: "John did 4 reps of squat at 80kg." When there are 10 stations, there are 10 sets of three specialists — all reporting back to the same coach.</p>
-  </div>
-
-  <h3>The Data Fusion Problem</h3>
-  <p>The hardest part of the server is not receiving the data — it is correlating three independent streams that have slightly different timestamps and frame rates. Pi 1 sends at 15 FPS, Pi 2 at 22 FPS, Pi 3 only when the weight changes. Donkey Runs must match a rep event from Pi 2 (timestamped 14:32:07.441) with the correct tracking ID from Pi 1 (last seen at 14:32:07.388) and the weight reading from Pi 3 (last updated at 14:32:05.002). The fusion engine uses a 500ms sliding window — any events within 500ms of each other are considered simultaneous and merged into a single log entry.</p>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Component</th><th>Technology</th><th>Role</th></tr></thead>
-      <tbody>
-        <tr><td>RTSP Receiver</td><td>GStreamer (VideoToolbox)</td><td>Decodes three H.265 RTSP streams from the Pis using Apple hardware decoder</td></tr>
-        <tr><td>Fusion Engine</td><td>Python — sliding window correlator</td><td>Matches tracking IDs, rep events, and weight readings by timestamp</td></tr>
-        <tr><td>Database</td><td>PostgreSQL (local)</td><td>Stores every set: member_id, exercise, weight_kg, reps, timestamp</td></tr>
-        <tr><td>Dashboard</td><td>FastAPI + simple HTML</td><td>Live view of current session — accessible from any device on the local network</td></tr>
-        <tr><td>Member lookup</td><td>SQLite (simple for prototype)</td><td>Maps tracking ID to member name after card-tap confirmation</td></tr>
+        <tr><td>Raspberry Pi 5 (4GB)</td><td>3</td><td>$130</td><td>$390</td><td>Edge capture nodes (4GB is plenty for capture-only)</td></tr>
+        <tr><td>Pi Camera Module 3 <strong>Wide</strong> (102°)</td><td>2</td><td>$50</td><td>$100</td><td>For Pi 1 (Tracking) and Pi 2 (Pose) — covers more floor area</td></tr>
+        <tr><td>Pi Camera Module 3 <strong>Standard</strong> (66°)</td><td>1</td><td>$45</td><td>$45</td><td>For Pi 3 (Weight) — less distortion for close-range plate reading</td></tr>
+        <tr><td>Pi 5 PoE+ HAT</td><td>3</td><td>$40</td><td>$120</td><td>Power and data over a single Cat6 cable</td></tr>
+        <tr><td>8-Port Gigabit PoE+ Switch</td><td>1</td><td>$150</td><td>$150</td><td>Powers the Pis and connects them to the Mac Mini</td></tr>
+        <tr><td>Cat6 Ethernet Cables (5m)</td><td>4</td><td>$10</td><td>$40</td><td>Network backbone</td></tr>
+        <tr><td>Super Clamps + Ball Heads</td><td>3</td><td>$25</td><td>$75</td><td>Mounting Pis to the truss</td></tr>
+        <tr><td><strong>Total</strong></td><td></td><td></td><td><strong>~$920</strong></td><td></td></tr>
       </tbody>
     </table>
   </div>
 
   <h3>Network Configuration</h3>
+  <p>All four devices are connected to the same gigabit PoE switch via Cat6 cable. Static IPs are assigned so the Pi addresses never change.</p>
+  <div class="callout how">
+    <div class="ct">// WHY TCP NOT UDP FOR VIDEO STREAMS</div>
+    <p>RTSP video streams from the Pis use <strong>TCP transport</strong>, not UDP. On a local wired gigabit network, packet loss is essentially zero — so TCP's retransmission guarantee costs nothing in latency. A dropped UDP packet in a video stream means a corrupted frame, which causes YOLO to misdetect or MoveNet to produce garbage keypoints. TCP prevents this entirely.</p>
+  </div>
   <div class="tbl">
     <table>
       <thead><tr><th>Device</th><th>Static IP</th><th>Port</th><th>Connection</th></tr></thead>
       <tbody>
-        <tr><td>Donkey Runs (Mac Mini M4)</td><td>192.168.1.10</td><td>8554 (RTSP in from each Pi) / 8080 (dashboard) / 8765 (WebSocket to tablet)</td><td>Gigabit Ethernet to PoE switch</td></tr>
-        <tr><td>Pi 1 — People Tracker</td><td>192.168.1.21</td><td>Sends to 5001</td><td>PoE Cat6 to switch</td></tr>
-        <tr><td>Pi 2 — Rep Counter</td><td>192.168.1.22</td><td>Sends to 5002</td><td>PoE Cat6 to switch</td></tr>
-        <tr><td>Pi 3 — Weight Reader</td><td>192.168.1.23</td><td>Sends to 5003</td><td>PoE Cat6 to switch</td></tr>
+        <tr><td><strong>Pi 1</strong></td><td>192.168.1.11</td><td>8554 (RTSP out — TCP)</td><td>PoE — Cat6 to switch</td></tr>
+        <tr><td><strong>Pi 2</strong></td><td>192.168.1.12</td><td>8554 (RTSP out — TCP)</td><td>PoE — Cat6 to switch</td></tr>
+        <tr><td><strong>Pi 3</strong></td><td>192.168.1.13</td><td>8554 (RTSP out — TCP)</td><td>PoE — Cat6 to switch</td></tr>
+        <tr><td><strong>Donkey Runs</strong></td><td>192.168.1.10</td><td>8554 (RTSP in) / 8080 (Dashboard) / 8765 (WebSocket)</td><td>Gigabit Ethernet to PoE switch</td></tr>
+        <tr><td><strong>Station Tablet</strong></td><td>192.168.1.20</td><td>8765 (WebSocket in)</td><td>Wi-Fi (5GHz) to router</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── Section 27: Brief for Donkey Runs ─────────────────────────────── -->
+<section class="section" id="proto-donkey">
+  <div class="section-tag">// SECTION 27 — CHAPTER 07</div>
+  <h2>Brief for <em>Donkey Runs</em></h2>
+  <p class="lead">Donkey Runs (the Mac Mini M4) is the brain of the entire system. It receives the dumb video streams from the Pis and does 100% of the heavy lifting. This is exactly what the server needs to do.</p>
+  
+  <div class="callout analogy">
+    <div class="ct">// THINK OF IT LIKE THIS</div>
+    <p>The three Pis above a station are like three specialists watching the same workout from different angles and streaming it to a central desk. Donkey Runs is the coach at that desk who watches all three monitors simultaneously, runs the AI to figure out what's happening, writes it down in the database, and shouts the current score back to the athlete via the tablet.</p>
+  </div>
+
+  <h3>The 5-Step Server Pipeline</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Step</th><th>Software / Framework</th><th>What Donkey Runs Does</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1. Ingest</strong></td><td>GStreamer + VideoToolbox</td><td>Receives the three RTSP streams (tcp://192.168.1.11:8554 etc) and decodes the H.265 video using the M4's hardware media engine.</td></tr>
+        <tr><td><strong>2. Inference</strong></td><td>PyTorch (MPS Backend)</td><td>Runs YOLOv8n on Stream 1 (Tracking), MoveNet + LSTM on Stream 2 (Pose/Reps), and custom YOLOv8n on Stream 3 (Weight).</td></tr>
+        <tr><td><strong>3. Fusion</strong></td><td>Python + Redis</td><td>Uses a 500ms sliding window correlator to match the tracking ID from Stream 1 with the rep events from Stream 2 and the weight from Stream 3.</td></tr>
+        <tr><td><strong>4. Storage</strong></td><td>PostgreSQL</td><td>Logs the completed set to the database (Member ID, Exercise, Weight, Reps, Timestamp).</td></tr>
+        <tr><td><strong>5. Display</strong></td><td>FastAPI + WebSockets</td><td>Pushes the live JSON state (current rep count, current weight) to the station tablet every 100ms.</td></tr>
       </tbody>
     </table>
   </div>
 
-  <h3>Build Checklist — Donkey Runs</h3>
-  <ul class="checklist">
-    <li><span class="check-icon todo">○</span>Install PostgreSQL — create <code>gym_prototype</code> database and <code>sets</code> table</li>
-    <li><span class="check-icon todo">○</span>Install GStreamer with VideoToolbox support on Mac Mini</li>
-    <li><span class="check-icon todo">○</span>Confirm all 3 RTSP streams open and decode cleanly</li>
-    <li><span class="check-icon todo">○</span>Write fusion engine — 500ms sliding window correlator</li>
-    <li><span class="check-icon todo">○</span>Write to PostgreSQL — verify set entries appear after a test rep</li>
-    <li><span class="check-icon todo">○</span>Build FastAPI dashboard — live view at http://192.168.1.10:8080</li>
-    <li><span class="check-icon todo">○</span>End-to-end test: do 5 reps of barbell curl — verify correct log entry</li>
-  </ul>
+  <h3>Training the Models (Server-Side)</h3>
+  <p>Donkey Runs is also responsible for training the Neural Networks. The Pis do not train anything. To train the custom weight detection model:</p>
+  <ol>
+    <li>Donkey Runs records 45 minutes of live video from Pi 3's RTSP stream while plates are loaded/unloaded.</li>
+    <li>Frames are extracted on Donkey Runs at 1 FPS.</li>
+    <li>Frames are uploaded to Roboflow for manual annotation (drawing boxes around the colour stripes).</li>
+    <li>The annotated dataset is downloaded back to Donkey Runs.</li>
+    <li>YOLOv8n is fine-tuned on Donkey Runs using the M4 GPU.</li>
+    <li>The new weights file (<code>best.pt</code>) is loaded into the inference pipeline on Donkey Runs.</li>
+  </ol>
 </section>
 
-<!-- ─── Section 31: Build Log ─────────────────────────────────────────── -->
-<section class="section" id="proto-log">
-  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
-  <h2>Prototype <em>Build Log</em></h2>
-  <p class="lead">A running record of prototype milestones, decisions, and discoveries. Updated as the build progresses.</p>
-
-  <div class="callout info">
-    <div class="ct">// HOW TO USE THIS LOG</div>
-    <p>Add a new entry each time a significant milestone is reached, a key decision is made, or an unexpected problem is discovered and solved. This log becomes the institutional memory of the prototype — useful when onboarding new team members and when debugging issues in the production system that may have roots in prototype decisions.</p>
-  </div>
-
-  <div class="log-entry">
-    <div class="log-date">// MAR 2026 — WEEK 1</div>
-    <div class="log-title">Prototype Architecture Defined</div>
-    <div class="log-body">Decision made to use 3 Raspberry Pi 5 units as distributed edge nodes rather than a single machine. Each Pi handles one task (tracking, rep counting, weight detection). Data fused on Donkey Runs (Mac Mini M4). Hardware list finalised. AlphaFit barbell plates confirmed as the target for colour-based weight detection.</div>
-  </div>
-
-  <div class="log-entry" style="border-left-color: var(--border); opacity: 0.4;">
-    <div class="log-date">// PENDING — NEXT ENTRY</div>
-    <div class="log-title">Hardware Received & First Boot</div>
-    <div class="log-body">Update this entry when Pi units arrive and first boot is confirmed. Note any setup issues, OS version used, and initial network configuration.</div>
+<!-- ─── Section 28: Step-by-Step Build Order ──────────────────────────── -->
+<section class="section" id="proto-build">
+  <div class="section-tag">// SECTION 28 — CHAPTER 07</div>
+  <h2>Step-by-Step <em>Build Order</em></h2>
+  <p class="lead">Do not try to build the whole system at once. Follow this exact sequence to isolate problems and guarantee success.</p>
+  
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Phase</th><th>Task</th><th>Success Criteria</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Step 1</strong><br>Hardware</td>
+          <td>Assemble truss. Mount 3 Pis. Run Cat6 to PoE switch. Flash Raspberry Pi OS.</td>
+          <td>All 3 Pis boot, get static IPs, and are accessible via SSH from Donkey Runs.</td>
+        </tr>
+        <tr>
+          <td><strong>Step 2</strong><br>Streaming</td>
+          <td>Install <code>mediamtx</code> (or similar RTSP server) on all 3 Pis. Configure Pi Camera to stream H.265.</td>
+          <td>Donkey Runs can open all 3 streams simultaneously in VLC or GStreamer with &lt;200ms latency.</td>
+        </tr>
+        <tr>
+          <td><strong>Step 3</strong><br>Data Collection</td>
+          <td>Record 45 mins of barbell loading via Pi 3 stream. Record 45 mins of squats via Pi 2 stream.</td>
+          <td>Raw video files saved on Donkey Runs ready for annotation.</td>
+        </tr>
+        <tr>
+          <td><strong>Step 4</strong><br>Tracking (Pi 1)</td>
+          <td>Run pre-trained YOLOv8n + DeepSORT on Donkey Runs using Pi 1's stream.</td>
+          <td>Terminal outputs persistent Tracking IDs as people walk through the zone.</td>
+        </tr>
+        <tr>
+          <td><strong>Step 5</strong><br>Weight (Pi 3)</td>
+          <td>Annotate Pi 3 frames in Roboflow. Train YOLO on Donkey Runs. Run inference on live stream.</td>
+          <td>Terminal correctly outputs "Blue 20kg" when plate is loaded.</td>
+        </tr>
+        <tr>
+          <td><strong>Step 6</strong><br>Reps (Pi 2)</td>
+          <td>Run MoveNet on Pi 2 stream. Train LSTM on the extracted keypoints. Run live inference.</td>
+          <td>Terminal correctly outputs "Rep +1" when squat is completed.</td>
+        </tr>
+        <tr>
+          <td><strong>Step 7</strong><br>The Live Loop</td>
+          <td>Write the Fusion Engine. Connect the WebSocket to the tablet.</td>
+          <td><strong>The Demo:</strong> Walk up, load weight, do 5 reps. Tablet shows it all instantly.</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
+<!-- ─── Section 29: Risk Assessment ───────────────────────────────────── -->
+<section class="section" id="proto-risk">
+  <div class="section-tag">// SECTION 29 — CHAPTER 07</div>
+  <h2>Risk <em>Assessment</em></h2>
+  <p class="lead">An honest evaluation of the technical risks in the MVP build and how we mitigate them.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Component</th><th>Confidence</th><th>Biggest Risk</th><th>Mitigation Strategy</th></tr></thead>
+      <tbody>
+        <tr><td>Person Tracking</td><td>🟢 High</td><td>Occlusion in squat rack breaks ID</td><td>Raise DeepSORT <code>max_age</code> to 90 frames (3 seconds) to hold ID in memory</td></tr>
+        <tr><td>Network Streaming</td><td>🟢 High</td><td>RTSP buffer causes 3-second lag</td><td>Configure GStreamer with <code>latency=0</code> and <code>drop-on-latency=true</code></td></tr>
+        <tr><td>Tablet Display</td><td>🟢 High</td><td>None significant</td><td>Standard WebSocket web dev — well understood</td></tr>
+        <tr><td>Pose Estimation</td><td>🟢 High</td><td>Motion blur on fast reps</td><td>Increase camera shutter speed; 12MP IMX708 sensor handles gym light well</td></tr>
+        <tr><td>Rep Counting (LSTM)</td><td>🟡 Medium</td><td>Requires multiple training iterations</td><td>Start data collection early; use strict rep definitions</td></tr>
+        <tr><td>Weight Detection</td><td>🟠 Medium-Low</td><td>Lighting variability washes out colours</td><td>Train on data collected at different times of day (morning sun vs evening LED)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</div> <!-- End of content-wrapper -->
 </body>
 </html>
