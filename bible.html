@@ -382,8 +382,9 @@
   <a class="nav-link" href="#proto-pi1">28 — Pi 1: People Tracker</a>
   <a class="nav-link" href="#proto-pi2">29 — Pi 2: Rep Counter</a>
   <a class="nav-link" href="#proto-pi3">30 — Pi 3: Weight Reader</a>
-  <a class="nav-link" href="#proto-donkey">31 — Donkey Runs (Server)</a>
-  <a class="nav-link" href="#proto-log">32 — Build Log</a>
+  <a class="nav-link" href="#proto-data">31 — Data Collection Pipeline</a>
+  <a class="nav-link" href="#proto-donkey">32 — Donkey Runs (Server)</a>
+  <a class="nav-link" href="#proto-log">33 — Build Log</a>
 </nav>
 
 <div class="main">
@@ -2169,6 +2170,71 @@ function switchPhase(num) {
 </section>
 
 <!-- ─── Section 30: Donkey Runs ───────────────────────────────────────── -->
+<!-- ─── Section 31: Data Collection Pipeline ──────────────────────────── -->
+<section class="section" id="proto-data">
+  <div class="section-tag">// SECTION 31 — CHAPTER 07</div>
+  <h2>Data Collection <em>Pipeline</em></h2>
+  <p class="lead">Before the models can run live, they need training data. This section documents the automated pipeline for capturing, transferring, and filtering training footage from all three Pis without manual intervention.</p>
+
+  <div class="callout what">
+    <div class="ct">// THE GOAL</div>
+    <p>Capture real, in-situ training data from all three cameras simultaneously whenever the station is in use, without filling up hard drives with empty gym footage, and without requiring someone to press "record".</p>
+  </div>
+
+  <h3>The Three Approaches to Recording</h3>
+  <p>When setting up the Pis to record training data, there are three possible approaches. Only one works reliably for a gym environment:</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Approach</th><th>How it works</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1. Continuous</strong></td><td>Record 24/7 to the Pi's SD card.</td><td>❌ <strong>Fail:</strong> SD card fills up in hours. 90% of footage is an empty gym.</td></tr>
+        <tr><td><strong>2. Motion-triggered</strong></td><td>Pi starts recording when pixels change.</td><td>⚠️ <strong>Risky:</strong> Slow eccentric reps often fail to trigger motion thresholds, resulting in clips that cut out mid-set.</td></tr>
+        <tr><td><strong>3. Rolling Clips + Filter</strong></td><td>Pi records continuous 2-min clips. Server filters them.</td><td>✅ <strong>Winner:</strong> Zero gaps, no empty footage saved, fully automated.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The Rolling Clip Architecture</h3>
+  <p>The solution is a two-part system: dumb capture on the edge, smart filtering on the server.</p>
+
+  <p><strong>On the Pi (Dumb Capture):</strong><br>
+  A Python script using <code>picamera2</code> runs automatically on boot via <code>systemd</code>. It records continuously in 2-minute chunks (e.g., <code>pi2_1430.mp4</code>, <code>pi2_1432.mp4</code>). It maintains a 5-second overlap between clips so no movement is ever lost at the cut point. As soon as a clip finishes, a background thread uses <code>rsync</code> to push it over the network to Donkey Runs (the Mac Mini), then deletes it from the Pi's SD card. The Pi never runs out of space.</p>
+
+  <p><strong>On Donkey Runs (Smart Filtering):</strong><br>
+  A watcher script monitors the incoming folder. When a new 2-minute clip arrives, Donkey Runs runs a high-speed YOLOv8n pass over it (checking 1 frame per second). 
+  <br>• If YOLO detects a person in the frame, the clip is moved to the <code>/training_data/</code> folder.
+  <br>• If the clip is just an empty gym, it is immediately deleted.</p>
+
+  <div class="callout how">
+    <div class="ct">// WHY THIS IS ELEGANT</div>
+    <p>The Pis do zero AI processing during data collection — they just act as dumb IP cameras, ensuring maximum framerate and zero thermal throttling. The Mac Mini's M4 chip can process a 2-minute clip in under 10 seconds, meaning it easily keeps up with three Pis sending clips simultaneously. You end up with a perfectly curated folder of training data containing only active sets.</p>
+  </div>
+
+  <h3>What Each Pi Captures</h3>
+  <p>All three Pis run the exact same rolling-clip script, but the footage they capture is used for different training pipelines:</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Node</th><th>Footage Type</th><th>What we do with it on Donkey Runs</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pi 1 (Tracker)</strong></td><td>Overhead, straight down</td><td>Extract frames, annotate bounding boxes for YOLO fine-tuning (handling gym-specific occlusion).</td></tr>
+        <tr><td><strong>Pi 2 (Pose)</strong></td><td>Overhead, 20–30° tilt</td><td>Run MoveNet to extract joint angles, manually label the start/end of reps to train the LSTM rep counter.</td></tr>
+        <tr><td><strong>Pi 3 (Weight)</strong></td><td>Side-on, barbell height</td><td>Extract frames when plates are being loaded/unloaded, annotate colours in Roboflow for YOLO weight detection.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Implementation Steps</h3>
+  <ul class="checklist">
+    <li><span class="check-icon todo">○</span>Write <code>rolling_capture.py</code> for the Pis (2-min chunks, 5s overlap, h264 encoding)</li>
+    <li><span class="check-icon todo">○</span>Set up SSH keys so Pis can <code>rsync</code> to Mac Mini without passwords</li>
+    <li><span class="check-icon todo">○</span>Create <code>systemd</code> service on Pis so capture starts automatically on boot</li>
+    <li><span class="check-icon todo">○</span>Write <code>smart_filter.py</code> for Mac Mini (YOLO person detection, 1 FPS scan rate)</li>
+    <li><span class="check-icon todo">○</span>Set up cron job on Mac Mini to run filter script every 5 minutes</li>
+  </ul>
+</section>
+
 <section class="section" id="proto-donkey">
   <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
   <h2>Donkey Runs — <em>The Server</em></h2>
