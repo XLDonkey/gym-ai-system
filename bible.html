@@ -376,13 +376,14 @@
   <a class="nav-link" href="#phases">23 — Interactive Roadmap</a>
   <a class="nav-link" href="#costs">24 — Cost Breakdown</a>
   <div class="nav-group">Chapter 7 — Prototyping</div>
-  <a class="nav-link" href="#proto-overview">25 — MVP Prototype Overview</a>
-  <a class="nav-link" href="#proto-hardware">26 — Prototype Hardware</a>
-  <a class="nav-link" href="#proto-pi1">27 — Pi 1: People Tracker</a>
-  <a class="nav-link" href="#proto-pi2">28 — Pi 2: Rep Counter</a>
-  <a class="nav-link" href="#proto-pi3">29 — Pi 3: Weight Reader</a>
-  <a class="nav-link" href="#proto-donkey">30 — Donkey Runs (Server)</a>
-  <a class="nav-link" href="#proto-log">31 — Build Log</a>
+  <a class="nav-link" href="#proto-decision">25 — Stakeholder MVP Decision</a>
+  <a class="nav-link" href="#proto-overview">26 — MVP Architecture Overview</a>
+  <a class="nav-link" href="#proto-hardware">27 — Prototype Hardware</a>
+  <a class="nav-link" href="#proto-pi1">28 — Pi 1: People Tracker</a>
+  <a class="nav-link" href="#proto-pi2">29 — Pi 2: Rep Counter</a>
+  <a class="nav-link" href="#proto-pi3">30 — Pi 3: Weight Reader</a>
+  <a class="nav-link" href="#proto-donkey">31 — Donkey Runs (Server)</a>
+  <a class="nav-link" href="#proto-log">32 — Build Log</a>
 </nav>
 
 <div class="main">
@@ -1834,11 +1835,11 @@ function switchPhase(num) {
     <div class="ch-sections">
       <span class="ch-pill">25 — MVP Overview</span>
       <span class="ch-pill">26 — Hardware List</span>
-      <span class="ch-pill">27 — Pi 1: People Tracker</span>
-      <span class="ch-pill">28 — Pi 2: Rep Counter</span>
-      <span class="ch-pill">29 — Pi 3: Weight Reader</span>
+      <span class="ch-pill">28 — Pi 1: People Tracker</span>
+      <span class="ch-pill">29 — Pi 2: Rep Counter</span>
+      <span class="ch-pill">30 — Pi 3: Weight Reader</span>
       <span class="ch-pill">30 — Donkey Runs</span>
-      <span class="ch-pill">31 — Build Log</span>
+      <span class="ch-pill">32 — Build Log</span>
     </div>
     <div class="ch-prereqs">
       <div class="ch-prereqs-title">// Prerequisites before starting</div>
@@ -1856,8 +1857,93 @@ function switchPhase(num) {
 </div>
 
 <!-- ─── Section 25: MVP Overview ─────────────────────────────────────── -->
-<section class="section" id="proto-overview">
+<!-- ─── Section 25: Stakeholder MVP Decision ─────────────────────────── -->
+<section class="section" id="proto-decision">
   <div class="section-tag">// SECTION 25 — CHAPTER 07</div>
+  <h2>Stakeholder <em>MVP Decision</em></h2>
+  <p class="lead">After seeing the demo, stakeholders have approved a real working MVP covering all three core capabilities: pose tracking, person tracking, and weight detection. This section documents the hardware decisions, the reasoning behind them, and the exact build order.</p>
+
+  <div class="callout what">
+    <div class="ct">// THE DECISION</div>
+    <p>Build a compact, self-contained prototype using <strong>Raspberry Pi 5 (4GB)</strong> units and <strong>Pi Camera Module 3 Wide</strong> cameras. Three Pis, one per task, all feeding data to Donkey Runs (Mac Mini M4). This system will be used to validate the AI models, collect training data, and demonstrate the full pipeline to stakeholders before committing to the production camera infrastructure.</p>
+  </div>
+
+  <h3>Why Raspberry Pi 5?</h3>
+  <p>The Pi 5 is the right choice for this prototype for three reasons. First, it is compact enough to mount directly on the truss frame alongside the camera — no separate enclosure needed. Second, it is powerful enough to run lightweight AI inference (YOLOv8n at 15 FPS, MoveNet Lightning at 22 FPS) without a GPU. Third, if we later move to a different camera system (Hikvision dome, Axis box camera, or a dedicated machine vision camera), the Pi can be repurposed for other tasks in the gym — controlling the electric weight stack motors, running the tablet UI, or acting as a network relay.</p>
+
+  <h3>Pi 5 4GB vs 8GB — The Honest Answer</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Spec</th><th>Pi 5 4GB (~$130 AUD)</th><th>Pi 5 8GB (~$175 AUD)</th></tr></thead>
+      <tbody>
+        <tr><td>YOLOv8n inference (people tracking)</td><td>✅ Runs fine at 15 FPS</td><td>✅ Runs fine at 15 FPS</td></tr>
+        <tr><td>MoveNet Lightning (pose estimation)</td><td>✅ Runs fine at 22 FPS</td><td>✅ Runs fine at 22 FPS</td></tr>
+        <tr><td>YOLOv8n custom (weight detection)</td><td>✅ Runs fine at 12 FPS</td><td>✅ Runs fine at 12 FPS</td></tr>
+        <tr><td>Running two models simultaneously</td><td>⚠️ Tight — possible but not recommended</td><td>✅ Comfortable</td></tr>
+        <tr><td>One task per Pi (our architecture)</td><td>✅ Ideal — no wasted RAM</td><td>✅ Fine but overkill</td></tr>
+        <tr><td><strong>Verdict</strong></td><td><strong>✅ Use this — one task per Pi</strong></td><td>Only if combining tasks on one Pi</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Since the architecture assigns exactly one task to each Pi, the 4GB model is the correct choice. The extra RAM in the 8GB model only becomes relevant if you try to run two models on the same Pi simultaneously — which we are not doing. Save the $45 per unit ($135 total across 3 Pis) and put it toward better mounting hardware or a spare Pi.</p>
+
+  <h3>Camera Selection — Pi Camera Module 3 Wide</h3>
+  <p>The camera choice matters enormously for Pi 3 (weight detection) and significantly for Pi 2 (pose estimation). The wrong camera will make the weight detection model unreliable regardless of how well it is trained.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Camera</th><th>Sensor</th><th>Field of View</th><th>Autofocus</th><th>IR LEDs</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>OV5647 5MP (IR version)</td><td>5MP — old, noisy</td><td>54°</td><td>Manual only</td><td>Yes — destroys colour</td><td>❌ Do not use for Pi 3</td></tr>
+        <tr><td>Pi Camera Module 3 (standard)</td><td>12MP IMX708</td><td>66°</td><td>Yes</td><td>No</td><td>✅ Good</td></tr>
+        <tr><td><strong>Pi Camera Module 3 Wide</strong></td><td><strong>12MP IMX708</strong></td><td><strong>102°</strong></td><td><strong>Yes</strong></td><td><strong>No</strong></td><td><strong>✅ Best choice</strong></td></tr>
+        <tr><td>Arducam 12MP IMX477</td><td>12MP IMX477</td><td>63°</td><td>Manual</td><td>No</td><td>✅ Good but manual focus</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warning">
+    <div class="ct">// DO NOT USE THE OV5647 IR CAMERA FOR PI 3</div>
+    <p>The infrared LED illuminators on the OV5647 IR camera reflect off the coloured plate stripes and render them white or grey under the IR light. The colour detection model will fail. The OV5647 can be used for Pi 1 (people tracking) in a pinch since colour is irrelevant for bounding boxes, but the Pi Camera Module 3 Wide is strongly preferred for all three nodes for consistency.</p>
+  </div>
+
+  <p>The Wide variant's 102° field of view is the key advantage. From a truss mounting height of 2.5–3.5 metres, the standard 66° lens covers roughly a 3×3 metre floor area. The Wide lens covers roughly a 5×5 metre area — enough to capture a full barbell station including the person, the bar, and both loaded sleeves in a single frame without repositioning.</p>
+
+  <h3>Training Data Portability — A Critical Advantage</h3>
+  <p>One of the most important decisions in this plan is that the training data collected during the prototype phase is fully reusable regardless of what camera system is used in production. The YOLO model trained to detect AlphaFit plate colours learns the relationship between colour and weight — it does not learn anything specific about the Pi Camera Module 3's sensor characteristics. When the production system uses Hikvision dome cameras or Axis box cameras, the model can be fine-tuned with a small number of new frames (50–100) from the new camera angle to account for any differences in colour rendering or perspective. The core 500+ frame training dataset remains valid and does not need to be recollected.</p>
+
+  <div class="callout how">
+    <div class="ct">// WHY THIS MATTERS FOR STAKEHOLDERS</div>
+    <p>The time invested in annotating training data during the prototype phase is not wasted when the system scales up. Every annotated frame of an AlphaFit plate is a permanent asset. The same applies to the pose estimation LSTM training data — rep patterns learned from the Pi camera footage transfer directly to the production camera system. Build the dataset now, use it forever.</p>
+  </div>
+
+  <h3>Recommended Build Order</h3>
+  <p>The three Pis should not be built in parallel. Pi 3 (weight detection) requires custom model training which takes the longest, so it should be started first. Pi 1 and Pi 2 use pre-trained models and can be set up quickly once the hardware arrives.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Week</th><th>Priority</th><th>Task</th><th>Why This Order</th></tr></thead>
+      <tbody>
+        <tr><td>Week 1</td><td>🔴 First</td><td>Buy hardware, build truss section, mount all 3 Pis</td><td>Everything depends on the physical setup being stable</td></tr>
+        <tr><td>Week 1–2</td><td>🔴 First</td><td>Start filming Pi 3 training data (plate loading footage)</td><td>Training takes time — start the data pipeline immediately</td></tr>
+        <tr><td>Week 2</td><td>🟡 Second</td><td>Set up Pi 1 — YOLO people tracking live, UDP to Donkey Runs</td><td>Pre-trained model — fast to deploy, validates the network pipeline</td></tr>
+        <tr><td>Week 2</td><td>🟡 Second</td><td>Set up Pi 2 — MoveNet pose + LSTM rep counting live</td><td>Pre-trained models — fast to deploy once Pi 1 network is proven</td></tr>
+        <tr><td>Week 2–3</td><td>🟠 Third</td><td>Annotate Pi 3 training frames in Roboflow (500+ frames)</td><td>Annotation takes 45–90 minutes with auto-label assist</td></tr>
+        <tr><td>Week 3</td><td>🟠 Third</td><td>Train YOLOv8n on annotated plate dataset on Mac Mini</td><td>~2 hours training time on Mac Mini M4</td></tr>
+        <tr><td>Week 3</td><td>🟢 Final</td><td>Deploy trained weights to Pi 3 — end-to-end test</td><td>Full system test: one person, one barbell, one set logged correctly</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout success">
+    <div class="ct">// MVP SUCCESS CRITERIA</div>
+    <p>The prototype is considered successful when the system correctly logs a complete set with: <strong>correct member identity</strong> (from card tap), <strong>correct weight</strong> (within ±2.5kg), and <strong>correct rep count</strong> (within ±1 rep) — for 9 out of 10 consecutive test sets. This is the gate before presenting to stakeholders for Phase 1 approval.</p>
+  </div>
+</section>
+
+<section class="section" id="proto-overview">
+  <div class="section-tag">// SECTION 26 — CHAPTER 07</div>
   <h2>MVP Prototype <em>Overview</em></h2>
   <p class="lead">The MVP has one job: prove that a camera can watch a person do a barbell set and correctly log who they are, how much weight is on the bar, and how many reps they completed. Nothing more.</p>
 
@@ -1944,7 +2030,7 @@ function switchPhase(num) {
 
 <!-- ─── Section 27: Pi 1 — People Tracker ────────────────────────────── -->
 <section class="section" id="proto-pi1">
-  <div class="section-tag">// SECTION 27 — CHAPTER 07</div>
+  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
   <h2>Pi 1 — <em>People Tracker</em></h2>
   <p class="lead">Pi 1 is responsible for detecting and tracking the person in the prototype zone. It runs YOLO for detection and DeepSORT for persistent ID assignment, then streams bounding box data to Donkey Runs over UDP.</p>
 
@@ -1977,7 +2063,7 @@ function switchPhase(num) {
 
 <!-- ─── Section 28: Pi 2 — Rep Counter ───────────────────────────────── -->
 <section class="section" id="proto-pi2">
-  <div class="section-tag">// SECTION 28 — CHAPTER 07</div>
+  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
   <h2>Pi 2 — <em>Rep Counter</em></h2>
   <p class="lead">Pi 2 watches the person's body and counts repetitions. It runs MoveNet Lightning for pose estimation (17 keypoints) and a pre-trained LSTM for rep detection, streaming rep events to Donkey Runs.</p>
 
@@ -2010,7 +2096,7 @@ function switchPhase(num) {
 
 <!-- ─── Section 29: Pi 3 — Weight Reader ─────────────────────────────── -->
 <section class="section" id="proto-pi3">
-  <div class="section-tag">// SECTION 29 — CHAPTER 07</div>
+  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
   <h2>Pi 3 — <em>Weight Reader</em></h2>
   <p class="lead">Pi 3 reads the weight on the barbell by detecting the colour stripes on the AlphaFit bumper plates. It uses a custom-trained YOLOv8n model to identify each plate's colour from the side, then calculates the total load.</p>
 
@@ -2081,7 +2167,7 @@ function switchPhase(num) {
 
 <!-- ─── Section 30: Donkey Runs ───────────────────────────────────────── -->
 <section class="section" id="proto-donkey">
-  <div class="section-tag">// SECTION 30 — CHAPTER 07</div>
+  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
   <h2>Donkey Runs — <em>The Server</em></h2>
   <p class="lead">Donkey Runs is the Mac Mini M4 that receives data from all three Pis, fuses it into a coherent workout log, and serves the dashboard. It is the brain of the prototype — the Pis are just its eyes.</p>
 
@@ -2132,7 +2218,7 @@ function switchPhase(num) {
 
 <!-- ─── Section 31: Build Log ─────────────────────────────────────────── -->
 <section class="section" id="proto-log">
-  <div class="section-tag">// SECTION 31 — CHAPTER 07</div>
+  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
   <h2>Prototype <em>Build Log</em></h2>
   <p class="lead">A running record of prototype milestones, decisions, and discoveries. Updated as the build progresses.</p>
 
