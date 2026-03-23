@@ -1930,7 +1930,7 @@ function switchPhase(num) {
       <tbody>
         <tr><td>Week 1</td><td>🔴 First</td><td>Buy hardware, build truss section, mount all 3 Pis</td><td>Everything depends on the physical setup being stable</td></tr>
         <tr><td>Week 1–2</td><td>🔴 First</td><td>Start filming Pi 3 training data (plate loading footage)</td><td>Training takes time — start the data pipeline immediately</td></tr>
-        <tr><td>Week 2</td><td>🟡 Second</td><td>Set up Pi 1 — YOLO people tracking live, UDP to Donkey Runs</td><td>Pre-trained model — fast to deploy, validates the network pipeline</td></tr>
+        <tr><td>Week 2</td><td>🟡 Second</td><td>Set up Pi 1 — RTSP stream live, confirmed on Donkey Runs</td><td>Pre-trained model — fast to deploy, validates the network pipeline</td></tr>
         <tr><td>Week 2</td><td>🟡 Second</td><td>Set up Pi 2 — MoveNet pose + LSTM rep counting live</td><td>Pre-trained models — fast to deploy once Pi 1 network is proven</td></tr>
         <tr><td>Week 2–3</td><td>🟠 Third</td><td>Annotate Pi 3 training frames in Roboflow (500+ frames)</td><td>Annotation takes 45–90 minutes with auto-label assist</td></tr>
         <tr><td>Week 3</td><td>🟠 Third</td><td>Train YOLOv8n on annotated plate dataset on Mac Mini</td><td>~2 hours training time on Mac Mini M4</td></tr>
@@ -1970,9 +1970,9 @@ function switchPhase(num) {
     <table>
       <thead><tr><th>Node</th><th>Device</th><th>Task</th><th>Mount Position (all above same station)</th><th>Sends to Donkey Runs</th></tr></thead>
       <tbody>
-        <tr><td><strong>Pi 1</strong></td><td>Raspberry Pi 5 (4GB)</td><td>People Tracking (YOLO + DeepSORT)</td><td>Straight down — full floor zone view of the station</td><td>Bounding boxes + Tracking IDs (JSON over UDP)</td></tr>
-        <tr><td><strong>Pi 2</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Pose Estimation + Rep Counting</td><td>20–30° tilt — full body and limbs visible</td><td>17-point skeleton + Rep events (JSON over UDP)</td></tr>
-        <tr><td><strong>Pi 3</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Barbell Plate Colour Detection</td><td>Side-on at barbell sleeve height — plate edges clearly visible</td><td>Plate colour array + Weight total (JSON over UDP)</td></tr>
+        <tr><td><strong>Pi 1</strong></td><td>Raspberry Pi 5 (4GB)</td><td>People Tracking (YOLO + DeepSORT)</td><td>Straight down — full floor zone view of the station</td><td>H.265 RTSP stream over TCP → Donkey Runs</td></tr>
+        <tr><td><strong>Pi 2</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Pose Estimation + Rep Counting</td><td>20–30° tilt — full body and limbs visible</td><td>H.265 RTSP stream over TCP → Donkey Runs</td></tr>
+        <tr><td><strong>Pi 3</strong></td><td>Raspberry Pi 5 (4GB)</td><td>Barbell Plate Colour Detection</td><td>Side-on at barbell sleeve height — plate edges clearly visible</td><td>H.265 RTSP stream over TCP → Donkey Runs</td></tr>
         <tr><td><strong>Donkey Runs</strong></td><td>Mac Mini M4 (16GB)</td><td>Data Fusion + Logging + Dashboard</td><td>N/A — central server, not on the truss</td><td>Receives from all station clusters, writes to PostgreSQL</td></tr>
       </tbody>
     </table>
@@ -2037,7 +2037,7 @@ function switchPhase(num) {
 <section class="section" id="proto-pi1">
   <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
   <h2>Pi 1 — <em>People Tracker</em></h2>
-  <p class="lead">Pi 1 is responsible for detecting and tracking the person in the prototype zone. It runs YOLO for detection and DeepSORT for persistent ID assignment, then streams bounding box data to Donkey Runs over UDP.</p>
+  <p class="lead">Pi 1 is a pure capture device. It streams a live 1080p H.265 video feed to Donkey Runs over RTSP/TCP. All YOLO detection and DeepSORT tracking inference runs on the Mac Mini. The Pi does nothing except encode and stream.</p>
 
   <div class="tbl">
     <table>
@@ -2048,7 +2048,7 @@ function switchPhase(num) {
         <tr><td>Detection model</td><td>YOLOv8n (nano) — person class only</td><td>Runs at ~15 FPS on Pi 5 without GPU acceleration</td></tr>
         <tr><td>Tracking model</td><td>DeepSORT with <code>max_age=90</code></td><td>Holds ID for 3 seconds through occlusion</td></tr>
         <tr><td>Output format</td><td>JSON: <code>&#123;"id":42,"x":320,"y":280,"w":180,"h":420,"conf":0.91&#125;</code></td><td>Lightweight, parseable by Donkey Runs fusion engine</td></tr>
-        <tr><td>Transmission</td><td>UDP to Donkey Runs port 5001</td><td>Low latency, acceptable packet loss at this scale</td></tr>
+        <tr><td>Transmission</td><td>RTSP over TCP — <code>rtsp://192.168.1.11:8554/stream</code></td><td>TCP guarantees frame delivery on local wired network</td></tr>
         <tr><td>Target FPS</td><td>10–15 FPS</td><td>Sufficient for tracking at walking/exercise speed</td></tr>
       </tbody>
     </table>
@@ -2062,7 +2062,7 @@ function switchPhase(num) {
     <li><span class="check-icon todo">○</span>Connect PoE HAT — verify Pi powers on via Cat6</li>
     <li><span class="check-icon todo">○</span>Run <code>libcamera-hello</code> to confirm camera feed is live</li>
     <li><span class="check-icon todo">○</span>Run tracker script — verify bounding boxes appear on test frame</li>
-    <li><span class="check-icon todo">○</span>Confirm UDP packets arriving at Donkey Runs port 5001</li>
+    <li><span class="check-icon todo">○</span>Confirm RTSP stream opening cleanly on Donkey Runs (<code>gst-launch-1.0 rtspsrc location=rtsp://192.168.1.11:8554/stream</code>)</li>
   </ul>
 </section>
 
@@ -2081,7 +2081,7 @@ function switchPhase(num) {
         <tr><td>Pose model</td><td>MoveNet Lightning (TFLite, int8 quantised)</td><td>~22 FPS on Pi 5 — fast enough for real-time rep detection</td></tr>
         <tr><td>Rep model</td><td>LSTM (pre-trained on barbell curl, squat, press)</td><td>Watches 60-frame rolling window of joint angles</td></tr>
         <tr><td>Output format</td><td>JSON: <code>&#123;"event":"rep","exercise":"curl","count":3,"conf":0.94&#125;</code></td><td>Event-driven — only sends on rep completion, not every frame</td></tr>
-        <tr><td>Transmission</td><td>UDP to Donkey Runs port 5002</td><td>Event-driven so packet loss is acceptable</td></tr>
+        <tr><td>Transmission</td><td>RTSP over TCP — <code>rtsp://192.168.1.12:8554/stream</code></td><td>TCP guarantees frame delivery on local wired network</td></tr>
         <tr><td>Target FPS</td><td>20–25 FPS pose, rep events as triggered</td><td>Higher FPS needed to catch fast concentric phases</td></tr>
       </tbody>
     </table>
@@ -2095,7 +2095,7 @@ function switchPhase(num) {
     <li><span class="check-icon todo">○</span>Mount Pi + Camera at 20–30° tilt on truss</li>
     <li><span class="check-icon todo">○</span>Run pose test — verify 17 keypoints detected on live feed</li>
     <li><span class="check-icon todo">○</span>Load pre-trained LSTM — run barbell curl test, verify rep count increments</li>
-    <li><span class="check-icon todo">○</span>Confirm rep event UDP packets arriving at Donkey Runs port 5002</li>
+    <li><span class="check-icon todo">○</span>Confirm RTSP stream opening cleanly on Donkey Runs (<code>rtsp://192.168.1.12:8554/stream</code>)</li>
   </ul>
 </section>
 
@@ -2166,7 +2166,7 @@ function switchPhase(num) {
     <li><span class="check-icon todo">○</span>Annotate 500+ frames in Roboflow — label each plate colour</li>
     <li><span class="check-icon todo">○</span>Train YOLOv8n on annotated dataset — target mAP &gt;0.90</li>
     <li><span class="check-icon todo">○</span>Deploy trained weights to Pi 3 — verify colour detection live</li>
-    <li><span class="check-icon todo">○</span>Confirm weight JSON packets arriving at Donkey Runs port 5003</li>
+    <li><span class="check-icon todo">○</span>Confirm RTSP stream opening cleanly on Donkey Runs (<code>rtsp://192.168.1.13:8554/stream</code>)</li>
   </ul>
 </section>
 
@@ -2255,7 +2255,7 @@ function switchPhase(num) {
       <thead><tr><th>Step</th><th>Component</th><th>Protocol</th><th>Target Latency</th></tr></thead>
       <tbody>
         <tr><td><strong>1. Capture</strong></td><td>3× Raspberry Pis capture 1080p@30fps and encode to H.265</td><td>Hardware Encoder</td><td>&lt;20ms</td></tr>
-        <tr><td><strong>2. Stream</strong></td><td>Pis stream the live video to the Mac Mini</td><td>RTSP (UDP)</td><td>&lt;10ms</td></tr>
+        <tr><td><strong>2. Stream</strong></td><td>Pis stream the live video to the Mac Mini</td><td>RTSP over TCP</td><td>&lt;10ms</td></tr>
         <tr><td><strong>3. Inference</strong></td><td>Mac Mini decodes stream and runs YOLO + Pose + LSTM</td><td>GStreamer + PyTorch</td><td>~60ms</td></tr>
         <tr><td><strong>4. Fusion</strong></td><td>Mac Mini merges the 3 results into a single "State" JSON</td><td>Python (Redis)</td><td>&lt;5ms</td></tr>
         <tr><td><strong>5. Display</strong></td><td>Mac Mini pushes the JSON state to the tablet browser UI</td><td>WebSocket</td><td>&lt;10ms</td></tr>
@@ -2301,7 +2301,7 @@ function switchPhase(num) {
     <table>
       <thead><tr><th>Component</th><th>Technology</th><th>Role</th></tr></thead>
       <tbody>
-        <tr><td>UDP Listener</td><td>Python asyncio socket server</td><td>Receives JSON packets from all 3 Pis on ports 5001–5003</td></tr>
+        <tr><td>RTSP Receiver</td><td>GStreamer (VideoToolbox)</td><td>Decodes three H.265 RTSP streams from the Pis using Apple hardware decoder</td></tr>
         <tr><td>Fusion Engine</td><td>Python — sliding window correlator</td><td>Matches tracking IDs, rep events, and weight readings by timestamp</td></tr>
         <tr><td>Database</td><td>PostgreSQL (local)</td><td>Stores every set: member_id, exercise, weight_kg, reps, timestamp</td></tr>
         <tr><td>Dashboard</td><td>FastAPI + simple HTML</td><td>Live view of current session — accessible from any device on the local network</td></tr>
@@ -2315,7 +2315,7 @@ function switchPhase(num) {
     <table>
       <thead><tr><th>Device</th><th>Static IP</th><th>Port</th><th>Connection</th></tr></thead>
       <tbody>
-        <tr><td>Donkey Runs (Mac Mini M4)</td><td>192.168.1.10</td><td>5001, 5002, 5003 (UDP in) / 8080 (dashboard)</td><td>Gigabit Ethernet to PoE switch</td></tr>
+        <tr><td>Donkey Runs (Mac Mini M4)</td><td>192.168.1.10</td><td>8554 (RTSP in from each Pi) / 8080 (dashboard) / 8765 (WebSocket to tablet)</td><td>Gigabit Ethernet to PoE switch</td></tr>
         <tr><td>Pi 1 — People Tracker</td><td>192.168.1.21</td><td>Sends to 5001</td><td>PoE Cat6 to switch</td></tr>
         <tr><td>Pi 2 — Rep Counter</td><td>192.168.1.22</td><td>Sends to 5002</td><td>PoE Cat6 to switch</td></tr>
         <tr><td>Pi 3 — Weight Reader</td><td>192.168.1.23</td><td>Sends to 5003</td><td>PoE Cat6 to switch</td></tr>
@@ -2326,7 +2326,8 @@ function switchPhase(num) {
   <h3>Build Checklist — Donkey Runs</h3>
   <ul class="checklist">
     <li><span class="check-icon todo">○</span>Install PostgreSQL — create <code>gym_prototype</code> database and <code>sets</code> table</li>
-    <li><span class="check-icon todo">○</span>Write UDP listener — confirm packets received from all 3 Pis</li>
+    <li><span class="check-icon todo">○</span>Install GStreamer with VideoToolbox support on Mac Mini</li>
+    <li><span class="check-icon todo">○</span>Confirm all 3 RTSP streams open and decode cleanly</li>
     <li><span class="check-icon todo">○</span>Write fusion engine — 500ms sliding window correlator</li>
     <li><span class="check-icon todo">○</span>Write to PostgreSQL — verify set entries appear after a test rep</li>
     <li><span class="check-icon todo">○</span>Build FastAPI dashboard — live view at http://192.168.1.10:8080</li>
