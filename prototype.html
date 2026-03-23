@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prototype Log — XL Fitness AI Overseer</title>
+  <style>
+    :root {
+      --purple: #8B5CF6;
+      --purple-light: #a78bfa;
+      --purple-dim: rgba(139,92,246,0.12);
+      --bg: #07070f;
+      --surface: #0d0d1a;
+      --surface2: #111128;
+      --surface3: #161630;
+      --border: #1e1e3a;
+      --border2: #2a2a50;
+      --text: #e2e8f0;
+      --text2: #cbd5e1;
+      --muted: #6b7280;
+      --muted2: #4b5563;
+      --green: #22c55e;
+      --yellow: #fbbf24;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --orange: #f97316;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+      display: flex;
+      min-height: 100vh;
+    }
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px; min-width: 260px;
+      height: 100vh; position: sticky; top: 0;
+      overflow-y: auto;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding-bottom: 60px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border2) transparent;
+      flex-shrink: 0;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+    .sidebar-brand { padding: 22px 18px 16px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+    .brand-name { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; color: #fff; text-transform: uppercase; }
+    .brand-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+    .brand-back { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 11px; color: var(--purple-light); text-decoration: none; font-weight: 600; }
+    .brand-back:hover { color: #fff; }
+    .nav-group { padding: 14px 18px 4px; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; color: var(--muted2); text-transform: uppercase; }
+    .nav-link { display: block; padding: 5px 18px; font-size: 11.5px; color: var(--muted); text-decoration: none; border-left: 2px solid transparent; transition: all 0.15s; }
+    .nav-link:hover { color: var(--text); background: var(--surface2); }
+    .nav-link.active { color: var(--purple-light); border-left-color: var(--purple); background: var(--purple-dim); }
+    /* ── Main ── */
+    .main { flex: 1; min-width: 0; overflow-x: hidden; }
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #07070f 0%, #0a0a1f 60%, #07070f 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 64px 64px 56px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -100px; right: -100px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(249,115,22,0.1); border: 1px solid var(--orange);
+      border-radius: 20px; padding: 5px 14px;
+      font-size: 11px; font-weight: 600; color: var(--orange);
+      letter-spacing: 0.05em; margin-bottom: 24px;
+    }
+    .hero h1 { font-size: clamp(32px, 4vw, 52px); font-weight: 900; line-height: 1.05; color: #fff; letter-spacing: -0.025em; margin-bottom: 8px; }
+    .hero h1 em { color: var(--orange); font-style: normal; display: block; }
+    .hero-sub { font-size: 16px; color: var(--muted); max-width: 600px; margin-top: 16px; line-height: 1.65; }
+    .hero-stats { display: flex; gap: 40px; margin-top: 44px; flex-wrap: wrap; }
+    .hero-stat .num { font-size: 32px; font-weight: 900; color: var(--orange); line-height: 1; }
+    .hero-stat .lbl { font-size: 10px; color: var(--muted); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.08em; }
+    /* ── Section ── */
+    .section { padding: 64px 64px; border-bottom: 1px solid var(--border); }
+    .section-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; color: var(--orange); text-transform: uppercase; margin-bottom: 14px; }
+    .section h2 { font-size: clamp(24px, 3vw, 38px); font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 20px; letter-spacing: -0.02em; }
+    .section h2 em { color: var(--orange); font-style: normal; }
+    .section h3 { font-size: 18px; font-weight: 700; color: #fff; margin: 36px 0 12px; }
+    .lead { font-size: 17px; color: var(--text2); line-height: 1.75; margin-bottom: 24px; max-width: 760px; }
+    p { color: var(--text2); margin-bottom: 16px; max-width: 760px; line-height: 1.75; }
+    /* ── Images ── */
+    .img-block { border-radius: 12px; overflow: hidden; border: 1px solid var(--border2); background: var(--surface2); margin: 24px auto; width: 55%; }
+    .img-block img { width: 100%; display: block; object-fit: contain; }
+    .img-caption { padding: 10px 14px; font-size: 11px; color: var(--muted); font-style: italic; border-top: 1px solid var(--border); background: var(--surface3); }
+    .img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+    .img-grid .img-block { margin: 0; width: 100%; }
+    /* ── Tables ── */
+    .tbl { overflow-x: auto; margin: 24px 0; border-radius: 10px; border: 1px solid var(--border2); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: var(--surface3); color: var(--text); font-weight: 700; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border2); font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; }
+    td { padding: 11px 16px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(249,115,22,0.03); }
+    /* ── Callouts ── */
+    .callout { border-radius: 10px; padding: 16px 20px; margin: 24px 0; border-left: 3px solid; }
+    .callout.info    { background: rgba(59,130,246,0.08); border-color: var(--blue); }
+    .callout.warning { background: rgba(251,191,36,0.08); border-color: var(--yellow); }
+    .callout.success { background: rgba(34,197,94,0.08);  border-color: var(--green); }
+    .callout.orange  { background: rgba(249,115,22,0.08); border-color: var(--orange); }
+    .ct { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+    .callout.info    .ct { color: #60a5fa; }
+    .callout.warning .ct { color: var(--yellow); }
+    .callout.success .ct { color: var(--green); }
+    .callout.orange  .ct { color: var(--orange); }
+    .callout p { color: var(--text2); font-size: 14px; max-width: none; margin: 0; }
+    /* ── Status Badges ── */
+    .status { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
+    .status.todo    { background: rgba(107,114,128,0.15); color: var(--muted); border: 1px solid var(--muted2); }
+    .status.active  { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+    .status.done    { background: rgba(34,197,94,0.12);  color: var(--green);  border: 1px solid rgba(34,197,94,0.3); }
+    .status.blocked { background: rgba(239,68,68,0.12);  color: var(--red);    border: 1px solid rgba(239,68,68,0.3); }
+    .status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    /* ── Progress Bar ── */
+    .progress-wrap { margin: 8px 0 4px; }
+    .progress-bar { height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 3px; background: var(--orange); transition: width 0.4s; }
+    .progress-fill.green { background: var(--green); }
+    .progress-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    /* ── Build Cards ── */
+    .build-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin: 24px 0; }
+    .build-card { background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 20px; transition: border-color 0.2s; }
+    .build-card:hover { border-color: var(--orange); }
+    .build-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+    .build-card-title { font-size: 14px; font-weight: 700; color: #fff; }
+    .build-card-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .build-card-body { font-size: 13px; color: var(--text2); line-height: 1.6; }
+    /* ── Log Entries ── */
+    .log-entry { border-left: 2px solid var(--border2); padding: 0 0 28px 20px; margin-left: 8px; position: relative; }
+    .log-entry::before { content: ''; position: absolute; left: -5px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); border: 2px solid var(--bg); }
+    .log-entry:last-child { border-left-color: transparent; }
+    .log-date { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .log-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .log-body { font-size: 13.5px; color: var(--text2); max-width: 680px; }
+    /* ── Code ── */
+    .code-block { background: #050510; border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+    .code-toggle-btn { width: 100%; background: var(--surface3); border: none; padding: 10px 16px; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; transition: background 0.15s; }
+    .code-toggle-btn:hover { background: var(--surface2); color: var(--text2); }
+    .code-toggle-body { display: none; }
+    .code-toggle-body.open { display: block; }
+    pre { padding: 20px; font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace; font-size: 12.5px; line-height: 1.65; color: #a5f3fc; overflow-x: auto; white-space: pre; margin: 0; }
+    .cm { color: #6b7280; } .kw { color: #c084fc; } .fn { color: #67e8f9; } .st { color: #86efac; } .nm { color: #fbbf24; }
+    /* ── Checklist ── */
+    .checklist { list-style: none; margin: 16px 0; }
+    .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; color: var(--text2); }
+    .checklist li:last-child { border-bottom: none; }
+    .check-icon { width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; margin-top: 2px; }
+    .check-icon.done    { background: rgba(34,197,94,0.15);  color: var(--green);  border: 1px solid rgba(34,197,94,0.3); }
+    .check-icon.todo    { background: var(--surface3); color: var(--muted2); border: 1px solid var(--border2); }
+    .check-icon.active  { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+  </style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-name">XL Fitness</div>
+    <div class="brand-sub">AI Overseer — Prototype Log</div>
+    <a class="brand-back" href="bible.html">← Back to The Bible</a>
+  </div>
+  <div class="nav-group">MVP Overview</div>
+  <a class="nav-link" href="#overview">Overview</a>
+  <a class="nav-link" href="#hardware">Hardware List</a>
+  <div class="nav-group">The 3 Systems</div>
+  <a class="nav-link" href="#pi1">Pi 1 — People Tracker</a>
+  <a class="nav-link" href="#pi2">Pi 2 — Rep Counter</a>
+  <a class="nav-link" href="#pi3">Pi 3 — Weight Reader</a>
+  <div class="nav-group">Infrastructure</div>
+  <a class="nav-link" href="#donkey">Donkey Runs (Mac Mini)</a>
+  <a class="nav-link" href="#network">Network Setup</a>
+  <div class="nav-group">Progress</div>
+  <a class="nav-link" href="#progress">Build Progress</a>
+  <a class="nav-link" href="#log">Build Log</a>
+</nav>
+
+<div class="main">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">🔬 MVP Prototype Documentation</div>
+    <h1>Prototype <em>Log</em></h1>
+    <p class="hero-sub">Tracking the build of the 3-Raspberry-Pi MVP proof of concept. Three edge nodes, one central server (Donkey Runs), three major problems to solve.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">3</div><div class="lbl">Pi Edge Nodes</div></div>
+      <div class="hero-stat"><div class="num">1</div><div class="lbl">Central Server</div></div>
+      <div class="hero-stat"><div class="num">3</div><div class="lbl">Core Problems</div></div>
+      <div class="hero-stat"><div class="num">0%</div><div class="lbl">Complete</div></div>
+    </div>
+  </div>
+
+  <!-- Overview -->
+  <section class="section" id="overview">
+    <div class="section-tag">MVP Overview</div>
+    <h2>What We're <em>Proving</em></h2>
+    <p class="lead">Before investing in a full PoE camera network and server rack, this prototype proves that the three core AI systems work in a real gym environment. Each Raspberry Pi handles one task. All three feed data back to the Mac Mini ("Donkey Runs") which fuses the data and logs it.</p>
+
+    <div class="callout orange">
+      <div class="ct">The Goal</div>
+      <p>One person walks up to a barbell, loads some AlphaFit plates, does a set of squats, and walks away. The system correctly logs: <strong>who they are, how much weight they lifted, and how many reps they did.</strong> That is the MVP.</p>
+    </div>
+
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Node</th><th>Hardware</th><th>Task</th><th>Output to Donkey Runs</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Pi 1</strong></td>
+            <td>Raspberry Pi 4/5 + Wide Cam</td>
+            <td>People Tracking (YOLO + DeepSORT)</td>
+            <td>Bounding boxes + Tracking IDs</td>
+            <td><span class="status todo">To Do</span></td>
+          </tr>
+          <tr>
+            <td><strong>Pi 2</strong></td>
+            <td>Raspberry Pi 4/5 + Standard Cam</td>
+            <td>Pose Estimation + Rep Counting</td>
+            <td>17-point skeletons + Rep events</td>
+            <td><span class="status todo">To Do</span></td>
+          </tr>
+          <tr>
+            <td><strong>Pi 3</strong></td>
+            <td>Raspberry Pi 4/5 + Close-up Cam</td>
+            <td>Barbell Plate Colour Detection</td>
+            <td>Colour array + Total weight (kg)</td>
+            <td><span class="status todo">To Do</span></td>
+          </tr>
+          <tr>
+            <td><strong>Donkey Runs</strong></td>
+            <td>Mac Mini M4</td>
+            <td>Data Fusion + Logging</td>
+            <td>Structured workout log to PostgreSQL</td>
+            <td><span class="status todo">To Do</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Hardware List -->
+  <section class="section" id="hardware">
+    <div class="section-tag">Hardware</div>
+    <h2>What You <em>Need</em></h2>
+    <p class="lead">The complete hardware shopping list for the MVP prototype.</p>
+
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Item</th><th>Qty</th><th>Purpose</th><th>Est. Cost (AUD)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Raspberry Pi 4 (4GB) or Pi 5</strong></td><td>3</td><td>One per AI task</td><td>~$120–$150 each</td></tr>
+          <tr><td><strong>Pi Camera Module 3 (Wide Angle)</strong></td><td>2</td><td>Pi 1 (tracking) + Pi 2 (pose)</td><td>~$55 each</td></tr>
+          <tr><td><strong>Pi Camera Module 3 (Standard)</strong></td><td>1</td><td>Pi 3 (weight detection — closer view)</td><td>~$45</td></tr>
+          <tr><td><strong>MicroSD Card 64GB (Class 10)</strong></td><td>3</td><td>OS + model storage per Pi</td><td>~$20 each</td></tr>
+          <tr><td><strong>USB-C Power Supply (5A)</strong></td><td>3</td><td>Powering each Pi</td><td>~$20 each</td></tr>
+          <tr><td><strong>Ethernet Cable (Cat6, 5m)</strong></td><td>3</td><td>Wired connection to router</td><td>~$10 each</td></tr>
+          <tr><td><strong>Truss / Camera Mount Arm</strong></td><td>1</td><td>Mounting all 3 Pis overhead</td><td>~$80–$200</td></tr>
+          <tr><td><strong>Gigabit Network Switch</strong></td><td>1</td><td>Connects all 3 Pis to Mac Mini</td><td>~$40</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warning">
+      <div class="ct">Camera Note</div>
+      <p>Do NOT use the OV5647 5MP IR camera for the weight detection Pi (Pi 3). The IR LEDs wash out the AlphaFit plate colours (red, blue, yellow, green) making colour classification unreliable. Use the Pi Camera Module 3 which has proper HDR and no IR blasters.</p>
+    </div>
+
+    <div class="img-grid">
+      <div class="img-block">
+        <img src="img/raspberry-pi5-board.jpg" alt="Raspberry Pi 5 board">
+        <div class="img-caption">Raspberry Pi 5 — the recommended board. The Pi 4 (4GB) also works for Phase 1 MVP.</div>
+      </div>
+      <div class="img-block">
+        <img src="img/pi-camera-module3-wide.jpg" alt="Pi Camera Module 3 Wide">
+        <div class="img-caption">Pi Camera Module 3 (Wide Angle) — 12MP Sony IMX708, autofocus, HDR. The correct camera for this MVP.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pi 1 -->
+  <section class="section" id="pi1">
+    <div class="section-tag">Node 01</div>
+    <h2>Pi 1 — <em>People Tracker</em></h2>
+    <p class="lead">Mounted overhead with a wide-angle view of the entire workout zone. Runs YOLO person detection and DeepSORT tracking. Sends bounding boxes and tracking IDs to Donkey Runs every frame.</p>
+
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Camera</strong></td><td>Pi Camera Module 3 Wide (120° FOV)</td></tr>
+          <tr><td><strong>Mount Position</strong></td><td>Overhead, 2.5–3m height, looking straight down</td></tr>
+          <tr><td><strong>Model</strong></td><td>YOLOv8n-pose (nano — runs on Pi CPU)</td></tr>
+          <tr><td><strong>Tracker</strong></td><td>DeepSORT with max_age=90</td></tr>
+          <tr><td><strong>Output</strong></td><td>JSON: <code>{"track_id": 42, "bbox": [x,y,w,h], "confidence": 0.91}</code></td></tr>
+          <tr><td><strong>Target FPS</strong></td><td>10–15 FPS (sufficient for tracking)</td></tr>
+          <tr><td><strong>Transport</strong></td><td>UDP socket to Donkey Runs on port 5001</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Build Checklist</h3>
+    <ul class="checklist">
+      <li><span class="check-icon todo">○</span>Flash Raspberry Pi OS Lite to MicroSD</li>
+      <li><span class="check-icon todo">○</span>Enable camera interface and test still image</li>
+      <li><span class="check-icon todo">○</span>Install Python 3.11, OpenCV, and Ultralytics</li>
+      <li><span class="check-icon todo">○</span>Run YOLOv8n on live camera feed — confirm detections</li>
+      <li><span class="check-icon todo">○</span>Integrate DeepSORT — confirm persistent tracking IDs</li>
+      <li><span class="check-icon todo">○</span>Build UDP sender — stream JSON to Donkey Runs</li>
+      <li><span class="check-icon todo">○</span>Mount overhead and test from 2.5m height</li>
+    </ul>
+  </section>
+
+  <!-- Pi 2 -->
+  <section class="section" id="pi2">
+    <div class="section-tag">Node 02</div>
+    <h2>Pi 2 — <em>Rep Counter</em></h2>
+    <p class="lead">Mounted at a 45-degree angle to the barbell station. Runs pose estimation to extract the 17 joint keypoints, then feeds them into the LSTM rep counter. Sends rep events and skeleton data to Donkey Runs.</p>
+
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Camera</strong></td><td>Pi Camera Module 3 Wide (120° FOV)</td></tr>
+          <tr><td><strong>Mount Position</strong></td><td>45° angle, 2m height, aimed at barbell station</td></tr>
+          <tr><td><strong>Pose Model</strong></td><td>MoveNet Lightning (fastest, runs on Pi)</td></tr>
+          <tr><td><strong>Rep Model</strong></td><td>LSTM (60-frame rolling window)</td></tr>
+          <tr><td><strong>Output</strong></td><td>JSON: <code>{"rep_event": true, "exercise": "squat", "keypoints": [...]}</code></td></tr>
+          <tr><td><strong>Target FPS</strong></td><td>20–30 FPS (needs smooth keypoint data)</td></tr>
+          <tr><td><strong>Transport</strong></td><td>UDP socket to Donkey Runs on port 5002</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Build Checklist</h3>
+    <ul class="checklist">
+      <li><span class="check-icon todo">○</span>Flash OS and install TensorFlow Lite runtime</li>
+      <li><span class="check-icon todo">○</span>Download MoveNet Lightning TFLite model</li>
+      <li><span class="check-icon todo">○</span>Run pose estimation on live feed — visualise 17 keypoints</li>
+      <li><span class="check-icon todo">○</span>Extract joint angles (hip, knee, elbow) from keypoints</li>
+      <li><span class="check-icon todo">○</span>Record 50 squat reps for LSTM training data</li>
+      <li><span class="check-icon todo">○</span>Train LSTM on joint angle time series — target >90% accuracy</li>
+      <li><span class="check-icon todo">○</span>Build UDP sender — stream rep events to Donkey Runs</li>
+    </ul>
+  </section>
+
+  <!-- Pi 3 -->
+  <section class="section" id="pi3">
+    <div class="section-tag">Node 03</div>
+    <h2>Pi 3 — <em>Weight Reader</em></h2>
+    <p class="lead">Mounted at barbell height, looking directly at the loaded sleeve from the side. Detects the coloured stripes on AlphaFit plates and calculates total barbell weight. Sends the weight value to Donkey Runs.</p>
+
+    <div class="img-block">
+      <img src="img/alphafit-colour-plates.webp" alt="AlphaFit colour coded plates">
+      <div class="img-caption">The AlphaFit plates Pi 3 will be reading. Each coloured stripe = a specific weight. Red=25kg, Blue=20kg, Yellow=15kg, Green=10kg, White=5kg.</div>
+    </div>
+
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Camera</strong></td><td>Pi Camera Module 3 (Standard, not Wide)</td></tr>
+          <tr><td><strong>Mount Position</strong></td><td>Side-on, ~1m height, aimed at barbell sleeve</td></tr>
+          <tr><td><strong>Model</strong></td><td>YOLOv8n custom-trained on AlphaFit plates</td></tr>
+          <tr><td><strong>Output</strong></td><td>JSON: <code>{"plates": ["blue_20", "yellow_15", "yellow_15"], "total_kg": 70}</code></td></tr>
+          <tr><td><strong>Target FPS</strong></td><td>5–10 FPS (weight doesn't change mid-set)</td></tr>
+          <tr><td><strong>Transport</strong></td><td>UDP socket to Donkey Runs on port 5003</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Build Checklist</h3>
+    <ul class="checklist">
+      <li><span class="check-icon todo">○</span>Flash OS and install Ultralytics YOLOv8</li>
+      <li><span class="check-icon todo">○</span>Photograph AlphaFit plates from side — collect 200+ images per colour</li>
+      <li><span class="check-icon todo">○</span>Annotate images in Roboflow — draw bounding boxes, label colours</li>
+      <li><span class="check-icon todo">○</span>Train YOLOv8n on annotated dataset — target >95% colour accuracy</li>
+      <li><span class="check-icon todo">○</span>Test detection on live feed — confirm colour labels are correct</li>
+      <li><span class="check-icon todo">○</span>Build weight calculator — sum plate values + 20kg barbell</li>
+      <li><span class="check-icon todo">○</span>Build UDP sender — stream weight JSON to Donkey Runs</li>
+    </ul>
+  </section>
+
+  <!-- Donkey Runs -->
+  <section class="section" id="donkey">
+    <div class="section-tag">Central Server</div>
+    <h2>Donkey Runs <em>(Mac Mini)</em></h2>
+    <p class="lead">The Mac Mini is the brain. It receives data streams from all three Pis simultaneously, fuses them together by matching tracking IDs to rep events and weight readings, and writes the final structured workout log to PostgreSQL.</p>
+
+    <div class="callout orange">
+      <div class="ct">The Data Fusion Problem</div>
+      <p>Pi 1 says "Track ID 42 is at position (320, 410)". Pi 2 says "A rep just happened at position (318, 415)". Pi 3 says "The barbell has 70kg loaded". Donkey Runs must match these three events — by position and timestamp — and write: <strong>"Track ID 42 completed 1 rep at 70kg"</strong>. This matching logic is the hardest part of the MVP.</p>
+    </div>
+
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Component</th><th>Technology</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><strong>UDP Listener</strong></td><td>Python asyncio</td><td>Receives JSON from all 3 Pis on ports 5001–5003</td></tr>
+          <tr><td><strong>Fusion Engine</strong></td><td>Python (custom)</td><td>Matches Track IDs to rep events by spatial proximity + timestamp</td></tr>
+          <tr><td><strong>Database</strong></td><td>PostgreSQL</td><td>Stores structured workout logs</td></tr>
+          <tr><td><strong>Dashboard</strong></td><td>FastAPI + simple HTML</td><td>Shows live workout data on screen</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Build Checklist</h3>
+    <ul class="checklist">
+      <li><span class="check-icon todo">○</span>Install PostgreSQL on Mac Mini — create gym_db database</li>
+      <li><span class="check-icon todo">○</span>Build UDP listener — confirm receiving data from all 3 Pis</li>
+      <li><span class="check-icon todo">○</span>Build fusion engine — match tracking IDs to rep + weight events</li>
+      <li><span class="check-icon todo">○</span>Write fused data to PostgreSQL sets table</li>
+      <li><span class="check-icon todo">○</span>Build basic FastAPI dashboard — display live workout log</li>
+      <li><span class="check-icon todo">○</span>End-to-end test — one person, one set, correct log entry</li>
+    </ul>
+  </section>
+
+  <!-- Network -->
+  <section class="section" id="network">
+    <div class="section-tag">Infrastructure</div>
+    <h2>Network <em>Setup</em></h2>
+    <p class="lead">All devices must be on the same local network. Wired Ethernet is strongly preferred over WiFi — UDP packets drop on congested WiFi and the tracking data becomes choppy.</p>
+
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Device</th><th>IP Address</th><th>Connection</th><th>Port</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Pi 1 (Tracker)</strong></td><td>192.168.1.101</td><td>Ethernet (Cat6)</td><td>Sends to :5001</td></tr>
+          <tr><td><strong>Pi 2 (Counter)</strong></td><td>192.168.1.102</td><td>Ethernet (Cat6)</td><td>Sends to :5002</td></tr>
+          <tr><td><strong>Pi 3 (Reader)</strong></td><td>192.168.1.103</td><td>Ethernet (Cat6)</td><td>Sends to :5003</td></tr>
+          <tr><td><strong>Donkey Runs</strong></td><td>192.168.1.10</td><td>Ethernet (Cat6)</td><td>Listens on :5001–5003</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Progress -->
+  <section class="section" id="progress">
+    <div class="section-tag">Build Progress</div>
+    <h2>Overall <em>Progress</em></h2>
+
+    <div class="build-grid">
+      <div class="build-card">
+        <div class="build-card-header">
+          <div><div class="build-card-title">Pi 1 — People Tracker</div><div class="build-card-sub">YOLO + DeepSORT</div></div>
+          <span class="status todo">To Do</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+          <div class="progress-label">0 / 7 tasks complete</div>
+        </div>
+      </div>
+      <div class="build-card">
+        <div class="build-card-header">
+          <div><div class="build-card-title">Pi 2 — Rep Counter</div><div class="build-card-sub">MoveNet + LSTM</div></div>
+          <span class="status todo">To Do</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+          <div class="progress-label">0 / 7 tasks complete</div>
+        </div>
+      </div>
+      <div class="build-card">
+        <div class="build-card-header">
+          <div><div class="build-card-title">Pi 3 — Weight Reader</div><div class="build-card-sub">YOLOv8 Colour Detection</div></div>
+          <span class="status todo">To Do</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+          <div class="progress-label">0 / 7 tasks complete</div>
+        </div>
+      </div>
+      <div class="build-card">
+        <div class="build-card-header">
+          <div><div class="build-card-title">Donkey Runs</div><div class="build-card-sub">Data Fusion + Database</div></div>
+          <span class="status todo">To Do</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+          <div class="progress-label">0 / 6 tasks complete</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Build Log -->
+  <section class="section" id="log">
+    <div class="section-tag">Build Log</div>
+    <h2>Build <em>Log</em></h2>
+    <p class="lead">A running log of prototype progress, decisions, and findings. Add entries here as you build.</p>
+
+    <div style="margin-top: 32px;">
+      <div class="log-entry">
+        <div class="log-date">March 2026</div>
+        <div class="log-title">Prototype page created — MVP scope defined</div>
+        <div class="log-body">The 3-Pi MVP architecture has been defined. Three Raspberry Pi units will each handle one core task (tracking, rep counting, weight detection) and stream results to Donkey Runs (Mac Mini M4). The Pi Camera Module 3 Wide Angle has been selected as the camera for all three nodes. The OV5647 5MP IR camera was evaluated and rejected for weight detection due to IR LED colour interference.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // Scroll-spy for sidebar nav
+  const navLinks = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('.section, .hero');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

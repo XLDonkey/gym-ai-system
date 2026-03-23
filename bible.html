@@ -337,41 +337,6 @@
       .phase-cards { grid-template-columns: 1fr; }
       .img-grid { grid-template-columns: 1fr; }
     }
-
-    /* ── Top-level Tab Switcher ── */
-    .doc-tabs {
-      display: flex;
-      background: var(--surface);
-      border-bottom: 2px solid var(--border2);
-      padding: 0 18px;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-    .doc-tab-btn {
-      padding: 14px 20px 12px;
-      background: none;
-      border: none;
-      border-bottom: 3px solid transparent;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-bottom: -2px;
-    }
-    .doc-tab-btn:hover { color: var(--text2); }
-    .doc-tab-btn.active {
-      color: var(--purple-light);
-      border-bottom-color: var(--purple);
-    }
-    /* ── Tab Content Panels ── */
-    .doc-panel { display: none; }
-    .doc-panel.active { display: block; }
-    /* ── Sidebar nav sections ── */
-    .sidebar-nav-panel { display: none; }
-    .sidebar-nav-panel.active { display: block; }
   </style>
 </head>
 <body>
@@ -379,61 +344,40 @@
 <nav class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">XL Fitness</div>
-    <div class="brand-sub">AI Overseer — The Bible</div>
+    <div class="brand-sub">AI Overseer — The Bible v13.0</div>
   </div>
-
-  <!-- Tab switcher inside sidebar -->
-  <div class="doc-tabs">
-    <button class="doc-tab-btn active" onclick="switchTab('plan', this)">The Plan</button>
-    <button class="doc-tab-btn" onclick="switchTab('prototypes', this)">Prototypes</button>
-  </div>
-
-  <!-- Nav for Tab 1: The Plan -->
-  <div class="sidebar-nav-panel active" id="nav-plan">
-    <div class="nav-group">Chapter 1 — The Vision</div>
-    <a class="nav-link" href="#vision">01 — What We're Building</a>
-    <a class="nav-link" href="#problem">02 — The Core Problem</a>
-    <a class="nav-link" href="#overview">03 — System Overview</a>
-    <div class="nav-group">Chapter 2 — Hardware</div>
-    <a class="nav-link" href="#cameras">04 — Camera Selection</a>
-    <a class="nav-link" href="#mounting">05 — Ceiling &amp; Frame Mounting</a>
-    <a class="nav-link" href="#poe">06 — PoE &amp; Cable Runs</a>
-    <a class="nav-link" href="#streaming">07 — Video Streaming Pipeline</a>
-    <a class="nav-link" href="#server">08 — Server Infrastructure</a>
-    <div class="nav-group">Chapter 3 — AI Models</div>
-    <a class="nav-link" href="#software">09 — The Full Software Stack</a>
-    <a class="nav-link" href="#yolo">10 — YOLO Detection</a>
-    <a class="nav-link" href="#deepsort">11 — People Tracking</a>
-    <a class="nav-link" href="#colour-tracking">12 — Colour Marker Tracking</a>
-    <a class="nav-link" href="#movenet">13 — Pose Estimation</a>
-    <a class="nav-link" href="#lstm">14 — Rep Counting</a>
-    <a class="nav-link" href="#faceid">15 — Member Identity</a>
-    <a class="nav-link" href="#weight">16 — Weight Detection</a>
-    <div class="nav-group">Chapter 4 — The Full System</div>
-    <a class="nav-link" href="#pipeline">18 — The 46ms Pipeline</a>
-    <a class="nav-link" href="#data">19 — Data &amp; Database</a>
-    <div class="nav-group">Chapter 5 — The Neural Network</div>
-    <a class="nav-link" href="#nn-architecture">20 — One Network vs Many</a>
-    <a class="nav-link" href="#nn-training">21 — Training &amp; Annotations</a>
-    <a class="nav-link" href="#nn-transfer">22 — Transfer Learning</a>
-    <div class="nav-group">Chapter 6 — Roadmap</div>
-    <a class="nav-link" href="#phases">23 — Interactive Roadmap</a>
-    <a class="nav-link" href="#costs">24 — Cost Breakdown</a>
-    <a class="nav-link" href="#phase1">25 — Phase 1: Foundation</a>
-    <a class="nav-link" href="#phase2">26 — Phase 2: Automation</a>
-  </div>
-
-  <!-- Nav for Tab 2: Prototypes -->
-  <div class="sidebar-nav-panel" id="nav-prototypes">
-    <div class="nav-group">MVP Overview</div>
-    <a class="nav-link" href="#pi-architecture">27 — The 3-Pi Architecture</a>
-    <a class="nav-link" href="#pi-cameras">28 — Camera Selection</a>
-  </div>
+  <div class="nav-group">Chapter 1 — The Vision</div>
+  <a class="nav-link" href="#vision">01 — What We're Building</a>
+  <a class="nav-link" href="#problem">02 — The Core Problem</a>
+  <a class="nav-link" href="#overview">03 — System Overview</a>
+  <div class="nav-group">Chapter 2 — Hardware</div>
+  <a class="nav-link" href="#cameras">04 — Camera Selection</a>
+  <a class="nav-link" href="#mounting">05 — Ceiling &amp; Frame Mounting</a>
+  <a class="nav-link" href="#poe">06 — PoE &amp; Cable Runs</a>
+  <a class="nav-link" href="#streaming">07 — Video Streaming Pipeline</a>
+  <a class="nav-link" href="#server">08 — Server Infrastructure</a>
+  <div class="nav-group">Chapter 3 — AI Models</div>
+  <a class="nav-link" href="#software">09 — The Full Software Stack</a>
+  <a class="nav-link" href="#yolo">10 — YOLO Detection</a>
+  <a class="nav-link" href="#deepsort">11 — People Tracking</a>
+  <a class="nav-link" href="#colour-tracking">12 — Colour Marker Tracking</a>
+  <a class="nav-link" href="#movenet">13 — Pose Estimation</a>
+  <a class="nav-link" href="#lstm">14 — Rep Counting</a>
+  <a class="nav-link" href="#faceid">15 — Member Identity</a>
+  <a class="nav-link" href="#weight">16 — Weight Detection</a>
+  <div class="nav-group">Chapter 4 — The Full System</div>
+  <a class="nav-link" href="#pipeline">18 — The 46ms Pipeline</a>
+  <a class="nav-link" href="#data">19 — Data &amp; Database</a>
+  <div class="nav-group">Chapter 5 — The Neural Network</div>
+  <a class="nav-link" href="#nn-architecture">20 — One Network vs Many</a>
+  <a class="nav-link" href="#nn-training">21 — Training &amp; Annotations</a>
+  <a class="nav-link" href="#nn-transfer">22 — Transfer Learning</a>
+  <div class="nav-group">Chapter 6 — Roadmap</div>
+  <a class="nav-link" href="#phases">23 — Interactive Roadmap</a>
+  <a class="nav-link" href="#costs">24 — Cost Breakdown</a>
 </nav>
 
 <div class="main">
-<div class="doc-panel active" id="panel-plan">
-
 
 <div class="hero" id="hero">
   <div class="hero-badge">XL Fitness — Internal Document</div>
@@ -1869,132 +1813,7 @@ function switchPhase(num) {
   document.getElementById('pp-' + num).classList.add('active');
   document.querySelectorAll('.phase-tab')[num - 1].classList.add('active');
 }
-
-  // ── Tab Switcher ──
-  function switchTab(tab, btn) {
-    // Update sidebar tab buttons
-    document.querySelectorAll('.doc-tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    // Update sidebar nav panels
-    document.querySelectorAll('.sidebar-nav-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('nav-' + tab).classList.add('active');
-    // Update main content panels
-    document.querySelectorAll('.doc-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + tab).classList.add('active');
-    // Scroll to top
-    document.querySelector('.main').scrollTo(0, 0);
-  }
 </script>
 
-</div>
-<div class="doc-panel" id="panel-prototypes">
-<div class="chapter-divider" id="ch-prototypes">
-  <div class="ch-inner">
-    <div class="ch-num">Chapter 07</div>
-    <h1>The MVP <em>Prototype</em></h1>
-    <p class="ch-desc">How to build the Proof of Concept (PoC) using 3 Raspberry Pi edge nodes feeding into the central Mac Mini ("Donkey Runs") server.</p>
-    <div class="ch-sections">
-      <span class="ch-pill">27 — The 3-Pi Architecture</span>
-      <span class="ch-pill">28 — Camera Hardware Selection</span>
-    </div>
-  </div>
-</div>
-
-<section class="section" id="pi-architecture">
-  <div class="section-tag">Section 27</div>
-  <h2>The 3-Pi <em>Architecture</em></h2>
-  <p class="lead">To prove the system works before buying expensive PoE dome cameras, the MVP will use three Raspberry Pi units acting as "edge cameras". Each Pi is dedicated to one specific task and streams its data back to the central Mac Mini server (Donkey Runs).</p>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Node</th><th>Hardware</th><th>Assigned Task</th><th>Data Sent to Donkey Runs</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><strong>Pi 1: The Tracker</strong></td>
-          <td>Raspberry Pi 4/5 + Wide Angle Cam</td>
-          <td>People Tracking (YOLO + DeepSORT)</td>
-          <td>Bounding boxes & Tracking IDs</td>
-        </tr>
-        <tr>
-          <td><strong>Pi 2: The Counter</strong></td>
-          <td>Raspberry Pi 4/5 + Standard Cam</td>
-          <td>Pose Estimation & Rep Counting</td>
-          <td>17-point skeletons & Rep events</td>
-        </tr>
-        <tr>
-          <td><strong>Pi 3: The Reader</strong></td>
-          <td>Raspberry Pi 4/5 + Telephoto Cam</td>
-          <td>Barbell Plate Colour Detection</td>
-          <td>Cropped plate images & Colour arrays</td>
-        </tr>
-        <tr>
-          <td><strong>Donkey Runs</strong></td>
-          <td>Mac Mini M4 (Central Server)</td>
-          <td>Data Fusion & Final Logging</td>
-          <td>Merges IDs, Reps, and Weights into DB</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  
-  <p><strong>Why this is the best way to build an MVP:</strong></p>
-  <ul>
-    <li style="color: var(--text2); margin-bottom: 8px;"><strong>Forces Network Architecture Early:</strong> By using 3 separate devices, you are forced to solve the problem of sending data over a network to a central server. If you build the MVP on one laptop with a webcam, you haven't solved the real gym problem.</li>
-    <li style="color: var(--text2); margin-bottom: 8px;"><strong>Modular Debugging:</strong> If rep counting fails, you know exactly which Pi to look at. The weight detection Pi isn't affected.</li>
-    <li style="color: var(--text2); margin-bottom: 8px;"><strong>Realistic Angles:</strong> You can physically mount the 3 Pis in 3 different locations (overhead for tracking, side-on for reps, 45-degree for plates), exactly simulating the final truss setup.</li>
-  </ul>
-</section>
-
-<section class="section" id="pi-cameras">
-  <div class="section-tag">Section 28</div>
-  <h2>Camera Hardware <em>Selection</em></h2>
-  <p class="lead">For the Pi nodes, we need small, board-level cameras that can mount cleanly to the truss. Not bulky security cameras, but high-quality computer vision sensors.</p>
-
-  <div class="img-block">
-    <img src="img/pi-camera-module3-wide.jpg" alt="Raspberry Pi Camera Module 3 Wide">
-    <div class="img-caption">The Raspberry Pi Camera Module 3 (Wide Angle). Small, lightweight, and features a high-quality 12MP Sony sensor with autofocus.</div>
-  </div>
-
-  <h3>Evaluating the OV5647 (5MP) vs Modern Sensors</h3>
-  <p>You mentioned using the <em>"Raspberry Pi 4 Camera Day & Night Vision 5MP OV5647 with IR LEDs"</em>. Here is the technical breakdown of why that camera is okay for a basic test, but why you should upgrade for the actual MVP:</p>
-
-  <div class="tbl">
-    <table>
-      <thead><tr><th>Feature</th><th>The 5MP OV5647 (Older)</th><th>The 12MP IMX708 (Module 3)</th><th>Why it matters for Gym AI</th></tr></thead>
-      <tbody>
-        <tr>
-          <td><strong>Resolution</strong></td>
-          <td>5 Megapixels</td>
-          <td>12 Megapixels</td>
-          <td>Reading a 2-inch colour stripe on a weight plate from 10 feet away requires high resolution. 5MP will be blurry.</td>
-        </tr>
-        <tr>
-          <td><strong>Focus</strong></td>
-          <td>Manual (twist the lens)</td>
-          <td>Phase Detection Autofocus</td>
-          <td>If the Pi gets bumped on the truss, manual focus is ruined. Autofocus keeps the plates sharp automatically.</td>
-        </tr>
-        <tr>
-          <td><strong>Low Light</strong></td>
-          <td>Relies on IR LED blasters</td>
-          <td>High Dynamic Range (HDR)</td>
-          <td>IR blasters wash out colours. You need accurate colour to read the Red/Blue/Yellow AlphaFit plates. HDR preserves colour in shadows.</td>
-        </tr>
-        <tr>
-          <td><strong>Motion Blur</strong></td>
-          <td>High (older sensor)</td>
-          <td>Low (modern rolling shutter)</td>
-          <td>A barbell moving fast during a clean-and-jerk will blur on the 5MP sensor, breaking the pose estimation model.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="callout success">
-    <div class="ct">The Recommendation</div>
-    <p>Use the 5MP OV5647 if you already own it just to get the network streaming working. But for the actual AI model testing (especially reading the AlphaFit plate colours), buy three <strong>Raspberry Pi Camera Module 3 (Wide Angle)</strong> units. They cost about $35 each and the 12MP Sony IMX708 sensor will dramatically improve your YOLO detection accuracy.</p>
-  </div></div>
-</div>
-</section>
 </body>
 </html>
