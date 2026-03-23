@@ -383,8 +383,9 @@
   <a class="nav-link" href="#proto-pi2">29 — Pi 2: Rep Counter</a>
   <a class="nav-link" href="#proto-pi3">30 — Pi 3: Weight Reader</a>
   <a class="nav-link" href="#proto-data">31 — Data Collection Pipeline</a>
-  <a class="nav-link" href="#proto-donkey">32 — Donkey Runs (Server)</a>
-  <a class="nav-link" href="#proto-log">33 — Build Log</a>
+  <a class="nav-link" href="#proto-live">32 — The Live Loop Test</a>
+  <a class="nav-link" href="#proto-donkey">33 — Donkey Runs (Server)</a>
+  <a class="nav-link" href="#proto-log">34 — Build Log</a>
 </nav>
 
 <div class="main">
@@ -2233,6 +2234,54 @@ function switchPhase(num) {
     <li><span class="check-icon todo">○</span>Write <code>smart_filter.py</code> for Mac Mini (YOLO person detection, 1 FPS scan rate)</li>
     <li><span class="check-icon todo">○</span>Set up cron job on Mac Mini to run filter script every 5 minutes</li>
   </ul>
+</section>
+
+<!-- ─── Section 32: The Live Loop Test ──────────────────────────── -->
+<section class="section" id="proto-live">
+  <div class="section-tag">// SECTION 32 — CHAPTER 07</div>
+  <h2>The Live <em>Loop Test</em></h2>
+  <p class="lead">Once the models are trained on the recorded clips, stakeholders need to see the system work in real time. This section documents the critical "Live Loop" milestone: streaming live video from the Pis, processing it on the Mac Mini, and displaying the results instantly on the station tablet.</p>
+
+  <div class="callout what">
+    <div class="ct">// THE STAKEHOLDER DEMO</div>
+    <p>A person walks up to the station, taps their card, loads a plate, and starts lifting. The tablet mounted on the machine instantly displays their name, the weight they loaded, and counts their reps as they happen. No delays, no offline processing.</p>
+  </div>
+
+  <h3>The Real-Time Architecture</h3>
+  <p>To achieve the Live Loop, the system shifts from "dumb recording" to "live streaming." The architecture looks like this:</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Step</th><th>Component</th><th>Protocol</th><th>Target Latency</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1. Capture</strong></td><td>3× Raspberry Pis capture 1080p@30fps and encode to H.265</td><td>Hardware Encoder</td><td>&lt;20ms</td></tr>
+        <tr><td><strong>2. Stream</strong></td><td>Pis stream the live video to the Mac Mini</td><td>RTSP (UDP)</td><td>&lt;10ms</td></tr>
+        <tr><td><strong>3. Inference</strong></td><td>Mac Mini decodes stream and runs YOLO + Pose + LSTM</td><td>GStreamer + PyTorch</td><td>~60ms</td></tr>
+        <tr><td><strong>4. Fusion</strong></td><td>Mac Mini merges the 3 results into a single "State" JSON</td><td>Python (Redis)</td><td>&lt;5ms</td></tr>
+        <tr><td><strong>5. Display</strong></td><td>Mac Mini pushes the JSON state to the tablet browser UI</td><td>WebSocket</td><td>&lt;10ms</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Key Technical Challenges</h3>
+  <p>Running the Live Loop exposes three specific bottlenecks that offline processing hides:</p>
+
+  <p><strong>1. The RTSP Delay</strong><br>
+  Standard RTSP streaming introduces a 2–3 second buffer delay. For a live rep counter, a 3-second delay means the person finishes the rep before the tablet counts it — breaking the illusion of a live system. <br>
+  <em>Solution:</em> Configure the GStreamer pipeline on the Mac Mini with <code>latency=0</code> and <code>drop-on-latency=true</code>. We prefer dropping a frame over falling behind real-time.</p>
+
+  <p><strong>2. Mac Mini Hardware Decoding</strong><br>
+  If the Mac Mini tries to decode three 1080p H.265 streams using the CPU, it will choke. <br>
+  <em>Solution:</em> The inference pipeline must use Apple's <code>VideoToolbox</code> framework to offload the video decoding to the M4's dedicated media engine, leaving the CPU/GPU free for the neural networks.</p>
+
+  <p><strong>3. The Visual Feedback Loop</strong><br>
+  Stakeholders want to see what the AI sees. The tablet UI should not just show numbers; it should show the live camera feed with the YOLO bounding boxes and MoveNet skeleton overlaid on top of the video.<br>
+  <em>Solution:</em> The Mac Mini draws the bounding boxes and skeletons onto the frames, encodes a low-res (720p) composite video stream, and sends it to the tablet via WebRTC.</p>
+
+  <div class="callout success">
+    <div class="ct">// LIVE LOOP SUCCESS CRITERIA</div>
+    <p>The Live Loop test passes when the "Glass-to-Glass" latency (the time from a physical movement occurring in front of the camera to the skeleton updating on the tablet screen) is <strong>under 150 milliseconds</strong>. This feels instantaneous to the human eye.</p>
+  </div>
 </section>
 
 <section class="section" id="proto-donkey">
