@@ -337,6 +337,41 @@
       .phase-cards { grid-template-columns: 1fr; }
       .img-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── Top-level Tab Switcher ── */
+    .doc-tabs {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 2px solid var(--border2);
+      padding: 0 18px;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .doc-tab-btn {
+      padding: 14px 20px 12px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: -2px;
+    }
+    .doc-tab-btn:hover { color: var(--text2); }
+    .doc-tab-btn.active {
+      color: var(--purple-light);
+      border-bottom-color: var(--purple);
+    }
+    /* ── Tab Content Panels ── */
+    .doc-panel { display: none; }
+    .doc-panel.active { display: block; }
+    /* ── Sidebar nav sections ── */
+    .sidebar-nav-panel { display: none; }
+    .sidebar-nav-panel.active { display: block; }
   </style>
 </head>
 <body>
@@ -344,40 +379,61 @@
 <nav class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-name">XL Fitness</div>
-    <div class="brand-sub">AI Overseer — The Bible v13.0</div>
+    <div class="brand-sub">AI Overseer — The Bible</div>
   </div>
-  <div class="nav-group">Chapter 1 — The Vision</div>
-  <a class="nav-link" href="#vision">01 — What We're Building</a>
-  <a class="nav-link" href="#problem">02 — The Core Problem</a>
-  <a class="nav-link" href="#overview">03 — System Overview</a>
-  <div class="nav-group">Chapter 2 — Hardware</div>
-  <a class="nav-link" href="#cameras">04 — Camera Selection</a>
-  <a class="nav-link" href="#mounting">05 — Ceiling &amp; Frame Mounting</a>
-  <a class="nav-link" href="#poe">06 — PoE &amp; Cable Runs</a>
-  <a class="nav-link" href="#streaming">07 — Video Streaming Pipeline</a>
-  <a class="nav-link" href="#server">08 — Server Infrastructure</a>
-  <div class="nav-group">Chapter 3 — AI Models</div>
-  <a class="nav-link" href="#software">09 — The Full Software Stack</a>
-  <a class="nav-link" href="#yolo">10 — YOLO Detection</a>
-  <a class="nav-link" href="#deepsort">11 — People Tracking</a>
-  <a class="nav-link" href="#colour-tracking">12 — Colour Marker Tracking</a>
-  <a class="nav-link" href="#movenet">13 — Pose Estimation</a>
-  <a class="nav-link" href="#lstm">14 — Rep Counting</a>
-  <a class="nav-link" href="#faceid">15 — Member Identity</a>
-  <a class="nav-link" href="#weight">16 — Weight Detection</a>
-  <div class="nav-group">Chapter 4 — The Full System</div>
-  <a class="nav-link" href="#pipeline">18 — The 46ms Pipeline</a>
-  <a class="nav-link" href="#data">19 — Data &amp; Database</a>
-  <div class="nav-group">Chapter 5 — The Neural Network</div>
-  <a class="nav-link" href="#nn-architecture">20 — One Network vs Many</a>
-  <a class="nav-link" href="#nn-training">21 — Training &amp; Annotations</a>
-  <a class="nav-link" href="#nn-transfer">22 — Transfer Learning</a>
-  <div class="nav-group">Chapter 6 — Roadmap</div>
-  <a class="nav-link" href="#phases">23 — Interactive Roadmap</a>
-  <a class="nav-link" href="#costs">24 — Cost Breakdown</a>
+
+  <!-- Tab switcher inside sidebar -->
+  <div class="doc-tabs">
+    <button class="doc-tab-btn active" onclick="switchTab('plan', this)">The Plan</button>
+    <button class="doc-tab-btn" onclick="switchTab('prototypes', this)">Prototypes</button>
+  </div>
+
+  <!-- Nav for Tab 1: The Plan -->
+  <div class="sidebar-nav-panel active" id="nav-plan">
+    <div class="nav-group">Chapter 1 — The Vision</div>
+    <a class="nav-link" href="#vision">01 — What We're Building</a>
+    <a class="nav-link" href="#problem">02 — The Core Problem</a>
+    <a class="nav-link" href="#overview">03 — System Overview</a>
+    <div class="nav-group">Chapter 2 — Hardware</div>
+    <a class="nav-link" href="#cameras">04 — Camera Selection</a>
+    <a class="nav-link" href="#mounting">05 — Ceiling &amp; Frame Mounting</a>
+    <a class="nav-link" href="#poe">06 — PoE &amp; Cable Runs</a>
+    <a class="nav-link" href="#streaming">07 — Video Streaming Pipeline</a>
+    <a class="nav-link" href="#server">08 — Server Infrastructure</a>
+    <div class="nav-group">Chapter 3 — AI Models</div>
+    <a class="nav-link" href="#software">09 — The Full Software Stack</a>
+    <a class="nav-link" href="#yolo">10 — YOLO Detection</a>
+    <a class="nav-link" href="#deepsort">11 — People Tracking</a>
+    <a class="nav-link" href="#colour-tracking">12 — Colour Marker Tracking</a>
+    <a class="nav-link" href="#movenet">13 — Pose Estimation</a>
+    <a class="nav-link" href="#lstm">14 — Rep Counting</a>
+    <a class="nav-link" href="#faceid">15 — Member Identity</a>
+    <a class="nav-link" href="#weight">16 — Weight Detection</a>
+    <div class="nav-group">Chapter 4 — The Full System</div>
+    <a class="nav-link" href="#pipeline">18 — The 46ms Pipeline</a>
+    <a class="nav-link" href="#data">19 — Data &amp; Database</a>
+    <div class="nav-group">Chapter 5 — The Neural Network</div>
+    <a class="nav-link" href="#nn-architecture">20 — One Network vs Many</a>
+    <a class="nav-link" href="#nn-training">21 — Training &amp; Annotations</a>
+    <a class="nav-link" href="#nn-transfer">22 — Transfer Learning</a>
+    <div class="nav-group">Chapter 6 — Roadmap</div>
+    <a class="nav-link" href="#phases">23 — Interactive Roadmap</a>
+    <a class="nav-link" href="#costs">24 — Cost Breakdown</a>
+    <a class="nav-link" href="#phase1">25 — Phase 1: Foundation</a>
+    <a class="nav-link" href="#phase2">26 — Phase 2: Automation</a>
+  </div>
+
+  <!-- Nav for Tab 2: Prototypes -->
+  <div class="sidebar-nav-panel" id="nav-prototypes">
+    <div class="nav-group">MVP Overview</div>
+    <a class="nav-link" href="#pi-architecture">27 — The 3-Pi Architecture</a>
+    <a class="nav-link" href="#pi-cameras">28 — Camera Selection</a>
+  </div>
 </nav>
 
 <div class="main">
+<div class="doc-panel active" id="panel-plan">
+
 
 <div class="hero" id="hero">
   <div class="hero-badge">XL Fitness — Internal Document</div>
@@ -1813,8 +1869,25 @@ function switchPhase(num) {
   document.getElementById('pp-' + num).classList.add('active');
   document.querySelectorAll('.phase-tab')[num - 1].classList.add('active');
 }
+
+  // ── Tab Switcher ──
+  function switchTab(tab, btn) {
+    // Update sidebar tab buttons
+    document.querySelectorAll('.doc-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // Update sidebar nav panels
+    document.querySelectorAll('.sidebar-nav-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('nav-' + tab).classList.add('active');
+    // Update main content panels
+    document.querySelectorAll('.doc-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+    // Scroll to top
+    document.querySelector('.main').scrollTo(0, 0);
+  }
 </script>
 
+</div>
+<div class="doc-panel" id="panel-prototypes">
 <div class="chapter-divider" id="ch-prototypes">
   <div class="ch-inner">
     <div class="ch-num">Chapter 07</div>
@@ -1920,7 +1993,8 @@ function switchPhase(num) {
   <div class="callout success">
     <div class="ct">The Recommendation</div>
     <p>Use the 5MP OV5647 if you already own it just to get the network streaming working. But for the actual AI model testing (especially reading the AlphaFit plate colours), buy three <strong>Raspberry Pi Camera Module 3 (Wide Angle)</strong> units. They cost about $35 each and the 12MP Sony IMX708 sensor will dramatically improve your YOLO detection accuracy.</p>
-  </div>
+  </div></div>
+</div>
 </section>
 </body>
 </html>
