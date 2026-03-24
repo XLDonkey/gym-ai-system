@@ -7,584 +7,535 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <title>XL Fitness — Live Skeleton</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      width: 100%; height: 100%;
-      background: #07090f;
-      overflow: hidden;
-      font-family: 'SF Pro Display', 'Inter', system-ui, sans-serif;
-      color: #fff;
-      -webkit-tap-highlight-color: transparent;
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{
+      width:100%;height:100%;
+      background:#07090f;
+      font-family:'SF Pro Display','Inter',system-ui,sans-serif;
+      color:#fff;
+      overflow:hidden;
+      -webkit-tap-highlight-color:transparent;
     }
 
-    /* ── Full-screen canvas ── */
-    #cvs {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-      touch-action: none;
+    /* ── Top nav ── */
+    #nav{
+      position:fixed;top:0;left:0;right:0;height:48px;
+      background:rgba(7,9,15,0.95);
+      border-bottom:1px solid #141e2e;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 16px;z-index:50;
+    }
+    .nav-logo{font-size:.75rem;font-weight:900;letter-spacing:4px;color:#00ff88;}
+    .nav-right{display:flex;align-items:center;gap:12px;}
+    #total-count{font-size:.65rem;color:#555;letter-spacing:1px;}
+    #total-count b{color:#00ff88;}
+    #settings-btn{
+      background:transparent;border:1px solid #1a2030;border-radius:6px;
+      color:#555;font-size:.85rem;padding:4px 10px;cursor:pointer;
     }
 
-    /* ── HUD overlay ── */
-    #hud {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%);
-      pointer-events: none;
-      z-index: 10;
+    /* ── Grid of Pi panels ── */
+    #grid{
+      position:fixed;top:48px;left:0;right:0;bottom:0;
+      display:grid;
+      gap:2px;
+      background:#000;
+      overflow:hidden;
     }
 
-    .hud-logo {
-      font-size: 0.75rem;
-      font-weight: 900;
-      letter-spacing: 4px;
-      color: #00ff88;
-      text-transform: uppercase;
+    /* Grid layouts by Pi count */
+    #grid.pis-1{grid-template-columns:1fr;grid-template-rows:1fr;}
+    #grid.pis-2{grid-template-columns:1fr 1fr;grid-template-rows:1fr;}
+    #grid.pis-3{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;}
+    #grid.pis-4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;}
+    #grid.pis-5,#grid.pis-6{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;}
+
+    /* On portrait mobile, stack vertically */
+    @media (max-width:500px){
+      #grid.pis-2{grid-template-columns:1fr;grid-template-rows:1fr 1fr;}
+      #grid.pis-3,#grid.pis-4{grid-template-columns:1fr;grid-template-rows:repeat(4,1fr);}
     }
 
-    .hud-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    /* ── Individual Pi panel ── */
+    .pi-panel{
+      position:relative;
+      background:#0b0f18;
+      overflow:hidden;
     }
 
-    #person-count {
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: #aaa;
+    .pi-canvas{
+      display:block;
+      width:100%;height:100%;
     }
 
-    #person-count span {
-      color: #00ff88;
-      font-size: 1rem;
+    /* Panel header overlay */
+    .pi-header{
+      position:absolute;top:0;left:0;right:0;
+      padding:6px 10px;
+      background:linear-gradient(to bottom,rgba(0,0,0,.8) 0%,transparent 100%);
+      display:flex;align-items:center;justify-content:space-between;
+      pointer-events:none;
     }
+    .pi-name{font-size:.6rem;font-weight:700;letter-spacing:2px;color:#fff;text-transform:uppercase;}
+    .pi-badges{display:flex;align-items:center;gap:6px;}
+    .pi-dot{width:6px;height:6px;border-radius:50%;background:#333;transition:background .3s;}
+    .pi-dot.live{background:#00ff88;box-shadow:0 0 6px #00ff88;animation:glow 1.2s infinite alternate;}
+    .pi-dot.warn{background:#f59e0b;}
+    .pi-dot.err {background:#ef4444;}
+    @keyframes glow{to{box-shadow:0 0 14px #00ff88;}}
+    .pi-fps{font-size:.55rem;color:#333;letter-spacing:.5px;}
+    .pi-hailo{font-size:.5rem;font-weight:700;letter-spacing:1px;color:#a78bfa;background:rgba(139,92,246,.15);padding:1px 5px;border-radius:3px;}
 
-    /* Live dot */
-    #live-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #333;
-      transition: background 0.3s;
+    /* Panel footer */
+    .pi-footer{
+      position:absolute;bottom:0;left:0;right:0;
+      padding:4px 10px;
+      background:linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 100%);
+      display:flex;align-items:center;justify-content:space-between;
+      pointer-events:none;
     }
-    #live-dot.live {
-      background: #00ff88;
-      box-shadow: 0 0 8px #00ff88;
-      animation: pulse 1.2s infinite alternate;
-    }
-    #live-dot.warn { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
-    #live-dot.err  { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
-    @keyframes pulse { to { box-shadow: 0 0 18px #00ff88; } }
+    .pi-people{font-size:.55rem;color:#555;}
+    .pi-people b{color:#00ff88;}
+    .pi-inf{font-size:.55rem;color:#333;}
 
-    /* ── Bottom bar ── */
-    #bottom-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      padding: 10px 16px;
-      padding-bottom: max(10px, env(safe-area-inset-bottom));
-      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 10;
+    /* Disconnected overlay per panel */
+    .pi-overlay{
+      position:absolute;inset:0;
+      background:rgba(7,9,15,.9);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:8px;
+      transition:opacity .3s;
     }
-
-    #status-text {
-      font-size: 0.65rem;
-      color: #555;
-      letter-spacing: 1px;
+    .pi-overlay.hidden{opacity:0;pointer-events:none;}
+    .pi-overlay-name{font-size:.65rem;font-weight:700;letter-spacing:2px;color:#fff;}
+    .pi-overlay-msg{font-size:.6rem;color:#555;text-align:center;max-width:160px;line-height:1.6;}
+    .pi-spinner{
+      width:24px;height:24px;
+      border:2px solid #1a2030;border-top-color:#00ff88;
+      border-radius:50%;animation:spin .8s linear infinite;
     }
-
-    #fps-display {
-      font-size: 0.65rem;
-      color: #333;
-      letter-spacing: 1px;
-    }
-
-    /* ── Connection overlay ── */
-    #conn-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(7, 9, 15, 0.95);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      z-index: 20;
-      transition: opacity 0.4s;
-    }
-    #conn-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .conn-logo {
-      font-size: 1.1rem;
-      font-weight: 900;
-      letter-spacing: 6px;
-      color: #00ff88;
-    }
-    .conn-sub {
-      font-size: 0.6rem;
-      letter-spacing: 3px;
-      color: #333;
-      text-transform: uppercase;
-    }
-    .conn-spinner {
-      width: 36px; height: 36px;
-      border: 3px solid #1a2030;
-      border-top-color: #00ff88;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    #conn-msg {
-      font-size: 0.72rem;
-      color: #555;
-      letter-spacing: 1px;
-      text-align: center;
-      max-width: 260px;
-      line-height: 1.7;
-    }
-
-    #retry-btn {
-      display: none;
-      padding: 12px 32px;
-      background: #00ff88;
-      border: none;
-      border-radius: 10px;
-      color: #000;
-      font-size: 0.88rem;
-      font-weight: 800;
-      cursor: pointer;
-      letter-spacing: 1px;
-    }
+    @keyframes spin{to{transform:rotate(360deg);}}
 
     /* ── Settings panel ── */
-    #settings-btn {
-      position: fixed;
-      top: 12px;
-      right: 16px;
-      width: 36px; height: 36px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid #1a2030;
-      border-radius: 8px;
-      color: #555;
-      font-size: 1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 15;
+    #settings-panel{
+      position:fixed;top:56px;right:12px;
+      background:#0b0f18;border:1px solid #1a2030;border-radius:12px;
+      padding:16px;width:260px;z-index:60;
+      display:none;max-height:80vh;overflow-y:auto;
     }
-
-    #settings-panel {
-      position: fixed;
-      top: 56px; right: 12px;
-      background: #0b0f18;
-      border: 1px solid #1a2030;
-      border-radius: 12px;
-      padding: 16px;
-      width: 220px;
-      z-index: 15;
-      display: none;
+    #settings-panel.open{display:block;}
+    .sp-title{font-size:.65rem;font-weight:700;letter-spacing:2px;color:#9ca3af;margin-bottom:12px;text-transform:uppercase;}
+    .sp-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+    .sp-label{font-size:.7rem;color:#9ca3af;}
+    .sp-input{
+      background:#141825;border:1px solid #2d3348;border-radius:6px;
+      color:#fff;font-size:.7rem;padding:4px 8px;width:130px;text-align:right;
     }
-    #settings-panel.open { display: block; }
-
-    .setting-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .setting-label {
-      font-size: 0.72rem;
-      color: #9ca3af;
-      letter-spacing: 0.5px;
-    }
-    .setting-input {
-      background: #141825;
-      border: 1px solid #2d3348;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 0.72rem;
-      padding: 4px 8px;
-      width: 100px;
-      text-align: right;
-    }
-    .apply-btn {
-      width: 100%;
-      padding: 8px;
-      background: #00ff88;
-      border: none;
-      border-radius: 8px;
-      color: #000;
-      font-size: 0.78rem;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: 1px;
-    }
-
-    /* ── Person legend ── */
-    #legend {
-      position: fixed;
-      bottom: 48px;
-      left: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      z-index: 10;
-      pointer-events: none;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.62rem;
-      color: #aaa;
-      letter-spacing: 0.5px;
-    }
-    .legend-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-    }
+    .sp-divider{height:1px;background:#1a2030;margin:12px 0;}
+    .sp-pi-block{background:#0d1117;border:1px solid #1a2030;border-radius:8px;padding:10px;margin-bottom:8px;}
+    .sp-pi-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+    .sp-pi-ip{flex:1;background:#141825;border:1px solid #2d3348;border-radius:5px;color:#fff;font-size:.68rem;padding:3px 7px;}
+    .sp-pi-name{flex:1;background:#141825;border:1px solid #2d3348;border-radius:5px;color:#fff;font-size:.68rem;padding:3px 7px;}
+    .sp-pi-del{background:transparent;border:1px solid #ef4444;border-radius:5px;color:#ef4444;font-size:.65rem;padding:3px 8px;cursor:pointer;}
+    .sp-add-btn{width:100%;padding:7px;background:transparent;border:1px dashed #2d3348;border-radius:7px;color:#555;font-size:.7rem;cursor:pointer;margin-bottom:8px;}
+    .sp-add-btn:hover{border-color:#00ff88;color:#00ff88;}
+    .sp-apply{width:100%;padding:9px;background:#00ff88;border:none;border-radius:8px;color:#000;font-size:.75rem;font-weight:700;cursor:pointer;letter-spacing:1px;}
   </style>
 </head>
 <body>
 
-<!-- Connection overlay -->
-<div id="conn-overlay">
-  <div class="conn-logo">XLFITNESS</div>
-  <div class="conn-sub">Live Skeleton · Multi-Person</div>
-  <div class="conn-spinner" id="spinner"></div>
-  <div id="conn-msg">Connecting to Pi…</div>
-  <button id="retry-btn" onclick="connect()">↺ Retry</button>
-</div>
-
-<!-- Main canvas -->
-<canvas id="cvs"></canvas>
-
-<!-- HUD -->
-<div id="hud">
-  <div class="hud-logo">XL FITNESS</div>
-  <div class="hud-right">
-    <div id="person-count"><span id="pcount">0</span> people</div>
-    <div id="live-dot"></div>
+<!-- Top nav -->
+<div id="nav">
+  <div class="nav-logo">XL FITNESS</div>
+  <div class="nav-right">
+    <div id="total-count"><b id="tc">0</b> people detected</div>
+    <button id="settings-btn" onclick="toggleSettings()">⚙ Pis</button>
   </div>
 </div>
 
-<!-- Person legend -->
-<div id="legend"></div>
-
-<!-- Bottom bar -->
-<div id="bottom-bar">
-  <div id="status-text">SKELETON STREAM</div>
-  <div id="fps-display">— fps</div>
-</div>
-
-<!-- Settings button -->
-<button id="settings-btn" onclick="toggleSettings()">⚙</button>
+<!-- Grid of Pi panels (populated by JS) -->
+<div id="grid" class="pis-1"></div>
 
 <!-- Settings panel -->
-<div id="settings-panel" id="settings">
-  <div class="setting-row">
-    <span class="setting-label">Pi IP Address</span>
-    <input class="setting-input" id="pi-ip" type="text" value="192.168.1.40"/>
+<div id="settings-panel">
+  <div class="sp-title">Pi Connections</div>
+  <div id="pi-list"></div>
+  <button class="sp-add-btn" onclick="addPiRow()">+ Add Pi</button>
+  <div class="sp-divider"></div>
+  <div class="sp-row">
+    <span class="sp-label">Bone width</span>
+    <input class="sp-input" id="bone-w" type="number" value="3" min="1" max="12"/>
   </div>
-  <div class="setting-row">
-    <span class="setting-label">WS Port</span>
-    <input class="setting-input" id="ws-port" type="number" value="8765"/>
+  <div class="sp-row">
+    <span class="sp-label">Joint size</span>
+    <input class="sp-input" id="joint-r" type="number" value="6" min="2" max="20"/>
   </div>
-  <div class="setting-row">
-    <span class="setting-label">Show Video BG</span>
-    <input class="setting-input" id="show-bg" type="checkbox" style="width:auto;" checked/>
+  <div class="sp-row">
+    <span class="sp-label">Show bbox</span>
+    <input id="show-bbox" type="checkbox"/>
   </div>
-  <div class="setting-row">
-    <span class="setting-label">Bone Width</span>
-    <input class="setting-input" id="bone-width" type="number" value="3" min="1" max="10"/>
-  </div>
-  <div class="setting-row">
-    <span class="setting-label">Joint Size</span>
-    <input class="setting-input" id="joint-size" type="number" value="6" min="2" max="20"/>
-  </div>
-  <button class="apply-btn" onclick="applySettings()">Apply & Reconnect</button>
+  <div class="sp-divider"></div>
+  <button class="sp-apply" onclick="applySettings()">Apply & Reconnect</button>
 </div>
 
 <script>
-// ── Config (can be overridden by settings panel) ──────────────────────────────
-let PI_IP    = localStorage.getItem('pi_ip')   || '192.168.1.40';
-let WS_PORT  = localStorage.getItem('ws_port') || '8765';
-let SHOW_BG  = localStorage.getItem('show_bg') !== 'false';
-let BONE_W   = parseInt(localStorage.getItem('bone_w') || '3');
-let JOINT_R  = parseInt(localStorage.getItem('joint_r') || '6');
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIG — stored in localStorage
+// ═══════════════════════════════════════════════════════════════════════════
+const DEFAULT_PIS = [
+  { ip: "192.168.1.40", port: 8765, name: "Pi 1" },
+];
 
-// Restore settings inputs
-document.getElementById('pi-ip').value    = PI_IP;
-document.getElementById('ws-port').value  = WS_PORT;
-document.getElementById('show-bg').checked = SHOW_BG;
-document.getElementById('bone-width').value = BONE_W;
-document.getElementById('joint-size').value = JOINT_R;
-
-// ── Canvas setup ──────────────────────────────────────────────────────────────
-const cvs = document.getElementById('cvs');
-const ctx = cvs.getContext('2d');
-
-function resizeCvs() {
-  cvs.width  = window.innerWidth  * devicePixelRatio;
-  cvs.height = window.innerHeight * devicePixelRatio;
-  cvs.style.width  = window.innerWidth  + 'px';
-  cvs.style.height = window.innerHeight + 'px';
-  ctx.scale(devicePixelRatio, devicePixelRatio);
+function loadConfig() {
+  try {
+    const saved = localStorage.getItem('xl_pis');
+    return saved ? JSON.parse(saved) : DEFAULT_PIS;
+  } catch { return DEFAULT_PIS; }
 }
-window.addEventListener('resize', resizeCvs);
-window.addEventListener('orientationchange', () => setTimeout(resizeCvs, 300));
-resizeCvs();
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let ws = null;
-let lastFrameData = null;
-let lastFrameTime = 0;
-let fpsCounter = 0;
-let fpsDisplay = 0;
-let fpsTimer = Date.now();
-let connected = false;
-let reconnectTimer = null;
-let animRunning = false;
+function saveConfig(pis) {
+  localStorage.setItem('xl_pis', JSON.stringify(pis));
+}
 
-// ── WebSocket connection ──────────────────────────────────────────────────────
-function connect() {
-  const overlay   = document.getElementById('conn-overlay');
-  const msg       = document.getElementById('conn-msg');
-  const spinner   = document.getElementById('spinner');
-  const retryBtn  = document.getElementById('retry-btn');
-  const dot       = document.getElementById('live-dot');
+let PIS      = loadConfig();
+let BONE_W   = parseInt(localStorage.getItem('xl_bone_w') || '3');
+let JOINT_R  = parseInt(localStorage.getItem('xl_joint_r') || '6');
+let SHOW_BBOX = localStorage.getItem('xl_bbox') === 'true';
 
-  overlay.classList.remove('hidden');
-  spinner.style.display = 'block';
-  retryBtn.style.display = 'none';
-  msg.textContent = `Connecting to ws://${PI_IP}:${WS_PORT}…`;
-  dot.className = 'warn';
+// ═══════════════════════════════════════════════════════════════════════════
+// STATE — one entry per Pi
+// ═══════════════════════════════════════════════════════════════════════════
+const piState = {};   // keyed by pi index
 
-  if (ws) {
-    ws.onclose = null;
-    ws.onerror = null;
-    ws.close();
-    ws = null;
-  }
+// ═══════════════════════════════════════════════════════════════════════════
+// GRID SETUP
+// ═══════════════════════════════════════════════════════════════════════════
+function buildGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  grid.className = `pis-${Math.min(PIS.length, 6)}`;
 
-  ws = new WebSocket(`ws://${PI_IP}:${WS_PORT}`);
+  PIS.forEach((pi, idx) => {
+    const panel = document.createElement('div');
+    panel.className = 'pi-panel';
+    panel.id = `panel-${idx}`;
+    panel.innerHTML = `
+      <canvas class="pi-canvas" id="cvs-${idx}"></canvas>
+      <div class="pi-header">
+        <div class="pi-name" id="name-${idx}">${pi.name || 'Pi ' + (idx+1)}</div>
+        <div class="pi-badges">
+          <div class="pi-fps" id="fps-${idx}">— fps</div>
+          <div class="pi-dot" id="dot-${idx}"></div>
+        </div>
+      </div>
+      <div class="pi-footer">
+        <div class="pi-people">People: <b id="ppl-${idx}">0</b></div>
+        <div class="pi-inf" id="inf-${idx}">—ms</div>
+      </div>
+      <div class="pi-overlay" id="ov-${idx}">
+        <div class="pi-overlay-name">${pi.name || 'Pi ' + (idx+1)}</div>
+        <div class="pi-spinner" id="sp-${idx}"></div>
+        <div class="pi-overlay-msg" id="ovm-${idx}">Connecting to<br/>${pi.ip}:${pi.port || 8765}</div>
+      </div>
+    `;
+    grid.appendChild(panel);
+
+    // Size canvas to panel
+    piState[idx] = {
+      ws: null, lastData: null, connected: false,
+      retryTimer: null, skel: null,
+      fps: 0, fpsCounter: 0, fpsTimer: Date.now(),
+    };
+  });
+
+  // Resize all canvases
+  resizeAll();
+}
+
+function resizeAll() {
+  PIS.forEach((_, idx) => {
+    const panel = document.getElementById(`panel-${idx}`);
+    const cvs   = document.getElementById(`cvs-${idx}`);
+    if (!panel || !cvs) return;
+    const dpr = devicePixelRatio || 1;
+    cvs.width  = panel.offsetWidth  * dpr;
+    cvs.height = panel.offsetHeight * dpr;
+    cvs.style.width  = panel.offsetWidth  + 'px';
+    cvs.style.height = panel.offsetHeight + 'px';
+  });
+}
+
+window.addEventListener('resize', () => { resizeAll(); });
+window.addEventListener('orientationchange', () => setTimeout(resizeAll, 300));
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WEBSOCKET — one per Pi
+// ═══════════════════════════════════════════════════════════════════════════
+function connectPi(idx) {
+  const pi  = PIS[idx];
+  const st  = piState[idx];
+  const dot = document.getElementById(`dot-${idx}`);
+  const ovm = document.getElementById(`ovm-${idx}`);
+  const sp  = document.getElementById(`sp-${idx}`);
+
+  if (!pi || !st) return;
+
+  clearTimeout(st.retryTimer);
+  if (st.ws) { st.ws.onclose = null; st.ws.close(); st.ws = null; }
+
+  const url = `ws://${pi.ip}:${pi.port || 8765}`;
+  ovm.textContent = `Connecting to\n${url}`;
+  if (sp) sp.style.display = 'block';
+  dot.className = 'pi-dot warn';
+
+  const ws = new WebSocket(url);
+  st.ws = ws;
 
   ws.onopen = () => {
-    connected = true;
-    overlay.classList.add('hidden');
-    dot.className = 'live';
-    document.getElementById('status-text').textContent = 'LIVE STREAM';
-    if (!animRunning) { animRunning = true; renderLoop(); }
-    console.log('[WS] Connected');
+    st.connected = true;
+    dot.className = 'pi-dot live';
+    document.getElementById(`ov-${idx}`).classList.add('hidden');
+    console.log(`[Pi${idx}] Connected: ${url}`);
   };
 
   ws.onmessage = (evt) => {
     try {
-      lastFrameData = JSON.parse(evt.data);
-      fpsCounter++;
+      const data = JSON.parse(evt.data);
+      if (data.type === 'hello') {
+        document.getElementById(`name-${idx}`).textContent =
+          data.name || PIS[idx].name || `Pi ${idx+1}`;
+        // Show Hailo badge if applicable
+        if (data.hailo) {
+          const badges = document.querySelector(`#panel-${idx} .pi-badges`);
+          if (badges && !badges.querySelector('.pi-hailo')) {
+            const tag = document.createElement('div');
+            tag.className = 'pi-hailo';
+            tag.textContent = 'HAILO';
+            badges.insertBefore(tag, badges.firstChild);
+          }
+        }
+        return;
+      }
+      st.lastData = data;
+      // Cache skeleton pairs (same for all frames)
+      if (data.sk) st.skel = data.sk;
+      // FPS counter
+      st.fpsCounter++;
     } catch(e) {}
   };
 
   ws.onerror = () => {
-    dot.className = 'err';
+    dot.className = 'pi-dot err';
   };
 
   ws.onclose = () => {
-    connected = false;
-    dot.className = 'err';
-    document.getElementById('status-text').textContent = 'DISCONNECTED';
-    overlay.classList.remove('hidden');
-    spinner.style.display = 'none';
-    retryBtn.style.display = 'block';
-    msg.textContent = `Could not reach ws://${PI_IP}:${WS_PORT}\nMake sure the Pi server is running.`;
-    // Auto-retry after 5s
-    clearTimeout(reconnectTimer);
-    reconnectTimer = setTimeout(connect, 5000);
+    st.connected = false;
+    dot.className = 'pi-dot err';
+    const ov = document.getElementById(`ov-${idx}`);
+    ov.classList.remove('hidden');
+    if (sp) sp.style.display = 'none';
+    ovm.textContent = `Reconnecting in 5s…\n${url}`;
+    st.retryTimer = setTimeout(() => connectPi(idx), 5000);
   };
 }
 
-// ── Render loop ───────────────────────────────────────────────────────────────
-const PERSON_COLOURS = [
-  '#00ff88', '#00aaff', '#ff6600', '#ff00aa', '#ffff00', '#aa00ff'
-];
+function connectAll() {
+  PIS.forEach((_, idx) => connectPi(idx));
+}
 
-function renderLoop() {
-  requestAnimationFrame(renderLoop);
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER LOOP — one rAF loop for all panels
+// ═══════════════════════════════════════════════════════════════════════════
+const PERSON_COLOURS = ['#00ff88','#00aaff','#ff6600','#ff00aa','#ffff00','#aa00ff'];
 
-  const W = window.innerWidth;
-  const H = window.innerHeight;
+function renderAll() {
+  requestAnimationFrame(renderAll);
 
-  // Clear
-  ctx.fillStyle = SHOW_BG ? '#07090f' : '#000';
-  ctx.fillRect(0, 0, W, H);
-
-  // FPS counter
+  let totalPeople = 0;
   const now = Date.now();
-  if (now - fpsTimer >= 1000) {
-    fpsDisplay = fpsCounter;
-    fpsCounter = 0;
-    fpsTimer = now;
-    document.getElementById('fps-display').textContent = fpsDisplay + ' fps';
-  }
 
-  if (!lastFrameData) return;
+  PIS.forEach((_, idx) => {
+    const st  = piState[idx];
+    const cvs = document.getElementById(`cvs-${idx}`);
+    if (!cvs) return;
 
-  const data = lastFrameData;
-  const people = data.people || [];
-  const pairs  = data.pairs  || [];
+    const ctx = cvs.getContext('2d');
+    const W   = cvs.width  / (devicePixelRatio || 1);
+    const H   = cvs.height / (devicePixelRatio || 1);
+    const dpr = devicePixelRatio || 1;
 
-  // Update person count
-  document.getElementById('pcount').textContent = people.length;
+    // Scale ctx for retina
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  // Update legend
-  updateLegend(people);
+    // Clear
+    ctx.fillStyle = '#0b0f18';
+    ctx.fillRect(0, 0, W, H);
 
-  // Draw each person
-  for (const person of people) {
-    const colour = person.colour || PERSON_COLOURS[person.id % PERSON_COLOURS.length];
-    const kps    = person.kps;
-
-    if (!kps || kps.length === 0) continue;
-
-    // Helper: normalised → canvas pixels
-    const px = (kp) => ({
-      x: kp[0] * W,
-      y: kp[1] * H,
-      c: kp[2]
-    });
-
-    // Draw bounding box (subtle)
-    if (SHOW_BG && person.bbox) {
-      const b = person.bbox;
-      ctx.strokeStyle = colour + '33';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([4, 4]);
-      ctx.strokeRect(b[0]*W, b[1]*H, (b[2]-b[0])*W, (b[3]-b[1])*H);
-      ctx.setLineDash([]);
+    // FPS update
+    if (now - st.fpsTimer >= 1000) {
+      st.fps = st.fpsCounter / ((now - st.fpsTimer) / 1000);
+      st.fpsCounter = 0;
+      st.fpsTimer = now;
+      document.getElementById(`fps-${idx}`).textContent =
+        st.fps.toFixed(1) + ' fps';
     }
 
-    // Draw skeleton bones
-    ctx.lineWidth = BONE_W;
-    ctx.lineCap = 'round';
-    for (const [a, b] of pairs) {
-      if (a >= kps.length || b >= kps.length) continue;
-      const pa = px(kps[a]);
-      const pb = px(kps[b]);
-      if (pa.c < 0.2 || pb.c < 0.2) continue;
+    const data = st.lastData;
+    if (!data) return;
 
-      // Fade bone by confidence
-      const alpha = Math.min(1, (pa.c + pb.c) / 2 * 1.5);
-      ctx.strokeStyle = colour + Math.round(alpha * 255).toString(16).padStart(2, '0');
-      ctx.beginPath();
-      ctx.moveTo(pa.x, pa.y);
-      ctx.lineTo(pb.x, pb.y);
-      ctx.stroke();
+    const people = data.p || [];
+    const skel   = st.skel || data.sk || [];
+
+    totalPeople += people.length;
+    document.getElementById(`ppl-${idx}`).textContent = people.length;
+    document.getElementById(`inf-${idx}`).textContent =
+      (data.ims || 0).toFixed(0) + 'ms';
+
+    // Draw each person
+    for (const person of people) {
+      const colour = person.colour || PERSON_COLOURS[person.id % PERSON_COLOURS.length];
+      const kps    = person.kps;
+      if (!kps || kps.length === 0) continue;
+
+      // Normalised → canvas pixels
+      const px = (kp) => ({ x: kp[0]*W, y: kp[1]*H, c: kp[2] });
+
+      // Bounding box
+      if (SHOW_BBOX && person.bbox) {
+        const b = person.bbox;
+        ctx.strokeStyle = colour + '33';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3,3]);
+        ctx.strokeRect(b[0]*W, b[1]*H, (b[2]-b[0])*W, (b[3]-b[1])*H);
+        ctx.setLineDash([]);
+      }
+
+      // Bones
+      ctx.lineWidth = BONE_W;
+      ctx.lineCap = 'round';
+      for (const [a, b] of skel) {
+        if (a >= kps.length || b >= kps.length) continue;
+        const pa = px(kps[a]), pb = px(kps[b]);
+        if (pa.c < 0.2 || pb.c < 0.2) continue;
+        const alpha = Math.min(1, (pa.c + pb.c) * 0.75);
+        ctx.strokeStyle = colour + Math.round(alpha*255).toString(16).padStart(2,'0');
+        ctx.beginPath(); ctx.moveTo(pa.x,pa.y); ctx.lineTo(pb.x,pb.y); ctx.stroke();
+      }
+
+      // Joints
+      for (let i = 0; i < kps.length; i++) {
+        const p = px(kps[i]);
+        if (p.c < 0.2) continue;
+        const r = JOINT_R * (0.6 + p.c * 0.7);
+
+        // Glow
+        ctx.beginPath(); ctx.arc(p.x,p.y,r+3,0,Math.PI*2);
+        ctx.fillStyle = colour+'22'; ctx.fill();
+
+        // Dot
+        ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2);
+        ctx.fillStyle = colour; ctx.fill();
+
+        // Centre
+        ctx.beginPath(); ctx.arc(p.x,p.y,r*0.3,0,Math.PI*2);
+        ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fill();
+      }
+
+      // Person label above nose (kp 0)
+      if (kps[0] && kps[0][2] > 0.25) {
+        const nose = px(kps[0]);
+        ctx.font = 'bold 11px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = colour;
+        ctx.shadowColor = '#000'; ctx.shadowBlur = 5;
+        ctx.fillText('P'+(person.id+1), nose.x, nose.y - 16);
+        ctx.shadowBlur = 0; ctx.textAlign = 'left';
+      }
     }
 
-    // Draw joints
-    for (let i = 0; i < kps.length; i++) {
-      const p = px(kps[i]);
-      if (p.c < 0.2) continue;
-
-      const r = JOINT_R * (0.7 + p.c * 0.6);
-
-      // Outer glow
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, r + 3, 0, Math.PI * 2);
-      ctx.fillStyle = colour + '22';
-      ctx.fill();
-
-      // Joint dot
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = colour;
-      ctx.fill();
-
-      // Dark centre
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, r * 0.35, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      ctx.fill();
-    }
-
-    // Person ID label (above head — keypoint 0 = nose)
-    if (kps[0] && kps[0][2] > 0.2) {
-      const nose = px(kps[0]);
-      ctx.font = `bold ${Math.round(11 * devicePixelRatio / devicePixelRatio)}px 'SF Pro Display', Arial`;
+    // Empty state
+    if (people.length === 0 && st.connected) {
+      ctx.fillStyle = '#1a2030';
+      ctx.font = '11px Arial';
       ctx.textAlign = 'center';
-      ctx.fillStyle = colour;
-      ctx.shadowColor = 'rgba(0,0,0,0.8)';
-      ctx.shadowBlur = 6;
-      ctx.fillText(`P${person.id + 1}`, nose.x, nose.y - 18);
-      ctx.shadowBlur = 0;
+      ctx.fillText('No people detected', W/2, H/2);
+      ctx.textAlign = 'left';
     }
-  }
+  });
 
-  // No-person message
-  if (people.length === 0 && connected) {
-    ctx.fillStyle = '#1a2030';
-    ctx.font = 'bold 14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('No people detected', W / 2, H / 2);
-    ctx.font = '11px Arial';
-    ctx.fillStyle = '#333';
-    ctx.fillText('Move into camera view', W / 2, H / 2 + 22);
-    ctx.textAlign = 'left';
-  }
+  document.getElementById('tc').textContent = totalPeople;
 }
 
-// ── Legend ────────────────────────────────────────────────────────────────────
-let lastLegendCount = -1;
-function updateLegend(people) {
-  if (people.length === lastLegendCount) return;
-  lastLegendCount = people.length;
-
-  const legend = document.getElementById('legend');
-  legend.innerHTML = '';
-  for (const p of people) {
-    const colour = p.colour || PERSON_COLOURS[p.id % PERSON_COLOURS.length];
-    const item = document.createElement('div');
-    item.className = 'legend-item';
-    item.innerHTML = `<div class="legend-dot" style="background:${colour}"></div>Person ${p.id + 1}`;
-    legend.appendChild(item);
-  }
-}
-
-// ── Settings ──────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// SETTINGS PANEL
+// ═══════════════════════════════════════════════════════════════════════════
 function toggleSettings() {
-  document.getElementById('settings-panel').classList.toggle('open');
+  const panel = document.getElementById('settings-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) renderSettingsForm();
+}
+
+function renderSettingsForm() {
+  const list = document.getElementById('pi-list');
+  list.innerHTML = '';
+  PIS.forEach((pi, idx) => {
+    const block = document.createElement('div');
+    block.className = 'sp-pi-block';
+    block.innerHTML = `
+      <div class="sp-pi-row">
+        <input class="sp-pi-name" id="sn-${idx}" placeholder="Name" value="${pi.name || ''}"/>
+        <button class="sp-pi-del" onclick="removePi(${idx})">✕</button>
+      </div>
+      <div class="sp-pi-row">
+        <input class="sp-pi-ip" id="si-${idx}" placeholder="IP e.g. 192.168.1.40" value="${pi.ip || ''}"/>
+        <input class="sp-pi-ip" id="sp-${idx}" placeholder="Port" value="${pi.port || 8765}" style="width:60px;"/>
+      </div>
+    `;
+    list.appendChild(block);
+  });
+
+  document.getElementById('bone-w').value  = BONE_W;
+  document.getElementById('joint-r').value = JOINT_R;
+  document.getElementById('show-bbox').checked = SHOW_BBOX;
+}
+
+function addPiRow() {
+  PIS.push({ ip: '192.168.1.4' + (PIS.length + 1), port: 8765, name: 'Pi ' + (PIS.length + 1) });
+  renderSettingsForm();
+}
+
+function removePi(idx) {
+  PIS.splice(idx, 1);
+  renderSettingsForm();
 }
 
 function applySettings() {
-  PI_IP   = document.getElementById('pi-ip').value.trim();
-  WS_PORT = document.getElementById('ws-port').value.trim();
-  SHOW_BG = document.getElementById('show-bg').checked;
-  BONE_W  = parseInt(document.getElementById('bone-width').value) || 3;
-  JOINT_R = parseInt(document.getElementById('joint-size').value) || 6;
+  // Read Pi list
+  const newPis = [];
+  PIS.forEach((_, idx) => {
+    const ip   = document.getElementById(`si-${idx}`)?.value.trim();
+    const port = parseInt(document.getElementById(`sp-${idx}`)?.value) || 8765;
+    const name = document.getElementById(`sn-${idx}`)?.value.trim() || `Pi ${idx+1}`;
+    if (ip) newPis.push({ ip, port, name });
+  });
+  PIS = newPis;
+  saveConfig(PIS);
 
-  localStorage.setItem('pi_ip',   PI_IP);
-  localStorage.setItem('ws_port', WS_PORT);
-  localStorage.setItem('show_bg', SHOW_BG);
-  localStorage.setItem('bone_w',  BONE_W);
-  localStorage.setItem('joint_r', JOINT_R);
+  BONE_W   = parseInt(document.getElementById('bone-w').value)  || 3;
+  JOINT_R  = parseInt(document.getElementById('joint-r').value) || 6;
+  SHOW_BBOX = document.getElementById('show-bbox').checked;
+  localStorage.setItem('xl_bone_w', BONE_W);
+  localStorage.setItem('xl_joint_r', JOINT_R);
+  localStorage.setItem('xl_bbox', SHOW_BBOX);
 
   document.getElementById('settings-panel').classList.remove('open');
-  connect();
+
+  // Rebuild everything
+  buildGrid();
+  connectAll();
 }
 
-// ── Tap to dismiss settings ───────────────────────────────────────────────────
+// Dismiss settings on outside tap
 document.addEventListener('click', (e) => {
   const panel = document.getElementById('settings-panel');
   const btn   = document.getElementById('settings-btn');
@@ -593,8 +544,12 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ── Start ─────────────────────────────────────────────────────────────────────
-connect();
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+buildGrid();
+connectAll();
+renderAll();
 </script>
 </body>
 </html>
