@@ -381,6 +381,11 @@
   <a class="nav-link" href="#proto-donkey">27 — Brief for Donkey Runs</a>
   <a class="nav-link" href="#proto-build">28 — Step-by-Step Build Order</a>
   <a class="nav-link" href="#proto-risk">29 — Risk Assessment</a>
+  <div class="nav-group">Chapter 8 — Enterprise Scale</div>
+  <a class="nav-link" href="#ent-architecture">30 — Edge-to-Cloud Architecture</a>
+  <a class="nav-link" href="#ent-multitenant">31 — Multi-Tenancy & SaaS</a>
+  <a class="nav-link" href="#ent-mlops">32 — MLOps & Deployment</a>
+  <a class="nav-link" href="#ent-observability">33 — Production Observability</a>
 </nav>
 
 <div class="main">
@@ -2033,6 +2038,168 @@ function switchPhase(num) {
       </tbody>
     </table>
   </div>
+</section>
+
+</div> <!-- End of content-wrapper -->
+</body>
+</html>
+
+<!-- ─── CHAPTER 8: ENTERPRISE SCALE ──────────────────────────────────────── -->
+<div class="chapter-divider" id="ch-enterprise">
+  <div class="ch-inner">
+    <div class="ch-num">Chapter 08</div>
+    <h1>Enterprise <em>Scale</em></h1>
+    <p class="ch-desc">Transitioning from a single-gym MVP to a robust, multi-tenant SaaS platform. How to re-architect the system for high availability, automated deployments, centralized observability, and global scalability using production-grade design patterns.</p>
+    <div class="ch-sections">
+      <span class="ch-pill">30 — Edge-to-Cloud Architecture</span>
+      <span class="ch-pill">31 — Multi-Tenancy & SaaS</span>
+      <span class="ch-pill">32 — MLOps & Deployment</span>
+      <span class="ch-pill">33 — Production Observability</span>
+    </div>
+    <div class="ch-prereqs">
+      <div class="ch-prereqs-title">Before scaling beyond the prototype</div>
+      <div class="ch-prereq-list">
+        <div class="ch-prereq"><span class="prereq-icon prereq-done">✓</span>Chapter 7 MVP successfully deployed and validated in one gym</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-active">→</span>Cloud infrastructure (AWS/GCP) provisioned</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-active">→</span>Container orchestration strategy defined</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Section 30: Edge-to-Cloud Architecture ────────────────────────────── -->
+<section class="section" id="ent-architecture">
+  <div class="section-tag">// SECTION 30 — CHAPTER 08</div>
+  <h2>Edge-to-Cloud <em>Architecture</em></h2>
+  <p class="lead">The MVP relies on a "Dumb Edge / Smart Server" model, streaming heavy video feeds to a central Mac Mini. This does not scale. A production system requires a distributed "Smart Edge / Cloud Brain" architecture to handle hundreds of cameras without saturating local networks.</p>
+
+  <h3>The Problem with Centralized Inference</h3>
+  <p>Streaming 150 concurrent 4K/1080p video feeds across a gym's local network to a single server creates a massive bandwidth bottleneck. Furthermore, if the central server crashes, the entire gym goes offline. This monolithic approach lacks the fault tolerance required for an enterprise SLA (Service Level Agreement).</p>
+
+  <div class="callout warning">
+    <div class="ct">// THE ENTERPRISE STANDARD</div>
+    <p>Major tech companies (AWS, Google, NVIDIA) push inference to the edge. Video is processed as close to the camera as possible. Only lightweight metadata (bounding boxes, keypoints, JSON state) is transmitted over the network.</p>
+  </div>
+
+  <h3>Distributed Edge AI</h3>
+  <p>In Phase 3, we transition to edge nodes capable of running lightweight inference (e.g., NVIDIA Jetson Orin Nanos or cameras with built-in AI accelerators). The edge nodes run YOLO and MoveNet locally.</p>
+  
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Component</th><th>Role in Production</th><th>Data Output</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Smart Edge Node</strong></td>
+          <td>Runs YOLO detection and MoveNet pose estimation locally.</td>
+          <td>Metadata stream (JSON via MQTT/Kafka) containing tracking IDs and 17-keypoint arrays.</td>
+        </tr>
+        <tr>
+          <td><strong>Local Gateway</strong></td>
+          <td>The evolved "Donkey Runs". Receives metadata from all edge nodes. Runs the Fusion layer and LSTM rep counter.</td>
+          <td>Aggregated workout events (Sets, Reps, Weight) and real-time WebSocket state for tablets.</td>
+        </tr>
+        <tr>
+          <td><strong>Cloud Control Plane</strong></td>
+          <td>Centralized AWS/GCP environment. Receives synced workout logs from all gym gateways.</td>
+          <td>Global analytics, multi-tenant dashboards, and model registry.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── Section 31: Multi-Tenancy & SaaS ──────────────────────────────────── -->
+<section class="section" id="ent-multitenant">
+  <div class="section-tag">// SECTION 31 — CHAPTER 08</div>
+  <h2>Multi-Tenancy &amp; <em>SaaS</em></h2>
+  <p class="lead">To commercialize the AI Overseer, it must support hundreds of independent gyms simultaneously. The architecture must enforce strict tenant isolation to ensure data privacy, security, and GDPR/CCPA compliance.</p>
+
+  <h3>Local-First, Cloud-Sync Architecture</h3>
+  <p>The system must continue operating even if the gym's internet connection drops. The Local Gateway processes all real-time events and stores them in a local PostgreSQL database. An asynchronous background worker syncs this data to the Cloud Control Plane.</p>
+
+  <div class="code-toggle">
+    <button class="code-toggle-btn" onclick="toggleCode(this)">
+      <span>&#128196;&nbsp; multi-tenant-schema.sql</span>
+      <span class="ct-arr">&#9660;</span>
+    </button>
+    <div class="code-toggle-body">
+<div class="code-block">
+  <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">multi-tenant-schema.sql</span></div>
+  <pre><span class="cm">-- Cloud Control Plane Schema Update</span>
+<span class="kw">CREATE TABLE</span> tenants (
+    tenant_id <span class="st">UUID PRIMARY KEY</span>,
+    gym_name <span class="st">VARCHAR(255)</span>,
+    region <span class="st">VARCHAR(50)</span>,
+    api_key_hash <span class="st">VARCHAR(255)</span>
+);
+
+<span class="kw">ALTER TABLE</span> workout_logs 
+<span class="kw">ADD COLUMN</span> tenant_id <span class="st">UUID REFERENCES</span> tenants(tenant_id);
+
+<span class="cm">-- Row-Level Security (RLS) ensures gyms cannot query each other's data</span>
+<span class="kw">ALTER TABLE</span> workout_logs <span class="kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="kw">CREATE POLICY</span> tenant_isolation <span class="kw">ON</span> workout_logs
+    <span class="kw">USING</span> (tenant_id = current_setting(<span class="st">'app.current_tenant'</span>)::UUID);</pre>
+</div>
+    </div>
+  </div>
+
+  <h3>Tenant Provisioning</h3>
+  <p>When a new gym is onboarded, the Cloud Control Plane generates a unique <code>tenant_id</code> and provisions a secure API key. The Local Gateway in that gym authenticates with the cloud using this key, ensuring all synced data is strictly partitioned.</p>
+</section>
+
+<!-- ─── Section 32: MLOps & Deployment ────────────────────────────────────── -->
+<section class="section" id="ent-mlops">
+  <div class="section-tag">// SECTION 32 — CHAPTER 08</div>
+  <h2>MLOps &amp; <em>Deployment</em></h2>
+  <p class="lead">Manually copying <code>best.pt</code> files to a Mac Mini is acceptable for a prototype, but catastrophic for a fleet of 50 gyms. Production requires automated CI/CD pipelines for machine learning (MLOps).</p>
+
+  <h3>Over-The-Air (OTA) Model Updates</h3>
+  <p>The Local Gateway runs a lightweight agent that periodically polls the Cloud Model Registry (e.g., MLflow or AWS SageMaker) for new model versions. When a new LSTM model is released, the gateway downloads the weights, validates the checksum, and hot-swaps the model in memory without dropping active tracking sessions.</p>
+
+  <div class="callout success">
+    <div class="ct">// SHADOW DEPLOYMENTS</div>
+    <p>Before rolling out a new rep-counting model to the entire fleet, we use a <strong>Shadow Deployment</strong>. The new model runs silently in the background on live data, but its outputs are not shown to the user or saved to the database. We compare the shadow model's accuracy against the current production model. If it performs better over 10,000 reps, we promote it to active status.</p>
+  </div>
+
+  <h3>Canary Releases</h3>
+  <p>To mitigate risk, new software versions (both AI models and API services) are deployed using a Canary strategy. The update is pushed to 5% of gyms first. The observability stack monitors these gyms for increased error rates or latency spikes. If the metrics remain stable for 24 hours, the rollout expands to the rest of the fleet.</p>
+</section>
+
+<!-- ─── Section 33: Production Observability ──────────────────────────────── -->
+<section class="section" id="ent-observability">
+  <div class="section-tag">// SECTION 33 — CHAPTER 08</div>
+  <h2>Production <em>Observability</em></h2>
+  <p class="lead">You cannot SSH into a server to read terminal logs when a gym in another state reports an issue. Enterprise systems require centralized telemetry, structured logging, and proactive alerting.</p>
+
+  <h3>The Observability Stack</h3>
+  <p>We deploy a standard cloud-native observability stack (e.g., Prometheus for metrics, Grafana for dashboards, ELK/Datadog for logs) to monitor the fleet globally.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Telemetry Type</th><th>What We Monitor</th><th>Alert Trigger Example</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>System Metrics</strong></td>
+          <td>CPU/GPU utilization, memory, network bandwidth, disk space.</td>
+          <td>Edge node GPU usage &gt; 95% for 5 minutes.</td>
+        </tr>
+        <tr>
+          <td><strong>AI Telemetry</strong></td>
+          <td>Inference latency, confidence score degradation, tracking ID loss rates.</td>
+          <td>Average YOLO confidence drops below 60% (indicating potential lighting changes or data drift).</td>
+        </tr>
+        <tr>
+          <td><strong>Business Logic</strong></td>
+          <td>WebSocket connection drops, database write failures, missing card taps.</td>
+          <td>More than 5 failed database writes per minute.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>High Availability &amp; Containerization</h3>
+  <p>The monolithic Python script from the MVP must be broken down into isolated microservices (Ingest Service, Inference Service, Fusion Service, API Service). These services are containerized using Docker and orchestrated via K3s (lightweight Kubernetes) on the Local Gateway. If the Fusion Service crashes, K3s automatically restarts it within seconds, ensuring high availability.</p>
 </section>
 
 </div> <!-- End of content-wrapper -->
