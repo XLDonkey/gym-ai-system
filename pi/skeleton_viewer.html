@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <title>XL Fitness — Live Skeleton</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #07090f;
+      overflow: hidden;
+      font-family: 'SF Pro Display', 'Inter', system-ui, sans-serif;
+      color: #fff;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Full-screen canvas ── */
+    #cvs {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      touch-action: none;
+    }
+
+    /* ── HUD overlay ── */
+    #hud {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .hud-logo {
+      font-size: 0.75rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: #00ff88;
+      text-transform: uppercase;
+    }
+
+    .hud-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #person-count {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #aaa;
+    }
+
+    #person-count span {
+      color: #00ff88;
+      font-size: 1rem;
+    }
+
+    /* Live dot */
+    #live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #333;
+      transition: background 0.3s;
+    }
+    #live-dot.live {
+      background: #00ff88;
+      box-shadow: 0 0 8px #00ff88;
+      animation: pulse 1.2s infinite alternate;
+    }
+    #live-dot.warn { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    #live-dot.err  { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+    @keyframes pulse { to { box-shadow: 0 0 18px #00ff88; } }
+
+    /* ── Bottom bar ── */
+    #bottom-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 10px 16px;
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
+      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+    }
+
+    #status-text {
+      font-size: 0.65rem;
+      color: #555;
+      letter-spacing: 1px;
+    }
+
+    #fps-display {
+      font-size: 0.65rem;
+      color: #333;
+      letter-spacing: 1px;
+    }
+
+    /* ── Connection overlay ── */
+    #conn-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 9, 15, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 20;
+      transition: opacity 0.4s;
+    }
+    #conn-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .conn-logo {
+      font-size: 1.1rem;
+      font-weight: 900;
+      letter-spacing: 6px;
+      color: #00ff88;
+    }
+    .conn-sub {
+      font-size: 0.6rem;
+      letter-spacing: 3px;
+      color: #333;
+      text-transform: uppercase;
+    }
+    .conn-spinner {
+      width: 36px; height: 36px;
+      border: 3px solid #1a2030;
+      border-top-color: #00ff88;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #conn-msg {
+      font-size: 0.72rem;
+      color: #555;
+      letter-spacing: 1px;
+      text-align: center;
+      max-width: 260px;
+      line-height: 1.7;
+    }
+
+    #retry-btn {
+      display: none;
+      padding: 12px 32px;
+      background: #00ff88;
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+
+    /* ── Settings panel ── */
+    #settings-btn {
+      position: fixed;
+      top: 12px;
+      right: 16px;
+      width: 36px; height: 36px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid #1a2030;
+      border-radius: 8px;
+      color: #555;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 15;
+    }
+
+    #settings-panel {
+      position: fixed;
+      top: 56px; right: 12px;
+      background: #0b0f18;
+      border: 1px solid #1a2030;
+      border-radius: 12px;
+      padding: 16px;
+      width: 220px;
+      z-index: 15;
+      display: none;
+    }
+    #settings-panel.open { display: block; }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .setting-label {
+      font-size: 0.72rem;
+      color: #9ca3af;
+      letter-spacing: 0.5px;
+    }
+    .setting-input {
+      background: #141825;
+      border: 1px solid #2d3348;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.72rem;
+      padding: 4px 8px;
+      width: 100px;
+      text-align: right;
+    }
+    .apply-btn {
+      width: 100%;
+      padding: 8px;
+      background: #00ff88;
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+
+    /* ── Person legend ── */
+    #legend {
+      position: fixed;
+      bottom: 48px;
+      left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.62rem;
+      color: #aaa;
+      letter-spacing: 0.5px;
+    }
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Connection overlay -->
+<div id="conn-overlay">
+  <div class="conn-logo">XLFITNESS</div>
+  <div class="conn-sub">Live Skeleton · Multi-Person</div>
+  <div class="conn-spinner" id="spinner"></div>
+  <div id="conn-msg">Connecting to Pi…</div>
+  <button id="retry-btn" onclick="connect()">↺ Retry</button>
+</div>
+
+<!-- Main canvas -->
+<canvas id="cvs"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-logo">XL FITNESS</div>
+  <div class="hud-right">
+    <div id="person-count"><span id="pcount">0</span> people</div>
+    <div id="live-dot"></div>
+  </div>
+</div>
+
+<!-- Person legend -->
+<div id="legend"></div>
+
+<!-- Bottom bar -->
+<div id="bottom-bar">
+  <div id="status-text">SKELETON STREAM</div>
+  <div id="fps-display">— fps</div>
+</div>
+
+<!-- Settings button -->
+<button id="settings-btn" onclick="toggleSettings()">⚙</button>
+
+<!-- Settings panel -->
+<div id="settings-panel" id="settings">
+  <div class="setting-row">
+    <span class="setting-label">Pi IP Address</span>
+    <input class="setting-input" id="pi-ip" type="text" value="192.168.1.40"/>
+  </div>
+  <div class="setting-row">
+    <span class="setting-label">WS Port</span>
+    <input class="setting-input" id="ws-port" type="number" value="8765"/>
+  </div>
+  <div class="setting-row">
+    <span class="setting-label">Show Video BG</span>
+    <input class="setting-input" id="show-bg" type="checkbox" style="width:auto;" checked/>
+  </div>
+  <div class="setting-row">
+    <span class="setting-label">Bone Width</span>
+    <input class="setting-input" id="bone-width" type="number" value="3" min="1" max="10"/>
+  </div>
+  <div class="setting-row">
+    <span class="setting-label">Joint Size</span>
+    <input class="setting-input" id="joint-size" type="number" value="6" min="2" max="20"/>
+  </div>
+  <button class="apply-btn" onclick="applySettings()">Apply & Reconnect</button>
+</div>
+
+<script>
+// ── Config (can be overridden by settings panel) ──────────────────────────────
+let PI_IP    = localStorage.getItem('pi_ip')   || '192.168.1.40';
+let WS_PORT  = localStorage.getItem('ws_port') || '8765';
+let SHOW_BG  = localStorage.getItem('show_bg') !== 'false';
+let BONE_W   = parseInt(localStorage.getItem('bone_w') || '3');
+let JOINT_R  = parseInt(localStorage.getItem('joint_r') || '6');
+
+// Restore settings inputs
+document.getElementById('pi-ip').value    = PI_IP;
+document.getElementById('ws-port').value  = WS_PORT;
+document.getElementById('show-bg').checked = SHOW_BG;
+document.getElementById('bone-width').value = BONE_W;
+document.getElementById('joint-size').value = JOINT_R;
+
+// ── Canvas setup ──────────────────────────────────────────────────────────────
+const cvs = document.getElementById('cvs');
+const ctx = cvs.getContext('2d');
+
+function resizeCvs() {
+  cvs.width  = window.innerWidth  * devicePixelRatio;
+  cvs.height = window.innerHeight * devicePixelRatio;
+  cvs.style.width  = window.innerWidth  + 'px';
+  cvs.style.height = window.innerHeight + 'px';
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+}
+window.addEventListener('resize', resizeCvs);
+window.addEventListener('orientationchange', () => setTimeout(resizeCvs, 300));
+resizeCvs();
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let ws = null;
+let lastFrameData = null;
+let lastFrameTime = 0;
+let fpsCounter = 0;
+let fpsDisplay = 0;
+let fpsTimer = Date.now();
+let connected = false;
+let reconnectTimer = null;
+let animRunning = false;
+
+// ── WebSocket connection ──────────────────────────────────────────────────────
+function connect() {
+  const overlay   = document.getElementById('conn-overlay');
+  const msg       = document.getElementById('conn-msg');
+  const spinner   = document.getElementById('spinner');
+  const retryBtn  = document.getElementById('retry-btn');
+  const dot       = document.getElementById('live-dot');
+
+  overlay.classList.remove('hidden');
+  spinner.style.display = 'block';
+  retryBtn.style.display = 'none';
+  msg.textContent = `Connecting to ws://${PI_IP}:${WS_PORT}…`;
+  dot.className = 'warn';
+
+  if (ws) {
+    ws.onclose = null;
+    ws.onerror = null;
+    ws.close();
+    ws = null;
+  }
+
+  ws = new WebSocket(`ws://${PI_IP}:${WS_PORT}`);
+
+  ws.onopen = () => {
+    connected = true;
+    overlay.classList.add('hidden');
+    dot.className = 'live';
+    document.getElementById('status-text').textContent = 'LIVE STREAM';
+    if (!animRunning) { animRunning = true; renderLoop(); }
+    console.log('[WS] Connected');
+  };
+
+  ws.onmessage = (evt) => {
+    try {
+      lastFrameData = JSON.parse(evt.data);
+      fpsCounter++;
+    } catch(e) {}
+  };
+
+  ws.onerror = () => {
+    dot.className = 'err';
+  };
+
+  ws.onclose = () => {
+    connected = false;
+    dot.className = 'err';
+    document.getElementById('status-text').textContent = 'DISCONNECTED';
+    overlay.classList.remove('hidden');
+    spinner.style.display = 'none';
+    retryBtn.style.display = 'block';
+    msg.textContent = `Could not reach ws://${PI_IP}:${WS_PORT}\nMake sure the Pi server is running.`;
+    // Auto-retry after 5s
+    clearTimeout(reconnectTimer);
+    reconnectTimer = setTimeout(connect, 5000);
+  };
+}
+
+// ── Render loop ───────────────────────────────────────────────────────────────
+const PERSON_COLOURS = [
+  '#00ff88', '#00aaff', '#ff6600', '#ff00aa', '#ffff00', '#aa00ff'
+];
+
+function renderLoop() {
+  requestAnimationFrame(renderLoop);
+
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  // Clear
+  ctx.fillStyle = SHOW_BG ? '#07090f' : '#000';
+  ctx.fillRect(0, 0, W, H);
+
+  // FPS counter
+  const now = Date.now();
+  if (now - fpsTimer >= 1000) {
+    fpsDisplay = fpsCounter;
+    fpsCounter = 0;
+    fpsTimer = now;
+    document.getElementById('fps-display').textContent = fpsDisplay + ' fps';
+  }
+
+  if (!lastFrameData) return;
+
+  const data = lastFrameData;
+  const people = data.people || [];
+  const pairs  = data.pairs  || [];
+
+  // Update person count
+  document.getElementById('pcount').textContent = people.length;
+
+  // Update legend
+  updateLegend(people);
+
+  // Draw each person
+  for (const person of people) {
+    const colour = person.colour || PERSON_COLOURS[person.id % PERSON_COLOURS.length];
+    const kps    = person.kps;
+
+    if (!kps || kps.length === 0) continue;
+
+    // Helper: normalised → canvas pixels
+    const px = (kp) => ({
+      x: kp[0] * W,
+      y: kp[1] * H,
+      c: kp[2]
+    });
+
+    // Draw bounding box (subtle)
+    if (SHOW_BG && person.bbox) {
+      const b = person.bbox;
+      ctx.strokeStyle = colour + '33';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(b[0]*W, b[1]*H, (b[2]-b[0])*W, (b[3]-b[1])*H);
+      ctx.setLineDash([]);
+    }
+
+    // Draw skeleton bones
+    ctx.lineWidth = BONE_W;
+    ctx.lineCap = 'round';
+    for (const [a, b] of pairs) {
+      if (a >= kps.length || b >= kps.length) continue;
+      const pa = px(kps[a]);
+      const pb = px(kps[b]);
+      if (pa.c < 0.2 || pb.c < 0.2) continue;
+
+      // Fade bone by confidence
+      const alpha = Math.min(1, (pa.c + pb.c) / 2 * 1.5);
+      ctx.strokeStyle = colour + Math.round(alpha * 255).toString(16).padStart(2, '0');
+      ctx.beginPath();
+      ctx.moveTo(pa.x, pa.y);
+      ctx.lineTo(pb.x, pb.y);
+      ctx.stroke();
+    }
+
+    // Draw joints
+    for (let i = 0; i < kps.length; i++) {
+      const p = px(kps[i]);
+      if (p.c < 0.2) continue;
+
+      const r = JOINT_R * (0.7 + p.c * 0.6);
+
+      // Outer glow
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r + 3, 0, Math.PI * 2);
+      ctx.fillStyle = colour + '22';
+      ctx.fill();
+
+      // Joint dot
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = colour;
+      ctx.fill();
+
+      // Dark centre
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r * 0.35, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fill();
+    }
+
+    // Person ID label (above head — keypoint 0 = nose)
+    if (kps[0] && kps[0][2] > 0.2) {
+      const nose = px(kps[0]);
+      ctx.font = `bold ${Math.round(11 * devicePixelRatio / devicePixelRatio)}px 'SF Pro Display', Arial`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = colour;
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 6;
+      ctx.fillText(`P${person.id + 1}`, nose.x, nose.y - 18);
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  // No-person message
+  if (people.length === 0 && connected) {
+    ctx.fillStyle = '#1a2030';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('No people detected', W / 2, H / 2);
+    ctx.font = '11px Arial';
+    ctx.fillStyle = '#333';
+    ctx.fillText('Move into camera view', W / 2, H / 2 + 22);
+    ctx.textAlign = 'left';
+  }
+}
+
+// ── Legend ────────────────────────────────────────────────────────────────────
+let lastLegendCount = -1;
+function updateLegend(people) {
+  if (people.length === lastLegendCount) return;
+  lastLegendCount = people.length;
+
+  const legend = document.getElementById('legend');
+  legend.innerHTML = '';
+  for (const p of people) {
+    const colour = p.colour || PERSON_COLOURS[p.id % PERSON_COLOURS.length];
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<div class="legend-dot" style="background:${colour}"></div>Person ${p.id + 1}`;
+    legend.appendChild(item);
+  }
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+function toggleSettings() {
+  document.getElementById('settings-panel').classList.toggle('open');
+}
+
+function applySettings() {
+  PI_IP   = document.getElementById('pi-ip').value.trim();
+  WS_PORT = document.getElementById('ws-port').value.trim();
+  SHOW_BG = document.getElementById('show-bg').checked;
+  BONE_W  = parseInt(document.getElementById('bone-width').value) || 3;
+  JOINT_R = parseInt(document.getElementById('joint-size').value) || 6;
+
+  localStorage.setItem('pi_ip',   PI_IP);
+  localStorage.setItem('ws_port', WS_PORT);
+  localStorage.setItem('show_bg', SHOW_BG);
+  localStorage.setItem('bone_w',  BONE_W);
+  localStorage.setItem('joint_r', JOINT_R);
+
+  document.getElementById('settings-panel').classList.remove('open');
+  connect();
+}
+
+// ── Tap to dismiss settings ───────────────────────────────────────────────────
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('settings-panel');
+  const btn   = document.getElementById('settings-btn');
+  if (panel.classList.contains('open') && !panel.contains(e.target) && e.target !== btn) {
+    panel.classList.remove('open');
+  }
+});
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+connect();
+</script>
+</body>
+</html>
