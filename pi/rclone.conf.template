@@ -1,0 +1,27 @@
+# rclone configuration for XL Fitness Google Drive uploads
+# ─────────────────────────────────────────────────────────────
+# SETUP INSTRUCTIONS (run once per Pi):
+#
+# 1. On your Mac, install rclone:
+#      brew install rclone
+#
+# 2. On your Mac, run the authorisation helper:
+#      rclone authorize "drive"
+#    → A browser window opens → sign in with your Google account
+#    → Copy the token it prints (a long JSON string)
+#
+# 3. On the Pi, create this config file:
+#      mkdir -p ~/.config/rclone
+#      nano ~/.config/rclone/rclone.conf
+#    → Paste the content below, replacing TOKEN_JSON with your token
+#
+# 4. Test it:
+#      rclone ls xlf-gdrive: --drive-root-folder-id 1KNDC4wctZqVt8s41U4ALWHJ45OM5U9FA
+#    → Should list the contents of your shared Google Drive folder
+# ─────────────────────────────────────────────────────────────
+
+[xlf-gdrive]
+type = drive
+scope = drive
+root_folder_id = 1KNDC4wctZqVt8s41U4ALWHJ45OM5U9FA
+token = TOKEN_JSON
