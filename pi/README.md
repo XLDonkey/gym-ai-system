@@ -91,6 +91,44 @@ The Pi will automatically start counting reps on boot.
 | `session_recorder.py` | Records video clips of sessions |
 | `uploader.py` | Uploads recordings to Google Drive |
 | `setup.sh` | One-command setup script |
+| `skeleton_ws_server.py` | **Demo 1** — Hailo-accelerated skeleton WebSocket server (~30fps) |
+| `skeleton_cpu.py` | **Demo 2** — CPU-only skeleton viewer, no Hailo required (~5-8fps) |
+
+---
+
+## Live Skeleton Demos
+
+Both demos stream pose keypoints to a mobile-friendly viewer. Open on any phone or tablet on the same WiFi as the Pi.
+
+### Demo 1 — Hailo-Accelerated (`skeleton_ws_server.py`)
+
+Uses the Hailo AI HAT+ for hardware-accelerated inference at ~30fps.
+
+```bash
+nohup ~/xlf-env/bin/python3 ~/gym-ai-system/pi/skeleton_ws_server.py > ~/skeleton_ws.log 2>&1 &
+```
+
+| | |
+|---|---|
+| **Viewer** | `http://192.168.1.40:8080` |
+| **WebSocket** | `ws://192.168.1.40:8765` |
+| **Speed** | ~25–30fps |
+| **Requires** | Hailo AI HAT+ with matching `.hef` model |
+
+### Demo 2 — CPU Only (`skeleton_cpu.py`)
+
+Runs YOLO pose on the Pi CPU — no Hailo required. Works out of the box on any Pi 5 with Camera Module 3.
+
+```bash
+nohup ~/xlf-env/bin/python3 ~/gym-ai-system/pi/skeleton_cpu.py > ~/skeleton_cpu.log 2>&1 &
+```
+
+| | |
+|---|---|
+| **Viewer** | `http://192.168.1.40:8080` |
+| **WebSocket** | `ws://192.168.1.40:8765` |
+| **Speed** | ~5–8fps |
+| **Requires** | Camera Module 3 + `yolo11n-pose.pt` in home directory |
 
 ---
 
