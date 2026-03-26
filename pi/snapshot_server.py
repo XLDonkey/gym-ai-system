@@ -30,27 +30,30 @@ log = logging.getLogger("snapshot")
 
 
 def capture_jpeg() -> bytes:
-    """Capture a single JPEG frame from the Pi camera using libcamera-still."""
+    """Capture a single JPEG frame from the Pi camera.
+    Tries rpicam-still first (Pi OS Bookworm/Trixie), falls back to libcamera-jpeg.
+    """
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
         tmp_path = f.name
 
+    # Determine which camera tool is available
+    import shutil
+    if shutil.which("rpicam-still"):
+        cmd = ["rpicam-still", "--output", tmp_path, "--timeout", "2000",
+               "--nopreview", "--width", "1280", "--height", "720", "--quality", "85"]
+    elif shutil.which("libcamera-jpeg"):
+        cmd = ["libcamera-jpeg", "--output", tmp_path, "--timeout", "2000",
+               "--nopreview", "--width", "1280", "--height", "720", "--quality", "85"]
+    elif shutil.which("libcamera-still"):
+        cmd = ["libcamera-still", "--output", tmp_path, "--timeout", "2000",
+               "--nopreview", "--width", "1280", "--height", "720", "--quality", "85"]
+    else:
+        raise RuntimeError("No camera capture tool found (rpicam-still / libcamera-jpeg / libcamera-still)")
+
     try:
-        # libcamera-still: capture one frame, no preview, timeout 2s
-        result = subprocess.run(
-            [
-                "libcamera-still",
-                "--output", tmp_path,
-                "--timeout", "2000",
-                "--nopreview",
-                "--width", "1280",
-                "--height", "720",
-                "--quality", "85",
-            ],
-            capture_output=True,
-            timeout=10,
-        )
+        result = subprocess.run(cmd, capture_output=True, timeout=12)
         if result.returncode != 0:
-            raise RuntimeError(f"libcamera-still failed: {result.stderr.decode()}")
+            raise RuntimeError(f"{cmd[0]} failed (exit {result.returncode}): {result.stderr.decode()[:200]}")
 
         with open(tmp_path, "rb") as f:
             return f.read()
