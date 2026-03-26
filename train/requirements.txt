@@ -1,0 +1,9 @@
+ultralytics
+torch
+onnx
+onnxruntime
+numpy
+scipy
+opencv-python
+gdown
+scikit-learn

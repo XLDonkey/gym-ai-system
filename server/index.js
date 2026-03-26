@@ -6,9 +6,11 @@
 
 const express = require('express');
 const http = require('http');
+const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { randomUUID } = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -135,12 +137,146 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// ── Training API ──────────────────────────────────────────────────────────────
+
+// In-memory job store (survives until server restart)
+const trainJobs = new Map();
+
+// Resolve paths relative to this repo
+const REPO_ROOT = path.resolve(__dirname, '..');
+const TRAIN_SCRIPT = path.join(REPO_ROOT, 'train', 'overseer_train.py');
+const MODELS_DIR = path.join(REPO_ROOT, 'models');
+
+/**
+ * POST /api/train
+ * Body: { "drive_folder": "1KNDC4w...", "output_name": "overseer_v1" }
+ * Returns: { "jobId": "uuid", "status": "running" }
+ */
+app.post('/api/train', (req, res) => {
+  const { drive_folder, output_name = 'overseer_v1' } = req.body || {};
+
+  if (!drive_folder) {
+    return res.status(400).json({ error: 'drive_folder is required' });
+  }
+
+  const jobId = randomUUID();
+  const outputPath = path.join(MODELS_DIR, `${output_name}.onnx`);
+  const logPath = path.join(MODELS_DIR, `${output_name}_${jobId.slice(0, 8)}.log`);
+
+  fs.mkdirSync(MODELS_DIR, { recursive: true });
+
+  const job = {
+    jobId,
+    status: 'running',
+    drive_folder,
+    output_name,
+    output_path: outputPath,
+    log_path: logPath,
+    started_at: new Date().toISOString(),
+    finished_at: null,
+    accuracy: null,
+    error: null,
+  };
+  trainJobs.set(jobId, job);
+
+  console.log(`[train] Starting job ${jobId} — drive_folder=${drive_folder} output=${outputPath}`);
+
+  // Launch training subprocess
+  const logStream = fs.createWriteStream(logPath, { flags: 'a' });
+  const proc = spawn('python3', [
+    TRAIN_SCRIPT,
+    '--drive-folder', drive_folder,
+    '--output', outputPath,
+  ], {
+    cwd: REPO_ROOT,
+    env: { ...process.env },
+  });
+
+  proc.stdout.pipe(logStream);
+  proc.stderr.pipe(logStream);
+
+  // Try to parse accuracy from stdout
+  proc.stdout.on('data', (chunk) => {
+    const text = chunk.toString();
+    // Look for "Best validation accuracy: 0.923"
+    const match = text.match(/Best validation accuracy:\s*([\d.]+)/);
+    if (match) {
+      job.accuracy = parseFloat(match[1]);
+    }
+  });
+
+  proc.on('close', (code) => {
+    job.finished_at = new Date().toISOString();
+    if (code === 0) {
+      job.status = 'complete';
+      console.log(`[train] Job ${jobId} complete — accuracy=${job.accuracy}`);
+    } else {
+      job.status = 'failed';
+      job.error = `Process exited with code ${code}`;
+      console.log(`[train] Job ${jobId} failed (exit ${code})`);
+    }
+    logStream.end();
+  });
+
+  proc.on('error', (err) => {
+    job.status = 'failed';
+    job.error = err.message;
+    job.finished_at = new Date().toISOString();
+    console.log(`[train] Job ${jobId} error: ${err.message}`);
+    logStream.end();
+  });
+
+  res.json({ jobId, status: 'running', message: `Training started. Poll GET /api/train/${jobId} for status.` });
+});
+
+/**
+ * GET /api/train/:jobId
+ * Returns job status, accuracy when complete, and log tail.
+ */
+app.get('/api/train/:jobId', (req, res) => {
+  const job = trainJobs.get(req.params.jobId);
+  if (!job) {
+    return res.status(404).json({ error: 'Job not found' });
+  }
+
+  // Include last 20 lines of log if available
+  let log_tail = null;
+  try {
+    const log = fs.readFileSync(job.log_path, 'utf8');
+    log_tail = log.split('\n').slice(-20).join('\n');
+  } catch (_) { /* log not yet written */ }
+
+  res.json({
+    jobId: job.jobId,
+    status: job.status,
+    drive_folder: job.drive_folder,
+    output_name: job.output_name,
+    output_path: job.output_path,
+    started_at: job.started_at,
+    finished_at: job.finished_at,
+    accuracy: job.accuracy,
+    error: job.error,
+    log_tail,
+  });
+});
+
+/**
+ * GET /api/train
+ * List all training jobs.
+ */
+app.get('/api/train', (req, res) => {
+  const jobs = Array.from(trainJobs.values()).map(({ jobId, status, output_name, started_at, finished_at, accuracy }) => ({
+    jobId, status, output_name, started_at, finished_at, accuracy,
+  }));
+  res.json(jobs);
+});
+
 // Root
 app.get('/', (req, res) => {
   res.json({ 
     service: 'XL Fitness Overseer Mac Mini Server',
-    version: '1.0.0',
-    endpoints: ['/api/health', '/api/nodes', '/api/refresh', '/api/snapshot/:id']
+    version: '1.1.0',
+    endpoints: ['/api/health', '/api/nodes', '/api/refresh', '/api/snapshot/:id', '/api/train']
   });
 });
 
