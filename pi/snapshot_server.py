@@ -28,6 +28,49 @@ PORT = 8090
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger("snapshot")
 
+# ─── Runtime stats (updated by the main recording process if running) ──────────
+import time
+START_TIME = time.time()
+VERSION = "1.1.0"
+
+def get_status() -> dict:
+    """Return current Pi status as a dict."""
+    uptime = int(time.time() - START_TIME)
+
+    # Check if the recorder process is running
+    recorder_running = False
+    try:
+        result = subprocess.run(["pgrep", "-f", "session_recorder"], capture_output=True)
+        recorder_running = result.returncode == 0
+    except Exception:
+        pass
+
+    # Count recordings in xlf_recordings
+    recordings_dir = os.path.expanduser("~/xlf_recordings")
+    recording_count = 0
+    try:
+        recording_count = len([f for f in os.listdir(recordings_dir) if f.endswith(".mp4")])
+    except Exception:
+        pass
+
+    # Get CPU temperature
+    cpu_temp = None
+    try:
+        with open("/sys/class/thermal/thermal_zone0/temp") as f:
+            cpu_temp = round(int(f.read().strip()) / 1000, 1)
+    except Exception:
+        pass
+
+    return {
+        "online": True,
+        "version": VERSION,
+        "uptime_s": uptime,
+        "recorder_running": recorder_running,
+        "recording_count": recording_count,
+        "cpu_temp_c": cpu_temp,
+        "timestamp": int(time.time()),
+    }
+
 
 def capture_jpeg() -> bytes:
     """Capture a single JPEG frame from the Pi camera.
@@ -102,6 +145,23 @@ class SnapshotHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": str(e)}).encode())
 
+        elif path == "/status":
+            try:
+                status = get_status()
+                body = json.dumps(status).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(body)
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+
         elif path == "/health":
             body = json.dumps({"status": "ok", "port": PORT}).encode()
             self.send_response(200)
@@ -119,9 +179,10 @@ class SnapshotHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     server = HTTPServer(("0.0.0.0", PORT), SnapshotHandler)
-    log.info(f"XL Fitness Snapshot Server listening on port {PORT}")
+    log.info(f"XL Fitness Snapshot Server v{VERSION} listening on port {PORT}")
     log.info(f"  GET http://localhost:{PORT}/snapshot  → live JPEG from camera")
-    log.info(f"  GET http://localhost:{PORT}/health    → status check")
+    log.info(f"  GET http://localhost:{PORT}/status    → JSON status (uptime, recorder, temp, recordings)")
+    log.info(f"  GET http://localhost:{PORT}/health    → simple health check")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
