@@ -2200,6 +2200,338 @@ function switchPhase(num) {
   <p>The monolithic Python script from the MVP must be broken down into isolated microservices (Ingest Service, Inference Service, Fusion Service, API Service). These services are containerized using Docker and orchestrated via K3s (lightweight Kubernetes) on the Local Gateway. If the Fusion Service crashes, K3s automatically restarts it within seconds, ensuring high availability.</p>
 </section>
 
+<!-- ═══════════════════════════════════════════════════════════════════════
+     CHAPTER 9 — DATA PIPELINE & TRAINING
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="chapter-divider" id="ch-training">
+  <div class="ch-inner">
+    <div class="ch-num">Chapter 09</div>
+    <h1>Data Pipeline &amp; <em>Training</em></h1>
+    <p class="ch-desc">How raw video becomes a trained neural network. The full loop from Pi camera to annotated JSON to trained model to deployed .hef file — and how it keeps improving automatically.</p>
+    <div class="ch-sections">
+      <span class="ch-pill">34 — Architecture Decisions</span>
+      <span class="ch-pill">35 — Annotation Workflow</span>
+      <span class="ch-pill">36 — Mac Mini as NAS + Trainer</span>
+      <span class="ch-pill">37 — Continuous Learning Loop</span>
+      <span class="ch-pill">38 — Hailo Deployment</span>
+    </div>
+    <div class="ch-prereqs">
+      <div class="ch-prereqs-title">Current status — March 2026</div>
+      <div class="ch-prereq-list">
+        <div class="ch-prereq"><span class="prereq-icon prereq-done">✓</span>Annotation tool v2.0 built — segment-based start/end timestamps</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-done">✓</span>Hailo-8 AI HAT+ physically detected on Pi (PCIe confirmed)</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-done">✓</span>Hailo driver (hailo_pci 4.23.0) installed and loaded</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-active">→</span>First annotated training data — not yet collected</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-active">→</span>Mac Mini training scripts — not yet written</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-active">→</span>Pi recording script — not yet written</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="section" id="training-decisions">
+  <div class="section-tag">// SECTION 34 — CHAPTER 09</div>
+  <h2>Architecture <em>Decisions</em></h2>
+  <p class="lead">Key decisions made during the March 2026 prototyping sprint. These are locked in for the MVP and inform all downstream work.</p>
+
+  <div class="callout success">
+    <div class="ct">// DECISION: Pi runs inference locally on Hailo NPU</div>
+    <p>The trained model (.hef file) is downloaded to the Pi and runs entirely on the Hailo-8 AI HAT+ 26 TOPS chip. The Pi does not stream video to the Mac Mini for inference. This gives ~15–25 FPS real-time inference with no network dependency. The Mac Mini is only involved in training, not in live operation.</p>
+  </div>
+
+  <div class="callout info">
+    <div class="ct">// DECISION: Google Drive for MVP, Mac Mini NAS for scale</div>
+    <p>During the MVP phase (first model, one machine), Pi cameras upload video to Google Drive. The Mac Mini downloads, processes, and trains from there. Once the model reaches ~75% accuracy and is proven, the Mac Mini becomes a local NAS — Pis upload directly to it over the gym network. Google Drive is cut out of the critical path. This transition requires only a one-line config change on the Pi.</p>
+  </div>
+
+  <div class="callout info">
+    <div class="ct">// DECISION: Mac Mini (Donkey Runs) is the training server</div>
+    <p>The Mac Mini M4 Pro handles all training. Apple Silicon MPS backend gives GPU-accelerated PyTorch training without a separate NVIDIA GPU. At idle the Mac Mini draws ~6–7W, making it cost-effective to leave on 24/7. Future transition: dedicated server room when scaling beyond 5 gyms.</p>
+  </div>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Component</th><th>MVP (Now)</th><th>Scale (Post-75% Accuracy)</th></tr></thead>
+      <tbody>
+        <tr><td>Video storage</td><td class="td-purple">Google Drive</td><td class="td-green">Mac Mini local NAS</td></tr>
+        <tr><td>Training trigger</td><td class="td-purple">Manual</td><td class="td-green">Automated nightly (2am)</td></tr>
+        <tr><td>Model delivery to Pi</td><td class="td-purple">Manual copy</td><td class="td-green">Pi polls Mac Mini each morning, auto-downloads</td></tr>
+        <tr><td>Inference location</td><td class="td-green">Pi Hailo NPU (always)</td><td class="td-green">Pi Hailo NPU (always)</td></tr>
+        <tr><td>Tablet display</td><td class="td-purple">Power Apps (existing)</td><td class="td-green">Custom web app via Pi WebSocket</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section" id="annotation-workflow">
+  <div class="section-tag">// SECTION 35 — CHAPTER 09</div>
+  <h2>Annotation <em>Workflow</em></h2>
+  <p class="lead">The annotation tool (v2.0) is built and live. It uses segment-based labelling — you press a key when a movement starts and press the same key again when it ends. The JSON output contains start_s, end_s, duration_s, and class_id for each segment — exactly the format the LSTM training pipeline expects.</p>
+
+  <h3>The 10 Label Classes</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Key</th><th>Class</th><th>Colour</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1</strong></td><td>No person</td><td>Grey</td><td>Machine empty, no one present</td></tr>
+        <tr><td><strong>2</strong></td><td>User seated / setting up</td><td>Blue</td><td>Person at machine but not yet lifting</td></tr>
+        <tr><td><strong>3</strong></td><td>User adjusting machine</td><td>Indigo</td><td>Changing seat, pin, or handles</td></tr>
+        <tr><td><strong>4</strong></td><td>Good rep — full clean ROM</td><td>Green</td><td>Complete range of motion, correct form</td></tr>
+        <tr><td><strong>5</strong></td><td>Partial rep</td><td>Yellow</td><td>Incomplete range of motion</td></tr>
+        <tr><td><strong>6</strong></td><td>Not a rep (false positive)</td><td>Red</td><td>Movement that is not a rep</td></tr>
+        <tr><td><strong>7</strong></td><td>Resting between sets</td><td>Orange</td><td>Seated at machine, resting</td></tr>
+        <tr><td><strong>8</strong></td><td>Hazardous / bad form</td><td>Pink</td><td>Dangerous movement pattern</td></tr>
+        <tr><td><strong>9</strong></td><td>Single left arm rep</td><td>Cyan</td><td>Unilateral left-arm movement</td></tr>
+        <tr><td><strong>0</strong></td><td>Single right arm rep</td><td>Pink</td><td>Unilateral right-arm movement</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Annotation Workflow Step by Step</h3>
+  <div class="step-list">
+    <div class="step"><div class="step-num">1</div><div><div class="step-title">Download video from Google Drive</div><div class="step-body">Pi uploads session .mp4 automatically. Download to your Mac.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div><div class="step-title">Open annotation tool</div><div class="step-body">Drop the .mp4 onto the annotation page. Set the machine name.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div><div class="step-title">Watch at 0.5× speed</div><div class="step-body">Slow playback makes it easier to catch the exact start and end of each movement.</div></div></div>
+    <div class="step"><div class="step-num">4</div><div><div class="step-title">Press key to START, press again to END</div><div class="step-body">Key 4 = good rep. Press 4 when the rep starts, press 4 again (or Enter) when it ends. A coloured bar appears on the timeline.</div></div></div>
+    <div class="step"><div class="step-num">5</div><div><div class="step-title">Export JSON</div><div class="step-body">Click Export. Upload the JSON file to the Google Drive training folder alongside the video.</div></div></div>
+    <div class="step"><div class="step-num">6</div><div><div class="step-title">Target: 300+ segments before first training run</div><div class="step-body">Aim for variety — different people, different speeds, different lighting conditions. Quality and variety matter more than raw quantity.</div></div></div>
+  </div>
+
+  <div class="callout warning">
+    <div class="ct">// THE SINGLE MOST IMPORTANT THING</div>
+    <p>The quality of the AI is almost entirely determined by the quality and variety of the training data. A model trained on 50 reps from one person will fail when someone else uses the machine. Annotate as many different people, speeds, and conditions as possible before the first training run.</p>
+  </div>
+</section>
+
+<section class="section" id="mac-nas">
+  <div class="section-tag">// SECTION 36 — CHAPTER 09</div>
+  <h2>Mac Mini as NAS <em>+ Training Server</em></h2>
+  <p class="lead">Once the first model reaches ~75% accuracy, the Mac Mini transitions from a manual training machine to an automated NAS and training hub. This is the architecture for all subsequent training rounds.</p>
+
+  <div class="callout purple">
+    <div class="ct">// THE FLOW</div>
+    <p>Pi cameras record sessions → upload video directly to Mac Mini over local network → Mac Mini watches for new videos → processes overnight → retrains model → saves new versioned .hef → Pi downloads it each morning → Pi runs smarter model that day.</p>
+  </div>
+
+  <h3>Why Mac Mini Over a Dedicated NAS</h3>
+  <p>A dedicated NAS (e.g. Synology DS223) can only store files — it cannot train models. The Mac Mini stores files AND trains models on the same machine, eliminating the need for a separate device. The M4 Pro chip provides GPU-accelerated PyTorch training via the MPS backend. At ~6–7W idle, it is cost-effective to run 24/7.</p>
+
+  <h3>Scripts to Build (Post-75% Accuracy)</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Script</th><th>Runs On</th><th>What It Does</th></tr></thead>
+      <tbody>
+        <tr><td>session_recorder.py</td><td>Pi</td><td>Records camera, saves .mp4, uploads to Mac Mini or Google Drive</td></tr>
+        <tr><td>file_server.py</td><td>Mac Mini</td><td>Lightweight server that accepts Pi uploads over local network</td></tr>
+        <tr><td>watcher.py</td><td>Mac Mini</td><td>Monitors for new videos, queues them for overnight processing</td></tr>
+        <tr><td>train.py</td><td>Mac Mini</td><td>Extracts keypoints, trains LSTM, saves best model weights</td></tr>
+        <tr><td>export.py</td><td>Mac Mini</td><td>Converts .pt → .onnx → .hef for Hailo deployment</td></tr>
+        <tr><td>model_sync.py</td><td>Pi</td><td>Checks Mac Mini each morning, downloads newer .hef if available</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section" id="continuous-learning">
+  <div class="section-tag">// SECTION 37 — CHAPTER 09</div>
+  <h2>Continuous <em>Learning Loop</em></h2>
+  <p class="lead">The model does not stop improving after the first training run. Every session the Pi records is potential new training data. The system is designed to get smarter automatically over time.</p>
+
+  <h3>Confidence-Based Flagging</h3>
+  <p>When the Pi classifies a movement but its confidence is below 70%, it saves that clip to a "review" folder on Google Drive automatically. These flagged clips are the most valuable training data — they are exactly the situations the model is weakest on. You review them in the annotation tool, confirm or correct the label, and they feed into the next training round.</p>
+
+  <h3>Expected Accuracy Progression</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Training Round</th><th>Data Volume</th><th>Expected Accuracy</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Round 1</td><td>~300 annotated segments</td><td class="td-purple">~70–75%</td><td>First working model — proves the concept</td></tr>
+        <tr><td>Round 2</td><td>+500 real session clips</td><td class="td-purple">~85–88%</td><td>Fine-tuned on real gym conditions</td></tr>
+        <tr><td>Round 3</td><td>+1,000 clips, multiple members</td><td class="td-green">~92–95%</td><td>Multiple people, lighting conditions</td></tr>
+        <tr><td>Ongoing</td><td>Every session adds data</td><td class="td-green">97–99%</td><td>Approaches production-grade accuracy</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout success">
+    <div class="ct">// WHY THIS GETS VERY GOOD VERY FAST</div>
+    <p>The model trains on your specific gym, your specific machines, your specific members, your specific lighting. This is far more powerful than any off-the-shelf model. A generic pose model trained on internet videos will never be as accurate on your lat pulldown machine as a model trained on 2,000 annotated reps from that exact machine.</p>
+  </div>
+</section>
+
+<section class="section" id="hailo-deployment">
+  <div class="section-tag">// SECTION 38 — CHAPTER 09</div>
+  <h2>Hailo <em>Deployment</em></h2>
+  <p class="lead">The Hailo-8 AI HAT+ 26 TOPS chip is physically confirmed working on the Pi as of March 2026. The driver (hailo_pci 4.23.0) is installed. The next step is compiling the trained model to a .hef file and loading it for live inference.</p>
+
+  <h3>Hardware Status</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Check</th><th>Status</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td>PCIe device detected</td><td class="td-green">✓ Confirmed</td><td>0001:01:00.0 Hailo Technologies Ltd. Hailo-8 AI Processor (rev 01)</td></tr>
+        <tr><td>Kernel driver installed</td><td class="td-green">✓ Confirmed</td><td>hailo_pci/4.23.0 for kernel 6.12.75+rpt-rpi-2712</td></tr>
+        <tr><td>/dev/hailo0 device node</td><td class="td-purple">Pending reboot</td><td>Will appear after next reboot post-driver install</td></tr>
+        <tr><td>hailort Python bindings</td><td class="td-green">✓ Installed</td><td>python3-hailort 4.23.0</td></tr>
+        <tr><td>First .hef model loaded</td><td class="td-purple">Pending</td><td>Requires trained model from Mac Mini</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>FPS Projection — Three NNs on Hailo-8L 26 TOPS</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Model</th><th>Input</th><th>FPS on Hailo-8</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td>Pose NN (YOLOv8n-pose)</td><td>640×640</td><td class="td-green">~45–60 FPS</td><td>Skeleton extraction + rep counting</td></tr>
+        <tr><td>Weight NN (MobileNetV2)</td><td>224×224</td><td class="td-green">~200+ FPS</td><td>Colour band classification</td></tr>
+        <tr><td>Person NN (MobileNetV2)</td><td>224×224</td><td class="td-green">~200+ FPS</td><td>Member identification</td></tr>
+        <tr><td><strong>Three NNs concurrent</strong></td><td>—</td><td class="td-green"><strong>~15–25 FPS</strong></td><td>Target: 15+ FPS ✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     CHAPTER 10 — GUI & DISPLAY LAYER
+═══════════════════════════════════════════════════════════════════════ -->
+<div class="chapter-divider" id="ch-gui">
+  <div class="ch-inner">
+    <div class="ch-num">Chapter 10</div>
+    <h1>GUI &amp; <em>Display Layer</em></h1>
+    <p class="ch-desc">How data from the Pis reaches members and staff. One web app, all machines, all views. The architecture for the member-facing tablet, the staff floor view, and the management dashboard.</p>
+    <div class="ch-sections">
+      <span class="ch-pill">39 — Display Architecture</span>
+      <span class="ch-pill">40 — Member Tablet View</span>
+      <span class="ch-pill">41 — Staff Floor View</span>
+      <span class="ch-pill">42 — Integration with Power Apps</span>
+    </div>
+    <div class="ch-prereqs">
+      <div class="ch-prereqs-title">Current status — March 2026</div>
+      <div class="ch-prereq-list">
+        <div class="ch-prereq"><span class="prereq-icon prereq-done">✓</span>Fleet management dashboard built (Pi health, status monitoring)</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-done">✓</span>Current tablet display: Power Apps in Kiosk mode (existing system)</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-active">→</span>Member-facing web app — to be built once model is proven</div>
+        <div class="ch-prereq"><span class="prereq-icon prereq-active">→</span>Pi WebSocket server — to be built with recording script</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="section" id="display-architecture">
+  <div class="section-tag">// SECTION 39 — CHAPTER 10</div>
+  <h2>Display <em>Architecture</em></h2>
+  <p class="lead">One web app, one URL, all machines. The same application serves different views depending on who is looking — a member at a machine tablet sees their live rep count, a staff member at the front desk sees all machines at a glance, an admin sees system health and model versions.</p>
+
+  <div class="callout purple">
+    <div class="ct">// THE CORE PRINCIPLE</div>
+    <p>You do not build 150 websites. You build one web app that is aware of all machines. Each Pi has a unique ID. The web app knows about all of them. You click any machine and see its live data. It is the same page, loaded with different data depending on which machine is selected.</p>
+  </div>
+
+  <h3>Data Flow</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Source</th><th>Transport</th><th>Consumer</th><th>Update Rate</th></tr></thead>
+      <tbody>
+        <tr><td>Pi Hailo NPU (inference result)</td><td>WebSocket (local network)</td><td>Machine tablet (member view)</td><td>Every 100ms</td></tr>
+        <tr><td>Pi session summary (set complete)</td><td>HTTP POST → Power Automate</td><td>Power Apps / Dataverse</td><td>Per set</td></tr>
+        <tr><td>Pi session summary (set complete)</td><td>HTTP POST → future web API</td><td>Custom web app (future)</td><td>Per set</td></tr>
+        <tr><td>All Pis → Mac Mini</td><td>Local network file transfer</td><td>Training pipeline</td><td>Per session</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Migration Path</h3>
+  <p>The current tablet display is Power Apps in Kiosk mode — it works, staff know it, and it requires no changes for the MVP. Power Apps is kept as-is and Overseer feeds data into it via Power Automate. When the system scales to 3–5 gyms, a custom web app replaces Power Apps as the primary display. The Pi-side code does not change — only the URL it sends data to changes.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Phase</th><th>Tablet Display</th><th>Staff Dashboard</th><th>Member App</th></tr></thead>
+      <tbody>
+        <tr><td><strong>MVP (now)</strong></td><td class="td-purple">Power Apps Kiosk</td><td class="td-purple">Fleet dashboard (built)</td><td class="td-purple">Not yet</td></tr>
+        <tr><td><strong>Scale (3–5 gyms)</strong></td><td class="td-green">Custom web app (Kiosk mode)</td><td class="td-green">Custom web app</td><td class="td-green">Custom web app (mobile view)</td></tr>
+        <tr><td><strong>Enterprise</strong></td><td class="td-green">Custom web app</td><td class="td-green">Custom web app + analytics</td><td class="td-green">React Native mobile app</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section" id="member-tablet">
+  <div class="section-tag">// SECTION 40 — CHAPTER 10</div>
+  <h2>Member <em>Tablet View</em></h2>
+  <p class="lead">The tablet mounted on each machine is the member's window into the system. It shows live data during their set and a summary when they finish. It must be readable from 1–2 metres away, update in real time, and require zero interaction from the member during a set.</p>
+
+  <h3>What the Tablet Shows</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>State</th><th>Display</th></tr></thead>
+      <tbody>
+        <tr><td>Machine idle (no one seated)</td><td>Machine name, last member's session summary, ambient clock</td></tr>
+        <tr><td>Member seated, not yet lifting</td><td>Member name + photo, weight detected on stack, "Ready" indicator</td></tr>
+        <tr><td>Active set in progress</td><td>Large rep counter (live), form indicator (Good / Partial / Bad), weight confirmed</td></tr>
+        <tr><td>Rest between sets</td><td>Set summary (reps completed, form breakdown), rest timer, total volume</td></tr>
+        <tr><td>Session complete</td><td>Full session summary — all sets, total reps, total volume, form score</td></tr>
+        <tr><td>Low confidence — tap required</td><td>"Please tap your card" prompt with member photo guess</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section" id="staff-view">
+  <div class="section-tag">// SECTION 41 — CHAPTER 10</div>
+  <h2>Staff <em>Floor View</em></h2>
+  <p class="lead">The staff view shows all machines simultaneously on a single screen. A staff member at the front desk or walking the floor can see at a glance who is on which machine, how long they have been there, and whether any alerts need attention.</p>
+
+  <h3>What Staff See</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Element</th><th>Information Shown</th></tr></thead>
+      <tbody>
+        <tr><td>Machine card (each machine)</td><td>Machine name, current member (name + photo), current exercise, rep count, weight, session duration, form score</td></tr>
+        <tr><td>Status indicator</td><td>Green = active set, Orange = resting, Grey = idle, Red = alert (bad form / long idle / Pi offline)</td></tr>
+        <tr><td>Alert panel</td><td>Flagged events — bad form detected, machine idle too long, Pi connectivity issue</td></tr>
+        <tr><td>Floor summary bar</td><td>Total members in gym, machines in use, machines idle, active alerts</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section" id="power-apps-integration">
+  <div class="section-tag">// SECTION 42 — CHAPTER 10</div>
+  <h2>Power Apps <em>Integration</em></h2>
+  <p class="lead">The existing Power Apps system is kept as-is for the MVP. Overseer feeds data into it via Power Automate. This requires no changes to the existing Power Apps build and gives the team time to validate the AI data before committing to a full custom app.</p>
+
+  <div class="callout info">
+    <div class="ct">// THE INTEGRATION FLOW</div>
+    <p>Pi detects set complete → Pi sends JSON payload to Power Automate HTTP webhook → Power Automate writes to Dataverse → Power Apps reads from Dataverse → tablet updates. The Pi-side sender is a single HTTP POST — one line of code. The Power Automate flow is a standard connector with no custom development.</p>
+  </div>
+
+  <h3>JSON Payload (Pi → Power Automate)</h3>
+  <div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">set_complete_payload.json</span></div>
+    <pre>{
+  "machine_id": "lat-pulldown-01",
+  "member_id": "M1089",
+  "timestamp": "2026-03-27T14:32:11Z",
+  "exercise": "Lat Pulldown",
+  "weight_kg": 52.5,
+  "reps": 10,
+  "form_breakdown": {
+    "good": 7,
+    "partial": 2,
+    "bad": 1
+  },
+  "form_score": 0.78,
+  "model_version": "v2"
+}</pre>
+  </div>
+
+  <div class="callout warning">
+    <div class="ct">// WHEN TO MOVE OFF POWER APPS</div>
+    <p>Power Apps works well for 1–2 gyms. At 3–5 gyms, per-user licensing costs become significant and the customisation ceiling becomes a constraint. At that point, build a custom web app. The Pi webhook sender stays identical — only the destination URL changes. This is a one-line config change, not a rebuild.</p>
+  </div>
+</section>
+
 </div> <!-- End of content-wrapper -->
 </body>
 </html>
