@@ -369,12 +369,21 @@ function doReset(){
 }
 
 // ── Camera + loop ─────────────────────────────────────────────────────────────
-let detector=null,stream=null,facing='environment';
+let detector=null,stream=null;
+// On desktop (no touch), default to user-facing; on mobile default to environment (rear)
+const isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+let facing=isMobile?'environment':'user';
 async function startCam(f){
   if(stream)stream.getTracks().forEach(t=>t.stop());
   try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:f,width:{ideal:1280},height:{ideal:720}},audio:false});}
-  catch(e){stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});}
-  video.srcObject=stream;await video.play();
+  catch(e){
+    // Fallback: try without facingMode constraint
+    try{stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720}},audio:false});}
+    catch(e2){stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});}
+  }
+  video.srcObject=stream;
+  await new Promise(r=>{video.onloadedmetadata=r;});
+  await video.play();
 }
 function flipCam(){facing=facing==='environment'?'user':'environment';startCam(facing);}
 
