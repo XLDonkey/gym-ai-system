@@ -47,3 +47,16 @@ SESSION_TIMEOUT_S     = 300    # End session after 5 min away
 # ── Display ───────────────────────────────────────────────────────────────────
 SHOW_PREVIEW  = False   # Set True only when a monitor is attached
 SHOW_SKELETON = True
+
+# ── Supabase Database ─────────────────────────────────────────────────────────
+# Set these to enable rep + session logging to Supabase.
+# Use the service-role key (not the anon key) so the Pi can write.
+SUPABASE_URL         = ""   # e.g. "https://xxxx.supabase.co"
+SUPABASE_SERVICE_KEY = ""   # service_role JWT from Supabase dashboard
+
+# ── Face Recognition ──────────────────────────────────────────────────────────
+FACE_RECOGNITION_ENABLED = True   # Set False to skip face ID (anonymous sessions)
+FACE_MODEL               = "buffalo_sc"   # buffalo_sc = fast; buffalo_l = most accurate
+FACE_THRESHOLD           = 0.40   # Cosine similarity threshold for positive match
+FACE_CHECK_INTERVAL      = 30     # Run face recognition every N frames (30 = ~1s at 30fps)
+FACE_IDENTITY_WINDOW_S   = 10     # Collect evidence for N seconds before locking identity

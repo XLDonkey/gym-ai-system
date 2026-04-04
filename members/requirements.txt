@@ -1,0 +1,4 @@
+# members/db_client.py uses only stdlib (urllib, json, math)
+# No additional packages required.
+# numpy is listed here for the cosine_similarity helper used in face matching.
+numpy>=1.24.0

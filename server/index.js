@@ -271,12 +271,143 @@ app.get('/api/train', (req, res) => {
   res.json(jobs);
 });
 
+// ── Members & Stats API ───────────────────────────────────────────────────────
+// These endpoints proxy to Supabase REST so the dashboard never needs its own
+// Supabase credentials.  Set SUPABASE_URL + SUPABASE_SERVICE_KEY in env.
+
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
+
+function supabaseHeaders() {
+  return {
+    'apikey':        SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type':  'application/json',
+  };
+}
+
+async function supabaseFetch(path, params = {}) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    throw new Error('SUPABASE_URL / SUPABASE_SERVICE_KEY not configured');
+  }
+  const qs  = new URLSearchParams(params).toString();
+  const url = `${SUPABASE_URL}/rest/v1${path}${qs ? '?' + qs : ''}`;
+
+  const { default: fetch } = await import('node-fetch').catch(() => ({ default: globalThis.fetch }));
+  const res = await fetch(url, { headers: supabaseHeaders(), timeout: 10000 });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Supabase ${path} → ${res.status}: ${body}`);
+  }
+  return res.json();
+}
+
+/**
+ * GET /api/members
+ * Returns all active members (no embeddings — stripped for privacy).
+ */
+app.get('/api/members', async (req, res) => {
+  try {
+    const rows = await supabaseFetch('/members', { active: 'eq.true', select: 'id,name,enrolled_at' });
+    res.json(rows);
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/members/:id/stats
+ * Returns lifetime + recent stats for one member.
+ *
+ * Response shape:
+ * {
+ *   member: { id, name, enrolled_at },
+ *   stats:  { total_sessions, total_reps, avg_reps_per_session, avg_rom,
+ *             last_session_at, favourite_machine },
+ *   recent_sessions: [...],
+ *   daily_volume: [...]
+ * }
+ */
+app.get('/api/members/:id/stats', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [memberRows, statsRows, sessionRows, volumeRows] = await Promise.all([
+      supabaseFetch('/members', { id: `eq.${id}`, select: 'id,name,enrolled_at', limit: '1' }),
+      supabaseFetch('/member_stats', { id: `eq.${id}` }),
+      supabaseFetch('/sessions', {
+        member_id: `eq.${id}`,
+        order: 'started_at.desc',
+        limit: '10',
+      }),
+      supabaseFetch('/daily_volume', {
+        member_id: `eq.${id}`,
+        order: 'workout_date.desc',
+        limit: '60',
+      }),
+    ]);
+
+    if (!memberRows.length) {
+      return res.status(404).json({ error: 'Member not found' });
+    }
+
+    res.json({
+      member:          memberRows[0],
+      stats:           statsRows[0] || {},
+      recent_sessions: sessionRows,
+      daily_volume:    volumeRows,
+    });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/sessions
+ * Recent sessions across all machines. Optional ?machine_id=xlf-pi-001
+ */
+app.get('/api/sessions', async (req, res) => {
+  const params = { order: 'started_at.desc', limit: '50' };
+  if (req.query.machine_id) params.machine_id = `eq.${req.query.machine_id}`;
+  try {
+    const rows = await supabaseFetch('/sessions', params);
+    res.json(rows);
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/sessions/:id/reps
+ * All reps for a specific session.
+ */
+app.get('/api/sessions/:id/reps', async (req, res) => {
+  try {
+    const rows = await supabaseFetch('/reps', {
+      session_id: `eq.${req.params.id}`,
+      order:      'rep_number.asc',
+    });
+    res.json(rows);
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
 // Root
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     service: 'XL Fitness Overseer Mac Mini Server',
-    version: '1.1.0',
-    endpoints: ['/api/health', '/api/nodes', '/api/refresh', '/api/snapshot/:id', '/api/train']
+    version: '1.2.0',
+    endpoints: [
+      '/api/health',
+      '/api/nodes',
+      '/api/refresh',
+      '/api/snapshot/:id',
+      '/api/train',
+      '/api/members',
+      '/api/members/:id/stats',
+      '/api/sessions',
+      '/api/sessions/:id/reps',
+    ],
   });
 });
 
