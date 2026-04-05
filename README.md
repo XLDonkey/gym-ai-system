@@ -10,6 +10,13 @@
 
 Open in Chrome. Point camera side-on to the machine. Start pulling.
 
+
+## Bible
+
+👉 **https://xldonkey.github.io/gym-ai-system/pose/alpha.html**
+
+A html file of the overall plan for the overseer 
+
 ---
 
 ## Structure
