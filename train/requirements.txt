@@ -7,3 +7,6 @@ scipy
 opencv-python
 gdown
 scikit-learn
+# auto_label_yt.py dependencies
+anthropic>=0.40.0
+yt-dlp>=2024.1.0
