@@ -32,7 +32,10 @@ from config import (
     SUPABASE_URL, SUPABASE_SERVICE_KEY,
     FACE_RECOGNITION_ENABLED, FACE_MODEL, FACE_THRESHOLD,
     FACE_CHECK_INTERVAL, FACE_IDENTITY_WINDOW_S,
+    WEIGHT_TRACKING_ENABLED, WEIGHT_STACK_ROI,
+    WEIGHT_MOVE_PX_THRESHOLD, WEIGHT_MOVE_FRAME_RATIO,
 )
+from weight_tracker import WeightStackTracker
 from session_recorder import SessionRecorder
 
 # ── Optional integrations (fail gracefully if not configured) ─────────────────
@@ -155,6 +158,9 @@ class RepCounter:
         self._rom_history   = []
         self._dur_history   = []
 
+        # Weight tracking — injected from main loop
+        self.weight_tracker: WeightStackTracker = None
+
     def start_session(self, member_id=None, member_name=None):
         self.session_active = True
         self.rep_count      = 0
@@ -239,6 +245,9 @@ class RepCounter:
                 self.phase         = 'down'
                 self._min_angle    = angle
                 self._rep_start_ms = time.time() * 1000
+                # Tell weight tracker a rep has begun
+                if self.weight_tracker:
+                    self.weight_tracker.start_rep()
 
         elif self.phase == 'down':
             self._min_angle = min(self._min_angle, angle)
@@ -248,7 +257,12 @@ class RepCounter:
                 return None
             if angle > ANGLE_TOP and dur_ms >= MIN_REP_DURATION_MS:
                 rom = self._max_angle - self._min_angle
-                if rom >= MIN_ROM_DEGREES:
+                # Gate: require weight to have actually moved
+                weight_confirmed = (
+                    self.weight_tracker is None
+                    or self.weight_tracker.weight_moved_during_rep()
+                )
+                if rom >= MIN_ROM_DEGREES and weight_confirmed:
                     self.rep_count += 1
                     dur_s = round(dur_ms / 1000, 2)
                     print(f"[REP] #{self.rep_count}  ROM={rom:.0f}°  dur={dur_ms:.0f}ms")
@@ -321,6 +335,19 @@ def main():
     session_active  = False
     frame_count     = 0
     fps_timer       = time.time()
+
+    # Weight stack tracker
+    weight_tracker = WeightStackTracker(
+        roi_norm         = WEIGHT_STACK_ROI,
+        frame_w          = FRAME_WIDTH,
+        frame_h          = FRAME_HEIGHT,
+        move_threshold   = WEIGHT_MOVE_PX_THRESHOLD,
+        move_frame_ratio = WEIGHT_MOVE_FRAME_RATIO,
+        enabled          = WEIGHT_TRACKING_ENABLED,
+    )
+    counter.weight_tracker = weight_tracker
+    print(f"[weight] Tracker {'enabled' if WEIGHT_TRACKING_ENABLED else 'disabled'}  "
+          f"ROI={WEIGHT_STACK_ROI}")
 
     # Face recognition state
     identity_window = None   # IdentityWindow | None
@@ -418,6 +445,9 @@ def main():
                     counter.end_session()
                     identity_window = None
 
+            # ── Weight stack tracking ─────────────────────────────────────────
+            weight_tracker.update(frame)
+
             counter.update(arm_data)
 
             # ── FPS logging ───────────────────────────────────────────────────
@@ -430,6 +460,7 @@ def main():
                       f"Rec:{recorder.is_recording if recorder else False}")
 
             if SHOW_PREVIEW:
+                weight_tracker.draw_overlay(frame)
                 cv2.imshow('XL Fitness AI Overseer', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break

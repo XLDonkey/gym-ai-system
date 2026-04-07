@@ -60,3 +60,16 @@ FACE_MODEL               = "buffalo_sc"   # buffalo_sc = fast; buffalo_l = most 
 FACE_THRESHOLD           = 0.40   # Cosine similarity threshold for positive match
 FACE_CHECK_INTERVAL      = 30     # Run face recognition every N frames (30 = ~1s at 30fps)
 FACE_IDENTITY_WINDOW_S   = 10     # Collect evidence for N seconds before locking identity
+
+# ── Weight Stack Tracker ───────────────────────────────────────────────────────
+# Prevents phantom reps — verifies the weight actually moved during a rep.
+# Set WEIGHT_TRACKING_ENABLED = False to disable (reps counted by angle alone).
+#
+# ROI = Region of Interest covering the weight stack in the camera frame.
+# Values are normalised (0.0–1.0): (x1, y1, x2, y2)
+# Default covers the right 20% of a side-on camera view — adjust for your setup.
+# Use SHOW_PREVIEW=True to see the ROI overlay while calibrating.
+WEIGHT_TRACKING_ENABLED   = True
+WEIGHT_STACK_ROI          = (0.72, 0.05, 0.92, 0.88)  # (x1,y1,x2,y2) normalised
+WEIGHT_MOVE_PX_THRESHOLD  = 1.5   # optical flow magnitude to count as "moving"
+WEIGHT_MOVE_FRAME_RATIO   = 0.30  # fraction of rep frames that must show movement
