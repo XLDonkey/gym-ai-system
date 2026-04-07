@@ -8,130 +8,115 @@
     *{margin:0;padding:0;box-sizing:border-box;}
     body{background:#06040f;color:#e5e7eb;font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
 
-    /* Header */
-    .hdr{background:#141825;border-bottom:1px solid #2d3348;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+    .hdr{background:#141825;border-bottom:1px solid #2d3348;padding:10px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
     .hdr-logo{font-size:.88rem;font-weight:900;letter-spacing:4px;color:#8b5cf6;}
     .hdr-title{font-size:.75rem;color:#6b7280;}
-    .hdr-tip{margin-left:auto;font-size:.7rem;color:#4b5563;font-style:italic;}
+    .hdr-tip{margin-left:auto;font-size:.68rem;color:#4b5563;font-style:italic;}
 
-    /* Layout */
     .body{display:flex;flex:1;min-height:0;}
+    .left{flex:1;display:flex;flex-direction:column;padding:14px;gap:10px;min-width:0;}
 
-    /* Video side */
-    .left{flex:1;display:flex;flex-direction:column;padding:16px;gap:12px;min-width:0;}
-
-    /* Drop zone */
     #drop-zone{border:2px dashed #2d3348;border-radius:10px;padding:28px;text-align:center;cursor:pointer;flex-shrink:0;}
     #drop-zone:hover,#drop-zone.drag{border-color:#8b5cf6;background:rgba(139,92,246,.05);}
     #drop-zone h3{font-size:.88rem;font-weight:700;margin-bottom:4px;}
     #drop-zone p{font-size:.72rem;color:#6b7280;}
     #file-in{display:none;}
 
-    /* Video */
-    #vid-wrap{display:none;flex-direction:column;gap:10px;flex:1;min-height:0;}
-    #vid{width:100%;border-radius:8px;background:#000;flex-shrink:0;max-height:calc(100vh - 340px);object-fit:contain;}
+    #vid-wrap{display:none;flex-direction:column;gap:8px;flex:1;min-height:0;}
+    #vid{width:100%;border-radius:8px;background:#000;flex-shrink:0;max-height:calc(100vh - 320px);object-fit:contain;}
 
-    /* Scrubber */
     .scrub-row{display:flex;align-items:center;gap:10px;}
-    #scrubber{flex:1;height:6px;accent-color:#8b5cf6;cursor:pointer;}
-    /* Section highlight on scrubber */
-    #scrubber{background:#1f2937;}
+    #scrubber{flex:1;height:6px;accent-color:#8b5cf6;cursor:pointer;background:#1f2937;}
     #time{font-size:.75rem;font-family:monospace;color:#9ca3af;white-space:nowrap;min-width:110px;}
 
-    /* Controls */
     .ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-    .btn{padding:8px 14px;border-radius:7px;font-size:.75rem;font-weight:700;cursor:pointer;border:none;transition:opacity .15s,transform .1s;}
+    .btn{padding:7px 13px;border-radius:7px;font-size:.75rem;font-weight:700;cursor:pointer;border:none;transition:opacity .15s,transform .1s;}
     .btn:active{opacity:.8;transform:scale(.97);}
     .btn-play{background:#8b5cf6;color:#fff;min-width:80px;}
     .btn-sm{background:#1f2937;color:#9ca3af;border:1px solid #374151;}
-    .spd{background:#1f2937;color:#9ca3af;border:1px solid #374151;border-radius:7px;padding:6px 10px;font-size:.72rem;cursor:pointer;}
+    .spd{background:#1f2937;color:#9ca3af;border:1px solid #374151;border-radius:7px;padding:5px 10px;font-size:.72rem;cursor:pointer;}
 
-    /* THE BIG ACTION AREA */
-    .action{background:#141825;border:1px solid #2d3348;border-radius:10px;padding:14px 16px;flex-shrink:0;}
-    .action-hint{font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:#4b5563;margin-bottom:10px;}
+    .action{background:#141825;border:1px solid #2d3348;border-radius:10px;padding:12px 14px;flex-shrink:0;}
+    .action-hint{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:#4b5563;margin-bottom:8px;}
 
-    /* State: idle */
     .state-idle{display:flex;gap:8px;align-items:center;}
-    .mark-start-btn{padding:12px 24px;background:transparent;border:2px solid #8b5cf6;border-radius:8px;color:#8b5cf6;font-size:.85rem;font-weight:800;cursor:pointer;letter-spacing:1px;transition:all .15s;}
+    .mark-start-btn{padding:10px 22px;background:transparent;border:2px solid #8b5cf6;border-radius:8px;color:#8b5cf6;font-size:.85rem;font-weight:800;cursor:pointer;letter-spacing:1px;transition:all .15s;}
     .mark-start-btn:hover{background:rgba(139,92,246,.12);}
-    .idle-hint{font-size:.72rem;color:#4b5563;}
+    .idle-hint{font-size:.7rem;color:#4b5563;line-height:1.6;}
 
-    /* State: recording */
-    .state-recording{display:none;flex-direction:column;gap:10px;}
+    .state-recording{display:none;flex-direction:column;gap:8px;}
     .rec-indicator{display:flex;align-items:center;gap:8px;font-size:.78rem;color:#f59e0b;font-weight:700;}
-    .rec-dot{width:10px;height:10px;border-radius:50%;background:#f59e0b;animation:blink .8s infinite alternate;}
+    .rec-dot{width:9px;height:9px;border-radius:50%;background:#f59e0b;animation:blink .8s infinite alternate;}
     @keyframes blink{to{opacity:.3;}}
     #rec-start-time{font-family:monospace;color:#8b5cf6;}
-    .label-btns{display:flex;gap:8px;flex-wrap:wrap;}
-    .lbtn{padding:11px 22px;border-radius:8px;font-size:.85rem;font-weight:800;cursor:pointer;border:2px solid;transition:all .15s;}
-    .lbtn:active{transform:scale(.97);}
-    .lbtn-g{background:rgba(34,197,94,.12);border-color:#22c55e;color:#22c55e;}
-    .lbtn-b{background:rgba(239,68,68,.12);border-color:#ef4444;color:#ef4444;}
-    .lbtn-f{background:rgba(245,158,11,.12);border-color:#f59e0b;color:#f59e0b;}
-    .lbtn-g:hover{background:rgba(34,197,94,.22);}
-    .lbtn-b:hover{background:rgba(239,68,68,.22);}
-    .lbtn-f:hover{background:rgba(245,158,11,.22);}
-    .cancel-btn{padding:11px 16px;background:transparent;border:1px solid #374151;border-radius:8px;color:#4b5563;font-size:.78rem;cursor:pointer;}
-    .note-in{width:100%;background:#0f141e;border:1px solid #2d3348;color:#e5e7eb;padding:8px 12px;border-radius:7px;font-size:.75rem;outline:none;}
+
+    .note-in{width:100%;background:#0f141e;border:1px solid #2d3348;color:#e5e7eb;padding:7px 11px;border-radius:7px;font-size:.75rem;outline:none;}
     .note-in:focus{border-color:#8b5cf6;}
 
-    /* Right side — sections list */
-    .right{width:320px;flex-shrink:0;background:#0d0a18;border-left:1px solid #2d3348;display:flex;flex-direction:column;}
-    .right-hdr{padding:14px 16px;border-bottom:1px solid #2d3348;display:flex;align-items:center;justify-content:space-between;}
+    /* Label button grid — 4 columns */
+    .label-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+    .lbtn{padding:9px 6px;border-radius:8px;font-size:.72rem;font-weight:800;cursor:pointer;border:2px solid;transition:all .15s;text-align:center;line-height:1.3;}
+    .lbtn:active{transform:scale(.97);}
+    .lbtn kbd{font-size:.6rem;opacity:.55;display:block;margin-top:2px;font-family:monospace;}
+    .cancel-btn{padding:9px;background:transparent;border:1px solid #374151;border-radius:8px;color:#4b5563;font-size:.72rem;cursor:pointer;}
+
+    /* Per-class colours */
+    .c0{background:rgba(107,114,128,.10);border-color:#6b7280;color:#9ca3af;}
+    .c1{background:rgba(59,130,246,.10);border-color:#3b82f6;color:#60a5fa;}
+    .c2{background:rgba(139,92,246,.10);border-color:#8b5cf6;color:#a78bfa;}
+    .c3{background:rgba(34,197,94,.10);border-color:#22c55e;color:#4ade80;}
+    .c4{background:rgba(239,68,68,.10);border-color:#ef4444;color:#f87171;}
+    .c5{background:rgba(245,158,11,.10);border-color:#f59e0b;color:#fbbf24;}
+    .c6{background:rgba(20,184,166,.10);border-color:#14b8a6;color:#2dd4bf;}
+    .c7{background:rgba(234,179,8,.10);border-color:#eab308;color:#facc15;}
+
+    /* Right panel */
+    .right{width:310px;flex-shrink:0;background:#0d0a18;border-left:1px solid #2d3348;display:flex;flex-direction:column;}
+    .right-hdr{padding:12px 14px;border-bottom:1px solid #2d3348;display:flex;align-items:center;justify-content:space-between;}
     .right-title{font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;}
     .badge{font-size:.68rem;font-weight:700;color:#8b5cf6;background:rgba(139,92,246,.15);padding:2px 10px;border-radius:20px;}
+    .sections{flex:1;overflow-y:auto;padding:8px;}
+    .empty{text-align:center;padding:32px 14px;color:#374151;font-size:.72rem;line-height:1.9;}
+    .empty kbd{background:#1f2937;color:#9ca3af;padding:1px 6px;border-radius:3px;font-family:monospace;}
 
-    .sections{flex:1;overflow-y:auto;padding:10px;}
-    .empty{text-align:center;padding:40px 16px;color:#374151;font-size:.75rem;line-height:1.8;}
-    .empty kbd{background:#1f2937;color:#9ca3af;padding:2px 7px;border-radius:4px;font-family:monospace;}
-
-    .sec-item{background:#141825;border:1px solid #2d3348;border-radius:8px;padding:11px 12px;margin-bottom:7px;cursor:pointer;transition:border-color .15s;}
+    .sec-item{background:#141825;border:1px solid #2d3348;border-radius:7px;padding:9px 11px;margin-bottom:6px;transition:border-color .15s;}
     .sec-item:hover{border-color:#4b5563;}
-    .sec-item.good{border-left:3px solid #22c55e;}
-    .sec-item.bad{border-left:3px solid #ef4444;}
-    .sec-item.false_movement{border-left:3px solid #f59e0b;}
-    .sec-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
-    .sec-times{font-family:monospace;font-size:.75rem;color:#8b5cf6;cursor:pointer;}
+    .sec-top{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
+    .sec-times{font-family:monospace;font-size:.72rem;color:#8b5cf6;cursor:pointer;flex:1;}
     .sec-times:hover{text-decoration:underline;}
-    .sec-pill{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;}
-    .sec-pill.good{background:rgba(34,197,94,.15);color:#22c55e;}
-    .sec-pill.bad{background:rgba(239,68,68,.15);color:#ef4444;}
-    .sec-pill.false_movement{background:rgba(245,158,11,.15);color:#f59e0b;}
-    .sec-meta{font-size:.68rem;color:#6b7280;}
-    .sec-note{font-size:.68rem;color:#4b5563;font-style:italic;margin-top:2px;}
-    .sec-del{font-size:.68rem;color:#374151;cursor:pointer;padding:1px 6px;border-radius:3px;}
+    .sec-pill{font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:8px;white-space:nowrap;}
+    .sec-del{font-size:.65rem;color:#374151;cursor:pointer;padding:1px 5px;border-radius:3px;flex-shrink:0;}
     .sec-del:hover{color:#ef4444;}
+    .sec-meta{font-size:.65rem;color:#6b7280;}
+    .sec-note{font-size:.65rem;color:#4b5563;font-style:italic;margin-top:1px;}
 
-    /* Export footer */
-    .footer{padding:12px 16px;border-top:1px solid #2d3348;}
-    .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;}
-    .stat{background:#141825;border:1px solid #2d3348;border-radius:6px;padding:8px;text-align:center;}
-    .stat-n{font-size:1.1rem;font-weight:900;}
-    .stat-n.g{color:#22c55e;}.stat-n.b{color:#ef4444;}.stat-n.f{color:#f59e0b;}
-    .stat-l{font-size:.58rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px;}
-    .exp-btn{width:100%;padding:11px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);border:none;border-radius:8px;color:#fff;font-size:.8rem;font-weight:800;cursor:pointer;margin-bottom:6px;}
+    /* Stats grid — 4 cols top, 4 cols bottom */
+    .footer{padding:10px 14px;border-top:1px solid #2d3348;}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:8px;}
+    .stat{background:#141825;border:1px solid #2d3348;border-radius:5px;padding:5px 3px;text-align:center;}
+    .stat-n{font-size:.95rem;font-weight:900;}
+    .stat-l{font-size:.5rem;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+    .exp-btn{width:100%;padding:10px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);border:none;border-radius:8px;color:#fff;font-size:.78rem;font-weight:800;cursor:pointer;margin-bottom:5px;}
     .exp-btn:disabled{background:#1f2937;color:#4b5563;cursor:not-allowed;}
-    .clr-btn{width:100%;padding:7px;background:transparent;border:1px solid #374151;border-radius:7px;color:#4b5563;font-size:.72rem;cursor:pointer;}
+    .clr-btn{width:100%;padding:6px;background:transparent;border:1px solid #374151;border-radius:6px;color:#4b5563;font-size:.68rem;cursor:pointer;}
 
-    #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#141825;border:1px solid #374151;color:#e5e7eb;padding:9px 22px;border-radius:20px;font-size:.78rem;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;}
+    #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#141825;border:1px solid #374151;color:#e5e7eb;padding:8px 20px;border-radius:20px;font-size:.76rem;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;}
   </style>
 </head>
 <body>
 
 <div class="hdr">
   <div class="hdr-logo">XLFITNESS</div>
-  <div class="hdr-title">Training Data Labeler</div>
-  <div class="hdr-tip">S = Start &nbsp;·&nbsp; G = Good &nbsp;·&nbsp; B = Bad &nbsp;·&nbsp; F = False &nbsp;·&nbsp; E = Seated &nbsp;·&nbsp; N = Empty &nbsp;·&nbsp; Space = Play/Pause</div>
+  <div class="hdr-title">Training Data Labeler v2</div>
+  <div class="hdr-tip">S = Mark Start &nbsp;·&nbsp; 1–8 = Label &nbsp;·&nbsp; Esc = Cancel &nbsp;·&nbsp; Space = Play/Pause</div>
 </div>
 
 <div class="body">
 
-  <!-- LEFT: Video -->
   <div class="left">
-
     <div id="drop-zone" onclick="document.getElementById('file-in').click()">
       <h3>📁 Click to load a video</h3>
-      <p>MP4, MOV — any gym footage. Drag and drop also works.</p>
+      <p>MP4, MOV — drop your Pi recording here. Drag and drop works too.</p>
       <input type="file" id="file-in" accept="video/*"/>
     </div>
 
@@ -159,34 +144,36 @@
         </select>
       </div>
 
-      <!-- Action area -->
       <div class="action">
 
-        <!-- IDLE STATE -->
+        <!-- IDLE -->
         <div id="state-idle">
-          <div class="action-hint">Step 1 — find a section of reps, then:</div>
+          <div class="action-hint">Step 1 — scrub to a moment, then mark start:</div>
           <div class="state-idle">
             <button class="mark-start-btn" onclick="markStart()">⬥ Mark Start &nbsp;<kbd style="font-size:.65rem;opacity:.6">S</kbd></button>
-            <span class="idle-hint">Press S (or click) when the set begins.<br/>Then play through, and label when it ends.</span>
+            <span class="idle-hint">Press <b>S</b> at the start of any moment.<br/>Play through it, then press <b>1–8</b> to label.</span>
           </div>
         </div>
 
-        <!-- RECORDING STATE -->
+        <!-- RECORDING -->
         <div id="state-rec" class="state-recording">
-          <div class="action-hint">Step 2 — play through the reps, then label the section:</div>
+          <div class="action-hint">Step 2 — play through the action, then press a number to label it:</div>
           <div class="rec-indicator">
             <div class="rec-dot"></div>
             Recording from <span id="rec-start-time">—</span>
-            <span id="rec-duration" style="margin-left:auto;color:#6b7280;font-size:.7rem;font-family:monospace;"></span>
+            <span id="rec-duration" style="margin-left:auto;color:#6b7280;font-size:.68rem;font-family:monospace;"></span>
           </div>
-          <input class="note-in" id="note-in" placeholder="Optional note — e.g. 'full ROM', 'leaning back', 'swinging'…"/>
+          <input class="note-in" id="note-in" placeholder="Optional note — e.g. 'leaning back', 'only pulled half way', 'left arm only'…"/>
           <div class="label-btns">
-            <button class="lbtn lbtn-g" onclick="endSection('good_rep')">✅ Good Rep &nbsp;<kbd style="font-size:.65rem;opacity:.7">G</kbd></button>
-            <button class="lbtn lbtn-b" onclick="endSection('bad_rep')">⚠ Bad Form &nbsp;<kbd style="font-size:.65rem;opacity:.7">B</kbd></button>
-            <button class="lbtn lbtn-f" onclick="endSection('false_movement')">⚡ False Move &nbsp;<kbd style="font-size:.65rem;opacity:.7">F</kbd></button>
-            <button class="lbtn" onclick="endSection('user_seated_engaged')" style="background:rgba(99,102,241,.12);border-color:#6366f1;color:#6366f1;">🪑 Seated &nbsp;<kbd style="font-size:.65rem;opacity:.7">E</kbd></button>
-            <button class="lbtn" onclick="endSection('no_user_present')" style="background:rgba(107,114,128,.12);border-color:#6b7280;color:#6b7280;">⬜ Empty &nbsp;<kbd style="font-size:.65rem;opacity:.7">N</kbd></button>
-            <button class="cancel-btn" onclick="cancelSection()">✕ Cancel</button>
+            <button class="lbtn c0" onclick="endSection(0)">⬜ No Person<kbd>1</kbd></button>
+            <button class="lbtn c1" onclick="endSection(1)">👤 User Present<kbd>2</kbd></button>
+            <button class="lbtn c2" onclick="endSection(2)">🪑 On Machine<kbd>3</kbd></button>
+            <button class="lbtn c3" onclick="endSection(3)">✅ Good Rep<kbd>4</kbd></button>
+            <button class="lbtn c4" onclick="endSection(4)">❌ Bad Rep<kbd>5</kbd></button>
+            <button class="lbtn c5" onclick="endSection(5)">⚡ False Rep<kbd>6</kbd></button>
+            <button class="lbtn c6" onclick="endSection(6)">💤 Resting<kbd>7</kbd></button>
+            <button class="lbtn c7" onclick="endSection(7)">½ Half Rep<kbd>8</kbd></button>
+            <button class="cancel-btn" onclick="cancelSection()" style="grid-column:span 4">✕ Cancel (Esc)</button>
           </div>
         </div>
 
@@ -194,7 +181,7 @@
     </div>
   </div>
 
-  <!-- RIGHT: Sections list -->
+  <!-- RIGHT: list -->
   <div class="right">
     <div class="right-hdr">
       <div class="right-title">Labelled Sections</div>
@@ -204,46 +191,54 @@
     <div class="sections" id="sec-list">
       <div class="empty">
         No sections yet.<br/><br/>
-        <kbd>S</kbd> to mark start<br/>
-        <kbd>G</kbd> Good · <kbd>B</kbd> Bad · <kbd>F</kbd> False<br/><br/>
-        Each section can contain multiple reps.<br/>
-        Donkey auto-extracts them all.
+        <kbd>S</kbd> mark start &nbsp; then <kbd>1</kbd>–<kbd>8</kbd> to label<br/><br/>
+        <b style="color:#6b7280;font-size:.65rem">
+          1 No Person &nbsp; 2 User Present<br/>
+          3 On Machine &nbsp; 4 Good Rep<br/>
+          5 Bad Rep &nbsp; 6 False Rep<br/>
+          7 Resting &nbsp; 8 Half Rep
+        </b>
       </div>
     </div>
 
     <div class="footer">
-      <div class="stats">
-        <div class="stat"><div class="stat-n g" id="sn-g">0</div><div class="stat-l">Good</div></div>
-        <div class="stat"><div class="stat-n b" id="sn-b">0</div><div class="stat-l">Bad</div></div>
-        <div class="stat"><div class="stat-n f" id="sn-f">0</div><div class="stat-l">False</div></div>
-      </div>
-      <button class="exp-btn" id="exp-btn" onclick="exportJSON()" disabled>⬇ Export JSON for Donkey</button>
+      <div class="stats" id="stats-grid"></div>
+      <button class="exp-btn" id="exp-btn" onclick="exportJSON()" disabled>⬇ Export JSON</button>
       <button class="clr-btn" onclick="clearAll()">Clear all sections</button>
     </div>
   </div>
 
 </div>
-
 <div id="toast"></div>
 
 <script>
-const vid = document.getElementById('vid');
-const scrubber = document.getElementById('scrubber');
-const playBtn = document.getElementById('play-btn');
+// ── Class definitions ──────────────────────────────────────────────────────────
+const CLASSES = [
+  { id:0, key:'1', label:'no_person',     display:'No Person',    color:'#9ca3af' },
+  { id:1, key:'2', label:'user_present',  display:'User Present', color:'#60a5fa' },
+  { id:2, key:'3', label:'on_machine',    display:'On Machine',   color:'#a78bfa' },
+  { id:3, key:'4', label:'good_rep',      display:'Good Rep',     color:'#4ade80' },
+  { id:4, key:'5', label:'bad_rep',       display:'Bad Rep',      color:'#f87171' },
+  { id:5, key:'6', label:'false_rep',     display:'False Rep',    color:'#fbbf24' },
+  { id:6, key:'7', label:'resting',       display:'Resting',      color:'#2dd4bf' },
+  { id:7, key:'8', label:'half_rep',      display:'Half Rep',     color:'#facc15' },
+];
 
-let sections = [];
-let recStart = null;
+const vid      = document.getElementById('vid');
+const scrubber = document.getElementById('scrubber');
+const playBtn  = document.getElementById('play-btn');
+
+let sections  = [];
+let recStart  = null;
 let videoName = 'video';
 
-// ── File load ─────────────────────────────────────────────────────────────────
+// ── File load ──────────────────────────────────────────────────────────────────
 document.getElementById('file-in').addEventListener('change', e => {
   const f = e.target.files[0]; if(!f) return;
   videoName = f.name;
   vid.src = URL.createObjectURL(f);
   showVideo();
 });
-
-// Drag and drop
 const dz = document.getElementById('drop-zone');
 dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
 dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
@@ -254,21 +249,19 @@ dz.addEventListener('drop', e => {
   vid.src = URL.createObjectURL(f);
   showVideo();
 });
-
 function showVideo(){
   document.getElementById('drop-zone').style.display = 'none';
   const w = document.getElementById('vid-wrap');
-  w.style.display = 'flex'; w.style.flexDirection = 'column'; w.style.gap = '10px';
+  w.style.display = 'flex';
 }
 
-// ── Playback ──────────────────────────────────────────────────────────────────
+// ── Playback ───────────────────────────────────────────────────────────────────
 vid.addEventListener('loadedmetadata', () => { scrubber.max = vid.duration; });
 vid.addEventListener('timeupdate', () => {
   scrubber.value = vid.currentTime;
   document.getElementById('time').textContent = `${fmt(vid.currentTime)} / ${fmt(vid.duration||0)}`;
-  if(recStart !== null){
+  if(recStart !== null)
     document.getElementById('rec-duration').textContent = `+${(vid.currentTime - recStart).toFixed(1)}s`;
-  }
 });
 vid.addEventListener('ended', () => { playBtn.textContent = '▶ Play'; });
 scrubber.addEventListener('input', () => { vid.currentTime = parseFloat(scrubber.value); });
@@ -277,23 +270,20 @@ function togglePlay(){
   if(vid.paused){ vid.play(); playBtn.textContent = '⏸ Pause'; }
   else{ vid.pause(); playBtn.textContent = '▶ Play'; }
 }
-function step(s){ vid.currentTime = Math.max(0, Math.min(vid.duration||0, vid.currentTime + s)); }
+function step(s){ vid.currentTime = Math.max(0, Math.min(vid.duration||0, vid.currentTime+s)); }
 function fmt(s){ const m=Math.floor(s/60); return `${m}:${(s%60).toFixed(1).padStart(4,'0')}`; }
 
-// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+// ── Keyboard ───────────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
-  if(e.key === ' '){ e.preventDefault(); togglePlay(); }
-  if(e.key === 's' || e.key === 'S') markStart();
-  if(e.key === 'g' || e.key === 'G') endSection('good_rep');
-  if(e.key === 'b' || e.key === 'B') endSection('bad_rep');
-  if(e.key === 'f' || e.key === 'F') endSection('false_movement');
-  if(e.key === 'e' || e.key === 'E') endSection('user_seated_engaged');
-  if(e.key === 'n' || e.key === 'N') endSection('no_user_present');
-  if(e.key === 'Escape') cancelSection();
+  if(e.key === ' '){ e.preventDefault(); togglePlay(); return; }
+  if(e.key === 's' || e.key === 'S'){ markStart(); return; }
+  if(e.key === 'Escape'){ cancelSection(); return; }
+  const n = parseInt(e.key);
+  if(n >= 1 && n <= 8) endSection(n - 1);
 });
 
-// ── Section recording ─────────────────────────────────────────────────────────
+// ── Section recording ──────────────────────────────────────────────────────────
 function markStart(){
   if(!vid.src || vid.readyState < 1){ toast('Load a video first'); return; }
   recStart = vid.currentTime;
@@ -302,66 +292,72 @@ function markStart(){
   const r = document.getElementById('state-rec');
   r.style.display = 'flex';
   document.getElementById('rec-duration').textContent = '';
-  toast(`Start marked at ${fmt(recStart)} — now play through the reps`);
+  toast(`Start marked at ${fmt(recStart)} — play through, then press 1–8`);
 }
 
-function endSection(label){
+function endSection(classId){
   if(recStart === null){ toast('Press S first to mark the start'); return; }
   vid.pause(); playBtn.textContent = '▶ Play';
   const end = vid.currentTime;
-  if(end <= recStart){ toast('Play through some reps first'); return; }
+  if(end <= recStart){ toast('Play through the action first'); return; }
+  const cls  = CLASSES[classId];
   const note = document.getElementById('note-in').value.trim();
   sections.push({
-    id: Date.now(),
-    label,
-    start: parseFloat(recStart.toFixed(2)),
-    end: parseFloat(end.toFixed(2)),
-    start_fmt: fmt(recStart),
-    end_fmt: fmt(end),
+    id:         Date.now(),
+    class_id:   classId,
+    label:      cls.label,
+    display:    cls.display,
+    color:      cls.color,
+    start_s:    parseFloat(recStart.toFixed(2)),
+    end_s:      parseFloat(end.toFixed(2)),
+    start_fmt:  fmt(recStart),
+    end_fmt:    fmt(end),
     duration_s: parseFloat((end - recStart).toFixed(1)),
-    note
+    note,
   });
-  sections.sort((a,b) => a.start - b.start);
+  sections.sort((a,b) => a.start_s - b.start_s);
   document.getElementById('note-in').value = '';
   resetRecState();
   render();
-  const lbl = label === 'good' ? '✅ Good section saved' : label === 'bad' ? '⚠ Bad section saved' : '⚡ False section saved';
-  toast(`${lbl} (${(end - recStart).toFixed(1)}s)`);
+  toast(`${cls.display} saved (${(end - recStart).toFixed(1)}s)`);
 }
 
-function cancelSection(){
-  recStart = null;
-  resetRecState();
-}
-
+function cancelSection(){ recStart = null; resetRecState(); }
 function resetRecState(){
   recStart = null;
   document.getElementById('state-idle').style.display = 'block';
   document.getElementById('state-rec').style.display = 'none';
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
+// ── Render ─────────────────────────────────────────────────────────────────────
 function render(){
   const list = document.getElementById('sec-list');
   document.getElementById('sec-count').textContent = sections.length;
-  document.getElementById('sn-g').textContent = sections.filter(s=>s.label==='good').length;
-  document.getElementById('sn-b').textContent = sections.filter(s=>s.label==='bad').length;
-  document.getElementById('sn-f').textContent = sections.filter(s=>s.label==='false_movement').length;
   document.getElementById('exp-btn').disabled = sections.length === 0;
 
+  // Stats grid
+  const sg = document.getElementById('stats-grid');
+  sg.innerHTML = CLASSES.map(c => {
+    const n = sections.filter(s => s.class_id === c.id).length;
+    return `<div class="stat">
+      <div class="stat-n" style="color:${c.color}">${n}</div>
+      <div class="stat-l">${c.display.split(' ')[0]}</div>
+    </div>`;
+  }).join('');
+
   if(!sections.length){
-    list.innerHTML = `<div class="empty">No sections yet.<br/><br/><kbd>S</kbd> to mark start<br/><kbd>G</kbd> Good · <kbd>B</kbd> Bad · <kbd>F</kbd> False<br/><br/>Each section can contain multiple reps.<br/>Donkey auto-extracts them all.</div>`;
+    list.innerHTML = `<div class="empty">No sections yet.<br/><br/><kbd>S</kbd> mark start &nbsp; then <kbd>1</kbd>–<kbd>8</kbd> to label<br/><br/><b style="color:#6b7280;font-size:.65rem">1 No Person &nbsp; 2 User Present<br/>3 On Machine &nbsp; 4 Good Rep<br/>5 Bad Rep &nbsp; 6 False Rep<br/>7 Resting &nbsp; 8 Half Rep</b></div>`;
     return;
   }
 
   list.innerHTML = sections.map((s,i) => `
-    <div class="sec-item ${s.label}">
+    <div class="sec-item" style="border-left:3px solid ${s.color}">
       <div class="sec-top">
-        <span class="sec-times" onclick="vid.currentTime=${s.start}">${s.start_fmt} → ${s.end_fmt}</span>
-        <span class="sec-pill ${s.label}">${s.label==='good'?'✅ Good':s.label==='bad'?'⚠ Bad':'⚡ False'}</span>
+        <span class="sec-times" onclick="vid.currentTime=${s.start_s}">${s.start_fmt} → ${s.end_fmt}</span>
+        <span class="sec-pill" style="background:${s.color}22;color:${s.color}">${s.display}</span>
         <span class="sec-del" onclick="delSection(${i})">✕</span>
       </div>
-      <div class="sec-meta">${s.duration_s}s section</div>
+      <div class="sec-meta">${s.duration_s}s &nbsp;·&nbsp; class ${s.class_id}</div>
       ${s.note ? `<div class="sec-note">"${s.note}"</div>` : ''}
     </div>
   `).join('');
@@ -374,36 +370,45 @@ function clearAll(){
   sections = []; render();
 }
 
-// ── Export ────────────────────────────────────────────────────────────────────
+// ── Export ─────────────────────────────────────────────────────────────────────
 function exportJSON(){
+  const counts = {};
+  CLASSES.forEach(c => { counts[c.label] = sections.filter(s=>s.class_id===c.id).length; });
   const out = {
-    video: videoName,
+    video:    videoName,
     exported: new Date().toISOString(),
-    instructions: "Send this JSON + the video file/link to Donkey. Donkey will run MoveNet across each section window and auto-extract individual rep sequences for LSTM training.",
-    summary: {
-      total_sections: sections.length,
-      good: sections.filter(s=>s.label==='good').length,
-      bad: sections.filter(s=>s.label==='bad').length,
-      false_movement: sections.filter(s=>s.label==='false_movement').length,
-      total_duration_s: parseFloat(sections.reduce((t,s)=>t+s.duration_s,0).toFixed(1))
+    classes:  CLASSES.map(c => ({ id:c.id, label:c.label, display:c.display })),
+    summary:  {
+      total_sections:   sections.length,
+      total_duration_s: parseFloat(sections.reduce((t,s)=>t+s.duration_s,0).toFixed(1)),
+      by_class:         counts,
     },
-    sections
+    annotations: sections.map(s => ({
+      start_s:    s.start_s,
+      end_s:      s.end_s,
+      duration_s: s.duration_s,
+      class_id:   s.class_id,
+      label:      s.label,
+      note:       s.note || '',
+    })),
   };
   const blob = new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `labels_${videoName.replace(/\.[^.]+$/,'')}_${Date.now()}.json`;
+  a.download = `labels_${videoName.replace(/\.[^.]+$/,'')}.json`;
   a.click();
-  toast('Exported ✅ — send the JSON + video link to Donkey');
+  toast('Exported ✅');
 }
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
+// ── Toast ──────────────────────────────────────────────────────────────────────
 function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg; t.style.opacity = '1';
   clearTimeout(t._t);
   t._t = setTimeout(()=>t.style.opacity='0', 2500);
 }
+
+render();
 </script>
 </body>
 </html>

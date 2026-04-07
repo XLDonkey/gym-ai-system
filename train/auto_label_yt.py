@@ -77,15 +77,16 @@ WINDOW_STRIDE  = 6                       # step between windows (3 s overlap)
 JPEG_QUALITY   = 75                      # lower = smaller payload, still readable
 MAX_FRAME_DIM  = 640                     # resize frames to fit within this box
 
-# Activity classes (must match train/overseer_train.py)
+# Activity classes — must match pose/label.html and train/overseer_train.py
 CLASS_LABELS = {
-    1: "No User",
-    2: "User Passing",
-    3: "User Present",
-    4: "Good Rep",
-    5: "Poor Rep",
-    6: "False Rep / Other",
-    7: "Resting",
+    0: "No Person",
+    1: "User Present",    # near machine, not on it
+    2: "On Machine",      # seated/engaged, not yet repping
+    3: "Good Rep",        # full ROM, controlled
+    4: "Bad Rep",         # uncontrolled, bouncing, momentum
+    5: "False Rep",       # stretching, adjusting handle, not a rep
+    6: "Resting",         # between sets, no movement
+    7: "Half Rep",        # partial ROM or single-arm only
 }
 
 # ── System prompt Claude uses to understand the task ──────────────────────────
@@ -95,36 +96,39 @@ strength training. Your job is to watch short clips of exercise footage and
 label each moment with the correct activity class.
 
 Activity classes:
-  1 = No User           — nobody at the machine
-  2 = User Passing      — person walking past, not using machine
-  3 = User Present      — person at machine but not actively exercising
-                          (adjusting seat, reading the display, talking)
-  4 = Good Rep          — one complete rep: full range-of-motion, controlled
-                          tempo, clean form (not rushed, not bounced)
-  5 = Poor Rep          — rep with partial ROM, bouncing the weight,
-                          using momentum, or otherwise bad form
-  6 = False Rep / Other — fidgeting, adjusting, half-started movement
-  7 = Resting           — person sitting idle at the machine between sets
+  0 = No Person    — nobody visible at or near the machine
+  1 = User Present — person is near the machine but NOT seated on it
+                     (standing next to it, watching, walking past)
+  2 = On Machine   — person is seated/positioned on the machine,
+                     gripping handles, but not yet moving the weight
+  3 = Good Rep     — one complete rep: full range-of-motion, controlled
+                     tempo, weight moving throughout, clean form
+  4 = Bad Rep      — rep with uncontrolled movement: bouncing the weight,
+                     using momentum, jerking, or dangerous form
+  5 = False Rep    — looks like a rep but isn't: stretching, adjusting the
+                     handle/seat/pin, reaching for a towel, posing
+  6 = Resting      — person seated at machine between sets, not moving
+  7 = Half Rep     — partial range of motion (didn't complete the full
+                     movement) OR only one arm/leg used on a bilateral machine
 
 You will receive a numbered sequence of video frames. For each frame respond
 with a JSON array of objects, one per frame:
 
 [
-  {"frame": 1, "time_s": 0.0, "class": 3, "label": "User Present",
-   "note": "user adjusting seat"},
-  {"frame": 2, "time_s": 0.5, "class": 4, "label": "Good Rep",
-   "note": "pulling bar down, elbows flared"},
+  {"frame": 1, "time_s": 0.0, "class": 2, "label": "On Machine",
+   "note": "seated, gripping bar overhead"},
+  {"frame": 2, "time_s": 0.5, "class": 3, "label": "Good Rep",
+   "note": "pulling bar to chest, controlled"},
   ...
 ]
 
 Rules:
 - Output ONLY the JSON array — no preamble, no markdown fences.
-- Use the exact class numbers above.
+- Use the exact class numbers above (0–7).
 - "time_s" is the wall-clock timestamp I give you for each frame.
 - "note" is a brief description (≤10 words) of what you see.
-- If you cannot see a person clearly, use class 1 or 2.
-- When a single rep spans multiple frames, label each frame with class 4 or 5.
-  The first frame where the concentric phase starts = start of the rep.
+- When a single rep spans multiple frames, label each frame with class 3, 4, or 7.
+- Class 1 vs 2: key difference is whether they are SEATED ON the machine.
 """
 
 
