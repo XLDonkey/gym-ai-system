@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**", "feature/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Lint
+        run: ruff check pi/ face/ members/ train/ --ignore E501,E402
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install numpy pytest
+          # Install lightweight deps only — skip insightface/torch for CI
+          pip install opencv-python-headless || true
+
+      - name: Test DB client (no network)
+        run: |
+          python3 -c "
+          import sys; sys.path.insert(0, '.')
+          # Verify imports work
+          from members.db_client import cosine_similarity, find_best_match
+          # Basic math check
+          a = [1.0, 0.0, 0.0]
+          b = [1.0, 0.0, 0.0]
+          assert abs(cosine_similarity(a, b) - 1.0) < 1e-6
+          a = [1.0, 0.0]
+          b = [0.0, 1.0]
+          assert abs(cosine_similarity(a, b)) < 1e-6
+          print('cosine_similarity: OK')
+          "
+
+      - name: Test weight tracker import
+        run: |
+          python3 -c "
+          import sys; sys.path.insert(0, 'pi')
+          from weight_tracker import WeightStackTracker
+          t = WeightStackTracker(enabled=False)
+          assert t.weight_moved_during_rep() == True
+          print('weight_tracker: OK')
+          "
+
+      - name: Test engagement detector import
+        run: |
+          python3 -c "
+          import sys; sys.path.insert(0, 'pi')
+          from engagement_detector import EngagementDetector, _bbox_overlap_ratio
+          assert _bbox_overlap_ratio((0,0,1,1),(0,0,1,1)) == 1.0
+          assert _bbox_overlap_ratio((0,0,0.5,0.5),(0.6,0.6,1,1)) == 0.0
+          d = EngagementDetector(enabled=False)
+          print('engagement_detector: OK')
+          "
+
+      - name: Validate configs JSON
+        run: |
+          python3 -c "
+          import json, glob
+          for f in glob.glob('configs/*.json') + glob.glob('pose/machine_configs/*.json'):
+            with open(f) as fh:
+              json.load(fh)
+            print(f'valid JSON: {f}')
+          "

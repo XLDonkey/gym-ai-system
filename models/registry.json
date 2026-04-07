@@ -1,0 +1,24 @@
+{
+  "_comment": "Model version registry. Weights are NOT stored in git — download from Google Drive.",
+  "models": [
+    {
+      "version": "v0.1-rule-based",
+      "type": "rule_based",
+      "description": "Angle threshold state machine — no ML, baseline",
+      "deployed": true,
+      "accuracy": null,
+      "training_samples": 0,
+      "drive_folder": null,
+      "files": []
+    }
+  ],
+  "active_version": "v0.1-rule-based",
+  "next_training_target": {
+    "min_annotations": 300,
+    "min_per_class": 30,
+    "classes": [
+      "no_person", "user_present", "on_machine",
+      "good_rep", "bad_rep", "false_rep", "resting", "half_rep"
+    ]
+  }
+}

@@ -1,31 +1,97 @@
-# Training data — never commit large files or sensitive data
+# ── Python ─────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+MANIFEST
+
+# ── Virtual environments ────────────────────────────────────────────────────────
+venv/
+env/
+ENV/
+.venv/
+.env/
+xlf-env/
+
+# ── Jupyter ─────────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── ML model weights (store in Google Drive / release assets, not git) ─────────
+models/weights/*.pt
+models/weights/*.pth
+models/weights/*.onnx
+models/weights/*.hef
+models/weights/*.tflite
+models/weights/*.h5
+models/weights/*.pb
+models/weights/*.keras
+*.pt
+*.pth
+*.onnx
+*.hef
+*.tflite
+*.h5
+*.pb
+# Exception: keep browser demo model
+!pose/model.json
+# Exception: keep versioned model metadata JSON
+!models/registry.json
+
+# ── Training data (too large for git — use Google Drive) ───────────────────────
+data/raw/
+data/processed/
+data/videos/
 *.mp4
 *.mov
 *.MOV
 *.avi
 *.mkv
-
-# Raw training sequences — store in Desktop/Training Data instead
-training_angles.json
+*.webm
 *_sequences.json
 *_angles.json
+training_angles.json
+# Annotation exports are intentionally NOT ignored — commit them
 
-# Model files — store in Desktop/Training Data instead
-model_v*.json
+# ── Logs & experiment tracking ──────────────────────────────────────────────────
+logs/
+runs/
+wandb/
+mlruns/
+*.log
+lightning_logs/
+checkpoints/
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# Node / build artifacts
-node_modules/
-dist/
+# ── Secrets & credentials ────────────────────────────────────────────────────────
 .env
+.env.*
 *.env
-
-# Credentials — never ever
+secrets.json
+credentials.json
 *.pem
 *.key
 *.token
-secrets.json
-credentials.json
+rclone.conf
+pi/rclone.conf
+
+# ── OS ──────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Node ────────────────────────────────────────────────────────────────────────
+node_modules/
+.next/
+
+# ── IDE ──────────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+
+# ── Temp ────────────────────────────────────────────────────────────────────────
+*.tmp
+*.bak
+*.swp
+*~
