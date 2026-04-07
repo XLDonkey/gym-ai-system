@@ -23,7 +23,16 @@
     #file-in{display:none;}
 
     #vid-wrap{display:none;flex-direction:column;gap:8px;flex:1;min-height:0;}
-    #vid{width:100%;border-radius:8px;background:#000;flex-shrink:0;max-height:calc(100vh - 320px);object-fit:contain;}
+
+    /* Video + canvas overlay */
+    .vid-container{position:relative;flex-shrink:0;background:#000;border-radius:8px;overflow:hidden;}
+    #vid{width:100%;display:block;max-height:calc(100vh - 320px);object-fit:contain;}
+    #bbox-canvas{position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;display:none;}
+    #bbox-canvas.drawing-mode{display:block;}
+
+    /* Engagement zone overlay shown on canvas */
+    .zone-badge{position:absolute;top:6px;left:6px;background:rgba(139,92,246,.85);color:#fff;font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:10px;pointer-events:none;display:none;}
+    .zone-badge.visible{display:block;}
 
     .scrub-row{display:flex;align-items:center;gap:10px;}
     #scrubber{flex:1;height:6px;accent-color:#8b5cf6;cursor:pointer;background:#1f2937;}
@@ -34,11 +43,12 @@
     .btn:active{opacity:.8;transform:scale(.97);}
     .btn-play{background:#8b5cf6;color:#fff;min-width:80px;}
     .btn-sm{background:#1f2937;color:#9ca3af;border:1px solid #374151;}
+    .btn-bbox{background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid #8b5cf6;font-size:.72rem;}
+    .btn-bbox.active{background:#8b5cf6;color:#fff;}
     .spd{background:#1f2937;color:#9ca3af;border:1px solid #374151;border-radius:7px;padding:5px 10px;font-size:.72rem;cursor:pointer;}
 
     .action{background:#141825;border:1px solid #2d3348;border-radius:10px;padding:12px 14px;flex-shrink:0;}
     .action-hint{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:#4b5563;margin-bottom:8px;}
-
     .state-idle{display:flex;gap:8px;align-items:center;}
     .mark-start-btn{padding:10px 22px;background:transparent;border:2px solid #8b5cf6;border-radius:8px;color:#8b5cf6;font-size:.85rem;font-weight:800;cursor:pointer;letter-spacing:1px;transition:all .15s;}
     .mark-start-btn:hover{background:rgba(139,92,246,.12);}
@@ -49,28 +59,31 @@
     .rec-dot{width:9px;height:9px;border-radius:50%;background:#f59e0b;animation:blink .8s infinite alternate;}
     @keyframes blink{to{opacity:.3;}}
     #rec-start-time{font-family:monospace;color:#8b5cf6;}
-
     .note-in{width:100%;background:#0f141e;border:1px solid #2d3348;color:#e5e7eb;padding:7px 11px;border-radius:7px;font-size:.75rem;outline:none;}
     .note-in:focus{border-color:#8b5cf6;}
 
-    /* Label button grid — 4 columns */
     .label-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
     .lbtn{padding:9px 6px;border-radius:8px;font-size:.72rem;font-weight:800;cursor:pointer;border:2px solid;transition:all .15s;text-align:center;line-height:1.3;}
     .lbtn:active{transform:scale(.97);}
     .lbtn kbd{font-size:.6rem;opacity:.55;display:block;margin-top:2px;font-family:monospace;}
     .cancel-btn{padding:9px;background:transparent;border:1px solid #374151;border-radius:8px;color:#4b5563;font-size:.72rem;cursor:pointer;}
 
-    /* Per-class colours */
     .c0{background:rgba(107,114,128,.10);border-color:#6b7280;color:#9ca3af;}
     .c1{background:rgba(59,130,246,.10);border-color:#3b82f6;color:#60a5fa;}
-    .c2{background:rgba(139,92,246,.10);border-color:#8b5cf6;color:#a78bfa;}
+    .c2{background:rgba(139,92,246,.18);border-color:#8b5cf6;color:#a78bfa;box-shadow:0 0 0 1px #8b5cf622;}
     .c3{background:rgba(34,197,94,.10);border-color:#22c55e;color:#4ade80;}
     .c4{background:rgba(239,68,68,.10);border-color:#ef4444;color:#f87171;}
     .c5{background:rgba(245,158,11,.10);border-color:#f59e0b;color:#fbbf24;}
     .c6{background:rgba(20,184,166,.10);border-color:#14b8a6;color:#2dd4bf;}
     .c7{background:rgba(234,179,8,.10);border-color:#eab308;color:#facc15;}
 
-    /* Right panel */
+    /* Engagement zone info box */
+    .zone-info{background:#0f0d1a;border:1px solid #8b5cf633;border-radius:8px;padding:9px 12px;font-size:.7rem;color:#9ca3af;display:none;}
+    .zone-info.visible{display:block;}
+    .zone-info strong{color:#a78bfa;}
+    .zone-copy{background:#1a1530;border:1px solid #8b5cf644;color:#8b5cf6;border-radius:5px;padding:3px 8px;font-size:.65rem;cursor:pointer;margin-top:5px;display:inline-block;}
+    .zone-copy:hover{background:#8b5cf6;color:#fff;}
+
     .right{width:310px;flex-shrink:0;background:#0d0a18;border-left:1px solid #2d3348;display:flex;flex-direction:column;}
     .right-hdr{padding:12px 14px;border-bottom:1px solid #2d3348;display:flex;align-items:center;justify-content:space-between;}
     .right-title{font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;}
@@ -89,8 +102,8 @@
     .sec-del:hover{color:#ef4444;}
     .sec-meta{font-size:.65rem;color:#6b7280;}
     .sec-note{font-size:.65rem;color:#4b5563;font-style:italic;margin-top:1px;}
+    .sec-bbox{font-size:.6rem;color:#8b5cf666;margin-top:1px;font-family:monospace;}
 
-    /* Stats grid — 4 cols top, 4 cols bottom */
     .footer{padding:10px 14px;border-top:1px solid #2d3348;}
     .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:8px;}
     .stat{background:#141825;border:1px solid #2d3348;border-radius:5px;padding:5px 3px;text-align:center;}
@@ -108,7 +121,7 @@
 <div class="hdr">
   <div class="hdr-logo">XLFITNESS</div>
   <div class="hdr-title">Training Data Labeler v2</div>
-  <div class="hdr-tip">S = Mark Start &nbsp;·&nbsp; 1–8 = Label &nbsp;·&nbsp; Esc = Cancel &nbsp;·&nbsp; Space = Play/Pause</div>
+  <div class="hdr-tip">B = Draw engagement box &nbsp;·&nbsp; S = Mark Start &nbsp;·&nbsp; 1–8 = Label &nbsp;·&nbsp; Space = Play/Pause</div>
 </div>
 
 <div class="body">
@@ -121,7 +134,13 @@
     </div>
 
     <div id="vid-wrap">
-      <video id="vid" preload="metadata"></video>
+
+      <!-- Video with canvas overlay for bbox drawing -->
+      <div class="vid-container">
+        <video id="vid" preload="metadata"></video>
+        <canvas id="bbox-canvas"></canvas>
+        <div class="zone-badge" id="zone-badge">📦 Engagement zone set</div>
+      </div>
 
       <div class="scrub-row">
         <input type="range" id="scrubber" min="0" step="0.033" value="0"/>
@@ -142,13 +161,25 @@
           <option value="2">2×</option>
           <option value="4">4×</option>
         </select>
+        <button class="btn btn-bbox" id="bbox-btn" onclick="toggleBboxMode()" title="Draw a box around the person when they sit on the machine (B)">
+          📦 Draw Engagement Box
+        </button>
+      </div>
+
+      <!-- Engagement zone info -->
+      <div class="zone-info" id="zone-info">
+        <strong>Engagement Zone Set</strong> — drawn from your bounding box.<br/>
+        This tells the Pi where to look for someone sitting on the machine.<br/>
+        <span id="zone-coords" style="font-family:monospace;color:#8b5cf6;font-size:.65rem;"></span><br/>
+        <span class="zone-copy" onclick="copyZoneConfig()">Copy config.py value</span>
+        <span class="zone-copy" style="margin-left:6px" onclick="clearZone()">Clear zone</span>
       </div>
 
       <div class="action">
 
         <!-- IDLE -->
         <div id="state-idle">
-          <div class="action-hint">Step 1 — scrub to a moment, then mark start:</div>
+          <div class="action-hint">Step 2 — mark a time range and label it:</div>
           <div class="state-idle">
             <button class="mark-start-btn" onclick="markStart()">⬥ Mark Start &nbsp;<kbd style="font-size:.65rem;opacity:.6">S</kbd></button>
             <span class="idle-hint">Press <b>S</b> at the start of any moment.<br/>Play through it, then press <b>1–8</b> to label.</span>
@@ -157,7 +188,7 @@
 
         <!-- RECORDING -->
         <div id="state-rec" class="state-recording">
-          <div class="action-hint">Step 2 — play through the action, then press a number to label it:</div>
+          <div class="action-hint">Step 3 — play through the action, then press a number to label it:</div>
           <div class="rec-indicator">
             <div class="rec-dot"></div>
             Recording from <span id="rec-start-time">—</span>
@@ -187,20 +218,12 @@
       <div class="right-title">Labelled Sections</div>
       <div class="badge" id="sec-count">0</div>
     </div>
-
     <div class="sections" id="sec-list">
       <div class="empty">
-        No sections yet.<br/><br/>
-        <kbd>S</kbd> mark start &nbsp; then <kbd>1</kbd>–<kbd>8</kbd> to label<br/><br/>
-        <b style="color:#6b7280;font-size:.65rem">
-          1 No Person &nbsp; 2 User Present<br/>
-          3 On Machine &nbsp; 4 Good Rep<br/>
-          5 Bad Rep &nbsp; 6 False Rep<br/>
-          7 Resting &nbsp; 8 Half Rep
-        </b>
+        <b style="color:#a78bfa;font-size:.75rem">Step 1</b> — Pause on a frame<br/>where the person is seated.<br/>Press <kbd>B</kbd> and draw a box.<br/><br/>
+        <b style="color:#8b5cf6;font-size:.75rem">Step 2</b> — Press <kbd>S</kbd> to mark<br/>start of a time range,<br/>then <kbd>1</kbd>–<kbd>8</kbd> to label it.
       </div>
     </div>
-
     <div class="footer">
       <div class="stats" id="stats-grid"></div>
       <button class="exp-btn" id="exp-btn" onclick="exportJSON()" disabled>⬇ Export JSON</button>
@@ -214,23 +237,33 @@
 <script>
 // ── Class definitions ──────────────────────────────────────────────────────────
 const CLASSES = [
-  { id:0, key:'1', label:'no_person',     display:'No Person',    color:'#9ca3af' },
-  { id:1, key:'2', label:'user_present',  display:'User Present', color:'#60a5fa' },
-  { id:2, key:'3', label:'on_machine',    display:'On Machine',   color:'#a78bfa' },
-  { id:3, key:'4', label:'good_rep',      display:'Good Rep',     color:'#4ade80' },
-  { id:4, key:'5', label:'bad_rep',       display:'Bad Rep',      color:'#f87171' },
-  { id:5, key:'6', label:'false_rep',     display:'False Rep',    color:'#fbbf24' },
-  { id:6, key:'7', label:'resting',       display:'Resting',      color:'#2dd4bf' },
-  { id:7, key:'8', label:'half_rep',      display:'Half Rep',     color:'#facc15' },
+  { id:0, key:'1', label:'no_person',    display:'No Person',    color:'#9ca3af' },
+  { id:1, key:'2', label:'user_present', display:'User Present', color:'#60a5fa' },
+  { id:2, key:'3', label:'on_machine',   display:'On Machine',   color:'#a78bfa' },
+  { id:3, key:'4', label:'good_rep',     display:'Good Rep',     color:'#4ade80' },
+  { id:4, key:'5', label:'bad_rep',      display:'Bad Rep',      color:'#f87171' },
+  { id:5, key:'6', label:'false_rep',    display:'False Rep',    color:'#fbbf24' },
+  { id:6, key:'7', label:'resting',      display:'Resting',      color:'#2dd4bf' },
+  { id:7, key:'8', label:'half_rep',     display:'Half Rep',     color:'#facc15' },
 ];
 
 const vid      = document.getElementById('vid');
 const scrubber = document.getElementById('scrubber');
 const playBtn  = document.getElementById('play-btn');
+const canvas   = document.getElementById('bbox-canvas');
+const ctx      = canvas.getContext('2d');
 
-let sections  = [];
-let recStart  = null;
-let videoName = 'video';
+let sections      = [];
+let recStart      = null;
+let videoName     = 'video';
+let engagementZone = null;   // {x1,y1,x2,y2} normalised 0–1
+let allBboxes     = [];      // all drawn bboxes for zone averaging
+
+// bbox drawing state
+let bboxMode  = false;
+let drawing   = false;
+let dragStart = null;
+let dragCurr  = null;
 
 // ── File load ──────────────────────────────────────────────────────────────────
 document.getElementById('file-in').addEventListener('change', e => {
@@ -256,41 +289,175 @@ function showVideo(){
 }
 
 // ── Playback ───────────────────────────────────────────────────────────────────
-vid.addEventListener('loadedmetadata', () => { scrubber.max = vid.duration; });
+vid.addEventListener('loadedmetadata', () => {
+  scrubber.max = vid.duration;
+  resizeCanvas();
+});
+window.addEventListener('resize', resizeCanvas);
 vid.addEventListener('timeupdate', () => {
   scrubber.value = vid.currentTime;
   document.getElementById('time').textContent = `${fmt(vid.currentTime)} / ${fmt(vid.duration||0)}`;
   if(recStart !== null)
     document.getElementById('rec-duration').textContent = `+${(vid.currentTime - recStart).toFixed(1)}s`;
+  redrawZone();
 });
 vid.addEventListener('ended', () => { playBtn.textContent = '▶ Play'; });
 scrubber.addEventListener('input', () => { vid.currentTime = parseFloat(scrubber.value); });
 
 function togglePlay(){
+  if(bboxMode) return;
   if(vid.paused){ vid.play(); playBtn.textContent = '⏸ Pause'; }
   else{ vid.pause(); playBtn.textContent = '▶ Play'; }
 }
 function step(s){ vid.currentTime = Math.max(0, Math.min(vid.duration||0, vid.currentTime+s)); }
 function fmt(s){ const m=Math.floor(s/60); return `${m}:${(s%60).toFixed(1).padStart(4,'0')}`; }
 
+function resizeCanvas(){
+  canvas.width  = vid.clientWidth  || vid.offsetWidth;
+  canvas.height = vid.clientHeight || vid.offsetHeight;
+  redrawZone();
+}
+
+// ── Bounding box drawing ───────────────────────────────────────────────────────
+function toggleBboxMode(){
+  bboxMode = !bboxMode;
+  canvas.classList.toggle('drawing-mode', bboxMode);
+  const btn = document.getElementById('bbox-btn');
+  btn.classList.toggle('active', bboxMode);
+  btn.textContent = bboxMode ? '✕ Cancel Box' : '📦 Draw Engagement Box';
+  if(bboxMode){
+    vid.pause();
+    playBtn.textContent = '▶ Play';
+    toast('Draw a box around the person sitting on the machine — click and drag');
+  }
+}
+
+canvas.addEventListener('mousedown', e => {
+  if(!bboxMode) return;
+  drawing   = true;
+  dragStart = canvasPos(e);
+  dragCurr  = dragStart;
+});
+canvas.addEventListener('mousemove', e => {
+  if(!drawing) return;
+  dragCurr = canvasPos(e);
+  redrawZone();
+  // Draw live rectangle
+  const {x1,y1,x2,y2} = normRect(dragStart, dragCurr);
+  const cw = canvas.width, ch = canvas.height;
+  ctx.strokeStyle = '#8b5cf6';
+  ctx.lineWidth   = 2;
+  ctx.setLineDash([5,3]);
+  ctx.strokeRect(x1*cw, y1*ch, (x2-x1)*cw, (y2-y1)*ch);
+});
+canvas.addEventListener('mouseup', e => {
+  if(!drawing) return;
+  drawing = false;
+  const norm = normRect(dragStart, canvasPos(e));
+  const w = norm.x2 - norm.x1;
+  const h = norm.y2 - norm.y1;
+  if(w < 0.02 || h < 0.02){ toast('Box too small — try again'); redrawZone(); return; }
+
+  allBboxes.push(norm);
+  // Update engagement zone as union of all drawn bboxes
+  engagementZone = unionBboxes(allBboxes);
+  bboxMode = false;
+  canvas.classList.remove('drawing-mode');
+  const btn = document.getElementById('bbox-btn');
+  btn.classList.remove('active');
+  btn.textContent = '📦 Draw Engagement Box';
+  dragStart = dragCurr = null;
+  updateZoneDisplay();
+  redrawZone();
+  toast(`Engagement zone updated — ${allBboxes.length} box(es) averaged`);
+});
+
+function canvasPos(e){
+  const r = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - r.left)  / canvas.width,
+    y: (e.clientY - r.top)   / canvas.height,
+  };
+}
+function normRect(a, b){
+  return {
+    x1: Math.min(a.x, b.x), y1: Math.min(a.y, b.y),
+    x2: Math.max(a.x, b.x), y2: Math.max(a.y, b.y),
+  };
+}
+function unionBboxes(boxes){
+  // Take the union (bounding box of all boxes) as the engagement zone
+  return {
+    x1: Math.min(...boxes.map(b=>b.x1)),
+    y1: Math.min(...boxes.map(b=>b.y1)),
+    x2: Math.max(...boxes.map(b=>b.x2)),
+    y2: Math.max(...boxes.map(b=>b.y2)),
+  };
+}
+
+function redrawZone(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if(!engagementZone) return;
+  const {x1,y1,x2,y2} = engagementZone;
+  const cw = canvas.width, ch = canvas.height;
+  ctx.setLineDash([]);
+  ctx.strokeStyle = '#8b5cf6';
+  ctx.lineWidth   = 2;
+  ctx.strokeRect(x1*cw+1, y1*ch+1, (x2-x1)*cw-2, (y2-y1)*ch-2);
+  ctx.fillStyle = 'rgba(139,92,246,0.06)';
+  ctx.fillRect(x1*cw+1, y1*ch+1, (x2-x1)*cw-2, (y2-y1)*ch-2);
+  // Draw individual boxes in lighter colour
+  allBboxes.forEach(b => {
+    ctx.strokeStyle = 'rgba(139,92,246,0.3)';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([3,3]);
+    ctx.strokeRect(b.x1*cw, b.y1*ch, (b.x2-b.x1)*cw, (b.y2-b.y1)*ch);
+    ctx.setLineDash([]);
+  });
+}
+
+function updateZoneDisplay(){
+  if(!engagementZone){ document.getElementById('zone-info').classList.remove('visible'); return; }
+  const z = engagementZone;
+  const str = `(${z.x1.toFixed(2)}, ${z.y1.toFixed(2)}, ${z.x2.toFixed(2)}, ${z.y2.toFixed(2)})`;
+  document.getElementById('zone-coords').textContent = str;
+  document.getElementById('zone-info').classList.add('visible');
+  document.getElementById('zone-badge').classList.add('visible');
+}
+
+function copyZoneConfig(){
+  const z = engagementZone;
+  const val = `MACHINE_ZONE_ROI = (${z.x1.toFixed(2)}, ${z.y1.toFixed(2)}, ${z.x2.toFixed(2)}, ${z.y2.toFixed(2)})`;
+  navigator.clipboard.writeText(val).then(() => toast('Copied to clipboard — paste into pi/config.py'));
+}
+
+function clearZone(){
+  engagementZone = null;
+  allBboxes = [];
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  document.getElementById('zone-info').classList.remove('visible');
+  document.getElementById('zone-badge').classList.remove('visible');
+}
+
 // ── Keyboard ───────────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   if(e.key === ' '){ e.preventDefault(); togglePlay(); return; }
+  if(e.key === 'b' || e.key === 'B'){ toggleBboxMode(); return; }
   if(e.key === 's' || e.key === 'S'){ markStart(); return; }
-  if(e.key === 'Escape'){ cancelSection(); return; }
+  if(e.key === 'Escape'){ if(bboxMode) toggleBboxMode(); else cancelSection(); return; }
   const n = parseInt(e.key);
   if(n >= 1 && n <= 8) endSection(n - 1);
 });
 
 // ── Section recording ──────────────────────────────────────────────────────────
 function markStart(){
+  if(bboxMode){ toast('Finish drawing the box first'); return; }
   if(!vid.src || vid.readyState < 1){ toast('Load a video first'); return; }
   recStart = vid.currentTime;
   document.getElementById('rec-start-time').textContent = fmt(recStart);
   document.getElementById('state-idle').style.display = 'none';
-  const r = document.getElementById('state-rec');
-  r.style.display = 'flex';
+  document.getElementById('state-rec').style.display = 'flex';
   document.getElementById('rec-duration').textContent = '';
   toast(`Start marked at ${fmt(recStart)} — play through, then press 1–8`);
 }
@@ -314,6 +481,8 @@ function endSection(classId){
     end_fmt:    fmt(end),
     duration_s: parseFloat((end - recStart).toFixed(1)),
     note,
+    // Attach current engagement zone to on_machine annotations
+    bbox_norm: classId === 2 && engagementZone ? {...engagementZone} : null,
   });
   sections.sort((a,b) => a.start_s - b.start_s);
   document.getElementById('note-in').value = '';
@@ -335,18 +504,14 @@ function render(){
   document.getElementById('sec-count').textContent = sections.length;
   document.getElementById('exp-btn').disabled = sections.length === 0;
 
-  // Stats grid
   const sg = document.getElementById('stats-grid');
   sg.innerHTML = CLASSES.map(c => {
     const n = sections.filter(s => s.class_id === c.id).length;
-    return `<div class="stat">
-      <div class="stat-n" style="color:${c.color}">${n}</div>
-      <div class="stat-l">${c.display.split(' ')[0]}</div>
-    </div>`;
+    return `<div class="stat"><div class="stat-n" style="color:${c.color}">${n}</div><div class="stat-l">${c.display.split(' ')[0]}</div></div>`;
   }).join('');
 
   if(!sections.length){
-    list.innerHTML = `<div class="empty">No sections yet.<br/><br/><kbd>S</kbd> mark start &nbsp; then <kbd>1</kbd>–<kbd>8</kbd> to label<br/><br/><b style="color:#6b7280;font-size:.65rem">1 No Person &nbsp; 2 User Present<br/>3 On Machine &nbsp; 4 Good Rep<br/>5 Bad Rep &nbsp; 6 False Rep<br/>7 Resting &nbsp; 8 Half Rep</b></div>`;
+    list.innerHTML = `<div class="empty"><b style="color:#a78bfa;font-size:.75rem">Step 1</b> — Pause on a frame<br/>where the person is seated.<br/>Press <kbd>B</kbd> and draw a box.<br/><br/><b style="color:#8b5cf6;font-size:.75rem">Step 2</b> — Press <kbd>S</kbd> to mark<br/>start of a time range,<br/>then <kbd>1</kbd>–<kbd>8</kbd> to label it.</div>`;
     return;
   }
 
@@ -358,6 +523,7 @@ function render(){
         <span class="sec-del" onclick="delSection(${i})">✕</span>
       </div>
       <div class="sec-meta">${s.duration_s}s &nbsp;·&nbsp; class ${s.class_id}</div>
+      ${s.bbox_norm ? `<div class="sec-bbox">bbox (${s.bbox_norm.x1.toFixed(2)},${s.bbox_norm.y1.toFixed(2)}) → (${s.bbox_norm.x2.toFixed(2)},${s.bbox_norm.y2.toFixed(2)})</div>` : ''}
       ${s.note ? `<div class="sec-note">"${s.note}"</div>` : ''}
     </div>
   `).join('');
@@ -378,7 +544,8 @@ function exportJSON(){
     video:    videoName,
     exported: new Date().toISOString(),
     classes:  CLASSES.map(c => ({ id:c.id, label:c.label, display:c.display })),
-    summary:  {
+    engagement_zone: engagementZone || null,
+    summary: {
       total_sections:   sections.length,
       total_duration_s: parseFloat(sections.reduce((t,s)=>t+s.duration_s,0).toFixed(1)),
       by_class:         counts,
@@ -390,6 +557,7 @@ function exportJSON(){
       class_id:   s.class_id,
       label:      s.label,
       note:       s.note || '',
+      bbox_norm:  s.bbox_norm || null,
     })),
   };
   const blob = new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
