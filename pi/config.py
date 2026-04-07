@@ -61,6 +61,21 @@ FACE_THRESHOLD           = 0.40   # Cosine similarity threshold for positive mat
 FACE_CHECK_INTERVAL      = 30     # Run face recognition every N frames (30 = ~1s at 30fps)
 FACE_IDENTITY_WINDOW_S   = 10     # Collect evidence for N seconds before locking identity
 
+# ── Machine Engagement Detection ──────────────────────────────────────────────
+# Prevents sessions starting when someone walks past or stands next to the machine.
+# The person must be inside the zone AND in a seated/engaged pose before tracking begins.
+#
+# MACHINE_ZONE_ROI: normalised (x1, y1, x2, y2) covering the seat + working space.
+# Set SHOW_PREVIEW=True and adjust until the box tightly wraps the machine area.
+# Default: centre 70% of frame width, full height — adjust per camera placement.
+#
+# ENGAGEMENT_MIN_OVERLAP: how much of the person's bounding box must be inside
+# the zone (0.0–1.0). 0.40 = at least 40% of their body inside the zone.
+ENGAGEMENT_DETECTION_ENABLED = True
+MACHINE_ZONE_ROI             = (0.15, 0.05, 0.85, 0.95)  # (x1,y1,x2,y2) normalised
+ENGAGEMENT_MIN_OVERLAP       = 0.40
+EXERCISE_TYPE                = "lat_pulldown"   # used to pick pose logic
+
 # ── Weight Stack Tracker ───────────────────────────────────────────────────────
 # Prevents phantom reps — verifies the weight actually moved during a rep.
 # Set WEIGHT_TRACKING_ENABLED = False to disable (reps counted by angle alone).

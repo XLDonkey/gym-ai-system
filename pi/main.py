@@ -34,8 +34,11 @@ from config import (
     FACE_CHECK_INTERVAL, FACE_IDENTITY_WINDOW_S,
     WEIGHT_TRACKING_ENABLED, WEIGHT_STACK_ROI,
     WEIGHT_MOVE_PX_THRESHOLD, WEIGHT_MOVE_FRAME_RATIO,
+    ENGAGEMENT_DETECTION_ENABLED, MACHINE_ZONE_ROI,
+    ENGAGEMENT_MIN_OVERLAP, EXERCISE_TYPE,
 )
 from weight_tracker import WeightStackTracker
+from engagement_detector import EngagementDetector
 from session_recorder import SessionRecorder
 
 # ── Optional integrations (fail gracefully if not configured) ─────────────────
@@ -349,6 +352,16 @@ def main():
     print(f"[weight] Tracker {'enabled' if WEIGHT_TRACKING_ENABLED else 'disabled'}  "
           f"ROI={WEIGHT_STACK_ROI}")
 
+    # Engagement detector — must be ON the machine before session starts
+    engagement = EngagementDetector(
+        zone_norm   = MACHINE_ZONE_ROI,
+        exercise    = EXERCISE_TYPE,
+        min_overlap = ENGAGEMENT_MIN_OVERLAP,
+        enabled     = ENGAGEMENT_DETECTION_ENABLED,
+    )
+    print(f"[engage] Detector {'enabled' if ENGAGEMENT_DETECTION_ENABLED else 'disabled'}  "
+          f"zone={MACHINE_ZONE_ROI}  exercise={EXERCISE_TYPE}")
+
     # Face recognition state
     identity_window = None   # IdentityWindow | None
     last_bbox       = None   # most recent YOLO bounding box
@@ -388,8 +401,21 @@ def main():
                         person_detected = True
                         last_bbox       = current_bbox
 
+                        # ── Engagement check ──────────────────────────────────
+                        # Only track people physically on the machine,
+                        # not bystanders, PTs, or people walking past.
+                        person_engaged = engagement.update(
+                            kps     = kps,
+                            bbox_px = current_bbox,
+                            frame_w = frame.shape[1],
+                            frame_h = frame.shape[0],
+                        )
+
+            if not person_detected:
+                person_engaged = False
+
             # ── Session management ────────────────────────────────────────────
-            if person_detected and not session_active:
+            if person_engaged and not session_active:
                 session_active  = True
                 identity_window = None
 
@@ -438,10 +464,11 @@ def main():
 
             # ── Recording ─────────────────────────────────────────────────────
             if recorder:
-                if person_detected:
+                if person_engaged:
                     recorder.write_frame(frame)
-                if recorder.tick_idle(person_detected):
+                if recorder.tick_idle(person_engaged):
                     session_active = False
+                    engagement.reset()
                     counter.end_session()
                     identity_window = None
 
@@ -461,6 +488,7 @@ def main():
 
             if SHOW_PREVIEW:
                 weight_tracker.draw_overlay(frame)
+                engagement.draw_overlay(frame)
                 cv2.imshow('XL Fitness AI Overseer', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
