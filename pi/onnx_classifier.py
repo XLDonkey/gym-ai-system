@@ -125,25 +125,26 @@ class ONNXActivityClassifier:
         window = window[np.newaxis, ...]                          # (1, 30, 51)
 
         try:
-            logits = self._session.run(None, {"keypoints": window})[0][0]  # (8,)
-
-            # Softmax — THE GATE.  Only one class can win.
-            exp   = np.exp(logits - logits.max())
-            probs = exp / exp.sum()
-
-            class_id   = int(probs.argmax())
-            confidence = float(probs[class_id])
+            logits = self._session.run(None, {"keypoints": window})[0][0]  # (8,) raw logits
         except Exception as e:
             print(f"[ONNX] Inference error: {e}")
             result = ClassifierResult(class_id=0, confidence=0.0, buffer=list(self._buffer))
             self._last_result = result
             return result
 
+        # Compute ungated softmax for reference (used by ClipReporter)
+        exp   = np.exp(logits - logits.max())
+        probs = exp / exp.sum()
+
+        class_id   = int(probs.argmax())
+        confidence = float(probs[class_id])
+
         result = ClassifierResult(
             class_id=class_id,
             confidence=confidence,
             buffer=list(self._buffer),
             probs=probs,
+            raw_logits=logits,   # ← exposed so ActivityStateMachine can apply gated softmax
         )
         self._last_result = result
         return result
@@ -166,11 +167,13 @@ class ClassifierResult:
         confidence: float,
         buffer: list,
         probs: np.ndarray = None,
+        raw_logits: np.ndarray = None,
     ):
         self.class_id   = class_id
         self.class_name = CLASS_NAMES[class_id] if class_id < NUM_CLASSES else "unknown"
         self.confidence = confidence
-        self.probs      = probs          # full softmax distribution (8,) or None
+        self.probs      = probs          # full softmax distribution (8,) — ungated
+        self.raw_logits = raw_logits     # raw ONNX output before softmax
         self.buffer     = buffer         # list of (51,) arrays — the 30-frame window
         self.timestamp  = time.time()
 

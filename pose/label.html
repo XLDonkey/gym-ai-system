@@ -462,11 +462,35 @@ function markStart(){
   toast(`Start marked at ${fmt(recStart)} — play through, then press 1–8`);
 }
 
+// Class hierarchy: rep/resting classes (3–7) are only valid AFTER on_machine (2).
+// If the annotator labels a rep without a prior on_machine segment, warn them —
+// this matches the state machine gate in pi/activity_state_machine.py.
+const REP_CLASSES = new Set([3, 4, 5, 6, 7]); // class IDs that require prior engagement
+
+function hasEngagementAt(start_s, end_s){
+  // Is there an on_machine segment (class 2) that overlaps this time range?
+  return sections.some(s => s.class_id === 2 && s.start_s < end_s && s.end_s > start_s);
+}
+
 function endSection(classId){
   if(recStart === null){ toast('Press S first to mark the start'); return; }
   vid.pause(); playBtn.textContent = '▶ Play';
   const end = vid.currentTime;
   if(end <= recStart){ toast('Play through the action first'); return; }
+
+  // Hierarchy check — rep classes need a prior on_machine segment
+  if(REP_CLASSES.has(classId) && !hasEngagementAt(recStart, end)){
+    const cls_name = CLASSES[classId].display;
+    const ok = confirm(
+      `⚠ Hierarchy warning\n\n` +
+      `You're labelling "${cls_name}" but there's no overlapping "On Machine" (3) segment.\n\n` +
+      `The AI state machine won't allow rep classes until the user is confirmed on_machine.\n\n` +
+      `• Click OK to save anyway (if you'll add the on_machine segment separately)\n` +
+      `• Click Cancel to go back and fix it`
+    );
+    if(!ok){ vid.play(); playBtn.textContent = '⏸ Pause'; return; }
+  }
+
   const cls  = CLASSES[classId];
   const note = document.getElementById('note-in').value.trim();
   sections.push({

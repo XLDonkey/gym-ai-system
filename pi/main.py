@@ -45,6 +45,7 @@ from engagement_detector import EngagementDetector
 from session_recorder import SessionRecorder
 from onnx_classifier import ONNXActivityClassifier
 from clip_reporter import ClipReporter
+from activity_state_machine import ActivityStateMachine
 
 # ── Optional integrations (fail gracefully if not configured) ─────────────────
 
@@ -75,12 +76,18 @@ if FACE_RECOGNITION_ENABLED:
 # ── ONNX Activity Classifier (optional — falls back to rule-based) ─────────────
 
 activity_classifier = None
+state_machine       = None
+
 if ONNX_MODEL_PATH:
     activity_classifier = ONNXActivityClassifier(
         model_path           = ONNX_MODEL_PATH,
         confidence_threshold = ONNX_CONFIDENCE_THRESH,
         review_threshold     = ONNX_REVIEW_THRESH,
     )
+    # State machine gates which classes are valid per phase.
+    # Phase IDLE    → only no_person / user_present / on_machine allowed
+    # Phase ENGAGED → rep/resting classes unlock (bad_rep requires engagement first)
+    state_machine = ActivityStateMachine()
 
 clip_reporter = ClipReporter(
     github_token         = GITHUB_REVIEW_TOKEN,
@@ -445,31 +452,47 @@ def main():
                         )
 
                         # ── ONNX activity classification ──────────────────────
-                        # Feed the 51-feature keypoint vector into the rolling
-                        # 30-frame buffer and run inference.  The softmax output
-                        # ensures exactly ONE of the 8 states is active (the gate).
-                        if activity_classifier:
-                            kps_flat = kps.flatten()  # (51,)
+                        # Feed keypoints → LSTM → raw logits → state machine
+                        # (gated softmax).  The state machine enforces the class
+                        # hierarchy: rep classes only valid once ENGAGED.
+                        if activity_classifier and state_machine:
+                            kps_flat  = kps.flatten()  # (51,)
                             nn_result = activity_classifier.update(kps_flat)
 
-                            # Flag uncertain clips to GitHub for human review
-                            clip_reporter.maybe_report(nn_result)
+                            if nn_result.raw_logits is not None:
+                                gated = state_machine.update(nn_result.raw_logits)
 
-                            # Log ONNX state every 30 frames to avoid spamming
-                            if frame_count % 30 == 0 and activity_classifier.ready:
-                                print(
-                                    f"[ONNX] {nn_result.class_name:<14}"
-                                    f"  conf={nn_result.confidence:.2f}"
-                                    f"{'  ⚠ low' if nn_result.low_confidence else ''}"
-                                )
+                                # State machine drives engagement — replaces
+                                # EngagementDetector when ONNX model is active
+                                person_engaged = gated.is_engaged
+
+                                # Session events from gated result
+                                if gated.just_engaged:
+                                    print(f"[SM] Session START — {MACHINE_NAME}")
+                                if gated.just_ended:
+                                    print(f"[SM] Session END — disengaged")
+
+                                # Flag uncertain clips to GitHub for human review
+                                # Use the ungated result so the reporter captures
+                                # the model's actual uncertainty, not the masked output
+                                clip_reporter.maybe_report(nn_result)
+
+                                if frame_count % 30 == 0 and activity_classifier.ready:
+                                    print(
+                                        f"[SM] [{gated.phase}] {gated.class_name:<14}"
+                                        f"  conf={gated.confidence:.2f}"
+                                        f"{'  ⚠' if gated.low_confidence else ''}"
+                                    )
 
             if not person_detected:
                 person_engaged = False
-                # Feed zeros to classifier when no person is visible
-                # so the buffer doesn't contain stale keypoints
-                if activity_classifier:
+                # Feed zeros to classifier when no person visible —
+                # keeps the rolling buffer current, model sees empty frames as class 0
+                if activity_classifier and state_machine:
                     import numpy as np
-                    activity_classifier.update(np.zeros(51, dtype=np.float32))
+                    nn_result = activity_classifier.update(np.zeros(51, dtype=np.float32))
+                    if nn_result.raw_logits is not None:
+                        state_machine.update(nn_result.raw_logits)
 
             # ── Session management ────────────────────────────────────────────
             if person_engaged and not session_active:
@@ -526,6 +549,8 @@ def main():
                 if recorder.tick_idle(person_engaged):
                     session_active = False
                     engagement.reset()
+                    if state_machine:
+                        state_machine.reset()
                     counter.end_session()
                     identity_window = None
 
@@ -545,7 +570,10 @@ def main():
 
             if SHOW_PREVIEW:
                 weight_tracker.draw_overlay(frame)
-                engagement.draw_overlay(frame)
+                if state_machine and state_machine.last_result:
+                    state_machine.last_result.draw_overlay(frame)
+                elif not activity_classifier:
+                    engagement.draw_overlay(frame)
                 cv2.imshow('XL Fitness AI Overseer', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
