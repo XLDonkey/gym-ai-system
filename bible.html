@@ -386,6 +386,12 @@
   <a class="nav-link" href="#ent-multitenant">31 — Multi-Tenancy & SaaS</a>
   <a class="nav-link" href="#ent-mlops">32 — MLOps & Deployment</a>
   <a class="nav-link" href="#ent-observability">33 — Production Observability</a>
+  <div class="nav-group">Chapter 9 — Code &amp; System Setup</div>
+  <a class="nav-link" href="#setup-architecture">34 — Three-Tier Architecture</a>
+  <a class="nav-link" href="#setup-stategate">35 — The State Gate</a>
+  <a class="nav-link" href="#setup-models">36 — The Three Models</a>
+  <a class="nav-link" href="#setup-ota">37 — OTA Update Pipeline</a>
+  <a class="nav-link" href="#setup-repo">38 — Repository Structure</a>
 </nav>
 
 <div class="main">
@@ -2529,6 +2535,322 @@ function switchPhase(num) {
   <div class="callout warning">
     <div class="ct">// WHEN TO MOVE OFF POWER APPS</div>
     <p>Power Apps works well for 1–2 gyms. At 3–5 gyms, per-user licensing costs become significant and the customisation ceiling becomes a constraint. At that point, build a custom web app. The Pi webhook sender stays identical — only the destination URL changes. This is a one-line config change, not a rebuild.</p>
+  </div>
+</section>
+
+
+<!-- ─── CHAPTER 9: CODE & SYSTEM SETUP ──────────────────────────────────────── -->
+<div class="chapter-divider" id="ch-setup">
+  <div class="ch-inner">
+    <div class="ch-num">Chapter 09</div>
+    <h1>Code &amp; System <em>Setup</em></h1>
+    <p class="ch-desc">The complete code architecture for the XL Fitness AI Overseer. Three tiers, three models, one gate. How GitHub acts as the data hub, the Mac Mini as the training brain, and each Raspberry Pi as an intelligent edge node running ONNX inference in real time.</p>
+    <div class="ch-sections">
+      <span class="ch-pill">34 — Three-Tier Architecture</span>
+      <span class="ch-pill">35 — The State Gate</span>
+      <span class="ch-pill">36 — The Three Models</span>
+      <span class="ch-pill">37 — OTA Update Pipeline</span>
+      <span class="ch-pill">38 — Repository Structure</span>
+    </div>
+    <div class="ch-prereqs">
+      <div class="ch-prereq-label">Before this chapter can begin</div>
+      <div class="ch-prereq-item ch-prereq-done">&#10003; Chapter 7 MVP successfully deployed and validated in one gym</div>
+      <div class="ch-prereq-item">&#8594; Mac Mini M4 configured as training server</div>
+      <div class="ch-prereq-item">&#8594; GitHub account with xl-fitness-overseer repository created</div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 34: Three-Tier Architecture -->
+<section class="section" id="setup-architecture">
+  <div class="section-label">// SECTION 34 — CHAPTER 09</div>
+  <h2>Three-Tier <em>Architecture</em></h2>
+  <p>The system is built across three tiers, each with a distinct role. This separation is not arbitrary — it mirrors how AWS, Google, and NVIDIA structure production edge AI systems. Each tier does exactly one job, and the interfaces between them are clean and replaceable.</p>
+
+  <div class="callout callout-purple">
+    <div class="callout-label">// THE THREE TIERS</div>
+    <strong>Tier 1 — Edge (Raspberry Pi):</strong> Real-time ONNX inference. Knows nothing about training. Runs three models, applies the State Gate, and uploads uncertain clips to GitHub.<br><br>
+    <strong>Tier 2 — Brain (Mac Mini):</strong> PyTorch training, FastAPI server, PostgreSQL. Knows everything about the data. Exports ONNX models and pushes them to GitHub Releases.<br><br>
+    <strong>Tier 3 — Hub (GitHub):</strong> Immutable data store. Training data, model versions, uncertain clips, and the OTA update pipeline all live here.
+  </div>
+
+  <h3>Why ONNX on the Pi — Not PyTorch?</h3>
+  <p>PyTorch is the right tool for training — it has autograd, flexible model definitions, and the best research ecosystem. But PyTorch is <strong>not</strong> the right tool for inference on a Raspberry Pi. The full PyTorch runtime is ~500MB and carries significant CPU overhead. ONNX Runtime is ~30MB, runs 2–3x faster on ARM processors, and has no Python dependency at all if needed. This is the same reason AWS Greengrass, NVIDIA Metropolis, and Google Coral all use ONNX or TFLite for edge deployment. The workflow is: <strong>train in PyTorch → export to ONNX → deploy to Pi</strong>.</p>
+
+  <h3>Hardware Allocation</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Hardware</th><th>Role</th><th>Key Software</th><th>Network Position</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Raspberry Pi 5</strong><br>(1 per 1–3 machines)</td><td>Real-time inference, state detection, clip upload</td><td>ONNX Runtime, OpenCV, Python 3.11</td><td>Local gym network</td></tr>
+        <tr><td><strong>Mac Mini M4</strong></td><td>Model training, API server, database</td><td>PyTorch, FastAPI, PostgreSQL</td><td>Local gym network + internet</td></tr>
+        <tr><td><strong>GitHub</strong></td><td>Data hub, model versioning, OTA updates</td><td>Git LFS, GitHub Releases, GitHub Actions</td><td>Cloud (internet)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Data Flow — Frame to Session</h3>
+  <p>Camera frames flow from the Pi's camera through the inference pipeline and out as a structured state event. The Pi never stores raw video permanently — it only keeps a rolling 5-second buffer in RAM for uncertain clip uploads. All permanent storage happens on the Mac Mini (PostgreSQL) and GitHub (training data).</p>
+
+  <div class="pipeline-steps">
+    <div class="pipeline-step"><div class="step-num">1</div><div class="step-body"><strong>Camera Frame</strong><br>Pi reads frame from RTSP stream via OpenCV</div><div class="step-ms">2ms</div></div>
+    <div class="pipeline-step"><div class="step-num">2</div><div class="step-body"><strong>Keypoint Extraction</strong><br>YOLOv8-pose ONNX extracts 17 body joints per person</div><div class="step-ms">12ms</div></div>
+    <div class="pipeline-step"><div class="step-num">3</div><div class="step-body"><strong>PoseNet Inference</strong><br>LSTM classifies 30-frame sequence into 8 states</div><div class="step-ms">8ms</div></div>
+    <div class="pipeline-step"><div class="step-num">4</div><div class="step-body"><strong>State Gate</strong><br>Priority mutex enforces single output, suppresses conflicts</div><div class="step-ms">0.1ms</div></div>
+    <div class="pipeline-step"><div class="step-num">5</div><div class="step-body"><strong>State Event POST</strong><br>Pi sends state update to Mac Mini FastAPI server</div><div class="step-ms">5ms</div></div>
+    <div class="pipeline-step"><div class="step-num">6</div><div class="step-body"><strong>Session Assembly</strong><br>Server builds sets and reps from the state event stream</div><div class="step-ms">1ms</div></div>
+  </div>
+</section>
+
+<!-- Section 35: The State Gate -->
+<section class="section" id="setup-stategate">
+  <div class="section-label">// SECTION 35 — CHAPTER 09</div>
+  <h2>The State <em>Gate</em></h2>
+  <p>This is the most important piece of logic in the entire system. The State Gate solves a fundamental problem with multi-class neural network outputs: <strong>a softmax classifier can produce high confidence scores for multiple classes simultaneously</strong>. Without the gate, the system can believe a person is both ENGAGED (mid-rep) and RESTING at the same time — causing double-counted reps, broken session boundaries, and corrupted workout logs.</p>
+
+  <h3>The Problem Without a Gate</h3>
+  <p>Imagine the model outputs: <code>ENGAGED=0.62, RESTING=0.58, IDLE=0.12</code>. Both ENGAGED and RESTING exceed a naive 0.5 threshold. If both fire, the system logs a rep AND ends the set simultaneously. This is not a hypothetical edge case — it happens constantly at the transition between states, which is exactly when accurate detection matters most. Your instinct to add a gate is correct, and it is the standard approach used in production state machine systems.</p>
+
+  <h3>The 8 States</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>State</th><th>Priority</th><th>Description</th><th>What It Triggers</th></tr></thead>
+      <tbody>
+        <tr><td><strong>UNCERTAIN</strong></td><td>0 (highest)</td><td>Model confidence below threshold — model does not know</td><td>Upload clip to GitHub for human review</td></tr>
+        <tr><td><strong>ENGAGED</strong></td><td>1</td><td>Active rep in progress — concentric phase detected</td><td>Increment rep counter</td></tr>
+        <tr><td><strong>SETUP</strong></td><td>2</td><td>Adjusting seat or weight, not yet performing</td><td>Start session timer</td></tr>
+        <tr><td><strong>RESTING</strong></td><td>3</td><td>Between sets, seated at machine, stationary</td><td>Close current set, start rest timer</td></tr>
+        <tr><td><strong>APPROACHING</strong></td><td>4</td><td>Person moving toward machine from the gym floor</td><td>Pre-load member identity lookup</td></tr>
+        <tr><td><strong>LEAVING</strong></td><td>5</td><td>Person moving away from machine</td><td>Close session, write to database</td></tr>
+        <tr><td><strong>BLOCKED</strong></td><td>6</td><td>Machine occupied but person not using it (e.g. on phone)</td><td>Log machine as unavailable</td></tr>
+        <tr><td><strong>IDLE</strong></td><td>7 (lowest)</td><td>No person detected at the machine</td><td>Mark machine as available</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The Three Gate Rules</h3>
+  <p>The gate applies three rules in sequence. Rule 1 is checked first and overrides everything else if it fires.</p>
+
+  <div class="callout callout-purple">
+    <div class="callout-label">// GATE RULE 1 — UNCERTAIN THRESHOLD</div>
+    If the maximum confidence score across all 8 states is below <strong>0.50</strong>, emit UNCERTAIN regardless of all other scores. The model is not confident enough to make any decision. Upload the clip for human review. This is the safety valve — when in doubt, ask a human.
+  </div>
+
+  <div class="callout" style="border-left-color: #4a9eff; background: rgba(74,158,255,0.06);">
+    <div class="callout-label" style="color: #4a9eff;">// GATE RULE 2 — MUTEX SUPPRESSION</div>
+    Certain state pairs are <strong>mutually exclusive by definition</strong>. A person cannot be mid-rep and resting simultaneously. If both states in a mutex pair exceed the confidence threshold (0.65), the lower-priority state is suppressed:<br><br>
+    &bull; <strong>ENGAGED</strong> suppresses <strong>RESTING</strong> — cannot be mid-rep and resting at the same time<br>
+    &bull; <strong>APPROACHING</strong> suppresses <strong>LEAVING</strong> — cannot be moving toward and away simultaneously
+  </div>
+
+  <div class="callout" style="border-left-color: #4aff9e; background: rgba(74,255,158,0.06);">
+    <div class="callout-label" style="color: #4aff9e;">// GATE RULE 3 — PRIORITY SELECTION</div>
+    After mutex suppression, if multiple states remain above the confidence threshold, the <strong>highest-priority state wins</strong>. Priority is defined by the integer value of the State enum — lower number = higher priority. ENGAGED (priority 1) always beats RESTING (priority 3). The gate returns exactly one state.
+  </div>
+
+  <h3>The Finite State Machine — Valid Transitions</h3>
+  <p>The gate also enforces valid state transitions. A person cannot jump from IDLE directly to ENGAGED — they must pass through APPROACHING and SETUP first. If the model tries to emit an impossible transition, the gate finds the next valid state or holds the current state. This prevents impossible state jumps caused by brief model errors or camera occlusion.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Current State</th><th>Valid Next States</th></tr></thead>
+      <tbody>
+        <tr><td>IDLE</td><td>APPROACHING, UNCERTAIN</td></tr>
+        <tr><td>APPROACHING</td><td>SETUP, IDLE, UNCERTAIN</td></tr>
+        <tr><td>SETUP</td><td>ENGAGED, LEAVING, UNCERTAIN</td></tr>
+        <tr><td>ENGAGED</td><td>RESTING, LEAVING, UNCERTAIN</td></tr>
+        <tr><td>RESTING</td><td>ENGAGED, LEAVING, UNCERTAIN</td></tr>
+        <tr><td>LEAVING</td><td>IDLE, APPROACHING, UNCERTAIN</td></tr>
+        <tr><td>UNCERTAIN</td><td>Any state (recovery)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block-wrap">
+    <button class="code-toggle" onclick="toggleCode(this)">&#128196; edge/state_gate.py — Core gate logic &#9660;</button>
+    <div class="code-block">
+      <pre><code class="language-python"># edge/state_gate.py
+
+class State(IntEnum):
+    UNCERTAIN   = 0  # Always wins — triggers clip upload
+    ENGAGED     = 1  # Active rep in progress
+    SETUP       = 2  # Adjusting seat/weight
+    RESTING     = 3  # Between sets
+    APPROACHING = 4  # Moving toward machine
+    LEAVING     = 5  # Moving away
+    BLOCKED     = 6  # Occupied, not using
+    IDLE        = 7  # No person
+
+MUTEX_PAIRS = [
+    (State.ENGAGED,     State.RESTING),
+    (State.APPROACHING, State.LEAVING),
+]
+
+CONFIDENCE_THRESHOLD = 0.65
+UNCERTAIN_THRESHOLD  = 0.50
+
+def apply_gate(softmax_output: list[float]) -> GateOutput:
+    scores = {State(i): v for i, v in enumerate(softmax_output)}
+
+    # Rule 1: Max confidence below uncertain threshold
+    if max(softmax_output) &lt; UNCERTAIN_THRESHOLD:
+        return GateOutput(state=State.UNCERTAIN, upload_clip=True)
+
+    # Rule 2: Collect states above confidence threshold
+    active = {s: v for s, v in scores.items() if v &gt;= CONFIDENCE_THRESHOLD}
+
+    # Rule 3: Apply mutex suppression
+    for (high, low) in MUTEX_PAIRS:
+        if high in active and low in active:
+            del active[low]  # High priority suppresses low
+
+    # Rule 4: Return highest-priority active state
+    return min(active.keys(), key=lambda s: s.value)</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- Section 36: The Three Models -->
+<section class="section" id="setup-models">
+  <div class="section-label">// SECTION 36 — CHAPTER 09</div>
+  <h2>The Three <em>Models</em></h2>
+  <p>Three separate neural networks run in parallel on each Raspberry Pi. They are deliberately separate — not one large multi-task model. This is the correct production approach: each model can be trained, updated, and replaced independently without affecting the others. If the weight detection model needs retraining because a new machine type was added, only WeightNet is retrained — PoseNet and FaceNet are untouched.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Model</th><th>Task</th><th>Architecture</th><th>Input</th><th>Output</th></tr></thead>
+      <tbody>
+        <tr><td><strong>PoseNet</strong></td><td>State classification + rep counting</td><td>LSTM (2 layers) &#8594; Dense &#8594; Softmax</td><td>30 frames &#215; 34 keypoint values</td><td>8-class probability vector</td></tr>
+        <tr><td><strong>FaceNet</strong></td><td>Member identity</td><td>MobileNetV2 &#8594; Embedding head</td><td>Face crop (112&#215;112px)</td><td>128-dim embedding vector</td></tr>
+        <tr><td><strong>WeightNet</strong></td><td>Weight detection</td><td>MobileNetV2 &#8594; Regression head</td><td>Weight stack crop</td><td>Weight in kg (float)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Model 1 — PoseNet (The State Classifier)</h3>
+  <p>PoseNet is an LSTM that takes a <strong>sequence</strong> of 30 frames (approximately 1 second at 30 FPS) and classifies the person's activity into one of 8 states. A single frame cannot distinguish ENGAGED from RESTING — both look like a person sitting at a machine. The LSTM sees the <em>motion pattern</em> over time and detects the characteristic joint angle trajectory of a rep in progress versus a person sitting still. The input is 17 body keypoints (x, y coordinates each) = 34 features per frame, giving an input tensor of shape <code>[batch=1, seq=30, features=34]</code>.</p>
+
+  <h3>Model 2 — FaceNet (Member Identity)</h3>
+  <p>FaceNet uses transfer learning from a pretrained MobileNetV2 backbone to produce a 128-dimensional embedding vector for any face crop. This embedding is compared against stored member embeddings in PostgreSQL using cosine similarity. If the similarity score exceeds 0.85, the member is identified. Below 0.85, the tablet prompts for RFID or manual check-in. The 0.85 threshold is configurable per gym — a higher-security installation might set 0.92.</p>
+
+  <h3>Model 3 — WeightNet (Weight Detection)</h3>
+  <p>WeightNet reads the current weight setting from the machine. It uses the AlphaFit colour band system as the primary signal — each weight increment has a distinct colour stripe on the weight horn, visible from the overhead camera. WeightNet is a regression model that outputs a float value in kg. For machines without colour bands, it falls back to OCR on the weight stack numbers. The colour band approach is more reliable than OCR because it works at low resolution and in variable lighting.</p>
+
+  <div class="callout callout-purple">
+    <div class="callout-label">// WHY THREE SEPARATE MODELS, NOT ONE</div>
+    A single multi-task model outputting state + identity + weight simultaneously would be harder to train, harder to debug, and impossible to update partially. Three separate models means three independent update cycles, three independent confidence thresholds, and three independent failure modes. This is standard practice at Google (separate models for detection, classification, and embedding) and NVIDIA (separate models in the DeepStream pipeline). The Mac Mini trains each model independently and exports each to its own ONNX file.
+  </div>
+</section>
+
+<!-- Section 37: OTA Update Pipeline -->
+<section class="section" id="setup-ota">
+  <div class="section-label">// SECTION 37 — CHAPTER 09</div>
+  <h2>OTA Update <em>Pipeline</em></h2>
+  <p>The Over-The-Air (OTA) update pipeline is what transforms this from a static system into a <strong>self-improving one</strong>. Every time a Pi encounters a situation it is not confident about, it uploads the clip to GitHub. A human reviews and annotates it. That annotation feeds back into the training data. The model gets retrained and pushed back to all Pis automatically. The system gets smarter with every uncertain moment it encounters — this is called <em>active learning</em>.</p>
+
+  <h3>The Active Learning Loop</h3>
+  <div class="pipeline-steps">
+    <div class="pipeline-step"><div class="step-num">1</div><div class="step-body"><strong>Pi Detects Uncertainty</strong><br>Max confidence &lt; 0.50. State Gate emits UNCERTAIN and flags the frame window.</div><div class="step-ms">Edge</div></div>
+    <div class="pipeline-step"><div class="step-num">2</div><div class="step-body"><strong>Clip Upload</strong><br>Pi uploads 5-second video clip + raw softmax scores to <code>data/pose/uncertain/</code> on GitHub via the API.</div><div class="step-ms">Edge &#8594; Hub</div></div>
+    <div class="pipeline-step"><div class="step-num">3</div><div class="step-body"><strong>Human Review</strong><br>Reviewer opens <code>annotation/review.html</code>, watches the clip, and assigns the correct state label.</div><div class="step-ms">Hub</div></div>
+    <div class="pipeline-step"><div class="step-num">4</div><div class="step-body"><strong>Annotation Merged</strong><br>Annotated JSON merged to <code>data/pose/annotated/</code>. GitHub Actions automatically triggers the retrain workflow.</div><div class="step-ms">Hub</div></div>
+    <div class="pipeline-step"><div class="step-num">5</div><div class="step-body"><strong>Mac Mini Retrains</strong><br>GitHub Actions self-hosted runner on Mac Mini pulls new data, retrains PoseNet in PyTorch, exports ONNX.</div><div class="step-ms">Brain</div></div>
+    <div class="pipeline-step"><div class="step-num">6</div><div class="step-body"><strong>Model Released</strong><br>New ONNX published to GitHub Releases with a version tag (e.g. <code>v20240115-001</code>).</div><div class="step-ms">Hub</div></div>
+    <div class="pipeline-step"><div class="step-num">7</div><div class="step-body"><strong>All Pis Auto-Update</strong><br>All Pis poll GitHub Releases every hour. Download new ONNX, validate checksum, hot-swap without restart.</div><div class="step-ms">Hub &#8594; Edge</div></div>
+  </div>
+
+  <h3>Hot-Swap Without Restart</h3>
+  <p>When a Pi downloads a new model, it does not restart. The <code>model_updater.py</code> module downloads the new ONNX to a temp file, validates the SHA256 checksum, then signals the inference thread to reload its ONNX Runtime session. The old session is released and the new one takes over in under 200ms — no downtime, no missed frames, no interrupted sessions. This is the same hot-swap pattern used by NVIDIA Metropolis for edge model updates.</p>
+
+  <h3>Mac Mini as a GitHub Actions Self-Hosted Runner</h3>
+  <p>The retraining step runs on the Mac Mini, not on GitHub's cloud runners. PyTorch training on an M4 chip (with Metal Performance Shaders acceleration) is significantly faster than on a generic cloud runner, and it keeps all training data local. The Mac Mini is registered as a <strong>self-hosted runner</strong> in the GitHub Actions settings — a one-time 5-minute setup. The <code>retrain.yml</code> workflow uses <code>runs-on: self-hosted</code> to target it specifically.</p>
+
+  <div class="callout callout-purple">
+    <div class="callout-label">// SETTING UP THE MAC MINI AS A SELF-HOSTED RUNNER</div>
+    1. Go to: <strong>github.com/Matt-xlfitness/xl-fitness-overseer &#8594; Settings &#8594; Actions &#8594; Runners</strong><br>
+    2. Click "New self-hosted runner" &#8594; select macOS<br>
+    3. Run the 3 commands shown on screen (download, configure, start)<br>
+    4. The Mac Mini will appear as an available runner for all workflows<br>
+    5. The <code>retrain.yml</code> workflow uses <code>runs-on: self-hosted</code> to target it
+  </div>
+</section>
+
+<!-- Section 38: Repository Structure -->
+<section class="section" id="setup-repo">
+  <div class="section-label">// SECTION 38 — CHAPTER 09</div>
+  <h2>Repository <em>Structure</em></h2>
+  <p>The <a href="https://github.com/Matt-xlfitness/xl-fitness-overseer" target="_blank">xl-fitness-overseer</a> repository is the single source of truth for the entire system. Every model, every training script, every Pi configuration, and every piece of training data lives here. The structure is designed so that any engineer can clone the repo and understand the system in under 10 minutes.</p>
+
+  <div class="code-block-wrap">
+    <button class="code-toggle" onclick="toggleCode(this)">&#128196; Repository structure — xl-fitness-overseer &#9660;</button>
+    <div class="code-block">
+      <pre><code>xl-fitness-overseer/
+&#9500;&#9472;&#9472; README.md                    # System overview and quick start
+&#9500;&#9472;&#9472; .gitattributes               # Git LFS tracking for .pt, .onnx, video files
+&#9500;&#9472;&#9472; .github/
+&#9474;   &#9492;&#9472;&#9472; workflows/
+&#9474;       &#9492;&#9472;&#9472; retrain.yml          # Auto-retrain when new annotations merged
+&#9500;&#9472;&#9472; models/                      # Canonical model files (Git LFS)
+&#9474;   &#9500;&#9472;&#9472; pose/pose_model.onnx     # PoseNet — deployed to all Pis
+&#9474;   &#9500;&#9472;&#9472; face/face_model.onnx     # FaceNet — deployed to all Pis
+&#9474;   &#9492;&#9472;&#9472; weight/weight_model.onnx # WeightNet — deployed to all Pis
+&#9500;&#9472;&#9472; training/                    # PyTorch training code (runs on Mac Mini)
+&#9474;   &#9500;&#9472;&#9472; pose/
+&#9474;   &#9474;   &#9500;&#9472;&#9472; model.py             # LSTM architecture definition
+&#9474;   &#9474;   &#9500;&#9472;&#9472; train.py             # Training loop (PyTorch)
+&#9474;   &#9474;   &#9492;&#9472;&#9472; export_onnx.py       # Export .pt &#8594; .onnx for Pi deployment
+&#9474;   &#9500;&#9472;&#9472; face/
+&#9474;   &#9492;&#9472;&#9472; weight/
+&#9500;&#9472;&#9472; edge/                        # Raspberry Pi inference code (ONNX Runtime)
+&#9474;   &#9500;&#9472;&#9472; main.py                  # Entry point — starts all inference threads
+&#9474;   &#9500;&#9472;&#9472; state_gate.py            # THE GATE — priority mutex + FSM
+&#9474;   &#9500;&#9472;&#9472; pose_runner.py           # PoseNet ONNX inference
+&#9474;   &#9500;&#9472;&#9472; face_runner.py           # FaceNet ONNX inference
+&#9474;   &#9500;&#9472;&#9472; weight_runner.py         # WeightNet ONNX inference
+&#9474;   &#9500;&#9472;&#9472; clip_uploader.py         # Uploads uncertain clips to GitHub
+&#9474;   &#9500;&#9472;&#9472; model_updater.py         # OTA — polls GitHub Releases hourly
+&#9474;   &#9500;&#9472;&#9472; config.py                # Pi configuration dataclass
+&#9474;   &#9500;&#9472;&#9472; config.example.json      # Template — copy to config.json and fill in
+&#9474;   &#9492;&#9472;&#9472; setup.sh                 # One-command Pi setup script
+&#9500;&#9472;&#9472; server/                      # Mac Mini server code
+&#9474;   &#9500;&#9472;&#9472; api/main.py              # FastAPI application
+&#9474;   &#9500;&#9472;&#9472; api/routes/sessions.py   # Workout session endpoints
+&#9474;   &#9500;&#9472;&#9472; db/schema.sql            # PostgreSQL schema (gyms, members, sessions, sets)
+&#9474;   &#9492;&#9472;&#9472; scripts/push_release.sh  # Tag and publish new model release to GitHub
+&#9500;&#9472;&#9472; data/                        # Training data (Git LFS)
+&#9474;   &#9500;&#9472;&#9472; pose/annotated/          # Human-annotated JSON labels &#8594; training input
+&#9474;   &#9500;&#9472;&#9472; pose/uncertain/          # Clips uploaded by Pis for human review
+&#9474;   &#9500;&#9472;&#9472; face/members/            # Face images per member
+&#9474;   &#9492;&#9472;&#9472; weight/annotated/
+&#9492;&#9472;&#9472; annotation/
+    &#9500;&#9472;&#9472; label.html               # Annotation tool for training data
+    &#9492;&#9472;&#9472; review.html              # Review uncertain clips uploaded by Pis</code></pre>
+    </div>
+  </div>
+
+  <h3>Getting Started — First Time Setup</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Step</th><th>Where</th><th>Command / Action</th></tr></thead>
+      <tbody>
+        <tr><td>1. Clone repo</td><td>Mac Mini</td><td><code>gh repo clone Matt-xlfitness/xl-fitness-overseer</code></td></tr>
+        <tr><td>2. Install Mac Mini deps</td><td>Mac Mini</td><td><code>pip install torch torchvision onnx onnxruntime fastapi uvicorn psycopg2</code></td></tr>
+        <tr><td>3. Set up PostgreSQL</td><td>Mac Mini</td><td><code>psql -U postgres -d xl_fitness -f server/db/schema.sql</code></td></tr>
+        <tr><td>4. Register as GitHub Actions runner</td><td>Mac Mini</td><td>GitHub &#8594; Settings &#8594; Actions &#8594; Runners &#8594; New self-hosted runner</td></tr>
+        <tr><td>5. Set up Pi (one command)</td><td>Raspberry Pi</td><td><code>bash edge/setup.sh</code></td></tr>
+        <tr><td>6. Configure Pi</td><td>Raspberry Pi</td><td>Copy <code>config.example.json</code> to <code>config.json</code>, fill in machine_id and camera_urls</td></tr>
+        <tr><td>7. Set GitHub token on Pi</td><td>Raspberry Pi</td><td><code>export GITHUB_TOKEN=your_token_here</code></td></tr>
+        <tr><td>8. Start Pi inference</td><td>Raspberry Pi</td><td><code>python edge/main.py</code></td></tr>
+        <tr><td>9. Start Mac Mini server</td><td>Mac Mini</td><td><code>uvicorn server.api.main:app --host 0.0.0.0 --port 8000</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-purple">
+    <div class="callout-label">// LIVE REPOSITORY</div>
+    The repository is live at: <a href="https://github.com/Matt-xlfitness/xl-fitness-overseer" target="_blank" style="color: var(--purple-light);">github.com/Matt-xlfitness/xl-fitness-overseer</a><br>
+    It is currently <strong>private</strong>. To add a collaborator: Settings &#8594; Collaborators &#8594; Add people.<br>
+    To make it public when ready for market: Settings &#8594; Danger Zone &#8594; Change visibility.
   </div>
 </section>
 
