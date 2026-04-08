@@ -36,10 +36,15 @@ from config import (
     WEIGHT_MOVE_PX_THRESHOLD, WEIGHT_MOVE_FRAME_RATIO,
     ENGAGEMENT_DETECTION_ENABLED, MACHINE_ZONE_ROI,
     ENGAGEMENT_MIN_OVERLAP, EXERCISE_TYPE,
+    ONNX_MODEL_PATH, ONNX_CONFIDENCE_THRESH, ONNX_REVIEW_THRESH,
+    GITHUB_REVIEW_TOKEN, GITHUB_REVIEW_REPO,
+    CLIP_REPORTER_ENABLED, CLIP_COOLDOWN_S,
 )
 from weight_tracker import WeightStackTracker
 from engagement_detector import EngagementDetector
 from session_recorder import SessionRecorder
+from onnx_classifier import ONNXActivityClassifier
+from clip_reporter import ClipReporter
 
 # ── Optional integrations (fail gracefully if not configured) ─────────────────
 
@@ -66,6 +71,25 @@ if FACE_RECOGNITION_ENABLED:
     except Exception as e:
         print(f"[face] WARNING: Face recognizer init failed — {e}  (anonymous sessions only)")
         recognizer = None
+
+# ── ONNX Activity Classifier (optional — falls back to rule-based) ─────────────
+
+activity_classifier = None
+if ONNX_MODEL_PATH:
+    activity_classifier = ONNXActivityClassifier(
+        model_path           = ONNX_MODEL_PATH,
+        confidence_threshold = ONNX_CONFIDENCE_THRESH,
+        review_threshold     = ONNX_REVIEW_THRESH,
+    )
+
+clip_reporter = ClipReporter(
+    github_token         = GITHUB_REVIEW_TOKEN,
+    repo                 = GITHUB_REVIEW_REPO,
+    machine_id           = MACHINE_ID,
+    confidence_threshold = ONNX_REVIEW_THRESH,
+    cooldown_s           = CLIP_COOLDOWN_S,
+    enabled              = CLIP_REPORTER_ENABLED and bool(ONNX_MODEL_PATH),
+)
 
 # ── YOLO ──────────────────────────────────────────────────────────────────────
 
@@ -302,14 +326,23 @@ class RepCounter:
 # ── Main loop ─────────────────────────────────────────────────────────────────
 
 def main():
+    onnx_status = (
+        f"loaded ({ONNX_MODEL_PATH})" if (activity_classifier and activity_classifier.ready)
+        else ("path set — model missing" if ONNX_MODEL_PATH else "not configured (rule-based)")
+    )
     print(f"\n[XLF] ═══════════════════════════════════════")
     print(f"[XLF]  AI Overseer — {MACHINE_NAME}")
-    print(f"[XLF]  Machine ID : {MACHINE_ID}")
-    print(f"[XLF]  Recording  : {RECORD_SESSIONS}")
-    print(f"[XLF]  Drive ID   : {GOOGLE_DRIVE_FOLDER_ID or 'NOT SET'}")
-    print(f"[XLF]  Supabase   : {'connected' if db else 'not configured'}")
-    print(f"[XLF]  Face ID    : {'ready' if (recognizer and recognizer.ready) else 'disabled'}")
+    print(f"[XLF]  Machine ID    : {MACHINE_ID}")
+    print(f"[XLF]  Recording     : {RECORD_SESSIONS}")
+    print(f"[XLF]  Drive ID      : {GOOGLE_DRIVE_FOLDER_ID or 'NOT SET'}")
+    print(f"[XLF]  Supabase      : {'connected' if db else 'not configured'}")
+    print(f"[XLF]  Face ID       : {'ready' if (recognizer and recognizer.ready) else 'disabled'}")
+    print(f"[XLF]  ONNX model    : {onnx_status}")
+    print(f"[XLF]  Clip reporter : {'active' if clip_reporter.enabled else 'disabled'}")
     print(f"[XLF] ═══════════════════════════════════════\n")
+
+    if clip_reporter.enabled:
+        clip_reporter.flush_retry_queue()
 
     cap = cv2.VideoCapture(CAMERA_INDEX)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH,  FRAME_WIDTH)
@@ -411,8 +444,32 @@ def main():
                             frame_h = frame.shape[0],
                         )
 
+                        # ── ONNX activity classification ──────────────────────
+                        # Feed the 51-feature keypoint vector into the rolling
+                        # 30-frame buffer and run inference.  The softmax output
+                        # ensures exactly ONE of the 8 states is active (the gate).
+                        if activity_classifier:
+                            kps_flat = kps.flatten()  # (51,)
+                            nn_result = activity_classifier.update(kps_flat)
+
+                            # Flag uncertain clips to GitHub for human review
+                            clip_reporter.maybe_report(nn_result)
+
+                            # Log ONNX state every 30 frames to avoid spamming
+                            if frame_count % 30 == 0 and activity_classifier.ready:
+                                print(
+                                    f"[ONNX] {nn_result.class_name:<14}"
+                                    f"  conf={nn_result.confidence:.2f}"
+                                    f"{'  ⚠ low' if nn_result.low_confidence else ''}"
+                                )
+
             if not person_detected:
                 person_engaged = False
+                # Feed zeros to classifier when no person is visible
+                # so the buffer doesn't contain stale keypoints
+                if activity_classifier:
+                    import numpy as np
+                    activity_classifier.update(np.zeros(51, dtype=np.float32))
 
             # ── Session management ────────────────────────────────────────────
             if person_engaged and not session_active:

@@ -88,3 +88,27 @@ WEIGHT_TRACKING_ENABLED   = True
 WEIGHT_STACK_ROI          = (0.72, 0.05, 0.92, 0.88)  # (x1,y1,x2,y2) normalised
 WEIGHT_MOVE_PX_THRESHOLD  = 1.5   # optical flow magnitude to count as "moving"
 WEIGHT_MOVE_FRAME_RATIO   = 0.30  # fraction of rep frames that must show movement
+
+# ── ONNX Activity Classifier ──────────────────────────────────────────────────
+# Once the LSTM is trained (train/train_pytorch.py) and deployed here, the Pi
+# switches from rule-based angle counting to NN-based 8-class activity detection.
+# Leave ONNX_MODEL_PATH blank to keep using rule-based counting (safe default).
+#
+# The model outputs exactly ONE class at a time (softmax gate) — so "resting"
+# and "on_machine" can never both be true simultaneously.
+ONNX_MODEL_PATH        = ""     # e.g. "/home/pi/xlf/models/activity_v1.onnx"
+ONNX_CONFIDENCE_THRESH = 0.65   # below this: uncertain but accept the prediction
+ONNX_REVIEW_THRESH     = 0.50   # below this: flag clip to GitHub for human review
+
+# ── Clip Reporter — GitHub Review Loop ────────────────────────────────────────
+# When the ONNX model is uncertain (confidence < ONNX_REVIEW_THRESH), the Pi
+# saves the 30-frame keypoint window and uploads it to GitHub data/review/.
+# A human annotates it in pose/label.html → commits → Mac Mini retrains →
+# new ONNX pushed to Pi → accuracy improves over time.
+#
+# GITHUB_REVIEW_TOKEN: PAT with Contents:write on the repo.
+# Leave blank to save clips locally only (no GitHub upload).
+GITHUB_REVIEW_TOKEN  = ""   # ghp_... Personal Access Token
+GITHUB_REVIEW_REPO   = "Matt-xlfitness/gym-ai-system"
+CLIP_REPORTER_ENABLED = True
+CLIP_COOLDOWN_S       = 30.0   # minimum seconds between uploads

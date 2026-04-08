@@ -1,0 +1,140 @@
+name: Validate ONNX Model
+
+# Runs whenever a new ONNX model is pushed to models/weights/
+# or when training sequences are updated in data/processed/.
+# Checks the model loads, has the right I/O shape, and passes
+# a smoke test with synthetic keypoint data.
+
+on:
+  push:
+    paths:
+      - "models/weights/**.onnx"
+      - "models/registry.json"
+      - "data/processed/**"
+      - "pi/onnx_classifier.py"
+  pull_request:
+    paths:
+      - "models/weights/**.onnx"
+      - "models/registry.json"
+      - "pi/onnx_classifier.py"
+
+jobs:
+  validate-onnx:
+    name: ONNX shape + inference smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install validation deps
+        run: pip install onnx onnxruntime numpy
+
+      - name: Validate all ONNX models in models/weights/
+        run: |
+          python3 - <<'EOF'
+          import sys, json, glob, os
+          import numpy as np
+          import onnx
+          import onnxruntime as ort
+
+          EXPECTED_INPUT_SHAPE  = [1, 30, 51]   # batch, window_frames, feature_dim
+          EXPECTED_OUTPUT_SHAPE = [1, 8]         # batch, num_classes
+          NUM_CLASSES = 8
+
+          models = glob.glob("models/weights/*.onnx")
+          if not models:
+              print("No ONNX models found in models/weights/ — skipping")
+              sys.exit(0)
+
+          errors = []
+          for path in sorted(models):
+              print(f"\n── Validating: {path}")
+
+              # 1. ONNX graph check
+              try:
+                  m = onnx.load(path)
+                  onnx.checker.check_model(m)
+                  print("  ✓ ONNX graph valid")
+              except Exception as e:
+                  errors.append(f"{path}: ONNX check failed: {e}")
+                  continue
+
+              # 2. Load with onnxruntime
+              try:
+                  sess = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
+              except Exception as e:
+                  errors.append(f"{path}: ort load failed: {e}")
+                  continue
+
+              # 3. Input/output shape
+              inp = sess.get_inputs()[0]
+              out = sess.get_outputs()[0]
+              print(f"  Input:  {inp.name} {inp.shape}")
+              print(f"  Output: {out.name} {out.shape}")
+
+              if inp.shape[1:] != [30, 51]:
+                  errors.append(f"{path}: Wrong input shape {inp.shape} (expected [*, 30, 51])")
+
+              # 4. Inference smoke test
+              dummy = np.zeros(EXPECTED_INPUT_SHAPE, dtype=np.float32)
+              try:
+                  logits = sess.run(None, {inp.name: dummy})[0]
+                  assert logits.shape == (1, NUM_CLASSES), f"Bad output shape: {logits.shape}"
+
+                  # Softmax check — all probs sum to ~1
+                  exp   = np.exp(logits[0] - logits[0].max())
+                  probs = exp / exp.sum()
+                  assert abs(probs.sum() - 1.0) < 1e-5, f"Probs don't sum to 1: {probs.sum()}"
+
+                  # Single argmax winner (this is the gate)
+                  winner = int(probs.argmax())
+                  print(f"  ✓ Inference OK  winner_class={winner}  conf={probs[winner]:.3f}")
+              except Exception as e:
+                  errors.append(f"{path}: Inference failed: {e}")
+                  continue
+
+              # 5. Companion meta file
+              meta_path = path.replace(".onnx", "_meta.json")
+              if os.path.exists(meta_path):
+                  with open(meta_path) as f:
+                      meta = json.load(f)
+                  assert meta.get("num_classes") == NUM_CLASSES, \
+                      f"Meta num_classes mismatch: {meta.get('num_classes')}"
+                  print(f"  ✓ Metadata OK  classes={meta['num_classes']}")
+              else:
+                  print(f"  ⚠ No _meta.json found alongside {path}")
+
+          if errors:
+              print(f"\n{'='*60}")
+              print(f"FAILED — {len(errors)} error(s):")
+              for e in errors:
+                  print(f"  ✗ {e}")
+              sys.exit(1)
+          else:
+              print(f"\n{'='*60}")
+              print(f"All {len(models)} ONNX model(s) passed validation ✓")
+          EOF
+
+      - name: Check registry.json is valid
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+
+          with open("models/registry.json") as f:
+              reg = json.load(f)
+
+          assert "models" in reg, "Missing 'models' key"
+          print(f"Registry: {len(reg['models'])} model entries")
+
+          for entry in reg["models"]:
+              assert "version" in entry
+              assert "type"    in entry
+              print(f"  {entry['version']}  type={entry['type']}  deployed={entry.get('deployed')}")
+
+          print("registry.json valid ✓")
+          EOF
