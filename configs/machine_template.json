@@ -1,0 +1,61 @@
+{
+  "_instructions": "Copy this file to configs/{machine_id}.json. Fill in every field. The Pi reads this at startup via config.py.",
+
+  "machine_id":   "xlf-pi-XXX",
+  "machine_name": "MACHINE NAME HERE",
+  "exercise":     "lat_pulldown",
+
+  "camera": {
+    "placement": "side-on",
+    "angle_deg": 90,
+    "height_m": 1.4,
+    "distance_m": 2.5,
+    "resolution": "1280x720",
+    "fps": 30,
+    "notes": "Mount camera level with the user's elbow at mid-rep"
+  },
+
+  "engagement_zone": {
+    "roi_norm": [0.15, 0.05, 0.85, 0.95],
+    "_how_to_set": "Open pose/label.html, load a video, press B, draw a box around the seat+machine area. The tool copies the normalised coords to clipboard.",
+    "min_overlap_fraction": 0.40,
+    "confirm_frames": 10
+  },
+
+  "weight_stack": {
+    "roi_norm": [0.72, 0.05, 0.92, 0.88],
+    "_how_to_set": "Adjust until the ROI tightly wraps the weight stack plates in the camera view. Set SHOW_PREVIEW=True in config.py to see overlay.",
+    "move_threshold_px": 1.5,
+    "move_frame_ratio": 0.30,
+    "weight_stack_kg": []
+  },
+
+  "rep_detection": {
+    "angle_top_threshold":    130,
+    "angle_bottom_threshold":  90,
+    "min_rep_duration_ms":    300,
+    "max_rep_duration_ms":  12000,
+    "min_rom_degrees":         40,
+    "_notes": "Adjust thresholds per machine. See pi/config.py for full list."
+  },
+
+  "onnx_model": {
+    "path": "",
+    "_how_to_set": "After training, scp the .onnx here: /home/pi/xlf/models/activity_v1.onnx then set path above.",
+    "confidence_threshold": 0.65,
+    "review_threshold": 0.50
+  },
+
+  "supabase": {
+    "url": "",
+    "service_key": ""
+  },
+
+  "github_review": {
+    "token": "",
+    "repo": "Matt-xlfitness/gym-ai-system",
+    "cooldown_s": 30
+  },
+
+  "notes": ""
+}

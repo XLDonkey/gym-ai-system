@@ -78,12 +78,76 @@ jobs:
           print('engagement_detector: OK')
           "
 
+      - name: Test ONNX classifier (no model file needed)
+        run: |
+          python3 -c "
+          import sys, numpy as np
+          sys.path.insert(0, 'pi')
+          from onnx_classifier import ONNXActivityClassifier, ClassifierResult, CLASS_NAMES, NUM_CLASSES
+          assert NUM_CLASSES == 8, f'Expected 8 classes, got {NUM_CLASSES}'
+          # No model file — should load gracefully and return class 0
+          c = ONNXActivityClassifier('/tmp/nonexistent.onnx')
+          assert not c.ready
+          r = c.update(np.zeros(51, dtype='float32'))
+          assert r.class_id == 0
+          print('onnx_classifier: OK (no-model graceful fallback)')
+          "
+
+      - name: Test activity state machine
+        run: |
+          python3 -c "
+          import sys, numpy as np
+          sys.path.insert(0, 'pi')
+          from activity_state_machine import ActivityStateMachine, ENGAGE_FRAMES
+
+          sm = ActivityStateMachine()
+          assert sm.phase == 'IDLE'
+
+          # Simulate on_machine logits — class 2 should win in IDLE
+          logits_on_machine = np.array([-10,-10, 5,-10,-10,-10,-10,-10], dtype='float32')
+          for _ in range(ENGAGE_FRAMES - 1):
+              r = sm.update(logits_on_machine)
+              assert sm.phase == 'IDLE', 'Should still be IDLE before threshold'
+
+          r = sm.update(logits_on_machine)
+          assert sm.phase == 'ENGAGED', 'Should be ENGAGED after threshold frames'
+          assert r.just_engaged
+
+          # In ENGAGED phase, rep classes should be reachable
+          logits_good_rep = np.array([-10,-10,-10, 5,-10,-10,-10,-10], dtype='float32')
+          r2 = sm.update(logits_good_rep)
+          assert r2.class_id == 3, f'Expected good_rep(3), got {r2.class_id}'
+          assert sm.phase == 'ENGAGED'
+
+          # Rep classes must NOT be reachable in IDLE phase
+          sm2 = ActivityStateMachine()
+          logits_bad_rep = np.array([-10,-10,-10,-10, 5,-10,-10,-10], dtype='float32')
+          r3 = sm2.update(logits_bad_rep)
+          assert r3.class_id != 4, f'bad_rep should be masked in IDLE, got class {r3.class_id}'
+          print(f'state_machine: OK (IDLE blocked bad_rep, got class {r3.class_id} instead)')
+          "
+
       - name: Validate configs JSON
         run: |
           python3 -c "
           import json, glob
           for f in glob.glob('configs/*.json') + glob.glob('pose/machine_configs/*.json'):
             with open(f) as fh:
-              json.load(fh)
+              data = json.load(fh)
+            # Skip template file
+            if '_instructions' not in data:
+              assert 'machine_id' in data, f'{f} missing machine_id'
             print(f'valid JSON: {f}')
+          "
+
+      - name: Validate model registry
+        run: |
+          python3 -c "
+          import json
+          with open('models/registry.json') as f:
+            reg = json.load(f)
+          assert 'models' in reg
+          for category, info in reg['models'].items():
+            assert 'versions' in info or '_description' in info
+          print('registry.json: OK')
           "

@@ -48,7 +48,7 @@ cd "$HOME_DIR"
 if [ -d "$REPO_DIR" ]; then
     cd "$REPO_DIR" && git pull origin main
 else
-    git clone https://github.com/XLDonkey/gym-ai-system.git
+    git clone https://github.com/Matt-xlfitness/gym-ai-system.git
 fi
 
 # 6. Download YOLO model

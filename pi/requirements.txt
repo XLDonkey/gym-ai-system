@@ -1,0 +1,24 @@
+# XL Fitness AI Overseer — Pi Dependencies
+# Install inside the Pi virtual environment:
+#   source ~/xlf-env/bin/activate
+#   pip install -r requirements.txt
+#
+# NOTE: ultralytics/torch are heavy. On a Pi 5 allow 10–15 min for install.
+# NOTE: insightface requires a C compiler — sudo apt install build-essential
+
+# Core CV + pose detection
+ultralytics>=8.0.0          # YOLOv11 pose model
+opencv-python>=4.8.0        # video capture + optical flow
+numpy>=1.24.0
+
+# ONNX inference (runs the trained LSTM on the Pi — no GPU needed)
+onnxruntime>=1.16.0         # CPU inference; swap for onnxruntime-gpu on CUDA
+
+# Member database
+requests>=2.31.0            # Supabase REST calls + GitHub clip uploads
+
+# Face recognition (optional — set FACE_RECOGNITION_ENABLED=False to skip)
+insightface>=0.7.3          # ArcFace buffalo_sc model
+
+# Session recording upload
+# rclone is installed via apt in setup.sh — no pip package needed
