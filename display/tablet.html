@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XL Fitness — Machine Display</title>
+<style>
+  :root {
+    --bg:       #0a0a0f;
+    --card:     #12121a;
+    --border:   #1e1e2e;
+    --green:    #22c55e;
+    --yellow:   #eab308;
+    --red:      #ef4444;
+    --blue:     #3b82f6;
+    --purple:   #a855f7;
+    --text:     #f8fafc;
+    --muted:    #64748b;
+    --radius:   16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── Top bar ─────────────────────────────────────────── */
+  #topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  #machine-name { font-size: 15px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+  #ws-status { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  #ws-status.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  /* ── Member strip ────────────────────────────────────── */
+  #member-strip {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    min-height: 72px;
+  }
+  #member-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800; color: var(--text);
+    flex-shrink: 0;
+  }
+  #member-name  { font-size: 22px; font-weight: 800; }
+  #member-state { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  #weight-badge {
+    margin-left: auto;
+    background: var(--border);
+    border-radius: 10px;
+    padding: 8px 16px;
+    text-align: center;
+  }
+  #weight-value { font-size: 24px; font-weight: 900; }
+  #weight-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* ── Rep counter ─────────────────────────────────────── */
+  #rep-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 20px;
+  }
+  #rep-label { font-size: 13px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+  #rep-count {
+    font-size: clamp(100px, 25vw, 180px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    transition: color 0.15s;
+  }
+  #rep-count.flash { animation: flash 0.3s ease; }
+  @keyframes flash {
+    0%   { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  #form-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .form-pill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .form-pill.good    { background: #15803d22; color: var(--green); border: 1px solid #15803d66; }
+  .form-pill.partial { background: #92400e22; color: var(--yellow); border: 1px solid #92400e66; }
+  .form-pill.bad     { background: #7f1d1d22; color: var(--red);    border: 1px solid #7f1d1d66; }
+
+  /* ── Activity state bar ──────────────────────────────── */
+  #activity-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  #activity-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+  #activity-label { font-size: 14px; font-weight: 600; }
+  #confidence-bar-wrap { margin-left: auto; width: 80px; }
+  #confidence-bar-bg { background: var(--border); border-radius: 4px; height: 6px; overflow: hidden; }
+  #confidence-bar-fill { height: 100%; border-radius: 4px; background: var(--blue); width: 0%; transition: width 0.3s; }
+  #confidence-pct { font-size: 11px; color: var(--muted); text-align: right; margin-top: 3px; }
+
+  /* ── Bottom session summary ──────────────────────────── */
+  #session-bar {
+    display: flex;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .stat-cell {
+    flex: 1;
+    padding: 14px 10px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-val { font-size: 22px; font-weight: 800; }
+  .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+  /* ── Idle overlay ────────────────────────────────────── */
+  #idle-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: var(--bg);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 10;
+  }
+  #idle-overlay.visible { display: flex; }
+  #idle-logo { font-size: 48px; font-weight: 900; letter-spacing: -0.04em; }
+  #idle-logo span { color: var(--green); }
+  #idle-machine { font-size: 18px; color: var(--muted); font-weight: 600; }
+  #idle-hint { font-size: 14px; color: var(--border); margin-top: 30px; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div id="topbar">
+  <div id="machine-name">Connecting…</div>
+  <div id="ws-status"></div>
+</div>
+
+<!-- Member identity + weight -->
+<div id="member-strip">
+  <div id="member-avatar">?</div>
+  <div>
+    <div id="member-name">—</div>
+    <div id="member-state">Waiting for member</div>
+  </div>
+  <div id="weight-badge">
+    <div id="weight-value">—</div>
+    <div id="weight-label">kg</div>
+  </div>
+</div>
+
+<!-- Rep counter -->
+<div id="rep-section">
+  <div id="rep-label">Reps this set</div>
+  <div id="rep-count">0</div>
+  <div id="form-row">
+    <div class="form-pill good"   id="pill-good">0 Good</div>
+    <div class="form-pill partial" id="pill-partial">0 Partial</div>
+    <div class="form-pill bad"    id="pill-bad">0 Bad</div>
+  </div>
+</div>
+
+<!-- Activity state -->
+<div id="activity-bar">
+  <div id="activity-dot"></div>
+  <div id="activity-label">No person detected</div>
+  <div id="confidence-bar-wrap">
+    <div id="confidence-bar-bg"><div id="confidence-bar-fill"></div></div>
+    <div id="confidence-pct">0%</div>
+  </div>
+</div>
+
+<!-- Session summary -->
+<div id="session-bar">
+  <div class="stat-cell">
+    <div class="stat-val" id="stat-sets">0</div>
+    <div class="stat-lbl">Sets</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-val" id="stat-reps">0</div>
+    <div class="stat-lbl">Total Reps</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-val" id="stat-volume">—</div>
+    <div class="stat-lbl">Volume (kg)</div>
+  </div>
+</div>
+
+<!-- Idle overlay (shown when no person at machine) -->
+<div id="idle-overlay" class="visible">
+  <div id="idle-logo">XL<span>Fitness</span></div>
+  <div id="idle-machine">Connecting to machine…</div>
+  <div id="idle-hint">Sit down to start your session</div>
+</div>
+
+<script>
+// ── Config ─────────────────────────────────────────────────────────────────
+// Auto-detect Pi IP from the URL this page was served from,
+// or fall back to localhost for testing.
+const PI_IP   = window.location.hostname !== '' ? window.location.hostname : 'localhost';
+const WS_PORT = 8788;
+const WS_URL  = `ws://${PI_IP}:${WS_PORT}`;
+
+// ── Activity colours and labels ────────────────────────────────────────────
+const ACTIVITY = {
+  0: { label: 'No person',     colour: '#64748b', idle: true  },
+  1: { label: 'Person nearby', colour: '#64748b', idle: true  },
+  2: { label: 'Seated — ready',colour: '#3b82f6', idle: false },
+  3: { label: 'Good rep',      colour: '#22c55e', idle: false },
+  4: { label: 'Bad rep',       colour: '#ef4444', idle: false },
+  5: { label: 'Adjusting',     colour: '#eab308', idle: false },
+  6: { label: 'Resting',       colour: '#a855f7', idle: false },
+  7: { label: 'Partial rep',   colour: '#f97316', idle: false },
+};
+
+// ── State ──────────────────────────────────────────────────────────────────
+let prevRepCount = 0;
+let formGood = 0, formPartial = 0, formBad = 0;
+let totalVolume = 0;
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+
+function setRepColour(actId) {
+  const col = ACTIVITY[actId]?.colour || '#64748b';
+  $('rep-count').style.color = col;
+  $('activity-dot').style.background = col;
+  $('activity-dot').style.boxShadow = `0 0 6px ${col}`;
+}
+
+function flashRep() {
+  const el = $('rep-count');
+  el.classList.remove('flash');
+  void el.offsetWidth; // reflow
+  el.classList.add('flash');
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render(s) {
+  const act = ACTIVITY[s.activity_id] || ACTIVITY[0];
+
+  // Machine name
+  $('machine-name').textContent = s.machine_name || 'XL Fitness';
+
+  // Member
+  const name = s.member_name || (s.phase === 'ENGAGED' ? 'Member' : null);
+  if (name) {
+    $('member-name').textContent = name;
+    $('member-avatar').textContent = name[0].toUpperCase();
+    $('member-state').textContent = act.label;
+    $('idle-overlay').classList.remove('visible');
+  } else {
+    $('idle-machine').textContent = s.machine_name || 'Machine';
+    $('idle-overlay').classList.add('visible');
+  }
+
+  // Weight
+  $('weight-value').textContent = s.weight_kg != null ? s.weight_kg.toFixed(1) : '—';
+
+  // Rep counter — flash on increment
+  const newReps = s.rep_count || 0;
+  if (newReps > prevRepCount) {
+    flashRep();
+    // Update form tallies
+    if (s.activity_id === 3) formGood++;
+    else if (s.activity_id === 7) formPartial++;
+    else if (s.activity_id === 4) formBad++;
+  }
+  if (newReps < prevRepCount) {
+    // Set reset — new set started
+    formGood = 0; formPartial = 0; formBad = 0;
+  }
+  prevRepCount = newReps;
+
+  $('rep-count').textContent = newReps;
+  setRepColour(s.activity_id);
+
+  $('pill-good').textContent    = `${formGood} Good`;
+  $('pill-partial').textContent = `${formPartial} Partial`;
+  $('pill-bad').textContent     = `${formBad} Bad`;
+
+  // Activity bar
+  $('activity-label').textContent = act.label;
+  const pct = Math.round((s.confidence || 0) * 100);
+  $('confidence-bar-fill').style.width = pct + '%';
+  $('confidence-pct').textContent = pct + '%';
+
+  // Session summary
+  $('stat-sets').textContent = s.session_sets || 0;
+  $('stat-reps').textContent = s.session_reps || 0;
+  if (s.weight_kg && s.session_reps) {
+    $('stat-volume').textContent = (s.weight_kg * s.session_reps).toFixed(0);
+  }
+}
+
+// ── WebSocket connection ────────────────────────────────────────────────────
+function connect() {
+  const ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+    $('ws-status').classList.add('connected');
+  };
+
+  ws.onmessage = e => {
+    try { render(JSON.parse(e.data)); }
+    catch(err) { console.error('Parse error', err); }
+  };
+
+  ws.onclose = () => {
+    $('ws-status').classList.remove('connected');
+    $('idle-machine').textContent = 'Reconnecting…';
+    $('idle-overlay').classList.add('visible');
+    setTimeout(connect, 2000);  // auto-reconnect
+  };
+
+  ws.onerror = () => ws.close();
+}
+
+connect();
+</script>
+</body>
+</html>

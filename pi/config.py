@@ -112,3 +112,18 @@ GITHUB_REVIEW_TOKEN  = ""   # ghp_... Personal Access Token
 GITHUB_REVIEW_REPO   = "Matt-xlfitness/gym-ai-system"
 CLIP_REPORTER_ENABLED = True
 CLIP_COOLDOWN_S       = 30.0   # minimum seconds between uploads
+
+# ── Display Layer ─────────────────────────────────────────────────────────────
+# WebSocket server — broadcasts live state to the tablet mounted on this machine.
+# The tablet opens display/tablet.html and connects to ws://[this-pi-ip]:8788.
+TABLET_DISPLAY_ENABLED = True
+TABLET_WS_PORT         = 8788   # WebSocket port for tablet connection
+
+# Power Automate webhook — fires when a set completes.
+# Set up an HTTP trigger flow in Power Automate and paste the URL here.
+# Leave blank to log set completions to console only (safe default).
+POWER_AUTOMATE_URL     = ""   # https://prod-xx.westeurope.logic.azure.com/...
+
+# Staff floor view — open display/staff.html on any browser on the local network.
+# No config needed — staff.html connects directly to each Pi's WebSocket.
+# Access from Mac Mini: open http://mac-mini-ip/staff  (after running make serve-display)

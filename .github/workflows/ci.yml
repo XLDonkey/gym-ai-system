@@ -22,7 +22,7 @@ jobs:
         run: pip install ruff
 
       - name: Lint
-        run: ruff check pi/ face/ members/ train/ --ignore E501,E402
+        run: ruff check pi/ face/ members/ train/ weight_id/ user_tracking/ e_weight/ --ignore E501,E402
 
   test:
     name: Run Tests
@@ -138,6 +138,46 @@ jobs:
             if '_instructions' not in data:
               assert 'machine_id' in data, f'{f} missing machine_id'
             print(f'valid JSON: {f}')
+          "
+
+      - name: Test weight_id imports
+        run: |
+          python3 -c "
+          import sys; sys.path.insert(0, '.')
+          from weight_id.colour_matcher import ColourMatcher, DEFAULT_COLOURS
+          assert len(DEFAULT_COLOURS) == 5, 'Expected 5 plate colours'
+          m = ColourMatcher()
+          print('weight_id.colour_matcher: OK')
+          from weight_id.detector import WeightDetector, WeightReading
+          d = WeightDetector(enabled=False)
+          print('weight_id.detector: OK')
+          "
+
+      - name: Test user_tracking imports
+        run: |
+          python3 -c "
+          import sys; sys.path.insert(0, '.')
+          from user_tracking.person_db import PersonDB, TrackedPerson
+          db = PersonDB()
+          tid = db.register_unknown(zone='test')
+          assert db.get_member(tid) is not None
+          db.expire_old_tracks()
+          print('user_tracking.person_db: OK')
+          from user_tracking.gym_tracker import GymTracker, _iou
+          assert _iou((0,0,1,1),(0,0,1,1)) == 1.0
+          assert _iou((0,0,1,1),(2,2,3,3)) == 0.0
+          print('user_tracking.gym_tracker: OK')
+          "
+
+      - name: Test e_weight import
+        run: |
+          python3 -c "
+          import sys; sys.path.insert(0, '.')
+          from e_weight.stack_client import StackClient
+          c = StackClient(enabled=False)
+          assert c.get_weight() is None
+          assert c.set_weight(50.0) == False
+          print('e_weight.stack_client: OK (disabled mode)')
           "
 
       - name: Validate model registry

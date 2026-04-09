@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XL Fitness — Staff Floor View</title>
+<style>
+  :root {
+    --bg:     #0a0a0f;
+    --card:   #12121a;
+    --border: #1e1e2e;
+    --green:  #22c55e;
+    --yellow: #eab308;
+    --red:    #ef4444;
+    --blue:   #3b82f6;
+    --purple: #a855f7;
+    --text:   #f8fafc;
+    --muted:  #64748b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── Header ────────────────────────────────────────────── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo { font-size: 18px; font-weight: 900; }
+  .logo span { color: var(--green); }
+  #floor-stats { display: flex; gap: 28px; }
+  .hstat { text-align: center; }
+  .hstat-val { font-size: 20px; font-weight: 800; }
+  .hstat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  #last-update { font-size: 12px; color: var(--muted); }
+
+  /* ── Machine grid ──────────────────────────────────────── */
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    padding: 24px;
+  }
+
+  /* ── Machine card ──────────────────────────────────────── */
+  .machine-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .machine-card.active  { border-color: #22c55e44; }
+  .machine-card.resting { border-color: #a855f744; }
+  .machine-card.idle    { opacity: 0.55; }
+  .machine-card.alert   { border-color: #ef444466; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-machine-name { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .status-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--muted); flex-shrink: 0;
+  }
+
+  .card-body { padding: 14px; display: flex; gap: 12px; align-items: center; }
+
+  .card-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .card-info { flex: 1; min-width: 0; }
+  .card-member { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-activity { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .card-reps {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .card-rep-count { font-size: 32px; font-weight: 900; line-height: 1; }
+  .card-rep-label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+
+  .card-footer {
+    display: flex;
+    border-top: 1px solid var(--border);
+  }
+  .card-stat {
+    flex: 1;
+    padding: 8px 10px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .card-stat:last-child { border-right: none; }
+  .cs-val { font-size: 14px; font-weight: 700; }
+  .cs-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* ── Add machine panel ─────────────────────────────────── */
+  #add-machine {
+    margin: 0 24px 24px;
+    background: var(--card);
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  #add-machine h3 { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+  .add-row { display: flex; gap: 10px; }
+  .add-row input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .add-row button {
+    background: var(--green);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">XL<span>Fitness</span> — Floor View</div>
+  <div id="floor-stats">
+    <div class="hstat"><div class="hstat-val" id="h-members">0</div><div class="hstat-lbl">Members</div></div>
+    <div class="hstat"><div class="hstat-val" id="h-active">0</div><div class="hstat-lbl">Active</div></div>
+    <div class="hstat"><div class="hstat-val" id="h-resting">0</div><div class="hstat-lbl">Resting</div></div>
+    <div class="hstat"><div class="hstat-val" id="h-idle">0</div><div class="hstat-lbl">Idle</div></div>
+  </div>
+  <div id="last-update">—</div>
+</header>
+
+<div id="grid"></div>
+
+<div id="add-machine">
+  <h3>Connect a machine Pi</h3>
+  <div class="add-row">
+    <input id="pi-ip"   placeholder="Pi IP address  e.g. 192.168.1.50" />
+    <input id="pi-name" placeholder="Machine name  e.g. Lat Pulldown" />
+    <button onclick="addMachine()">Connect</button>
+  </div>
+</div>
+
+<script>
+// ── Machine connections ─────────────────────────────────────────────────────
+// machines: { id: { ip, name, ws, state, card } }
+const machines = {};
+
+const ACTIVITY_LABEL = [
+  'No person', 'Person nearby', 'Seated — ready',
+  'Good rep', 'Bad rep', 'Adjusting',
+  'Resting', 'Partial rep',
+];
+const ACTIVITY_COLOUR = [
+  '#64748b','#64748b','#3b82f6',
+  '#22c55e','#ef4444','#eab308',
+  '#a855f7','#f97316',
+];
+
+function addMachine(ip, name) {
+  ip   = ip   || document.getElementById('pi-ip').value.trim();
+  name = name || document.getElementById('pi-name').value.trim() || `Machine (${ip})`;
+  if (!ip) return;
+
+  const id = ip;
+  if (machines[id]) return;
+
+  const card = buildCard(id, name);
+  document.getElementById('grid').appendChild(card);
+  machines[id] = { ip, name, ws: null, state: null, card };
+  connectMachine(id);
+
+  document.getElementById('pi-ip').value   = '';
+  document.getElementById('pi-name').value = '';
+
+  // Persist to localStorage
+  const saved = JSON.parse(localStorage.getItem('xlf_machines') || '[]');
+  if (!saved.find(m => m.ip === ip)) {
+    saved.push({ ip, name });
+    localStorage.setItem('xlf_machines', JSON.stringify(saved));
+  }
+}
+
+function connectMachine(id) {
+  const m   = machines[id];
+  const url = `ws://${m.ip}:8788`;
+  const ws  = new WebSocket(url);
+
+  ws.onopen    = () => updateCardStatus(id, 'connected');
+  ws.onmessage = e => { try { onState(id, JSON.parse(e.data)); } catch(err) {} };
+  ws.onclose   = () => {
+    updateCardStatus(id, 'offline');
+    setTimeout(() => connectMachine(id), 3000);
+  };
+  ws.onerror = () => ws.close();
+  m.ws = ws;
+}
+
+function onState(id, s) {
+  machines[id].state = s;
+  renderCard(id, s);
+  updateHeaderStats();
+  document.getElementById('last-update').textContent =
+    'Updated ' + new Date().toLocaleTimeString();
+}
+
+// ── Card builder ────────────────────────────────────────────────────────────
+function buildCard(id, name) {
+  const card = document.createElement('div');
+  card.className = 'machine-card idle';
+  card.id = 'card-' + id.replace(/\./g, '_');
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-machine-name">${name}</div>
+      <div class="status-dot" id="dot-${card.id}"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-avatar" id="av-${card.id}">?</div>
+      <div class="card-info">
+        <div class="card-member"   id="mem-${card.id}">—</div>
+        <div class="card-activity" id="act-${card.id}">Connecting…</div>
+      </div>
+      <div class="card-reps">
+        <div class="card-rep-count" id="reps-${card.id}">0</div>
+        <div class="card-rep-label">reps</div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="card-stat"><div class="cs-val" id="wt-${card.id}">—</div><div class="cs-lbl">kg</div></div>
+      <div class="card-stat"><div class="cs-val" id="sets-${card.id}">0</div><div class="cs-lbl">Sets</div></div>
+      <div class="card-stat"><div class="cs-val" id="vol-${card.id}">—</div><div class="cs-lbl">Volume</div></div>
+    </div>`;
+  return card;
+}
+
+function renderCard(id, s) {
+  const cid = 'card-' + id.replace(/\./g, '_');
+  const card = document.getElementById(cid);
+  if (!card) return;
+
+  const actId  = s.activity_id || 0;
+  const colour = ACTIVITY_COLOUR[actId] || '#64748b';
+  const label  = ACTIVITY_LABEL[actId]  || 'Unknown';
+  const name   = s.member_name || (s.phase === 'ENGAGED' ? 'Member' : null);
+
+  // Card state class
+  card.className = 'machine-card ' +
+    (actId === 6                 ? 'resting' :
+     actId >= 3 && actId !== 6  ? 'active'  :
+     actId === 2                 ? 'active'  : 'idle');
+
+  document.getElementById(`dot-${cid}`).style.background   = colour;
+  document.getElementById(`dot-${cid}`).style.boxShadow    = actId >= 2 ? `0 0 6px ${colour}` : '';
+  document.getElementById(`av-${cid}`).textContent          = name ? name[0].toUpperCase() : '?';
+  document.getElementById(`mem-${cid}`).textContent         = name || '—';
+  document.getElementById(`act-${cid}`).textContent         = label;
+  document.getElementById(`act-${cid}`).style.color         = colour;
+  document.getElementById(`reps-${cid}`).textContent        = s.rep_count || 0;
+  document.getElementById(`reps-${cid}`).style.color        = colour;
+  document.getElementById(`wt-${cid}`).textContent          = s.weight_kg != null ? s.weight_kg.toFixed(1) : '—';
+  document.getElementById(`sets-${cid}`).textContent        = s.session_sets || 0;
+  const vol = s.weight_kg && s.session_reps ? (s.weight_kg * s.session_reps).toFixed(0) : '—';
+  document.getElementById(`vol-${cid}`).textContent         = vol;
+}
+
+function updateCardStatus(id, status) {
+  const cid = 'card-' + id.replace(/\./g, '_');
+  const dot = document.getElementById(`dot-${cid}`);
+  const act = document.getElementById(`act-${cid}`);
+  if (!dot) return;
+  if (status === 'offline') {
+    dot.style.background = '#64748b';
+    dot.style.boxShadow  = '';
+    if (act) act.textContent = 'Offline — reconnecting…';
+  }
+}
+
+function updateHeaderStats() {
+  let members = 0, active = 0, resting = 0, idle = 0;
+  for (const m of Object.values(machines)) {
+    const s = m.state;
+    if (!s) { idle++; continue; }
+    const a = s.activity_id || 0;
+    if (a === 0 || a === 1) { idle++; }
+    else if (a === 6) { members++; resting++; }
+    else if (a >= 2)  { members++; active++;  }
+    else              { idle++; }
+  }
+  document.getElementById('h-members').textContent = members;
+  document.getElementById('h-active').textContent  = active;
+  document.getElementById('h-resting').textContent = resting;
+  document.getElementById('h-idle').textContent    = idle;
+}
+
+// ── Restore from localStorage ────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const saved = JSON.parse(localStorage.getItem('xlf_machines') || '[]');
+  saved.forEach(m => addMachine(m.ip, m.name));
+
+  // Demo mode — add localhost if nothing saved
+  if (!saved.length) {
+    addMachine('localhost', 'Demo Machine');
+  }
+});
+</script>
+</body>
+</html>
