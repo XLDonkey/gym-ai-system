@@ -1,11 +1,17 @@
 # XL Fitness AI Overseer — Common Commands
 # Run from the repo root on your Mac Mini.
 # Usage: make <target>
+#
+# 4 Projects:
+#   1. Rep Tracking   — LSTM activity classifier (train/ + pi/)
+#   2. Weight ID      — AlphaFit plate colour detection (weight_id/)
+#   3. User Tracking  — Entry face ID + gym floor tracking (user_tracking/ + face/)
+#   4. E-Weight       — Electric motor stack API client (e_weight/)  [Phase 2]
 
-REPO   = Matt-xlfitness/gym-ai-system
+REPO   = xldonkey/gym-ai-system
 BRANCH = main
 
-# ── Training ──────────────────────────────────────────────────────────────────
+# ── Project 1: Rep Tracking ───────────────────────────────────────────────────
 
 # Extract keypoint sequences from annotated videos (run before train)
 extract:
@@ -97,8 +103,45 @@ EOF
 
 # ── Development ───────────────────────────────────────────────────────────────
 
+# ── Project 2: Weight ID ──────────────────────────────────────────────────────
+
+# Train YOLOv11 weight plate detector (Mac Mini, MPS)
+train-weight:
+	python3 weight_id/train.py \
+		--data data/weight_plates \
+		--output models/weights/weight_id_v1.onnx
+
+# Quick colour-scan test (no YOLO needed — uses webcam or image)
+test-weight:
+	python3 - <<'EOF'
+import cv2, sys
+from weight_id.detector import WeightDetector
+det = WeightDetector()
+cap = cv2.VideoCapture(0)
+ret, frame = cap.read()
+cap.release()
+if ret:
+    r = det.identify(frame)
+    print(f"Weight: {r.total_kg} kg  method={r.method}  conf={r.confidence:.0%}")
+else:
+    print("No camera — test skipped")
+EOF
+
+# ── Project 3: User Tracking ──────────────────────────────────────────────────
+
+# Enrol a new member's face (follow prompts — uses webcam)
+enrol:
+	@echo "Usage: make enrol NAME='Matthew'"
+	python3 face/enroll_member.py --name "$(NAME)"
+
+# Run entry camera standalone (registers members in PersonDB as they walk in)
+entry-camera:
+	python3 user_tracking/entry_camera.py
+
+# ── Development ───────────────────────────────────────────────────────────────
+
 lint:
-	ruff check pi/ face/ members/ train/ --ignore E501,E402
+	ruff check pi/ face/ members/ train/ weight_id/ user_tracking/ e_weight/ --ignore E501,E402
 
 test:
 	pytest train/test_synthetic.py -v
@@ -119,4 +162,4 @@ sync:
 	rsync -avz --progress $(PI):~/xlf_recordings/ data/raw/
 	@echo "Sync complete. New videos in data/raw/"
 
-.PHONY: extract train train-from-raw autolabel deploy logs ssh stats pending lint test annotate review sync
+.PHONY: extract train train-from-raw autolabel deploy logs ssh stats pending lint test annotate review sync train-weight test-weight enrol entry-camera

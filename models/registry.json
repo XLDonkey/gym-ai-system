@@ -1,129 +1,213 @@
 {
-  "_comment": "XL Fitness AI — Model version registry. Weights are NOT in git. Download from Google Drive or deploy via scp to Pi.",
-  "_pipeline": "Mac Mini trains in PyTorch → export ONNX → scp to Pi → Pi runs onnxruntime",
+  "_comment": "XL Fitness AI Overseer — Model registry. Weights are NOT in git. Deploy via 'make deploy PI=...'",
+  "_pipeline": "Mac Mini trains PyTorch → exports ONNX → scp to Pi → Pi runs onnxruntime",
+
+  "_overview": {
+    "project_1_rep_tracking":  "LSTM activity classifier — 8 classes, 30-frame keypoint window",
+    "project_2_weight_id":     "YOLOv11 + HSV colour — identifies AlphaFit barbell plate weights",
+    "project_3_user_tracking": "InsightFace ArcFace entry ID + IoU gym floor tracking",
+    "project_4_e_weight":      "Electric motor stack API — Phase 2, no camera needed"
+  },
 
   "models": {
-    "activity": {
-      "_description": "8-class gym activity classifier. The main 'brain' — replaces rule-based counting. Softmax output = one state at a time (the gate).",
-      "_classes": ["no_person","user_present","on_machine","good_rep","bad_rep","false_rep","resting","half_rep"],
-      "_input": "30-frame YOLO keypoint window (30 × 51 features)",
-      "_architecture": "LSTM(51→128) → Dropout(0.3) → Linear(128→64) → ReLU → Linear(64→8) → softmax",
-      "versions": [
-        {
-          "version": "v0.1-rule-based",
-          "type": "rule_based",
-          "description": "Angle threshold state machine — baseline, no ML",
-          "deployed": true,
-          "accuracy": null,
-          "training_samples": 0,
-          "onnx_file": null,
-          "drive_folder": null,
-          "notes": "Current live system on all Pis"
-        },
-        {
-          "version": "v0.2-mlp",
-          "type": "mlp",
-          "description": "Fast MLP for < 500 samples — stepping stone before LSTM",
-          "deployed": false,
-          "accuracy": null,
-          "training_samples": 0,
-          "onnx_file": "activity_v0.2_mlp.onnx",
-          "drive_folder": null,
-          "notes": "Train with train/train_model.py once 60+ samples collected"
-        },
-        {
-          "version": "v1.0-lstm",
-          "type": "lstm",
-          "description": "Full LSTM — target model. Requires 300+ annotated segments.",
-          "deployed": false,
-          "accuracy": null,
-          "training_samples": 0,
-          "onnx_file": "activity_v1.0_lstm.onnx",
-          "drive_folder": null,
-          "notes": "Train with train/train_pytorch.py. Retrains automatically using Pi review clips."
-        }
-      ],
-      "active_version": "v0.1-rule-based",
-      "training_target": {
-        "min_annotations": 300,
-        "min_per_class": 30,
-        "annotation_tool": "pose/label.html",
-        "extract_script": "train/extract_sequences.py",
-        "train_script": "train/train_pytorch.py"
-      }
-    },
-
-    "face_id": {
-      "_description": "Member identification via ArcFace embeddings. Runs InsightFace buffalo_sc on Pi.",
-      "_input": "Cropped face image (112×112 RGB)",
-      "_output": "512-dim embedding vector — cosine similarity match against member registry",
-      "_architecture": "InsightFace buffalo_sc (pre-trained ArcFace — not retrained by us)",
-      "versions": [
-        {
-          "version": "buffalo_sc",
-          "type": "arcface",
-          "description": "InsightFace buffalo_sc — fast, accurate for 4–50 member gym",
-          "deployed": true,
-          "accuracy": null,
-          "onnx_file": null,
-          "drive_folder": null,
-          "notes": "Downloaded automatically by insightface. Enrol members via face/enroll_member.py"
-        }
-      ],
-      "active_version": "buffalo_sc"
-    },
 
     "pose_detection": {
-      "_description": "Person detection + keypoint extraction. Runs on Hailo NPU.",
-      "_input": "1280×720 RGB video frame",
-      "_output": "Bounding boxes + 17 COCO keypoints per person",
-      "_architecture": "YOLOv11n-pose — nano, optimised for edge",
+      "_project":      "shared — feeds projects 1, 2, 3",
+      "_description":  "Person detection + 17 COCO keypoints. Runs on Hailo NPU at 30fps.",
+      "_input":        "1280×720 BGR frame",
+      "_output":       "Bounding boxes + 17 keypoints per person",
+      "_architecture": "YOLOv11n-pose (nano)",
       "versions": [
         {
-          "version": "yolo11n-pose",
-          "type": "yolo_pose",
-          "description": "YOLOv11n-pose — nano model, runs at 30fps on Hailo",
-          "deployed": true,
-          "onnx_file": "yolo11n-pose.onnx",
-          "hef_file": "yolo11n-pose.hef",
-          "drive_folder": null,
-          "notes": ".pt auto-downloaded by ultralytics. Convert to .hef for Hailo via hailo_model_zoo."
+          "version":     "yolo11n-pose",
+          "type":        "yolo_pose",
+          "description": "YOLOv11n-pose — nano, 30fps on Hailo AI HAT+",
+          "deployed":    true,
+          "onnx_file":   "yolo11n-pose.onnx",
+          "hef_file":    "yolo11n-pose.hef",
+          "notes":       ".pt auto-downloaded by ultralytics. Convert to .hef for Hailo via hailo_model_zoo."
         }
       ],
       "active_version": "yolo11n-pose"
     },
 
+    "activity_classifier": {
+      "_project":      "Project 1 — Rep Tracking",
+      "_description":  "8-class gym activity classifier. The rep-counting brain. Softmax gate = one state at a time.",
+      "_classes":      ["no_person","user_present","on_machine","good_rep","bad_rep","false_rep","resting","half_rep"],
+      "_input":        "30-frame YOLO keypoint window (30 × 51 features)",
+      "_architecture": "LSTM(51→128) → Dropout(0.3) → Linear(128→64) → ReLU → Linear(64→8) → softmax",
+      "_gating":       "ActivityStateMachine: IDLE phase allows classes 0-2, ENGAGED phase allows 2-7",
+      "versions": [
+        {
+          "version":          "v0.1-rule-based",
+          "type":             "rule_based",
+          "description":      "Angle threshold state machine — baseline, no ML",
+          "deployed":         true,
+          "accuracy":         null,
+          "training_samples": 0,
+          "onnx_file":        null,
+          "notes":            "Current live system. Replace with v1.0-lstm once 300+ annotations collected."
+        },
+        {
+          "version":          "v0.2-mlp",
+          "type":             "mlp",
+          "description":      "Fast MLP — stepping stone before LSTM (< 500 samples)",
+          "deployed":         false,
+          "accuracy":         null,
+          "training_samples": 0,
+          "onnx_file":        "activity_v0.2_mlp.onnx",
+          "notes":            "Train with train/train_pytorch.py once 60+ samples collected."
+        },
+        {
+          "version":          "v1.0-lstm",
+          "type":             "lstm",
+          "description":      "Full LSTM — target model. Requires 300+ annotated segments.",
+          "deployed":         false,
+          "accuracy":         null,
+          "training_samples": 0,
+          "onnx_file":        "activity_v1.0_lstm.onnx",
+          "notes":            "Train with train/train_pytorch.py. Auto-retrains using Pi review clips."
+        }
+      ],
+      "active_version": "v0.1-rule-based",
+      "training_target": {
+        "min_annotations":   300,
+        "min_per_class":     30,
+        "annotation_tool":   "pose/label.html",
+        "extract_script":    "train/extract_sequences.py",
+        "train_script":      "train/train_pytorch.py"
+      }
+    },
+
+    "weight_id": {
+      "_project":      "Project 2 — Weight ID (Free Weights)",
+      "_description":  "Detects AlphaFit barbell plate stripe colours → kg values. Camera looks along sleeve from side.",
+      "_classes":      ["red_plate (25kg)","blue_plate (20kg)","yellow_plate (15kg)","green_plate (10kg)","white_plate (5kg)"],
+      "_input":        "1280×720 BGR frame — camera on barbell frame, side angle",
+      "_architecture": "YOLOv11n object detection + HSV colour verification",
+      "_fallback":     "Whole-frame HSV band scan (colour_matcher.py) if no YOLO model",
+      "versions": [
+        {
+          "version":     "v0-colour-scan",
+          "type":        "deterministic",
+          "description": "HSV colour band scanning — no training needed, moderate accuracy",
+          "deployed":    false,
+          "accuracy":    null,
+          "onnx_file":   null,
+          "notes":       "Works out of the box. Run: python3 weight_id/detector.py for a demo."
+        },
+        {
+          "version":     "v1.0-yolo",
+          "type":        "yolo_detect",
+          "description": "Fine-tuned YOLOv11n on AlphaFit plates — target model",
+          "deployed":    false,
+          "accuracy":    null,
+          "training_samples": 0,
+          "onnx_file":   "weight_id_v1.onnx",
+          "notes":       "Train with: python3 weight_id/train.py. Need 50+ images per plate colour."
+        }
+      ],
+      "active_version": "v0-colour-scan",
+      "training_target": {
+        "min_images_per_class": 50,
+        "dataset_path":         "data/weight_plates/",
+        "train_script":         "weight_id/train.py",
+        "colour_config":        "configs/weight_plate_colours.json"
+      }
+    },
+
+    "face_id": {
+      "_project":      "Project 3 — User Tracking (entry camera)",
+      "_description":  "Member identification via ArcFace embeddings at the gym door.",
+      "_input":        "Cropped face image (112×112 RGB)",
+      "_output":       "512-dim embedding → cosine similarity match against member registry",
+      "_architecture": "InsightFace buffalo_sc (pre-trained ArcFace — not retrained by us)",
+      "versions": [
+        {
+          "version":     "buffalo_sc",
+          "type":        "arcface",
+          "description": "InsightFace buffalo_sc — fast, accurate for 4–50 member gym",
+          "deployed":    true,
+          "accuracy":    null,
+          "onnx_file":   null,
+          "notes":       "Auto-downloaded by insightface. Enrol members: python3 face/enroll_member.py"
+        }
+      ],
+      "active_version": "buffalo_sc"
+    },
+
+    "gym_tracker": {
+      "_project":      "Project 3 — User Tracking (gym floor)",
+      "_description":  "IoU-based person tracker — follows people across the gym floor within one camera zone.",
+      "_input":        "YOLO person bounding boxes (from pose_detection model)",
+      "_output":       "Track IDs linked to member identities in PersonDB",
+      "_architecture": "IoU matching (deterministic) + InsightFace mid-floor face checks",
+      "versions": [
+        {
+          "version":     "v1.0-iou",
+          "type":        "deterministic",
+          "description": "Greedy IoU tracker — no ML, works out of the box",
+          "deployed":    false,
+          "accuracy":    null,
+          "onnx_file":   null,
+          "notes":       "Phase 2: upgrade to ByteTrack for multi-camera cross-zone tracking."
+        }
+      ],
+      "active_version": "v1.0-iou"
+    },
+
     "weight_verifier": {
-      "_description": "Confirms the weight stack actually moved during a rep. Prevents phantom reps.",
-      "_input": "ROI crop of weight stack (video frames during rep)",
-      "_output": "bool — did the weight move?",
+      "_project":      "Project 2 — Weight ID (rep validation)",
+      "_description":  "Confirms the weight stack actually moved during a rep (prevents phantom reps).",
+      "_input":        "ROI crop of weight stack across rep frames",
+      "_output":       "bool — did the weight move?",
       "_architecture": "Dense optical flow (Farneback) — deterministic, no ML",
       "versions": [
         {
-          "version": "v1.0-optical-flow",
-          "type": "deterministic",
+          "version":     "v1.0-optical-flow",
+          "type":        "deterministic",
           "description": "Farneback optical flow on weight stack ROI",
-          "deployed": true,
-          "accuracy": null,
-          "onnx_file": null,
-          "notes": "Implemented in pi/weight_tracker.py. Calibrate WEIGHT_STACK_ROI in config.py."
+          "deployed":    true,
+          "onnx_file":   null,
+          "notes":       "In pi/weight_tracker.py. Calibrate WEIGHT_STACK_ROI in pi/config.py."
         }
       ],
       "active_version": "v1.0-optical-flow"
+    },
+
+    "e_weight_stack": {
+      "_project":      "Project 4 — E-Weight (electric motor stacks)",
+      "_description":  "Electric brushless motor weight stacks for cable machines. Weight read from motor API.",
+      "_input":        "HTTP GET /api/weight → {weight_kg, locked}",
+      "_output":       "float — exact weight in kg (100% accurate, no camera needed)",
+      "_architecture": "HTTP API client (no ML) — motor controller firmware by hardware team",
+      "versions": [
+        {
+          "version":     "v1.0-api",
+          "type":        "api_client",
+          "description": "REST API client for motor controller — Phase 2",
+          "deployed":    false,
+          "accuracy":    null,
+          "onnx_file":   null,
+          "notes":       "Hardware not yet built. Phase 2. See e_weight/stack_client.py for API spec."
+        }
+      ],
+      "active_version": "v1.0-api",
+      "_phase":        "Phase 2 — hardware in development"
     }
   },
 
   "review_loop": {
-    "_description": "Closed-loop retraining pipeline — Pi flags uncertain clips, human annotates, Mac Mini retrains.",
-    "flow": [
-      "Pi runs ONNX → confidence < 0.50 → clip_reporter.py saves 30-frame window",
-      "Uploads to GitHub: data/review/{machine_id}/{date}/{uid}_kps.npy + _meta.json",
-      "Human sets 'true_class' in _meta.json via GitHub web UI or local checkout",
-      "Mac Mini runs: python3 train/train_pytorch.py --review data/review/",
-      "New ONNX exported to models/weights/activity_vN.onnx",
-      "scp new model to Pi, restart pi/main.py — accuracy improves"
-    ],
+    "_description":        "Closed-loop retraining. Pi flags uncertain clips → human annotates → Mac Mini retrains.",
     "confidence_threshold": 0.50,
-    "cooldown_between_uploads_s": 30
+    "cooldown_s":           30,
+    "flow": [
+      "Pi runs ONNX → confidence < 0.50 → clip_reporter.py saves 30-frame keypoint window",
+      "Uploads to GitHub: data/review/{machine_id}/{date}/{uid}_kps.npy + _meta.json",
+      "Mac Mini: git pull → python3 pose/review_server.py → http://localhost:8787",
+      "Human clicks correct class → review_status: reviewed → git commit",
+      "make train → new ONNX → make deploy PI=pi@IP → Pi now smarter"
+    ]
   }
 }

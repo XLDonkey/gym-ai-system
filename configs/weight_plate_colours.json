@@ -1,0 +1,40 @@
+{
+  "_comment": "HSV colour ranges for XL Fitness AlphaFit barbell plates. Tune for your gym lighting.",
+  "_format":  "[H_low, H_high, S_low, S_high, V_low, V_high]  — OpenCV HSV (H: 0-180, S/V: 0-255)",
+  "_tuning":  "Set SHOW_PREVIEW=True in pi/config.py, run pi/main.py, adjust ranges until each plate colour shows a clean mask.",
+
+  "barbell_weight_kg": 20.0,
+
+  "colours": {
+    "red": {
+      "_notes": "Two ranges needed — red wraps at 0°/180° in HSV",
+      "hsv_ranges": [
+        [0,   10,  140, 255, 80, 255],
+        [170, 180, 140, 255, 80, 255]
+      ],
+      "kg": 25.0,
+      "hex": "#e74c3c"
+    },
+    "blue": {
+      "hsv_ranges": [[100, 130, 130, 255, 60, 255]],
+      "kg": 20.0,
+      "hex": "#3498db"
+    },
+    "yellow": {
+      "hsv_ranges": [[20, 35, 160, 255, 150, 255]],
+      "kg": 15.0,
+      "hex": "#f1c40f"
+    },
+    "green": {
+      "hsv_ranges": [[40, 80, 110, 255, 60, 255]],
+      "kg": 10.0,
+      "hex": "#2ecc71"
+    },
+    "white": {
+      "_notes": "Low saturation + high value — can look grey/cream. Raise V_low if floor triggers false positives.",
+      "hsv_ranges": [[0, 180, 0, 50, 175, 255]],
+      "kg": 5.0,
+      "hex": "#bdc3c7"
+    }
+  }
+}
