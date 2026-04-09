@@ -148,6 +148,12 @@ class ClipReporter:
             "feature_dim":     51,
             "review_status":   "pending",
             "true_class":      None,  # annotator fills this in
+            # Keypoints embedded for the review portal skeleton animation
+            # Each entry is a flat list of 51 floats [x0,y0,c0, x1,y1,c1, ...]
+            "keypoints_array": [
+                [round(float(v), 4) for v in frame]
+                for frame in result.buffer
+            ],
         }
 
         # ── Save locally first ────────────────────────────────────────────────

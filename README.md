@@ -1,242 +1,297 @@
-# XL Fitness AI Overseer
+# Gym Overseer AI
 
-Real-time gym machine monitoring using computer vision and neural networks.
-Runs on Raspberry Pi 5 + Hailo AI HAT+. Identifies members, counts reps, classifies form, and logs everything to Supabase.
+> Real-time AI that watches every machine, counts every rep, identifies every member — automatically.
+
+**GitHub:** `Matt-xlfitness/Gym-Overseer-AI` &nbsp;·&nbsp; **Collaborators:** Matt (owner), XLDonkey (maintain)
 
 ---
 
-## System Architecture
+## What This Is
+
+A self-improving AI system for XL Fitness. One Raspberry Pi per machine. No phones. No QR codes. No manual input from staff or members.
+
+A member sits down → the system sees them → starts a session → counts every rep → classifies form → logs to their profile. When the AI isn't sure what it's seeing, it flags the clip, sends it to GitHub, and Matt corrects it. The model retrains and gets smarter. Every week it improves.
+
+---
+
+## Two-Minute Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│  GITHUB  (data hub)                                                 │
-│  data/annotations/  ← committed label JSONs from annotation tool   │
-│  data/review/       ← Pi-flagged uncertain clips for human review   │
-│  models/registry.json ← version table for all 4 models             │
-│  models/weights/    ← NOT in git (use Google Drive)                 │
-└────────────┬────────────────────────┬───────────────────────────────┘
-             │                        │
-       annotate                 review clips
-             │                        │
-     ┌───────▼────────┐    ┌──────────▼──────────┐
-     │  MAC MINI      │    │  HUMAN REVIEWER     │
-     │  PyTorch LSTM  │◄───│  sets true_class in │
-     │  MPS backend   │    │  *_meta.json        │
-     │  train_pytorch │    └─────────────────────┘
-     │  export ONNX   │
-     └───────┬────────┘
-             │  scp activity_v*.onnx
-             ▼
-     ┌───────────────────────────────────────────────────────────┐
-     │  RASPBERRY PI 5  (one per machine)                        │
-     │  Hailo NPU → YOLOv11-pose → 17 keypoints                 │
-     │  onnxruntime → LSTM → 8-class softmax (ONE state wins)   │
-     │  InsightFace → face embeddings → member ID               │
-     │  Optical flow → weight stack → phantom rep rejection     │
-     │  confidence < 0.50 → clip_reporter → upload to GitHub   │
-     └───────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  RASPBERRY PI  (one per machine)                             │
+│                                                              │
+│  Camera → YOLO pose → 17 keypoints                          │
+│         → Engagement check (is person seated?)              │
+│         → Weight stack check (did plates move?)             │
+│         → ONNX LSTM → 8-class output (ONE state wins)       │
+│         → Supabase (log reps + sessions)                     │
+│         → Low confidence? → flag clip to GitHub             │
+└──────────────────────┬───────────────────────────────────────┘
+                       │ SSH / GitHub
+┌──────────────────────▼───────────────────────────────────────┐
+│  MAC MINI  (training server)                                 │
+│                                                              │
+│  rsync ← Pi recordings                                       │
+│  pose/label.html → annotate segments → data/annotations/     │
+│  pose/review.html → review Pi-flagged clips                  │
+│  make train → PyTorch LSTM → ONNX export                    │
+│  make deploy → scp model to Pi                              │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-**The gate:** The LSTM's softmax output means exactly ONE of the 8 activity states is active at any time. "Resting" and "on_machine" cannot both be true — the probabilities must sum to 1.0 and argmax picks a single winner.
+---
+
+## The 8 Activity Classes
+
+| ID | Label | Description | Counts as rep? |
+|----|-------|-------------|---------------|
+| 0 | `no_person` | Nobody at the machine | — |
+| 1 | `user_present` | Person nearby, not seated | — |
+| 2 | `on_machine` | Seated, engaged, about to lift | Starts session |
+| 3 | `good_rep` | Full ROM, controlled, weight moving | ✓ Yes |
+| 4 | `bad_rep` | Bouncing, swinging, uncontrolled | ✓ Yes (flagged) |
+| 5 | `false_rep` | Stretching, adjusting handle/seat/pin | ✗ No |
+| 6 | `resting` | Seated between sets | — |
+| 7 | `half_rep` | Partial ROM or single arm only | ✓ Yes (flagged) |
+
+**The gate:** Softmax output means exactly ONE class is active at a time. The state machine also blocks rep classes (3–7) until class 2 (on_machine) is confirmed for 10 consecutive frames. A bad_rep cannot appear before engagement.
 
 ---
 
-## What It Does
-
-- **Detects engagement** — person must be seated on the machine (not just nearby) before a session starts
-- **Counts reps** — rule-based now → LSTM activity classifier once training data is ready
-- **Classifies form** — 8-class activity schema per machine
-- **Identifies members** — InsightFace face recognition matched against member registry
-- **Validates reps** — optical flow on weight stack confirms weight actually moved
-- **Flags uncertain clips** — low-confidence ONNX inference → saved to GitHub → human review → retraining
-- **Logs everything** — sessions, reps, ROM, duration → Supabase (PostgreSQL)
-
----
-
-## Activity Classes
-
-| ID | Label | Description |
-|----|-------|-------------|
-| 0 | `no_person` | Nobody at the machine |
-| 1 | `user_present` | Person nearby, not seated |
-| 2 | `on_machine` | Seated, engaged, not yet lifting |
-| 3 | `good_rep` | Full ROM, controlled, weight moving |
-| 4 | `bad_rep` | Uncontrolled, bouncing, momentum |
-| 5 | `false_rep` | Stretching, adjusting handle/seat/pin |
-| 6 | `resting` | Seated between sets |
-| 7 | `half_rep` | Partial ROM or single arm only |
-
----
-
-## Repo Structure
+## Repository Structure
 
 ```
-gym-ai-system/
+Gym-Overseer-AI/
 │
-├── pi/                         # Raspberry Pi edge node
-│   ├── main.py                 # Main inference loop
-│   ├── config.py               # Per-machine config  ← edit per Pi
-│   ├── onnx_classifier.py      # ONNX activity model (8-class, softmax gate)
-│   ├── clip_reporter.py        # Uploads low-confidence clips to GitHub
-│   ├── engagement_detector.py  # Seated-on-machine check before session starts
-│   ├── weight_tracker.py       # Optical flow — validates weight moved
-│   └── session_recorder.py
+├── pi/                          ← Runs on each Raspberry Pi
+│   ├── main.py                  ← Main inference loop (start here)
+│   ├── config.py                ← Per-machine config — edit for each Pi
+│   ├── onnx_classifier.py       ← LSTM activity model inference
+│   ├── activity_state_machine.py← Phase gating (IDLE → ENGAGED)
+│   ├── clip_reporter.py         ← Flags uncertain clips to GitHub
+│   ├── engagement_detector.py   ← Seated-on-machine check
+│   ├── weight_tracker.py        ← Optical flow — validates weight moved
+│   ├── session_recorder.py      ← Video recording to local disk
+│   ├── requirements.txt         ← pip install -r requirements.txt
+│   └── setup.sh                 ← One-shot Pi setup script
 │
-├── face/                       # Face recognition
-│   ├── face_recognizer.py      # InsightFace ArcFace wrapper + IdentityWindow
-│   └── enroll_member.py        # CLI to register members
+├── face/                        ← Member face recognition
+│   ├── face_recognizer.py       ← InsightFace ArcFace wrapper
+│   └── enroll_member.py         ← Register a member's face
 │
-├── members/                    # Database layer
-│   ├── db_client.py            # Supabase REST client (pure stdlib)
-│   └── schema.sql              # Run in Supabase SQL editor
+├── members/                     ← Supabase database layer
+│   ├── schema.sql               ← Run in Supabase SQL editor (once)
+│   └── db_client.py             ← REST client — no extra packages needed
 │
-├── train/                      # Model training (run on Mac Mini)
-│   ├── train_pytorch.py        # LSTM training — Mac Mini MPS backend → ONNX export
-│   ├── extract_sequences.py    # Extract keypoint sequences from annotated videos
-│   ├── auto_label_yt.py        # Claude Opus auto-labels YouTube videos
-│   └── overseer_train.py       # Legacy training script
+├── train/                       ← Run on Mac Mini
+│   ├── train_pytorch.py         ← LSTM training (MPS backend)
+│   ├── extract_sequences.py     ← Convert annotated videos → .npy sequences
+│   └── auto_label_yt.py         ← Claude AI auto-labels YouTube videos
 │
 ├── pose/
-│   ├── index.html              # Start page
-│   ├── label.html              # Annotation tool — draw zones, label segments, export JSON
-│   └── alpha.html              # Live rep counter (browser-based)
+│   ├── label.html               ← Annotation tool — open in browser
+│   ├── review.html              ← Review portal — classify Pi-flagged clips
+│   ├── review_server.py         ← Local server for review portal
+│   └── index.html               ← Start page (links to all tools)
 │
 ├── data/
-│   ├── annotations/            # Label JSONs — commit these
-│   ├── review/                 # Pi-flagged clips for human review — commit reviewed JSONs
-│   ├── raw/                    # Videos — NOT in git (Google Drive)
-│   └── processed/              # Extracted sequences — NOT in git
+│   ├── annotations/             ← Label JSONs — COMMIT THESE
+│   ├── review/                  ← Pi-flagged clips — COMMIT after reviewing
+│   ├── raw/                     ← Raw videos — NOT in git (too large)
+│   └── processed/               ← Extracted sequences — NOT in git
 │
 ├── models/
-│   ├── registry.json           # All 4 model versions + review loop config
-│   └── weights/                # .onnx files — NOT in git (Google Drive / scp)
+│   ├── registry.json            ← Version log for all 4 models
+│   └── weights/                 ← .onnx files — NOT in git (use scp/Drive)
 │
 ├── configs/
-│   └── lat_pulldown.json       # Per-machine config JSON
+│   ├── lat_pulldown.json        ← Live machine config
+│   └── machine_template.json    ← Copy this for each new machine
 │
-└── server/                     # Mac Mini proxy server
-    └── index.js
+├── scripts/
+│   └── mac_mini_setup.sh        ← One-shot Mac Mini setup
+│
+├── Makefile                     ← Common commands (make train, make deploy...)
+└── bible.html                   ← Full technical document — open in browser
 ```
 
 ---
 
-## Quick Start
+## Current Status
 
-**1. Set up Supabase** — run `members/schema.sql` in the SQL editor
+| Component | Status | Notes |
+|-----------|--------|-------|
+| YOLO pose detection | ✅ Live | Running on lat pulldown Pi |
+| Rule-based rep counting | ✅ Live | Angle threshold fallback |
+| Weight stack verification | ✅ Live | Optical flow, rejects phantom reps |
+| Engagement detection | ✅ Live | Prevents bystander sessions |
+| Face recognition | ⏳ Ready | Run `enroll_member.py` to add members |
+| Supabase logging | ⏳ Ready | Set `SUPABASE_URL` + `KEY` in `config.py` |
+| ONNX activity classifier | ❌ Needs data | Collect 300+ annotations first |
+| Review portal | ✅ Built | `python3 pose/review_server.py` |
+| Training pipeline | ✅ Built | `make train` on Mac Mini |
+| Review loop | ✅ Built | Pi flags → GitHub → portal → retrain |
 
-**2. Configure the Pi:**
-```python
-# pi/config.py
-MACHINE_ID           = "xlf-pi-001"
-SUPABASE_URL         = "https://xxxx.supabase.co"
-SUPABASE_SERVICE_KEY = "eyJ..."
-MACHINE_ZONE_ROI     = (0.15, 0.05, 0.85, 0.95)  # set via annotation tool
+---
 
-# Once ONNX model is trained and deployed:
-ONNX_MODEL_PATH      = "/home/pi/xlf/models/activity_v1.onnx"
-GITHUB_REVIEW_TOKEN  = "ghp_..."   # PAT with Contents:write
+## Setup
+
+### Mac Mini (training server) — run once
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/Matt-xlfitness/Gym-Overseer-AI/main/scripts/mac_mini_setup.sh)
 ```
 
-**3. Install and run:**
+Then open a new terminal tab and type `xlf` to jump into the project.
+
+### Raspberry Pi — run once per Pi
+
 ```bash
-cd pi && bash setup.sh && python3 main.py
+git clone https://github.com/Matt-xlfitness/Gym-Overseer-AI.git
+cd Gym-Overseer-AI/pi
+bash setup.sh
 ```
 
-**4. Enrol members:**
+Then edit `pi/config.py` for this machine (machine ID, zone ROI, weights).
+
+### Supabase — run once
+
+1. Create a free project at [supabase.com](https://supabase.com)
+2. Open SQL Editor → paste + run `members/schema.sql`
+3. Copy your project URL and service role key into `pi/config.py`
+
+### Enrol a member
+
 ```bash
+source ~/.xlf-env/bin/activate
 python3 face/enroll_member.py --name "Matthew"
+# Follow prompts — looks at webcam for 3 seconds
 ```
 
 ---
 
-## Annotation Workflow
+## Day-to-Day Workflow
 
-1. Open `pose/label.html` in a browser
-2. Load a Pi recording
-3. Press **B** → draw a box around the seated person → copies to `MACHINE_ZONE_ROI` in config.py
-4. Press **S** to mark start → press **1–8** for the class → press **E** for end of segment
-5. Export JSON to `data/annotations/`
+### Collecting training data
 
-**Target: 300+ segments across all 8 classes before first training run (≥30 per class).**
+```
+1. Pi records sessions to /home/pi/xlf_recordings/
+2. On Mac Mini: make sync PI=pi@192.168.1.XX
+3. Open pose/label.html in browser
+4. Load video → label segments → Export JSON → save to data/annotations/
+5. git add data/annotations/ && git commit -m "annotations: session date"
+```
 
----
+### Reviewing Pi-flagged clips
 
-## Training Pipeline (Mac Mini)
+```
+1. On Mac Mini: git pull   (picks up clips the Pi uploaded overnight)
+2. python3 pose/review_server.py
+3. Open http://localhost:8787
+4. Watch skeleton animation → click correct class → auto-saves
+5. git add data/review/ && git commit -m "reviewed: batch date"
+```
+
+### Training a new model
 
 ```bash
-cd train && pip install -r requirements.txt
-
-# Option A: Train from pre-extracted sequences
-python3 extract_sequences.py \
-    --annotations ../data/annotations/ \
-    --output ../data/processed/
-
-python3 train_pytorch.py \
-    --sequences ../data/processed/ \
-    --output ../models/weights/activity_v1.onnx
-
-# Option B: Train from raw videos + annotations (slower, auto-extracts)
-python3 train_pytorch.py \
-    --annotations ../data/annotations/ \
-    --videos ../data/raw/ \
-    --output ../models/weights/activity_v1.onnx
-
-# Include human-reviewed Pi clips in training:
-python3 train_pytorch.py \
-    --sequences ../data/processed/ \
-    --review ../data/review/ \
-    --output ../models/weights/activity_v2.onnx
-
-# Auto-label from YouTube (boosts dataset):
-export ANTHROPIC_API_KEY=sk-ant-...
-python3 auto_label_yt.py --url "https://youtube.com/watch?v=..." --machine lat_pulldown
+make train
+# Trains on all annotations + reviewed Pi clips
+# Exports to models/weights/activity_v*.onnx
+# Takes ~5 minutes on Mac Mini M4
 ```
 
-**Deploy to Pi:**
+### Deploying to a Pi
+
 ```bash
-scp models/weights/activity_v1.onnx pi@xlf-pi-001:/home/pi/xlf/models/
-# Update ONNX_MODEL_PATH in pi/config.py and restart main.py
+make deploy PI=pi@192.168.1.XX
+# Copies .onnx to Pi, restarts the service
+# Watch logs: ssh pi@192.168.1.XX "sudo journalctl -u xlf-overseer -f"
 ```
 
 ---
 
-## Review Loop (Pi → GitHub → Mac Mini → Pi)
+## Key Configuration (`pi/config.py`)
 
-When the ONNX model is uncertain (confidence < 0.50 on any frame), the Pi automatically:
-1. Saves the 30-frame keypoint window to `data/review/{machine_id}/{date}/`
-2. Uploads it to GitHub via the API
+```python
+MACHINE_ID        = "xlf-pi-001"          # unique per Pi
+MACHINE_NAME      = "Nautilus Lat Pulldown"
+MACHINE_ZONE_ROI  = (0.15, 0.05, 0.85, 0.95)  # set via label.html bounding box tool
 
-**To process review clips:**
-1. Check `data/review/` on GitHub — open `*_meta.json` files
-2. Set `"true_class": 3` (or the correct class ID) in each reviewed JSON
-3. Commit the changes
-4. Retrain: `python3 train/train_pytorch.py --review data/review/`
-5. Deploy new ONNX to Pi
+# Supabase — get from supabase.com dashboard
+SUPABASE_URL      = "https://xxxx.supabase.co"
+SUPABASE_SERVICE_KEY = "eyJ..."
 
----
+# ONNX model — set after first training run
+ONNX_MODEL_PATH   = "/home/pi/xlf/models/activity_v1.onnx"
 
-## Model Registry
-
-| Model | Type | Status |
-|-------|------|--------|
-| Activity classifier v0.1 | Rule-based angles | Live |
-| Activity classifier v0.2 | MLP | Waiting for 60+ samples |
-| Activity classifier v1.0 | LSTM (8-class, softmax gate) | Waiting for 300+ samples |
-| Face ID | InsightFace buffalo_sc ArcFace | Live |
-| Pose detection | YOLOv11n-pose | Live |
-| Weight verifier | Optical flow (Farneback) | Live |
-
-Full version details in `models/registry.json`.
-Weights stored in Google Drive (not in git).
+# GitHub review loop — PAT with Contents:write scope
+GITHUB_REVIEW_TOKEN = "ghp_..."
+GITHUB_REVIEW_REPO  = "Matt-xlfitness/Gym-Overseer-AI"
+```
 
 ---
 
-## Hardware
+## Make Commands
 
-| Component | Purpose |
-|-----------|---------|
-| Raspberry Pi 5 (4GB) | Edge inference |
-| Hailo-8 AI HAT+ (26 TOPS) | NPU — runs YOLOv11-pose at 30fps |
-| Pi Camera Module 3 Wide | Side-on view of machine |
-| PoE+ HAT | Single-cable power + network |
-| Mac Mini M4 | PyTorch training (MPS backend) |
+```bash
+make sync    PI=pi@192.168.1.XX   # pull recordings from Pi → data/raw/
+make train                         # extract sequences + train LSTM + export ONNX
+make deploy  PI=pi@192.168.1.XX   # push latest .onnx to Pi + restart service
+make review                        # start review portal at localhost:8787
+make stats                         # show annotation counts per class
+make pending                       # show how many Pi clips need reviewing
+make logs    PI=pi@192.168.1.XX   # tail Pi service logs live
+```
+
+---
+
+## The Review Loop (Pi → GitHub → Mac Mini → Pi)
+
+```
+Pi uncertain (confidence < 0.50)
+  ↓
+clip_reporter.py saves:
+  • 30-frame keypoint window embedded in _meta.json
+  • Uploads to: data/review/{machine_id}/{date}/
+  ↓
+Mac Mini: git pull → sees new clips
+  ↓
+python3 pose/review_server.py → open http://localhost:8787
+  ↓
+Review portal: skeleton animation → click correct class → saved
+  ↓
+git commit data/review/ → git push
+  ↓
+make train  (includes reviewed clips automatically)
+  ↓
+make deploy PI=pi@192.168.1.XX
+  ↓
+Pi now smarter. Loop repeats.
+```
+
+---
+
+## Hardware Per Machine
+
+| Part | Purpose | ~Cost |
+|------|---------|-------|
+| Raspberry Pi 5 (4GB) | Edge inference | £80 |
+| Hailo-8 AI HAT+ (26 TOPS) | NPU — YOLO at 30fps | £70 |
+| Pi Camera Module 3 Wide | Side-on view | £35 |
+| PoE+ HAT | Single cable: power + network | £25 |
+| Mount + housing | Wall/ceiling bracket | £20 |
+| **Total per machine** | | **£230** |
+
+Shared: Mac Mini M4 (~£700) trains models for all machines.
+
+---
+
+## The Bible
+
+Open `bible.html` in a browser for the complete technical reference — architecture, AI models, hardware decisions, training strategy, and enterprise scale plan.
+
+```bash
+open ~/Gym-Overseer-AI/bible.html    # Mac Mini
+# or visit: pose/index.html → "The AI Bible"
+```

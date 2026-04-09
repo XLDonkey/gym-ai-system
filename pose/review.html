@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Review Portal — XL Fitness AI</title>
+<style>
+:root {
+  --bg: #07070f; --surface: #0d0d1a; --surface2: #111128;
+  --border: #1e1e3a; --border2: #2a2a50;
+  --text: #e2e8f0; --muted: #6b7280;
+  --purple: #8B5CF6; --purple-light: #a78bfa;
+  --green: #22c55e; --yellow: #fbbf24; --red: #ef4444; --blue: #3b82f6;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;min-height:100vh}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;gap:16px}
+header h1{font-size:18px;font-weight:700;color:#fff}
+header h1 em{color:var(--purple-light);font-style:normal}
+.badge{background:var(--purple);color:#fff;font-size:11px;font-weight:700;border-radius:12px;padding:3px 10px}
+.stats-bar{display:flex;gap:24px;padding:12px 24px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)}
+.stat-val{color:#fff;font-weight:700;margin-right:4px}
+.layout{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 90px)}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0}
+.clip-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s}
+.clip-item:hover{background:var(--surface2)}
+.clip-item.active{background:#1a1040;border-left:3px solid var(--purple)}
+.clip-machine{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+.clip-pred{font-size:12px;font-weight:600;margin-top:2px}
+.clip-conf{font-size:11px;color:var(--muted)}
+.clip-conf.low{color:var(--red)}
+.clip-conf.medium{color:var(--yellow)}
+.done-badge{font-size:10px;background:#22c55e22;color:var(--green);border-radius:8px;padding:1px 7px;float:right;margin-top:2px}
+.main{padding:24px;overflow-y:auto}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);text-align:center;gap:12px}
+.empty h2{color:#fff;font-size:20px}
+.viewer{display:flex;gap:24px;flex-wrap:wrap}
+.canvas-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;flex:0 0 340px}
+canvas{display:block;background:#0a0a18;border-radius:8px}
+.controls{display:flex;gap:8px;margin-top:10px;align-items:center}
+.btn-sm{background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px}
+.btn-sm:hover{border-color:var(--purple)}
+.progress{flex:1;height:4px;background:var(--border2);border-radius:2px;cursor:pointer}
+.progress-fill{height:100%;background:var(--purple);border-radius:2px;transition:width 0.05s}
+.meta-panel{flex:1;min-width:260px}
+.meta-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+.meta-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.meta-val{font-size:15px;font-weight:600}
+.conf-bar{height:6px;background:var(--border2);border-radius:3px;margin-top:6px;overflow:hidden}
+.conf-fill{height:100%;border-radius:3px}
+.classes-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.class-btn{background:var(--surface2);border:2px solid var(--border2);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all 0.15s;text-align:left}
+.class-btn:hover{border-color:var(--purple);background:#1a1040}
+.class-btn.selected{border-color:var(--green);background:#07170f}
+.class-id{font-size:10px;color:var(--muted);font-weight:700}
+.class-name{font-size:13px;font-weight:600;color:#fff;margin-top:2px}
+.class-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.save-btn{width:100%;padding:12px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;transition:background 0.15s}
+.save-btn:hover{background:#7c3aed}
+.save-btn:disabled{background:var(--border2);color:var(--muted);cursor:not-allowed}
+.save-btn.saved{background:var(--green)}
+.loading{color:var(--muted);padding:40px;text-align:center}
+kbd{background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:1px 6px;font-size:11px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Review <em>Portal</em></h1>
+  <span class="badge" id="pending-badge">Loading...</span>
+  <span style="color:var(--muted);font-size:12px;margin-left:auto">XL Fitness AI Overseer — Mac Mini</span>
+</header>
+
+<div class="stats-bar">
+  <div><span class="stat-val" id="stat-pending">—</span> pending</div>
+  <div><span class="stat-val" id="stat-reviewed">—</span> reviewed</div>
+  <div><span class="stat-val" id="stat-total">—</span> total clips</div>
+  <div style="margin-left:auto;color:var(--muted)">
+    Keyboard: <kbd>←</kbd><kbd>→</kbd> navigate &nbsp; <kbd>0</kbd>–<kbd>7</kbd> classify &nbsp; <kbd>Enter</kbd> save
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar" id="clip-list"><div class="loading">Loading clips...</div></div>
+  <div class="main" id="main-panel">
+    <div class="empty" id="empty-state" style="display:none">
+      <h2>All clips reviewed ✓</h2>
+      <p>No pending clips. Run <code>git pull</code> to fetch new ones from the Pi.</p>
+    </div>
+    <div id="viewer-area" style="display:none">
+      <div class="viewer">
+        <div class="canvas-wrap">
+          <canvas id="skeleton-canvas" width="300" height="400"></canvas>
+          <div class="controls">
+            <button class="btn-sm" id="btn-play">▶ Play</button>
+            <div class="progress" id="progress-bar">
+              <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+            </div>
+            <span id="frame-counter" style="font-size:11px;color:var(--muted);white-space:nowrap">0 / 30</span>
+          </div>
+        </div>
+
+        <div class="meta-panel">
+          <div class="meta-card">
+            <div class="meta-label">Model Predicted</div>
+            <div class="meta-val" id="pred-class">—</div>
+            <div class="conf-bar"><div class="conf-fill" id="conf-fill" style="width:0%"></div></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">
+              Confidence: <span id="conf-val">—</span>
+              &nbsp;·&nbsp; <span id="clip-time">—</span>
+              &nbsp;·&nbsp; <span id="clip-machine">—</span>
+            </div>
+          </div>
+
+          <div class="meta-card">
+            <div class="meta-label">What is actually happening? Click to select:</div>
+            <div class="classes-grid" id="classes-grid"></div>
+            <button class="save-btn" id="save-btn" disabled>Select a class to save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CLASSES = [
+  {id:0, name:'no_person',    desc:'Nobody at machine'},
+  {id:1, name:'user_present', desc:'Person nearby, not seated'},
+  {id:2, name:'on_machine',   desc:'Seated, engaged, not lifting'},
+  {id:3, name:'good_rep',     desc:'Full ROM, controlled, weight moving'},
+  {id:4, name:'bad_rep',      desc:'Uncontrolled, bouncing, momentum'},
+  {id:5, name:'false_rep',    desc:'Stretching, adjusting, not a rep'},
+  {id:6, name:'resting',      desc:'Seated between sets'},
+  {id:7, name:'half_rep',     desc:'Partial ROM or single arm'},
+];
+
+// COCO skeleton connections
+const SKELETON = [[15,13],[13,11],[16,14],[14,12],[11,12],[5,11],[6,12],[5,6],[5,7],[6,8],[7,9],[8,10],[1,2],[0,1],[0,2],[1,3],[2,4]];
+
+let clips = [], currentIdx = 0, selectedClass = null;
+let animFrame = null, frameIdx = 0, playing = false;
+const canvas = document.getElementById('skeleton-canvas');
+const ctx    = canvas.getContext('2d');
+
+// ── Fetch clips from server ────────────────────────────────────
+async function loadClips() {
+  try {
+    const r = await fetch('/api/clips');
+    const d = await r.json();
+    clips = d.clips || [];
+    await loadStats();
+    renderSidebar();
+    if (clips.length) selectClip(0);
+    else { document.getElementById('empty-state').style.display='flex'; }
+  } catch(e) {
+    document.getElementById('clip-list').innerHTML =
+      '<div class="loading" style="color:#ef4444">Cannot reach server.<br>Run: python3 pose/review_server.py</div>';
+  }
+}
+
+async function loadStats() {
+  const r = await fetch('/api/stats');
+  const d = await r.json();
+  document.getElementById('stat-pending').textContent  = d.pending;
+  document.getElementById('stat-reviewed').textContent = d.reviewed;
+  document.getElementById('stat-total').textContent    = d.total;
+  document.getElementById('pending-badge').textContent = d.pending + ' pending';
+}
+
+// ── Sidebar ────────────────────────────────────────────────────
+function renderSidebar() {
+  const list = document.getElementById('clip-list');
+  if (!clips.length) { list.innerHTML = '<div class="loading">No pending clips</div>'; return; }
+  list.innerHTML = clips.map((c, i) => {
+    const conf  = c.meta.confidence || 0;
+    const confCls = conf < 0.35 ? 'low' : conf < 0.50 ? 'medium' : '';
+    const reviewed = c.meta.review_status === 'reviewed';
+    return `<div class="clip-item${i===currentIdx?' active':''}" onclick="selectClip(${i})">
+      <div class="clip-machine">${c.meta.machine_id || 'unknown'}</div>
+      <div class="clip-pred">${c.meta.class_name || '—'}
+        ${reviewed ? '<span class="done-badge">✓ done</span>' : ''}
+      </div>
+      <div class="clip-conf ${confCls}">${(conf*100).toFixed(0)}% confidence &nbsp;·&nbsp; ${(c.meta.timestamp_utc||'').slice(11,19)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Clip viewer ────────────────────────────────────────────────
+function selectClip(idx) {
+  currentIdx   = idx;
+  selectedClass = null;
+  frameIdx     = 0;
+  stopAnim();
+  renderSidebar();
+
+  const clip = clips[idx];
+  document.getElementById('viewer-area').style.display = 'block';
+  document.getElementById('empty-state').style.display = 'none';
+
+  // Meta panel
+  const conf = clip.meta.confidence || 0;
+  document.getElementById('pred-class').textContent  = `${clip.meta.class_name} (class ${clip.meta.predicted_class})`;
+  document.getElementById('conf-val').textContent    = `${(conf*100).toFixed(1)}%`;
+  document.getElementById('conf-fill').style.width   = `${conf*100}%`;
+  document.getElementById('conf-fill').style.background = conf < 0.35 ? '#ef4444' : conf < 0.55 ? '#fbbf24' : '#22c55e';
+  document.getElementById('clip-time').textContent   = (clip.meta.timestamp_utc||'').slice(0,19).replace('T',' ');
+  document.getElementById('clip-machine').textContent = clip.meta.machine_id || '';
+
+  // Class buttons
+  document.getElementById('classes-grid').innerHTML = CLASSES.map(c =>
+    `<div class="class-btn" id="cls-${c.id}" onclick="selectClass(${c.id})">
+      <div class="class-id">Class ${c.id}</div>
+      <div class="class-name">${c.name}</div>
+      <div class="class-desc">${c.desc}</div>
+    </div>`
+  ).join('');
+
+  updateSaveBtn();
+
+  // Start animation
+  if (clip.keypoints && clip.keypoints.length) {
+    playAnim();
+  } else {
+    drawEmpty();
+  }
+}
+
+function selectClass(id) {
+  selectedClass = id;
+  document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById(`cls-${id}`).classList.add('selected');
+  updateSaveBtn();
+}
+
+function updateSaveBtn() {
+  const btn = document.getElementById('save-btn');
+  if (selectedClass === null) {
+    btn.disabled = true;
+    btn.textContent = 'Select a class to save';
+    btn.className = 'save-btn';
+  } else {
+    btn.disabled = false;
+    btn.textContent = `Save as: ${CLASSES[selectedClass].name}  (Enter)`;
+    btn.className = 'save-btn';
+  }
+}
+
+// ── Skeleton animation ─────────────────────────────────────────
+function drawFrame(kpsFlat) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#0a0a18';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (!kpsFlat || kpsFlat.length < 51) return;
+
+  const W = canvas.width, H = canvas.height;
+  const pts = [];
+  for (let i = 0; i < 17; i++) {
+    pts.push({ x: kpsFlat[i*3]*W, y: kpsFlat[i*3+1]*H, c: kpsFlat[i*3+2] });
+  }
+
+  // Draw skeleton lines
+  ctx.strokeStyle = '#8B5CF6';
+  ctx.lineWidth   = 2;
+  for (const [a,b] of SKELETON) {
+    if (pts[a].c > 0.2 && pts[b].c > 0.2) {
+      ctx.beginPath();
+      ctx.moveTo(pts[a].x, pts[a].y);
+      ctx.lineTo(pts[b].x, pts[b].y);
+      ctx.stroke();
+    }
+  }
+
+  // Draw keypoints
+  for (const p of pts) {
+    if (p.c < 0.2) continue;
+    ctx.fillStyle = p.c > 0.6 ? '#a78bfa' : '#6b7280';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawEmpty() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#0a0a18';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '13px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('No keypoint data', canvas.width/2, canvas.height/2);
+}
+
+function playAnim() {
+  const kps = clips[currentIdx]?.keypoints;
+  if (!kps) return;
+  playing = true;
+  document.getElementById('btn-play').textContent = '⏸ Pause';
+
+  function step() {
+    drawFrame(kps[frameIdx]);
+    const pct = ((frameIdx+1)/kps.length*100).toFixed(0);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('frame-counter').textContent = `${frameIdx+1} / ${kps.length}`;
+    frameIdx = (frameIdx + 1) % kps.length;
+    animFrame = setTimeout(step, 60); // ~16fps playback
+  }
+  step();
+}
+
+function stopAnim() {
+  clearTimeout(animFrame);
+  playing = false;
+  document.getElementById('btn-play').textContent = '▶ Play';
+}
+
+document.getElementById('btn-play').onclick = () => {
+  if (playing) stopAnim(); else playAnim();
+};
+
+// ── Save annotation ────────────────────────────────────────────
+document.getElementById('save-btn').onclick = saveAnnotation;
+
+async function saveAnnotation() {
+  if (selectedClass === null) return;
+  const clip = clips[currentIdx];
+  const btn  = document.getElementById('save-btn');
+
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    const r = await fetch('/api/annotate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ path: clip.path, true_class: selectedClass }),
+    });
+    const d = await r.json();
+
+    if (d.ok) {
+      clip.meta.review_status = 'reviewed';
+      clip.meta.true_class    = selectedClass;
+      btn.textContent = '✓ Saved!';
+      btn.className = 'save-btn saved';
+      await loadStats();
+      renderSidebar();
+      // Auto-advance to next pending clip after 1s
+      setTimeout(() => {
+        const nextIdx = clips.findIndex((c,i) => i > currentIdx && c.meta.review_status === 'pending');
+        if (nextIdx >= 0) selectClip(nextIdx);
+      }, 900);
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Error — try again';
+    btn.className = 'save-btn';
+  }
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') { selectClip(Math.min(currentIdx+1, clips.length-1)); return; }
+  if (e.key === 'ArrowLeft')  { selectClip(Math.max(currentIdx-1, 0)); return; }
+  if (e.key === 'Enter')      { saveAnnotation(); return; }
+  if (e.key === ' ')          { if (playing) stopAnim(); else playAnim(); e.preventDefault(); return; }
+  const n = parseInt(e.key);
+  if (!isNaN(n) && n >= 0 && n <= 7) selectClass(n);
+});
+
+// ── Init ───────────────────────────────────────────────────────
+loadClips();
+</script>
+</body>
+</html>

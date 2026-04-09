@@ -346,6 +346,17 @@
     <div class="brand-name">XL Fitness</div>
     <div class="brand-sub">AI Overseer — The Bible v13.0</div>
   </div>
+  <div class="nav-group" style="color:#22c55e;font-size:10px">▶ PART 1 — THE PLAN</div>
+  <a class="nav-link" href="#plan-overview">What We're Building</a>
+  <a class="nav-link" href="#plan-status">Current Status</a>
+  <a class="nav-link" href="#plan-hardware">Hardware Plan</a>
+  <div class="nav-group" style="color:#3b82f6;font-size:10px">▶ PART 2 — THE LIVE SYSTEM</div>
+  <a class="nav-link" href="#sys-pipeline">The Pipeline</a>
+  <a class="nav-link" href="#sys-classes">8 Activity Classes</a>
+  <a class="nav-link" href="#sys-annotation">Annotating Videos</a>
+  <a class="nav-link" href="#sys-review">The Review Loop</a>
+  <a class="nav-link" href="#sys-training">Training on Mac Mini</a>
+  <a class="nav-link" href="#sys-deploy">Deploying to Pi</a>
   <div class="nav-group">Chapter 1 — The Vision</div>
   <a class="nav-link" href="#vision">01 — What We're Building</a>
   <a class="nav-link" href="#problem">02 — The Core Problem</a>
@@ -401,6 +412,347 @@
     <div class="hero-stat"><div class="num">v6.0</div><div class="lbl">March 2026</div></div>
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PART 1 — THE PLAN
+     ═══════════════════════════════════════════════════════════════ -->
+
+<div class="chapter-divider" id="plan-overview" style="background:linear-gradient(135deg,#07170f 0%,#0d1a10 60%,#07070f 100%);border-top:2px solid #22c55e22">
+  <div class="ch-inner">
+    <div class="ch-num" style="color:#22c55e">Part 1 — The Plan</div>
+    <h1>What We're <em style="color:#22c55e">Building</em></h1>
+    <p class="ch-desc">The strategy, the goal, and where we are today. Read this before anything else.</p>
+    <div class="ch-sections">
+      <span class="ch-pill" style="border-color:#22c55e33;color:#22c55e">The Vision</span>
+      <span class="ch-pill" style="border-color:#22c55e33;color:#22c55e">Current Status</span>
+      <span class="ch-pill" style="border-color:#22c55e33;color:#22c55e">Hardware Plan</span>
+    </div>
+  </div>
+</div>
+
+<section class="section" id="plan-overview-s">
+  <div class="section-tag" style="color:#22c55e">Part 1 — The Plan</div>
+  <h2>What We're <em>Building</em></h2>
+  <p class="lead">A self-improving AI system that watches every machine in XL Fitness, identifies who is on it, counts every rep, classifies form quality, and learns to get better the more it's used — with no manual input required from staff or members.</p>
+
+  <div class="callout" style="border-color:#22c55e44;background:#07170f">
+    <div class="ct" style="color:#22c55e">The End Goal</div>
+    <p>A member sits down on the lat pulldown. The system recognises them by face, starts a session, counts every rep, flags bad form, and logs the entire workout to their profile — automatically. They never touch a phone. Staff never touch a spreadsheet.</p>
+  </div>
+
+  <h3>The Strategy — Start Simple, Get Smarter</h3>
+  <p>We are not building everything at once. The system has three stages:</p>
+  <div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">build-strategy.txt</span></div>
+    <pre>Stage 1 — Rule-Based (LIVE NOW)
+  Pi → YOLO pose → angle thresholds → rep count
+  Works today. No training data needed.
+  Limitation: can't classify form quality or handle complex movements.
+
+Stage 2 — Hybrid (IN PROGRESS)
+  Pi → YOLO pose → LSTM activity classifier → 8-class output
+  Requires ~300 annotated video segments to train.
+  We annotate Pi recordings, train on Mac Mini, deploy ONNX back to Pi.
+
+Stage 3 — Self-Improving (TARGET)
+  Pi flags uncertain clips → GitHub → Matt annotates → Mac Mini retrains
+  Model improves automatically as more data is collected.
+  One Pi per machine, all learning from the same shared model.</pre>
+  </div>
+
+  <h3 id="plan-status">Current Status — April 2026</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Component</th><th>Status</th><th>What's Needed</th></tr>
+    <tr><td>Pi → YOLO pose detection</td><td><span style="color:#22c55e">✓ Live</span></td><td>Running on lat pulldown Pi</td></tr>
+    <tr><td>Rule-based rep counting</td><td><span style="color:#22c55e">✓ Live</span></td><td>Angle threshold state machine</td></tr>
+    <tr><td>Weight stack verification</td><td><span style="color:#22c55e">✓ Live</span></td><td>Optical flow — rejects phantom reps</td></tr>
+    <tr><td>Engagement detection</td><td><span style="color:#22c55e">✓ Live</span></td><td>Prevents bystander sessions</td></tr>
+    <tr><td>Face recognition</td><td><span style="color:#fbbf24">⏳ Ready</span></td><td>Enrol members via face/enroll_member.py</td></tr>
+    <tr><td>Supabase logging</td><td><span style="color:#fbbf24">⏳ Ready</span></td><td>Set SUPABASE_URL + KEY in config.py</td></tr>
+    <tr><td>ONNX activity classifier</td><td><span style="color:#ef4444">✗ Needs data</span></td><td>300+ annotated segments first</td></tr>
+    <tr><td>Review portal</td><td><span style="color:#22c55e">✓ Built</span></td><td>Open pose/review.html on Mac Mini</td></tr>
+    <tr><td>Mac Mini training pipeline</td><td><span style="color:#22c55e">✓ Built</span></td><td>Run: make train</td></tr>
+  </table></div>
+
+  <h3 id="plan-hardware">Hardware Per Machine</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Part</th><th>Purpose</th><th>Cost (approx)</th></tr>
+    <tr><td>Raspberry Pi 5 (4GB)</td><td>Edge inference node</td><td>~£80</td></tr>
+    <tr><td>Hailo-8 AI HAT+ (26 TOPS)</td><td>NPU — runs YOLO at 30fps</td><td>~£70</td></tr>
+    <tr><td>Pi Camera Module 3 Wide</td><td>Side-on view of machine</td><td>~£35</td></tr>
+    <tr><td>PoE+ HAT</td><td>Single cable: power + network</td><td>~£25</td></tr>
+    <tr><td>Camera mount + housing</td><td>Ceiling/wall bracket</td><td>~£20</td></tr>
+    <tr><td colspan="2"><strong>Total per machine</strong></td><td><strong>~£230</strong></td></tr>
+  </table></div>
+  <p>Shared infrastructure: one Mac Mini M4 (~£700) serves as the training server for all machines.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PART 2 — THE LIVE SYSTEM
+     ═══════════════════════════════════════════════════════════════ -->
+
+<div class="chapter-divider" id="sys-pipeline" style="background:linear-gradient(135deg,#07070f 0%,#0d0d20 60%,#07070f 100%);border-top:2px solid #3b82f622">
+  <div class="ch-inner">
+    <div class="ch-num" style="color:#3b82f6">Part 2 — The Live System</div>
+    <h1>How It <em style="color:#3b82f6">Works</em></h1>
+    <p class="ch-desc">The actual running system — pipeline, classes, annotation, review loop, training, and deployment.</p>
+    <div class="ch-sections">
+      <span class="ch-pill" style="border-color:#3b82f633;color:#3b82f6">The Pipeline</span>
+      <span class="ch-pill" style="border-color:#3b82f633;color:#3b82f6">8 Activity Classes</span>
+      <span class="ch-pill" style="border-color:#3b82f633;color:#3b82f6">Annotating Videos</span>
+      <span class="ch-pill" style="border-color:#3b82f633;color:#3b82f6">The Review Loop</span>
+      <span class="ch-pill" style="border-color:#3b82f633;color:#3b82f6">Training</span>
+      <span class="ch-pill" style="border-color:#3b82f633;color:#3b82f6">Deployment</span>
+    </div>
+  </div>
+</div>
+
+<section class="section" id="sys-pipeline-s">
+  <div class="section-tag" style="color:#3b82f6">Part 2 — The Live System</div>
+  <h2>The <em>Pipeline</em></h2>
+  <p class="lead">Every frame that comes off the Pi camera goes through this exact sequence in under 46ms.</p>
+  <div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">pipeline.txt</span></div>
+    <pre>Pi Camera (30fps)
+  │
+  ▼
+YOLO v11n-pose (Hailo NPU — 26 TOPS)
+  → 17 keypoints per person (x, y, confidence)
+  → Bounding box
+  │
+  ▼
+Engagement Detector
+  → Is person inside the machine zone? (≥40% body overlap)
+  → Is pose seated? (hips below shoulders, arms raised)
+  → 10-frame confirmation buffer before session starts
+  → BLOCKS bystanders, personal trainers, people walking past
+  │
+  ▼ (person engaged)
+Weight Stack Tracker (optical flow)
+  → Monitors weight plate ROI every frame during a rep
+  → Rejects rep if plates didn't move (phantom rep prevention)
+  │
+  ▼
+ONNX Activity Classifier (LSTM — when trained)
+  → 30-frame rolling keypoint window (30 × 51 features)
+  → Outputs ONE of 8 activity classes (softmax — the gate)
+  → If confidence &lt; 0.50 → clip saved + uploaded for review
+  │
+  ▼
+Activity State Machine
+  → Phase IDLE: only classes 0,1,2 valid (rep classes blocked)
+  → Phase ENGAGED: all 8 classes valid
+  → Transition requires 10 consecutive on_machine frames
+  │
+  ▼
+Supabase (PostgreSQL)
+  → Session created, reps logged, ROM + duration recorded
+  │
+  ▼
+Mac Mini Dashboard / Member App</pre>
+  </div>
+
+  <div class="callout purple">
+    <div class="ct">The Gate — Why Only One State at a Time</div>
+    <p>You asked: "can a user be 'engaged' AND 'resting' at the same time?" No. The LSTM output goes through a <strong>softmax</strong> layer — this forces all 8 class probabilities to sum to exactly 1.0. The argmax picks one winner. Additionally, the Activity State Machine blocks rep classes entirely until engagement is confirmed. Two locks, not one.</p>
+  </div>
+</section>
+
+<section class="section" id="sys-classes">
+  <div class="section-tag" style="color:#3b82f6">Part 2 — The Live System</div>
+  <h2>The 8 <em>Activity Classes</em></h2>
+  <p class="lead">Every frame is classified as exactly one of these 8 states. The classes are mutually exclusive and hierarchical — you cannot reach a rep class without first being confirmed on_machine.</p>
+  <div class="table-wrap"><table>
+    <tr><th>ID</th><th>Label</th><th>Description</th><th>Session?</th></tr>
+    <tr><td>0</td><td><code>no_person</code></td><td>Nobody at the machine</td><td>No</td></tr>
+    <tr><td>1</td><td><code>user_present</code></td><td>Person nearby, not seated — walking past, standing, PT coaching</td><td>No</td></tr>
+    <tr><td>2</td><td><code>on_machine</code></td><td>Seated and engaged — gripping handles, about to lift</td><td>Starts session</td></tr>
+    <tr><td>3</td><td><code>good_rep</code></td><td>Full ROM, controlled speed, weight stack moving throughout</td><td>Count rep ✓</td></tr>
+    <tr><td>4</td><td><code>bad_rep</code></td><td>Uncontrolled — bouncing, swinging, using momentum</td><td>Count rep ⚠</td></tr>
+    <tr><td>5</td><td><code>false_rep</code></td><td>Stretching, adjusting handles/seat/pin, reaching for towel</td><td>Don't count</td></tr>
+    <tr><td>6</td><td><code>resting</code></td><td>Seated between sets — handles released, recovering</td><td>Session continues</td></tr>
+    <tr><td>7</td><td><code>half_rep</code></td><td>Partial ROM or single-arm only</td><td>Count rep ⚠</td></tr>
+  </table></div>
+  <div class="callout warning">
+    <div class="ct">Annotation Rule — Hierarchy Must Be Respected</div>
+    <p>When annotating, you must label an <code>on_machine</code> segment <strong>before</strong> labelling any rep segments. The annotation tool will warn you if you try to add a good_rep without a preceding on_machine label. This matches the state machine's hierarchy — the model learns the correct progression from day one.</p>
+  </div>
+</section>
+
+<section class="section" id="sys-annotation">
+  <div class="section-tag" style="color:#3b82f6">Part 2 — The Live System</div>
+  <h2>Annotating <em>Videos</em></h2>
+  <p class="lead">This is how raw Pi recordings become training data. You do this on the Mac Mini. The whole process takes about 20 minutes per video once you're practiced.</p>
+
+  <h3>Step 1 — Pull the video from the Pi to Mac Mini</h3>
+  <p>The Pi saves recordings to <code>/home/pi/xlf_recordings/</code>. The Mac Mini SSHs in and copies them over:</p>
+  <div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">terminal — Mac Mini</span></div>
+    <pre># Pull all new recordings from the Pi
+rsync -avz --progress pi@192.168.1.XX:~/xlf_recordings/ ~/Gym-Overseer-AI/data/raw/
+
+# Or use the Makefile shortcut:
+make sync PI=pi@192.168.1.XX</pre>
+  </div>
+
+  <h3>Step 2 — Open the annotation tool</h3>
+  <p>Open <code>pose/label.html</code> in Chrome or Safari on the Mac Mini. This is a self-contained web app — no server needed, just open the file.</p>
+  <div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">terminal — Mac Mini</span></div>
+    <pre>open ~/Gym-Overseer-AI/pose/label.html</pre>
+  </div>
+
+  <h3>Step 3 — Set up the engagement zone (first time only)</h3>
+  <ol>
+    <li>Load the video</li>
+    <li>Pause on a frame where the user is clearly seated on the machine</li>
+    <li>Press <kbd>B</kbd> — bounding box mode activates</li>
+    <li>Click and drag a box tightly around the seat + machine area</li>
+    <li>Click "Copy config.py value" — this copies the zone coordinates</li>
+    <li>Paste into <code>pi/config.py</code> as <code>MACHINE_ZONE_ROI</code></li>
+  </ol>
+  <p>You only do this once per camera setup. If the camera moves, redo it.</p>
+
+  <h3>Step 4 — Label segments</h3>
+  <p>Work through the video, marking time ranges for each activity class:</p>
+  <div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">keyboard shortcuts</span></div>
+    <pre>Space     — Play / Pause
+S         — Mark START of a segment
+1–8       — Label the segment with that class ID (marks END automatically)
+B         — Toggle bounding box drawing mode
+Escape    — Cancel current segment
+Export    — Downloads the JSON annotation file</pre>
+  </div>
+
+  <div class="callout" style="border-color:#22c55e44;background:#07170f">
+    <div class="ct" style="color:#22c55e">Target: 300+ segments across all 8 classes (≥30 per class)</div>
+    <p>You don't need 300 from one video. 10 videos × 30 segments each = 300. Label the most common states first (on_machine, good_rep, resting), then collect rarer ones (bad_rep, false_rep, half_rep).</p>
+  </div>
+
+  <h3>Step 5 — Save the annotation JSON</h3>
+  <p>Click <strong>Export JSON</strong>. Save the file to <code>data/annotations/</code> in the repo. Commit and push:</p>
+  <div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">terminal — Mac Mini</span></div>
+    <pre>cd ~/Gym-Overseer-AI
+git add data/annotations/
+git commit -m "Add annotations: lat_pulldown session 2026-04-09"
+git push</pre>
+  </div>
+</section>
+
+<section class="section" id="sys-review">
+  <div class="section-tag" style="color:#3b82f6">Part 2 — The Live System</div>
+  <h2>The <em>Review Loop</em></h2>
+  <p class="lead">Once the ONNX model is running on the Pi, it will encounter situations it's not sure about. Instead of guessing, it flags those clips and sends them to you for correction. This is how the model gets smarter over time without any manual data collection effort.</p>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">the-review-loop.txt</span></div>
+    <pre>Pi running ONNX model
+  │
+  └─ Confidence &lt; 0.50 on any frame?
+       │
+       YES → clip_reporter.py saves:
+               • 30-frame keypoint window → _kps.npy (for retraining)
+               • Metadata JSON → _meta.json (predicted class, confidence, timestamp)
+               • Keypoints embedded in JSON → for the review portal
+             Uploads both to GitHub: data/review/xlf-pi-001/2026-04-09/
+             (rate-limited: max 1 upload per 30 seconds)
+       │
+  Mac Mini does: git pull
+  │
+  Matt opens: pose/review.html  ← THE REVIEW PORTAL
+  │
+  Portal shows:
+    • Animated skeleton playback of the 30-frame clip
+    • What the model predicted (e.g. "good_rep — 38% confidence")
+    • 8 class buttons — Matt clicks the correct one
+    • JSON updated with true_class
+  │
+  Matt commits: git add data/review/ && git commit -m "Review batch 2026-04-09"
+  │
+  Mac Mini retrains with review data included:
+    make train           ← runs train/train_pytorch.py --review data/review/
+  │
+  New ONNX model deployed to Pi:
+    make deploy PI=pi@192.168.1.XX
+  │
+  Pi is now smarter. Loop repeats.</pre>
+  </div>
+
+  <div class="callout purple">
+    <div class="ct">Should it be a portal?</div>
+    <p>Yes — and it already is. <code>pose/review.html</code> is a self-contained review portal you run locally on the Mac Mini. Open it in a browser, it reads from <code>data/review/</code>, shows you each pending clip as a skeleton animation, and lets you click the correct class. No server needed. No internet connection needed. Works offline.</p>
+  </div>
+
+  <h3>Where do annotated files go?</h3>
+  <p>After reviewing a clip in the portal, the updated <code>_meta.json</code> (with <code>true_class</code> filled in) goes back to <code>data/review/</code>. You don't move them anywhere — the training script automatically picks up any JSON in <code>data/review/</code> where <code>true_class</code> is not null.</p>
+</section>
+
+<section class="section" id="sys-training">
+  <div class="section-tag" style="color:#3b82f6">Part 2 — The Live System</div>
+  <h2>Training on the <em>Mac Mini</em></h2>
+  <p class="lead">All training happens on the Mac Mini using PyTorch with Apple Silicon's MPS backend. No cloud, no GPU rental — the M4's Neural Engine handles it.</p>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">terminal — Mac Mini</span></div>
+    <pre># One-command training (uses all annotations + reviewed Pi clips):
+make train
+
+# What this runs under the hood:
+# 1. Extracts keypoint sequences from raw videos + annotation JSONs
+python3 train/extract_sequences.py     --annotations data/annotations/     --videos data/raw/     --output data/processed/
+
+# 2. Trains LSTM, includes reviewed Pi clips automatically
+python3 train/train_pytorch.py     --sequences data/processed/     --review data/review/     --output models/weights/activity_v1.onnx
+
+# Output: models/weights/activity_v1.onnx + activity_v1_meta.json</pre>
+  </div>
+
+  <h3>What the training script does</h3>
+  <ol>
+    <li>Loads all <code>*_X.npy</code> / <code>*_y.npy</code> sequence pairs from <code>data/processed/</code></li>
+    <li>Loads all reviewed clips from <code>data/review/</code> where <code>true_class</code> is set</li>
+    <li>Trains the LSTM for 60 epochs on Apple MPS (typically 2–5 minutes)</li>
+    <li>Exports to ONNX — verified with a smoke test (checks softmax gate)</li>
+    <li>Updates <code>models/registry.json</code> with version, accuracy, and sample count</li>
+  </ol>
+
+  <div class="callout warning">
+    <div class="ct">Minimum data before first training run</div>
+    <p>You need at least 300 annotated segments with at least 30 examples of each class. With fewer than this, the model will overfit — it'll get 100% accuracy on training data and fail completely on new footage. Collect data first, then train.</p>
+  </div>
+</section>
+
+<section class="section" id="sys-deploy">
+  <div class="section-tag" style="color:#3b82f6">Part 2 — The Live System</div>
+  <h2>Deploying a New Model <em>to the Pi</em></h2>
+  <p class="lead">Once trained, the ONNX file goes from Mac Mini to Pi over SSH. The Pi loads it automatically on the next restart.</p>
+
+  <div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">terminal — Mac Mini</span></div>
+    <pre># Deploy the latest model to a Pi:
+make deploy PI=pi@192.168.1.XX
+
+# What this does:
+scp models/weights/activity_v1.onnx pi@192.168.1.XX:/home/pi/xlf/models/
+ssh pi@192.168.1.XX "sudo systemctl restart xlf-overseer"
+
+# Check it loaded correctly:
+ssh pi@192.168.1.XX "sudo journalctl -u xlf-overseer -n 30"
+# You should see: [ONNX] Activity model loaded: /home/pi/xlf/models/activity_v1.onnx</pre>
+  </div>
+
+  <h3>Updating config on the Pi</h3>
+  <p>The first time you deploy a model, set <code>ONNX_MODEL_PATH</code> in <code>pi/config.py</code>:</p>
+  <div class="code-block">
+    <div class="code-header"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div><span class="code-filename">pi/config.py</span></div>
+    <pre>ONNX_MODEL_PATH    = "/home/pi/xlf/models/activity_v1.onnx"
+GITHUB_REVIEW_TOKEN = "ghp_..."   # PAT with Contents:write
+GITHUB_REVIEW_REPO  = "Matt-xlfitness/Gym-Overseer-AI"</pre>
+  </div>
+  <p>Push the config change and the Pi will pick it up on next restart.</p>
+</section>
 
 <div class="chapter-divider" id="ch-vision">
   <div class="ch-inner">

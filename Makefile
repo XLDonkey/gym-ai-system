@@ -107,4 +107,16 @@ test:
 annotate:
 	open pose/label.html
 
-.PHONY: extract train train-from-raw autolabel deploy logs ssh stats pending lint test annotate
+# Open review portal in browser (start server first)
+review:
+	@echo "Starting review portal at http://localhost:8787 ..."
+	python3 pose/review_server.py &
+	sleep 1 && open http://localhost:8787
+
+# Pull recordings from Pi to data/raw/
+sync:
+	@test -n "$(PI)" || (echo "Set PI=user@ip  e.g. make sync PI=pi@192.168.1.50" && exit 1)
+	rsync -avz --progress $(PI):~/xlf_recordings/ data/raw/
+	@echo "Sync complete. New videos in data/raw/"
+
+.PHONY: extract train train-from-raw autolabel deploy logs ssh stats pending lint test annotate review sync
