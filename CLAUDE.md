@@ -11,10 +11,27 @@ A self-improving AI gym tracking system for **XL Fitness**.
 One camera per machine. Every rep counted, every weight logged, every member tracked — automatically.
 No phones. No QR codes. No staff input.
 
-**Repo:** `xldonkey/gym-ai-system` (public — hosts GitHub Pages)
-**Private repo:** `Matt-xlfitness/Gym-Overseer-AI` (production, private)
+**Primary repo:** `Matt-xlfitness/Gym-Overseer-AI` (private — production)
+**Public repo:** `xldonkey/gym-ai-system` (hosts GitHub Pages / Bible only)
 **Bible (live):** https://xldonkey.github.io/gym-ai-system/bible.html
 **Branch for all development:** `claude/gym-tracking-neural-network-sHldz`
+
+---
+
+## MVP v1 Scope (Current Focus)
+
+Building in this order:
+1. **Tablet interface** → `display/tablet.html` — member-facing kiosk display ← **IN PROGRESS**
+2. **Weight detection Pi** → camera looks at barbell horns/sleeves → detects plate colours → kg
+3. **Person tracking** → bounding box IoU tracker (no face detection in MVP)
+
+**Explicitly OUT of MVP v1:**
+- Face detection / member identification
+- Supabase session logging (can be stubbed)
+- LSTM classifier (rule-based angle counting only for now)
+
+**Running in parallel:**
+- Recording LSTM training data on the machine Pi
 
 ---
 
@@ -22,9 +39,9 @@ No phones. No QR codes. No staff input.
 
 | # | Name | Status | Key file |
 |---|------|--------|----------|
-| 1 | **Rep Tracking** | Live (rule-based). LSTM needs training data | `pi/activity_state_machine.py` |
-| 2 | **Weight ID** | Built, needs training images | `weight_id/detector.py` |
-| 3 | **User Tracking** | Built, needs member enrolment | `user_tracking/gym_tracker.py` |
+| 1 | **Rep Tracking** | Live (rule-based). LSTM training data being collected | `pi/activity_state_machine.py` |
+| 2 | **Weight ID** | Building — Pi camera looks at barbell horns | `weight_id/detector.py` |
+| 3 | **User Tracking** | MVP = bounding box only, no face ID | `user_tracking/gym_tracker.py` |
 | 4 | **E-Weight** | Phase 2 — hardware pending | `e_weight/stack_client.py` |
 
 ---
@@ -33,14 +50,14 @@ No phones. No QR codes. No staff input.
 
 ```
 ENTRY PI (door camera)
-  └─ InsightFace ArcFace → member identity → PersonDB
+  └─ InsightFace ArcFace → member identity → PersonDB [NOT IN MVP]
 
 MACHINE PI (one per machine)
   ├─ YOLO Pose          → 17 keypoints / frame
-  ├─ GymTracker         → track_id → member from PersonDB
+  ├─ GymTracker         → bounding box IoU tracking [MVP: no face ID]
   ├─ ActivityStateMachine → IDLE / ENGAGED phase gate
-  ├─ LSTM Classifier    → 8-class activity (30-frame window)
-  ├─ WeightDetector     → AlphaFit plate colour → kg
+  ├─ LSTM Classifier    → 8-class activity [post-MVP: needs training data]
+  ├─ WeightDetector     → AlphaFit plate colour → kg [building now]
   ├─ WeightStackTracker → optical flow → validates rep
   ├─ ws_server.py       → WebSocket → tablet (100ms)
   ├─ set_reporter.py    → HTTP POST → Supabase / Power Automate
@@ -98,7 +115,7 @@ Output: softmax (one class wins)
 | Green  | 10 kg  |
 | White  | 5 kg   |
 
-Camera looks along barbell sleeve (~45°). HSV colour classification.
+Camera looks along barbell horn/sleeve (~45°). HSV colour classification.
 Barbell bar = 20 kg added automatically.
 
 ---
@@ -114,39 +131,34 @@ Barbell bar = 20 kg added automatically.
 
 ---
 
-## Git Authentication
+## Git Push
 
-The session proxy authenticates as `Matt-xlfitness`. Push to XLDonkey repo using:
+Push to both repos:
 ```bash
+# Primary (private, production)
+git push https://Matt-xlfitness:<PAT>@github.com/Matt-xlfitness/Gym-Overseer-AI.git claude/gym-tracking-neural-network-sHldz
+
+# Public (GitHub Pages only)
 git push https://Matt-xlfitness:<PAT>@github.com/XLDonkey/gym-ai-system.git claude/gym-tracking-neural-network-sHldz
-git fetch https://Matt-xlfitness:<PAT>@github.com/XLDonkey/gym-ai-system.git claude/gym-tracking-neural-network-sHldz:refs/remotes/origin/claude/gym-tracking-neural-network-sHldz
 ```
-
----
-
-## Current Blockers (Data Collection)
-
-- [ ] Collect 300+ annotated rep segments → `make train`
-- [ ] Collect 50+ weight plate photos per colour → `make train-weight`
-- [ ] Enrol all members → `make enrol NAME="..."`
-- [ ] Set Supabase credentials in `pi/config.py`
-- [ ] Deploy models to Pi → `make deploy PI=pi@IP`
 
 ---
 
 ## Key Decisions Made
 
+- **Primary repo** is `Matt-xlfitness/Gym-Overseer-AI` (private) — not xldonkey
+- **MVP v1**: tablet interface → weight detection → person tracking (bounding box). No face ID.
 - **Supabase** (not Power Apps) for database — Postgres + Realtime, scales to multiple gyms
 - **Power Automate** for set reporting (interim) — replace with Next.js `/api/set` endpoint later
 - **ONNX** for Pi deployment (not PyTorch) — faster inference, no torch on Pi
-- **Rule-based** angle counting now, LSTM later (needs training data first)
+- **Rule-based** angle counting now, LSTM later (training data being collected)
 - **IoU tracker** (not DeepSORT) — lightweight, no GPU needed on Pi
-- **buffalo_sc** ArcFace model (not buffalo_l) — faster, good enough accuracy on Pi
-- **xldonkey/gym-ai-system** (public) hosts Bible/GitHub Pages; private repo stays private
+- **buffalo_sc** ArcFace model (not buffalo_l) — faster, good enough on Pi [post-MVP]
 
 ---
 
 ## Obsidian Knowledge Graph
 
-Full interlinked notes in `obsidian/` folder. Open in Obsidian → File → Open Vault → select repo folder.
-The graph view shows connections between all concepts.
+Full interlinked notes in `obsidian/` folder.
+Open `Gym-Overseer-AI/obsidian/` as a vault in Obsidian for graph view.
+Update by telling Claude what changed — both CLAUDE.md and Obsidian notes updated together.
