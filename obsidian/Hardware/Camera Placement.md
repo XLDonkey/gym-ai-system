@@ -73,5 +73,9 @@ Covers the weight stack in the camera frame — adjust per machine layout.
 ## Related
 
 - [[Hardware/Machine Pi]] — the hardware
+- [[Hardware/Costs]] — camera cost per station
 - [[System/YOLO Pipeline]] — what the camera feeds
-- [[Projects/Weight ID]] — barbell weight detection
+- [[Projects/Weight ID]] — barbell weight detection, camera angle critical
+- [[Projects/User Tracking]] — door camera for face recognition
+- [[Projects/Rep Tracking]] — machine camera for keypoints
+- [[Data/AlphaFit Plates]] — what the barbell camera is looking for

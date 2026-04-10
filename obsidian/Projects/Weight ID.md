@@ -88,3 +88,15 @@ make test-weight
 - [x] YOLO pipeline built
 - [ ] Training images collected (50+ per colour)
 - [ ] YOLO model trained and deployed
+
+---
+
+## Related
+
+- [[Data/AlphaFit Plates]] — colour → kg mapping and HSV ranges
+- [[System/YOLO Pipeline]] — object detection backbone
+- [[Hardware/Camera Placement]] — how to mount for best plate view
+- [[Hardware/Machine Pi]] — hardware this runs on
+- [[Hardware/Costs]] — 2 extra cameras per barbell station
+- [[Data/Training Requirements]] — 50+ photos per colour needed
+- [[Projects/E-Weight]] — alternative for pin-loaded machines

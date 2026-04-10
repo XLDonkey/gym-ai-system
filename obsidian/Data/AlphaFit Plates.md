@@ -72,3 +72,5 @@ When no YOLO model is available, `ColourMatcher.analyse_frame(frame)` scans the 
 
 - [[Projects/Weight ID]] — full project
 - [[System/Architecture]] — where weight detection fits
+- [[Hardware/Camera Placement]] — camera must face plates at ~45°
+- [[Data/Training Requirements]] — 50+ photos per colour needed

@@ -85,3 +85,13 @@ To enable: set `enabled=True` and provide the motor controller's IP.
 - [ ] Hardware designed
 - [ ] Hardware built
 - [ ] Tested on cable machine
+
+---
+
+## Related
+
+- [[Projects/Weight ID]] — alternative for free weight barbells
+- [[System/Database Schema]] — weight_kg written to sets table
+- [[System/WebSocket Layer]] — weight broadcast to tablet
+- [[Hardware/Machine Pi]] — Pi calls the motor API
+- [[Hardware/Costs]] — no extra cameras needed (digital readout)

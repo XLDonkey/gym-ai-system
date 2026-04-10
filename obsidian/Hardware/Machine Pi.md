@@ -75,5 +75,11 @@ Install: `pip install -r pi/requirements.txt`
 
 - [[System/YOLO Pipeline]] — main workload on Pi
 - [[System/LSTM Model]] — ONNX inference on Pi
+- [[System/WebSocket Layer]] — WebSocket server runs on Pi
+- [[System/Review Loop]] — Mac Mini retrains, Pi deploys
 - [[Hardware/Camera Placement]] — where to mount
 - [[Hardware/Costs]] — full cost breakdown
+- [[Projects/Rep Tracking]] — primary project running on Pi
+- [[Projects/Weight ID]] — runs on same Pi (barbell stations)
+- [[Projects/User Tracking]] — entry Pi + machine Pi
+- [[Projects/E-Weight]] — Pi calls motor API (Phase 2)

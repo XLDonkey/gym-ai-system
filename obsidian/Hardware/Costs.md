@@ -77,3 +77,7 @@ Stays in office. Trains all models, serves review portal.
 
 - [[Hardware/Machine Pi]] — full hardware spec
 - [[Hardware/Camera Placement]] — how to mount
+- [[Projects/Rep Tracking]] — runs on every machine Pi
+- [[Projects/Weight ID]] — needs 2 extra cameras per barbell
+- [[Projects/User Tracking]] — needs separate entry Pi
+- [[Projects/E-Weight]] — replaces weight stack hardware (Phase 2)

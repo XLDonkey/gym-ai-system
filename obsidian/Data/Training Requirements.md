@@ -112,4 +112,8 @@ Repeat for each member. No minimum count — one enrolment per person is enough.
 - [[System/LSTM Model]] — what gets trained
 - [[System/Review Loop]] — ongoing improvement after go-live
 - [[Data/AlphaFit Plates]] — colour ranges for weight ID
-- [[Projects/User Tracking]] — enrolment process
+- [[Projects/Rep Tracking]] — needs 300+ annotated segments
+- [[Projects/Weight ID]] — needs 50+ photos per colour
+- [[Projects/User Tracking]] — needs member enrolment
+- [[Hardware/Machine Pi]] — Pi records the training footage
+- [[Hardware/Camera Placement]] — correct angle = better training data

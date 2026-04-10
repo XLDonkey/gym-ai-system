@@ -122,3 +122,16 @@ make review              # review portal localhost:8787
 make stats               # annotation counts per class
 make pending             # Pi clips awaiting review
 ```
+
+---
+
+## Related
+
+- [[System/LSTM Model]] — the model being used
+- [[System/Activity Classes]] — the 8 output classes
+- [[System/YOLO Pipeline]] — produces the keypoint input
+- [[System/Review Loop]] — how the model improves
+- [[System/WebSocket Layer]] — broadcasts rep count live to tablet
+- [[System/Database Schema]] — where completed sets are stored
+- [[Hardware/Machine Pi]] — the hardware this runs on
+- [[Data/Training Requirements]] — data needed before LSTM goes live

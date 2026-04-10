@@ -93,3 +93,15 @@ make enrol NAME="Matthew"
 - [x] Face recognizer wrapper
 - [ ] Members enrolled (run `make enrol` for each person)
 - [ ] Tested end-to-end: door → machine → session attributed
+
+---
+
+## Related
+
+- [[System/YOLO Pipeline]] — bounding boxes used by GymTracker
+- [[System/Database Schema]] — members and sessions tables
+- [[System/Architecture]] — where this fits in the full system
+- [[Hardware/Machine Pi]] — entry Pi + machine Pi hardware
+- [[Hardware/Camera Placement]] — door camera mounting
+- [[Decisions/Stack Choices]] — why buffalo_sc, why IoU tracker
+- [[Data/Training Requirements]] — member enrolment steps
