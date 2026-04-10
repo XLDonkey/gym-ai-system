@@ -2,11 +2,12 @@
 title: Database Schema
 tags: [system, database, supabase, schema]
 created: 2026-04-09
+updated: 2026-04-10
 ---
 
 # Database Schema (Supabase)
 
-Supabase (PostgreSQL) stores all members, sessions, and sets. See [[Decisions/Stack Choices]].
+PostgreSQL on Supabase. Full schema in `members/schema.sql`.
 
 ---
 
@@ -15,60 +16,122 @@ Supabase (PostgreSQL) stores all members, sessions, and sets. See [[Decisions/St
 ### `members`
 
 ```sql
-id          uuid primary key default gen_random_uuid()
-created_at  timestamptz default now()
-name        text not null
-member_code text unique          -- e.g. "M1089"
-face_embedding  vector(512)      -- ArcFace embedding (pgvector)
-enrolled_at timestamptz
-gym_id      text                 -- for multi-gym support
+CREATE TABLE members (
+    id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    name            text NOT NULL,
+    face_embedding  float[] NOT NULL,   -- 512-dim ArcFace vector
+    enrolled_at     timestamptz DEFAULT now(),
+    active          boolean DEFAULT true
+);
 ```
+
+Populated by `make enrol NAME="..."` → `face/enroll_member.py`.
+Loaded at Pi startup by `FaceRecognizer.load_members()`.
 
 ### `sessions`
 
 ```sql
-id          uuid primary key
-member_id   uuid references members(id)
-machine_id  text                 -- e.g. "xlf-pi-001"
-machine_name text
-started_at  timestamptz
-ended_at    timestamptz
-total_sets  int
-total_reps  int
+CREATE TABLE sessions (
+    id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    member_id       uuid REFERENCES members(id),
+    machine_id      text NOT NULL,     -- e.g. "xlf-pi-001"
+    machine_name    text,
+    started_at      timestamptz DEFAULT now(),
+    ended_at        timestamptz,
+    total_reps      int DEFAULT 0,
+    avg_rom         float,             -- average range of motion (degrees)
+    avg_duration_s  float              -- average rep duration
+);
 ```
 
-### `sets`
+### `reps`
 
 ```sql
-id          uuid primary key
-session_id  uuid references sessions(id)
-member_id   uuid references members(id)
-machine_id  text
-timestamp   timestamptz
-exercise    text
-weight_kg   float
-reps        int
-form_good   int
-form_partial int
-form_bad    int
-form_score  float                -- good / (good + partial + bad)
-model_version text               -- e.g. "v1.0-lstm"
+CREATE TABLE reps (
+    id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id      uuid REFERENCES sessions(id),
+    rep_number      int NOT NULL,
+    rom_degrees     float,             -- range of motion this rep
+    duration_s      float,             -- rep duration
+    timestamp       timestamptz DEFAULT now()
+);
 ```
 
-### `pi_status`
+### `sets` (from set_reporter)
 
 ```sql
-machine_id   text primary key
-machine_name text
-last_seen    timestamptz
-state        jsonb               -- last WebSocket payload
-ip_address   text
-model_version text
+CREATE TABLE sets (
+    id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id      uuid REFERENCES sessions(id),
+    member_id       uuid REFERENCES members(id),
+    machine_id      text,
+    timestamp       timestamptz,
+    exercise        text,
+    weight_kg       float,
+    reps            int,
+    form_good       int DEFAULT 0,
+    form_partial    int DEFAULT 0,
+    form_bad        int DEFAULT 0,
+    form_score      float,             -- good / (good + partial + bad)
+    model_version   text               -- e.g. "v1.0-lstm"
+);
 ```
 
 ---
 
-## Set Payload (Pi → Supabase)
+## Views
+
+### `member_stats`
+Lifetime aggregates per member:
+```sql
+-- total_sessions, total_reps, avg_form_score, last_session_at
+-- Used in member dashboard (future)
+```
+
+### `daily_volume`
+Per-day per-member volume:
+```sql
+-- date, member_id, total_reps, total_sets, total_weight_moved_kg
+-- total_weight_moved_kg = SUM(weight_kg * reps) across all sets that day
+```
+
+---
+
+## Row-Level Security (RLS)
+
+```sql
+-- Anonymous: read-only (for public leaderboards, future)
+-- service_role: full read/write (Pi uses this key)
+-- authenticated: own rows only (member app, future)
+```
+
+Pi uses the **service_role** key (bypasses RLS) — set in `pi/config.py`:
+```python
+SUPABASE_URL         = "https://xxxx.supabase.co"
+SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+Never use the anon key on the Pi — it can't write.
+
+---
+
+## Supabase Client (`members/db_client.py`)
+
+Thin REST wrapper — no Supabase SDK, just `requests`:
+
+| Method | Purpose |
+|--------|---------|
+| `get_all_members()` | Load face embeddings at startup |
+| `get_member(member_id)` | Fetch one member |
+| `create_member(name, embedding)` | Enrol new member |
+| `deactivate_member(member_id)` | Soft-delete |
+| `create_session(machine_id, machine_name, member_id)` | Start session |
+| `close_session(session_id, total_reps, avg_rom, avg_duration_s)` | End session |
+| `log_rep(session_id, rep_number, rom_degrees, duration_s)` | Per-rep log |
+
+---
+
+## Set Payload (Pi → Supabase via set_reporter)
 
 ```json
 {
@@ -88,26 +151,17 @@ model_version text
 
 ---
 
-## Config
+## Multi-Gym (Future)
 
-Set in `pi/config.py`:
-```python
-SUPABASE_URL         = "https://xxxx.supabase.co"
-SUPABASE_SERVICE_KEY = "eyJ..."   # service_role JWT (not anon key)
-```
-
-Use the **service_role** key on the Pi — it bypasses Row-Level Security and can write directly.
-
----
-
-## Multi-Gym
-
-Add `gym_id` column to members + machines tables, use Supabase Row-Level Security (RLS) to restrict each staff account to their gym's data.
+Add `gym_id` column to `members`, `sessions`, `sets`.
+RLS policy: `gym_id = auth.jwt() -> 'gym_id'`.
+Each gym's staff sees only their data.
 
 ---
 
 ## Related
 
-- [[Decisions/Stack Choices]] — why Supabase
+- [[Projects/User Tracking]] — members table populated here
 - [[System/WebSocket Layer]] — set_reporter sends to Supabase
-- [[Projects/User Tracking]] — members table populated via enrolment
+- [[System/Architecture]] — db_client.py position in main loop
+- [[Decisions/Stack Choices]] — why Supabase over Power Apps

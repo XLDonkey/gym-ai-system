@@ -2,58 +2,63 @@
 title: Stack Choices
 tags: [decisions, architecture, tech-stack]
 created: 2026-04-09
+updated: 2026-04-10
 ---
 
 # Stack Choices — Why We Chose What We Chose
 
-Every major technical decision, and the reasoning. Saves relitigating these questions.
+Every major technical decision with reasoning. Prevents relitigating these.
 
 ---
 
 ## Database: Supabase (not Power Apps / Dataverse)
 
-**Chosen:** Supabase (PostgreSQL + Realtime + Auth)
+**Chosen:** Supabase (PostgreSQL + Realtime + Auth + REST)
 
 | Factor | Supabase | Power Apps / Dataverse |
 |--------|----------|----------------------|
-| Price | Free tier → $25/mo | £6–9 per user per month |
-| Realtime | Built-in (< 1s) | Polling, ~5s lag |
-| Multi-gym | `gym_id` column + RLS | Expensive licensing |
+| Price (1 gym) | Free tier | £6–9 per user per month |
+| Price (10 gyms) | $25/mo flat | Hundreds per month |
+| Realtime | Built-in (< 1s) | Polling, 5–10s lag |
+| Multi-gym | `gym_id` column + RLS | Expensive licences |
 | Custom UI | Full control | Rigid Power Apps canvas |
 | Data ownership | Your Postgres database | Locked in Microsoft |
-| SQL | Full PostgreSQL | Limited |
+| SQL | Full PostgreSQL | Limited Dataverse query |
+| Face embeddings | `FLOAT[]` array column | Complex workaround |
 
-**Decision:** Supabase scales from 1 gym to 100 gyms at minimal cost. Power Apps is fine for a proof of concept but becomes expensive and inflexible.
+**Decision:** Supabase scales from 1 gym to 100 gyms at minimal cost. Power Apps is a low-code tool — not appropriate for a production product.
 
 ---
 
-## Pi Inference: ONNX (not PyTorch)
+## Pi Inference: ONNX Runtime (not PyTorch)
 
-**Chosen:** ONNX Runtime on Pi
+**Chosen:** Export PyTorch → ONNX, run ONNX Runtime on Pi.
 
 | Factor | ONNX Runtime | PyTorch |
 |--------|-------------|---------|
-| Install size | ~50MB | ~800MB |
-| Pi 5 inference | ~5ms | ~15ms |
-| Dependencies | Minimal | Heavy (torch, etc.) |
-| Hailo support | Via ONNX export | Not directly |
+| Install size on Pi | ~50 MB | ~800 MB |
+| Inference time | ~5ms | ~15ms |
+| Dependencies | Minimal | Heavy |
+| Hailo HAT support | Via ONNX export | Not directly |
+| Pi SD card impact | Minimal | Large |
 
-**Decision:** Train on Mac Mini with PyTorch, export to ONNX, deploy ONNX to Pi. Best of both worlds.
+**Decision:** Train on Mac Mini with PyTorch (best DX), deploy ONNX to Pi (best performance). No PyTorch on Pi.
 
 ---
 
-## Tracking: IoU (not DeepSORT / ByteTrack)
+## Person Tracking: IoU Matching (not DeepSORT / ByteTrack)
 
-**Chosen:** IoU greedy matching
+**Chosen:** Greedy IoU matching (~50 lines of code)
 
-| Factor | IoU | DeepSORT / ByteTrack |
-|--------|-----|----------------------|
+| Factor | IoU | DeepSORT |
+|--------|-----|----------|
 | CPU cost | Near zero | Requires Re-ID model |
 | GPU needed | No | Ideally yes |
-| Accuracy | Good enough for gym | Better in crowds |
-| Complexity | ~50 lines | Large dependency |
+| Accuracy at gym | Good enough | Overkill |
+| Complexity | Simple | Large dependency |
+| Code | `user_tracking/gym_tracker.py` | Separate library |
 
-**Decision:** A gym machine has 1–2 people in frame at most. IoU matching is completely adequate. DeepSORT adds weight for no benefit.
+**Decision:** Gym machines have 1–2 people in frame at most. IoU works perfectly. DeepSORT solves problems we don't have.
 
 ---
 
@@ -63,50 +68,79 @@ Every major technical decision, and the reasoning. Saves relitigating these ques
 
 | Factor | buffalo_sc | buffalo_l |
 |--------|-----------|-----------|
-| Speed (Pi) | ~80ms | ~300ms |
+| Pi 5 speed | ~80ms | ~300ms |
 | Accuracy | Good | Excellent |
 | Model size | Small | Large |
 
-**Decision:** At a gym door, "good" accuracy is enough — members enrol once and are the only people expected. Speed matters more to avoid blocking the inference loop.
+**Decision:** At a gym door, "good" accuracy with fast speed beats "excellent" accuracy too slow for real-time. Members enrol once and are the only people expected.
 
 ---
 
-## Angle Counting: Rule-Based Now, LSTM Later
+## Rep Counting: Rule-Based Now, LSTM Later
 
-**Current:** Rule-based (elbow/shoulder angle thresholds)
-**Future:** LSTM 8-class classifier
+**Current:** Angle-based rule-based counting (live from day one, zero training data)
+**Future:** LSTM 8-class classifier (300+ training segments)
 
-**Why rule-based first:** Zero training data needed. Live from day one. Gives time to collect real gym data for LSTM training.
+**Why rule-based first:** The system works from installation day. Rules work well for standard reps on a lat pulldown. They give us time to collect real data.
 
-**Why switch to LSTM:** Rules can't handle "bad rep" vs "adjusting", can't detect "resting", can't classify half reps. LSTM learns from real data and handles all 8 classes.
+**Why LSTM eventually:** Rules can't distinguish "bad_rep" from "adjusting", can't detect "resting" vs "done", can't handle half-reps. LSTM handles all 8 classes and improves via the review loop.
 
----
-
-## Set Reporting: Power Automate Now, Next.js Later
-
-**Current:** Pi → Power Automate HTTP webhook
-**Planned:** Pi → Next.js `/api/set` on Vercel
-
-Only `POWER_AUTOMATE_URL` (or `SERVER_URL`) in `pi/config.py` changes. Pi code is unchanged.
-
-**Why Power Automate first:** Zero infrastructure to set up. Works today.
-**Why replace it:** Power Automate has rate limits, costs money at scale, adds latency, and is opaque.
+**Switch:** set `ONNX_MODEL_PATH` in `pi/config.py`. Blank = rules. Path set = LSTM.
 
 ---
 
-## Public vs Private Repos
+## Set Reporting: Power Automate Now, Custom Later
 
-| Repo | Visibility | Purpose |
-|------|-----------|---------|
-| `xldonkey/gym-ai-system` | **Public** | GitHub Pages (Bible), open development |
-| `Matt-xlfitness/Gym-Overseer-AI` | **Private** | Production code, credentials |
+**Current:** Pi → HTTP POST → Power Automate webhook → Dataverse
+**Planned:** Pi → HTTP POST → Next.js `/api/set` on Vercel → Supabase Realtime
 
-GitHub Pages requires a public repo on the free plan. The Bible lives at `xldonkey/gym-ai-system`, production stays private.
+Only `POWER_AUTOMATE_URL` (or `SERVER_URL`) changes in `pi/config.py`. Pi code unchanged.
+
+**Why Power Automate first:** Zero infrastructure. Works today. Free up to ~750 runs/month.
+**Why replace:** Rate-limited, opaque, adds latency, locks into Microsoft.
+
+---
+
+## Video Storage: Google Drive (not S3 / local only)
+
+**Chosen:** Local Pi buffer → rclone → Google Drive
+
+| Factor | Google Drive | S3 |
+|--------|-------------|-----|
+| Cost | 15GB free, £2/mo for 100GB | $0.023/GB/month |
+| Mac Mini access | Drag to Finder, rclone sync | AWS CLI |
+| Setup | rclone + service account | IAM + keys |
+| Simplicity | Very simple | More config |
+
+**Decision:** Team uses Google accounts already. Google Drive is accessible to non-technical users.
+
+---
+
+## GitHub Pages: xldonkey/gym-ai-system (public)
+
+**Production code:** `Matt-xlfitness/Gym-Overseer-AI` — **private**
+**Dev + Bible:** `xldonkey/gym-ai-system` — **public**
+
+GitHub Pages requires a public repo on the free plan. Bible lives at `xldonkey.github.io/gym-ai-system/bible.html`.
+
+---
+
+## Edge Inference vs Cloud (Not Even Considered)
+
+Every inference runs **on the Pi**. No frames sent to cloud for analysis.
+
+Why:
+- Privacy — member data never leaves the gym network
+- Latency — cloud round-trip adds 100–300ms
+- Reliability — works when internet is down
+- Cost — no cloud GPU inference fees
+- GDPR — biometric data stays on premises
 
 ---
 
 ## Related
 
 - [[Decisions/Display Layer]] — tablet vs web app decisions
-- [[System/Architecture]] — how all pieces connect
-- [[System/Database Schema]] — Supabase schema detail
+- [[System/Database Schema]] — Supabase schema
+- [[System/LSTM Model]] — ONNX deployment
+- [[Projects/User Tracking]] — IoU tracker + face model choices

@@ -3,95 +3,126 @@ title: Project 4 — E-Weight
 tags: [project, e-weight, motor, phase-2, pending]
 status: phase-2-hardware-pending
 created: 2026-04-09
+updated: 2026-04-10
 ---
 
 # Project 4 — E-Weight (Electric Weight Stacks)
 
-> Custom motor stacks on cable machines — weight read digitally from motor API. 100% accurate.
+> Custom brushless motor stacks on cable machines — weight read digitally from motor API. 100% accurate.
 
-Part of [[Home]]. This replaces camera-based weight detection for **pin-loaded cable machines**. Hardware not yet built.
-
----
-
-## The Concept
-
-Traditional cable machines have iron pin-loaded weight stacks — hard to see, lighting-dependent, camera angle awkward.
-
-The E-Weight replaces these with **brushless motor stacks**:
-- Motor controller manages exact weight in software
-- Exposes a local HTTP API: `GET /api/weight → {"weight_kg": 42.5}`
-- Pi calls the API at session start — weight is always exact, 1 kg increments
-- **Zero camera detection needed for weight** — digital readout
-
-This is **100% accurate** vs ~95% for camera-based plate detection.
+Part of [[Home]]. Replaces camera-based weight detection for **pin-loaded cable machines**. Hardware not yet built — code is ready.
 
 ---
 
-## API Spec
+## The Problem It Solves
+
+Pin-loaded cable machines (lat pulldowns, cable rows, tricep pushdowns) have traditional iron weight stacks. Camera-based detection is hard:
+- Stack is side-on, pins obscure the weight number
+- Lighting inside the frame varies
+- Only partial plate visibility
+
+Current solution: [[System/Architecture|optical flow]] detects that the stack *moved* but doesn't know *how much*.
+
+E-Weight solution: **replace the stack with a motor-controlled equivalent** — weight is a software value. Read it directly. 100% accurate, 1 kg increments.
+
+---
+
+## How It Works
 
 ```
-GET  /api/weight          → {"weight_kg": 42.5}
-POST /api/weight          → {"weight_kg": 50.0}   (set weight remotely)
-GET  /api/status          → {"locked": true, "motor_temp": 38}
+Custom brushless motor weight stack
+  → Motor controller board (WiFi + HTTP server)
+  → GET /api/weight → {"weight_kg": 42.5, "locked": true}
+  → Pi reads at session start
+  → Written to Supabase sets table
+```
+
+Zero camera detection needed for weight on cable machines.
+
+---
+
+## API Spec (Motor Controller)
+
+```http
+GET  /api/weight
+→ {"weight_kg": 42.5, "locked": true, "motor_temp": 38}
+
+POST /api/weight
+body: {"weight_kg": 50.0}
+→ {"ok": true, "weight_kg": 50.0}
+
+GET  /api/status
+→ {"locked": true, "motor_temp": 38, "firmware": "1.2.0"}
 ```
 
 ---
 
-## Code Status
-
-Code is fully written and ready. Disabled until hardware ships.
+## StackClient (`e_weight/stack_client.py`)
 
 ```python
-# e_weight/stack_client.py
-client = StackClient(stack_ip="192.168.1.200", enabled=False)  # enabled=False for now
-weight = client.get_weight()   # returns None until hardware connected
+client = StackClient(
+    stack_ip="192.168.1.200",
+    port=80,
+    timeout_s=2.0,
+    enabled=False          # ← False until hardware ships
+)
+
+weight = client.get_weight()    # Returns None (disabled)
+ok     = client.set_weight(50)  # Returns False (disabled)
+locked = client.is_locked()     # Returns False (disabled)
 ```
 
-To enable: set `enabled=True` and provide the motor controller's IP.
+To enable: set `enabled=True` and provide `stack_ip`.
 
 ---
 
-## Key Files
+## Weight Detection Comparison
 
-| File | Purpose |
-|------|---------|
-| `e_weight/stack_client.py` | HTTP API client |
-| `pi/config.py` | `E_WEIGHT_ENABLED`, `STACK_IP` |
-
----
-
-## Relationship to Project 2
-
-| Machine type | Weight method |
-|---|---|
-| Free weight barbells | [[Projects/Weight ID]] — camera + plate colours |
-| Cable / pin machines | E-Weight — motor API (Phase 2) |
-| Cable / pin machines (interim) | Weight stack optical flow tracker (in `pi/`) |
+| Machine type | Weight method | Accuracy |
+|---|---|---|
+| Free weight barbells | [[Projects/Weight ID]] — plate colours + YOLO | ~95–99% |
+| Cable / pin machines (now) | Optical flow — confirms *movement*, not weight | N/A |
+| Cable / pin machines (Phase 2) | E-Weight motor API | 100%, 1 kg increments |
 
 ---
 
 ## Hardware (Phase 2)
 
 - Custom brushless motor weight stack (design TBD)
-- Motor controller board with WiFi + HTTP server
-- Replaces traditional iron stacks per machine
+- Motor controller board with WiFi module + HTTP server
+- Replaces traditional pin-loaded iron stacks per machine
+- Motor manages weight stack position → software-defined weight
+
+**No hardware designed or ordered yet.**
+
+---
+
+## Config (`pi/config.py`)
+
+```python
+# Phase 2 — disabled until hardware ships
+E_WEIGHT_ENABLED = False
+STACK_IP         = ""      # e.g. "192.168.1.200"
+```
 
 ---
 
 ## Status
 
-- [x] Code written (`e_weight/stack_client.py`)
-- [x] API spec defined
+- [x] `StackClient` code written
+- [x] HTTP API spec defined
+- [x] Integrated into `pi/main.py` (disabled by default)
 - [ ] Hardware designed
-- [ ] Hardware built
-- [ ] Tested on cable machine
+- [ ] Hardware prototyped
+- [ ] Hardware tested on cable machine
+- [ ] Production deployment
 
 ---
 
 ## Related
 
 - [[Projects/Weight ID]] — alternative for free weight barbells
-- [[System/Database Schema]] — weight_kg written to sets table
+- [[System/Database Schema]] — `weight_kg` written to sets table regardless of source
 - [[System/WebSocket Layer]] — weight broadcast to tablet
-- [[Hardware/Machine Pi]] — Pi calls the motor API
-- [[Hardware/Costs]] — no extra cameras needed (digital readout)
+- [[Hardware/Machine Pi]] — Pi calls the motor controller API
+- [[Hardware/Costs]] — no extra cameras needed (digital readout saves £70/station)
