@@ -930,15 +930,17 @@
             engaged = engagement.update(kps, bbox);
           }
 
+          // Skeleton ALWAYS draws when a pose is detected — gives the
+          // demo viewer instant feedback that the AI is working. The
+          // engagement gate still controls reps + the green pill.
+          ingestPose(kps);
+          $poseWrap.classList.add('has-pose');
+
           if (engaged) {
             if (!counter.sessionActive) counter.startSession();
             counter.update(armData);
-            ingestPose(kps);
-            $poseWrap.classList.add('has-pose');
           } else {
             if (counter.sessionActive) counter.endSession();
-            $poseWrap.classList.remove('has-pose');
-            if (smoothed) clearPose();
           }
 
           updateUI(engaged, counter.repCount);
