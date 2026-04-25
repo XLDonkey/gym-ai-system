@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="screen-orientation" content="landscape">
+<title>XL Fitness — Overseer Beta</title>
+
+<!-- TensorFlow.js + MoveNet (loaded from CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+
+<style>
+  /* ── Reset & base — identical to MVP 1.0 tablet.html ─────────────────── */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  :root {
+    --bg: #000000;
+    --panel: #15181d;
+    --panel-border: #2a2f38;
+    --accent: #22c8ff;
+    --text: #ffffff;
+    --text-muted: #9aa4af;
+    --disconnect: #ef4444;
+    --engaged: #22c55e;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Barlow Condensed", "Oswald", "Impact", "Helvetica Neue", sans-serif;
+    font-weight: 600;
+  }
+
+  /* ── Layout ──────────────────────────────────────────────────────────── */
+  .app {
+    display: grid;
+    grid-template-rows: auto 4px 1fr;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────────── */
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 18px 32px;
+    background: var(--bg);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-x {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .machine-name {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+    letter-spacing: 0.5px;
+  }
+
+  .accent-divider {
+    background: var(--accent);
+    width: 100%;
+    height: 4px;
+  }
+
+  /* ── Body ────────────────────────────────────────────────────────────── */
+  .body {
+    display: grid;
+    grid-template-columns: 1fr 3px 1.6fr;
+    overflow: hidden;
+  }
+
+  .column-divider {
+    background: var(--accent);
+    width: 3px;
+  }
+
+  .left-col {
+    display: grid;
+    grid-template-rows: 1fr;
+    gap: 16px;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  .right-col {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: 20px;
+    gap: 14px;
+    overflow: hidden;
+  }
+
+  /* ── Panels ──────────────────────────────────────────────────────────── */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    padding: 16px 22px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .panel .label {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .panel .value-big {
+    font-size: clamp(220px, 48vh, 480px);
+    font-weight: 800;
+    color: var(--text);
+    line-height: 0.9;
+    font-variant-numeric: tabular-nums;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Engagement pill ─────────────────────────────────────────────────── */
+  .engage-pill {
+    align-self: center;
+    margin-top: 14px;
+    padding: 14px 36px;
+    border-radius: 999px;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 3px solid var(--disconnect);
+    color: var(--disconnect);
+    background: rgba(239, 68, 68, 0.08);
+    transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    white-space: nowrap;
+  }
+  .engage-pill.engaged {
+    border-color: var(--engaged);
+    color: var(--engaged);
+    background: rgba(34, 197, 94, 0.10);
+  }
+
+  /* ── Pose panel ──────────────────────────────────────────────────────── */
+  .pose-panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    padding: 16px 22px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .pose-panel .label {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .pose-canvas-wrap {
+    flex: 1;
+    border: 2px solid var(--panel-border);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    background: #0c0e11;
+  }
+
+  /* The video element shows the live camera feed beneath the skeleton.
+     Front camera is mirrored so the user sees themselves selfie-style.
+     The skeleton canvas sits on top, perfectly aligned. */
+  #cam-video {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);  /* mirror — front camera */
+    z-index: 1;
+    opacity: 0.55;
+  }
+
+  #pose-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    z-index: 2;
+  }
+
+  .pose-idle-msg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-muted);
+    font-size: 22px;
+    font-weight: 500;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0.85;
+    z-index: 3;
+  }
+
+  .pose-canvas-wrap.has-pose .pose-idle-msg {
+    display: none;
+  }
+
+  /* ── Footer ──────────────────────────────────────────────────────────── */
+  .right-footer {
+    text-align: right;
+    padding: 0 4px;
+    line-height: 1.1;
+  }
+
+  .right-footer .version {
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .right-footer .version-num {
+    color: var(--accent);
+  }
+
+  .right-footer .tagline {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    margin-top: 4px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Connection / camera status dot ──────────────────────────────────── */
+  .conn-dot {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--disconnect);
+    box-shadow: 0 0 10px var(--disconnect);
+    transition: all 0.3s ease;
+    z-index: 100;
+  }
+
+  .conn-dot.live {
+    background: var(--engaged);
+    box-shadow: 0 0 10px var(--engaged);
+  }
+
+  /* ── Phase badge ─────────────────────────────────────────────────────── */
+  .phase-badge {
+    position: absolute;
+    bottom: 10px;
+    left: 14px;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    font-size: 15px;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 1px;
+    z-index: 4;
+  }
+
+  .phase-badge.engaged {
+    color: var(--engaged);
+    border-color: var(--engaged);
+  }
+
+  /* ── Boot / camera-permission overlay ─────────────────────────────────── */
+  #boot {
+    position: fixed; inset: 0; z-index: 999;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px;
+    text-align: center; padding: 24px;
+  }
+  #boot .b-logo {
+    font-size: 36px; font-weight: 800; letter-spacing: 4px;
+    color: var(--accent); text-transform: uppercase;
+  }
+  #boot .b-msg {
+    font-size: 20px; color: var(--text-muted); max-width: 480px; line-height: 1.4;
+  }
+  #boot.error .b-msg { color: var(--disconnect); }
+  #boot button {
+    margin-top: 12px; padding: 14px 32px;
+    background: var(--accent); border: none; border-radius: 8px;
+    color: #000; font-size: 20px; font-weight: 800; letter-spacing: 2px;
+    text-transform: uppercase; cursor: pointer;
+  }
+
+  /* ── Secret triple-tap fullscreen toggle (bottom-left) ─────────────── */
+  .fs-hotspot {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 70px;
+    height: 70px;
+    background: transparent;
+    z-index: 9999;
+  }
+  .fs-hotspot.flash {
+    background: rgba(34, 200, 255, 0.25);
+    transition: background 0.15s ease-out;
+  }
+</style>
+</head>
+<body>
+
+<!-- Camera-permission / boot overlay -->
+<div id="boot">
+  <div class="b-logo">XL FITNESS OVERSEER</div>
+  <div class="b-msg" id="boot-msg">Loading pose model & requesting camera…</div>
+  <button id="boot-retry" style="display:none;">Retry</button>
+</div>
+
+<!-- Status indicators -->
+<div class="conn-dot" id="conn-dot" title="Camera + model status"></div>
+<div class="fs-hotspot" id="fs-hotspot" aria-hidden="true"></div>
+
+<div class="app" style="display:none;" id="main-app">
+  <header>
+    <div class="logo">
+      <svg class="logo-x" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M 15 10 L 40 10 L 50 30 L 60 10 L 85 10 L 65 50 L 85 90 L 60 90 L 50 70 L 40 90 L 15 90 L 35 50 Z"
+              fill="#ffffff" stroke="#22c8ff" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+      <div class="logo-text">XL FITNESS</div>
+    </div>
+    <div class="machine-name" id="machine-name">Beta — Tablet Camera Demo</div>
+  </header>
+
+  <div class="accent-divider"></div>
+
+  <div class="body">
+    <!-- LEFT — big REPS number + engagement pill -->
+    <div class="left-col">
+      <div class="panel">
+        <div class="label">Reps</div>
+        <div class="value-big" id="rep-count">0</div>
+        <div class="engage-pill" id="engage-pill">Not Engaged</div>
+      </div>
+    </div>
+
+    <div class="column-divider"></div>
+
+    <!-- RIGHT — live camera + pose skeleton -->
+    <div class="right-col">
+      <div class="pose-panel">
+        <div class="label">Pose</div>
+        <div class="pose-canvas-wrap" id="pose-wrap">
+          <video id="cam-video" autoplay playsinline muted></video>
+          <canvas id="pose-canvas"></canvas>
+          <div class="pose-idle-msg" id="pose-idle-msg">Waiting for engagement…</div>
+          <div class="phase-badge" id="phase-badge">IDLE</div>
+        </div>
+      </div>
+
+      <div class="right-footer">
+        <div class="version">Smart Tracking Beta: <span class="version-num">V 0.02.00</span></div>
+        <div class="tagline">Web-based — runs on the tablet, no Pi required</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * MVP 1.0 PARITY — every constant here matches pi/main.py + pi/config.py
+   * ───────────────────────────────────────────────────────────────────── */
+
+  // Engagement zone — same as MACHINE_ZONE_ROI in pi/config.py
+  // Tablet camera is in front of the user, so the seat occupies the
+  // centre of the frame. (x1, y1, x2, y2) in normalised 0–1 coordinates.
+  const MACHINE_ZONE_ROI       = [0.25, 0.05, 0.75, 0.95];
+  const ENGAGE_FRAMES_REQUIRED = 5;       // ~0.5s at 10 fps
+  const DISENGAGE_FRAMES       = 15;      // ~1.5s
+  const MOTION_MAX_DRIFT_NORM  = 0.25;
+  const MIN_ZONE_OVERLAP       = 0.20;
+
+  // Pose check thresholds — port of _check_pose_engaged()
+  const KP_CONF_MIN  = 0.20;
+  const HIP_BELOW_SHOULDER_MIN = 0.08;   // hip_y - shoulder_y > this => seated
+
+  // Rep counter — port of RepCounter in pi/main.py
+  const ANGLE_TOP            = 130;
+  const ANGLE_BOTTOM         = 90;
+  const MIN_REP_DURATION_MS  = 300;
+  const MAX_REP_DURATION_MS  = 12000;
+  const MIN_ROM_DEGREES      = 40;
+  const INACTIVITY_RESET_S   = 15.0;
+  const WRIST_ABOVE_SHOULDER_THRESHOLD = 0.10;
+
+  // COCO 17 keypoint indices (same as YOLO + MoveNet)
+  const KP = {
+    NOSE: 0, L_EYE: 1, R_EYE: 2, L_EAR: 3, R_EAR: 4,
+    L_SHOULDER: 5, R_SHOULDER: 6,
+    L_ELBOW: 7,    R_ELBOW: 8,
+    L_WRIST: 9,    R_WRIST: 10,
+    L_HIP: 11,     R_HIP: 12,
+    L_KNEE: 13,    R_KNEE: 14,
+    L_ANKLE: 15,   R_ANKLE: 16,
+  };
+
+  const SKELETON_EDGES = [
+    [0,1],[0,2],[1,3],[2,4],
+    [5,7],[7,9],[6,8],[8,10],
+    [5,6],[5,11],[6,12],[11,12],
+    [11,13],[13,15],[12,14],[14,16],
+  ];
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * Element refs
+   * ───────────────────────────────────────────────────────────────────── */
+  const $boot       = document.getElementById('boot');
+  const $bootMsg    = document.getElementById('boot-msg');
+  const $bootRetry  = document.getElementById('boot-retry');
+  const $app        = document.getElementById('main-app');
+  const $repCount   = document.getElementById('rep-count');
+  const $engagePill = document.getElementById('engage-pill');
+  const $phaseBadge = document.getElementById('phase-badge');
+  const $poseWrap   = document.getElementById('pose-wrap');
+  const $canvas     = document.getElementById('pose-canvas');
+  const $video      = document.getElementById('cam-video');
+  const $connDot    = document.getElementById('conn-dot');
+  const ctx         = $canvas.getContext('2d');
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * Math helpers — direct ports
+   * ───────────────────────────────────────────────────────────────────── */
+
+  function angleBetween(a, b, c) {
+    // Angle ABC at vertex B. a/b/c = [x, y].
+    const ba = [a[0]-b[0], a[1]-b[1]];
+    const bc = [c[0]-b[0], c[1]-b[1]];
+    const dot = ba[0]*bc[0] + ba[1]*bc[1];
+    const mag = Math.hypot(...ba) * Math.hypot(...bc);
+    if (mag < 1e-6) return 0;
+    return Math.acos(Math.max(-1, Math.min(1, dot/mag))) * 180 / Math.PI;
+  }
+
+  function bboxOverlapRatio(a, b) {
+    // Fraction of bbox A that overlaps with B. Both [x1,y1,x2,y2].
+    const ix1 = Math.max(a[0], b[0]);
+    const iy1 = Math.max(a[1], b[1]);
+    const ix2 = Math.min(a[2], b[2]);
+    const iy2 = Math.min(a[3], b[3]);
+    if (ix2 <= ix1 || iy2 <= iy1) return 0;
+    const inter  = (ix2-ix1) * (iy2-iy1);
+    const areaA  = Math.max(1e-9, (a[2]-a[0]) * (a[3]-a[1]));
+    return inter / areaA;
+  }
+
+  function maxDrift(centres) {
+    if (centres.length < 2) return 0;
+    const xs = centres.map(c => c[0]);
+    const ys = centres.map(c => c[1]);
+    const dx = Math.max(...xs) - Math.min(...xs);
+    const dy = Math.max(...ys) - Math.min(...ys);
+    return Math.hypot(dx, dy);
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * Pose helpers — get the working arm + check seated
+   * ───────────────────────────────────────────────────────────────────── */
+
+  function getBestArm(kps) {
+    // Returns {side:'L'|'R', angle, wristAboveShoulder, ...} or null.
+    const arms = [
+      ['L', kps[KP.L_SHOULDER], kps[KP.L_ELBOW], kps[KP.L_WRIST]],
+      ['R', kps[KP.R_SHOULDER], kps[KP.R_ELBOW], kps[KP.R_WRIST]],
+    ];
+    let best = null, bestConf = 0;
+    for (const [side, s, e, w] of arms) {
+      const conf = Math.min(s[2], e[2], w[2]);
+      if (conf > 0.30 && conf > bestConf) {
+        const wristAbove = w[1] < s[1] + WRIST_ABOVE_SHOULDER_THRESHOLD;
+        best = {
+          side,
+          shoulder: [s[0], s[1]],
+          elbow:    [e[0], e[1]],
+          wrist:    [w[0], w[1]],
+          angle:    angleBetween([s[0],s[1]], [e[0],e[1]], [w[0],w[1]]),
+          wristAboveShoulder: wristAbove,
+          confidence: conf,
+        };
+        bestConf = conf;
+      }
+    }
+    return best;
+  }
+
+  function weightedAvgY(points) {
+    let total_w = 0, total_v = 0;
+    for (const [val, conf] of points) {
+      if (conf >= KP_CONF_MIN) {
+        total_w += conf;
+        total_v += val * conf;
+      }
+    }
+    return total_w < KP_CONF_MIN ? -1 : total_v / total_w;
+  }
+
+  function checkPoseEngaged(kps) {
+    // Port of _check_pose_engaged() — seated lat-pulldown variant.
+    const ls = kps[KP.L_SHOULDER], rs = kps[KP.R_SHOULDER];
+    const lh = kps[KP.L_HIP],      rh = kps[KP.R_HIP];
+    const lw = kps[KP.L_WRIST],    rw = kps[KP.R_WRIST];
+
+    const shoulderY = weightedAvgY([[ls[1],ls[2]], [rs[1],rs[2]]]);
+    const hipY      = weightedAvgY([[lh[1],lh[2]], [rh[1],rh[2]]]);
+    const wristY    = weightedAvgY([[lw[1],lw[2]], [rw[1],rw[2]]]);
+
+    if (shoulderY < 0 || hipY < 0) return { ok: false, hipY: -1, wristRaised: false };
+
+    const seated       = (hipY - shoulderY) > HIP_BELOW_SHOULDER_MIN;
+    const wristRaised  = (wristY >= 0 && shoulderY - wristY > 0.05);
+    const armsWorking  = (wristY >= 0 && hipY > wristY && wristY > 0);
+
+    return {
+      ok:    seated && (wristRaised || armsWorking),
+      hipY,
+      wristRaised,
+    };
+  }
+
+  function bboxFromKeypoints(kps) {
+    // Tightest bbox around all confident keypoints, normalised 0–1.
+    let x1=1, y1=1, x2=0, y2=0, any=false;
+    for (const k of kps) {
+      if (k[2] < KP_CONF_MIN) continue;
+      x1 = Math.min(x1, k[0]); y1 = Math.min(y1, k[1]);
+      x2 = Math.max(x2, k[0]); y2 = Math.max(y2, k[1]);
+      any = true;
+    }
+    if (!any) return null;
+    // Pad slightly so the bbox isn't pixel-tight to the skeleton
+    const padX = (x2-x1) * 0.10;
+    const padY = (y2-y1) * 0.10;
+    return [
+      Math.max(0, x1-padX), Math.max(0, y1-padY),
+      Math.min(1, x2+padX), Math.min(1, y2+padY),
+    ];
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * Engagement detector — port of pi/engagement_detector.py
+   * ───────────────────────────────────────────────────────────────────── */
+
+  class EngagementDetector {
+    constructor() {
+      this.engaged       = false;
+      this._engageBuf    = [];
+      this._disengageBuf = [];
+      this._centreBuf    = [];
+    }
+
+    update(kps, bboxNorm) {
+      // Zone check
+      const zoneRatio = bboxOverlapRatio(bboxNorm, MACHINE_ZONE_ROI);
+      const inZone    = zoneRatio >= MIN_ZONE_OVERLAP;
+
+      // Pose check
+      const pose = checkPoseEngaged(kps);
+
+      // Motion stability
+      const cx = (bboxNorm[0]+bboxNorm[2])/2;
+      const cy = (bboxNorm[1]+bboxNorm[3])/2;
+      this._centreBuf.push([cx, cy]);
+      if (this._centreBuf.length > ENGAGE_FRAMES_REQUIRED) this._centreBuf.shift();
+      const drift = maxDrift(this._centreBuf);
+      const still = this._centreBuf.length >= ENGAGE_FRAMES_REQUIRED &&
+                    drift <= MOTION_MAX_DRIFT_NORM;
+
+      const candidate = inZone && pose.ok && still;
+
+      this._engageBuf.push(candidate);
+      if (this._engageBuf.length > ENGAGE_FRAMES_REQUIRED) this._engageBuf.shift();
+      this._disengageBuf.push(!candidate);
+      if (this._disengageBuf.length > DISENGAGE_FRAMES) this._disengageBuf.shift();
+
+      if (!this.engaged) {
+        if (this._engageBuf.length === ENGAGE_FRAMES_REQUIRED &&
+            this._engageBuf.every(b => b)) {
+          this.engaged = true;
+          console.log('[engage] ENGAGED  zone=' + zoneRatio.toFixed(2) +
+                      '  drift=' + drift.toFixed(2));
+        }
+      } else {
+        if (this._disengageBuf.length === DISENGAGE_FRAMES &&
+            this._disengageBuf.every(b => b)) {
+          this.engaged = false;
+          console.log('[engage] DISENGAGED');
+        }
+      }
+
+      return this.engaged;
+    }
+
+    reset() {
+      this.engaged = false;
+      this._engageBuf = [];
+      this._disengageBuf = [];
+      this._centreBuf = [];
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * Rep counter — port of RepCounter in pi/main.py
+   * ───────────────────────────────────────────────────────────────────── */
+
+  class RepCounter {
+    constructor() {
+      this.phase          = 'waiting';
+      this.repCount       = 0;
+      this.sessionActive  = false;
+      this.ema            = null;
+      this._minAngle      = 180.0;
+      this._maxAngle      = 0.0;
+      this._repStartMs    = null;
+      this._lastRepArm    = null;
+      this._lastRepTime   = 0.0;
+    }
+
+    startSession() {
+      this.sessionActive = true;
+      this.repCount      = 0;
+      this._lastRepArm   = null;
+      this._lastRepTime  = 0.0;
+      console.log('[SESSION] Started');
+    }
+
+    endSession() {
+      if (!this.sessionActive) return;
+      this.sessionActive  = false;
+      console.log('[SESSION] Ended — ' + this.repCount + ' reps');
+      this.repCount       = 0;
+      this._lastRepArm    = null;
+      this._lastRepTime   = 0.0;
+      this._minAngle      = 180.0;
+      this._maxAngle      = 0.0;
+      this.phase          = 'waiting';
+    }
+
+    update(armData) {
+      if (!armData) return;
+
+      const raw  = armData.angle;
+      this.ema   = this.ema === null ? raw : 0.3*raw + 0.7*this.ema;
+      const angle = this.ema;
+
+      if (!this.sessionActive && armData.wristAboveShoulder) {
+        this.startSession();
+      }
+      if (!this.sessionActive) return;
+
+      // Inactivity reset
+      const nowS = Date.now() / 1000;
+      if (this.repCount > 0 && this._lastRepTime > 0 &&
+          nowS - this._lastRepTime > INACTIVITY_RESET_S) {
+        console.log('[REP] Auto-reset — no reps for ' + INACTIVITY_RESET_S + 's');
+        this.repCount    = 0;
+        this._lastRepArm = null;
+      }
+
+      // 3-phase state machine — count on the pull-down
+      if (this.phase === 'waiting') {
+        this._maxAngle = Math.max(this._maxAngle, angle);
+        if (angle < ANGLE_BOTTOM - 5 && armData.wristAboveShoulder) {
+          this.phase = 'pulling';
+          this._minAngle  = angle;
+          this._repStartMs = Date.now();
+        }
+      } else if (this.phase === 'pulling') {
+        this._minAngle = Math.min(this._minAngle, angle);
+        const durMs = Date.now() - this._repStartMs;
+        if (durMs > MAX_REP_DURATION_MS) {
+          this.phase = 'waiting';
+          this._minAngle = 180; this._maxAngle = angle;
+          return;
+        }
+        if (angle < ANGLE_BOTTOM && durMs >= MIN_REP_DURATION_MS) {
+          const rom = this._maxAngle - this._minAngle;
+          if (rom >= MIN_ROM_DEGREES) {
+            // Arm-switch reset
+            const currentArm = armData.side;
+            if (this._lastRepArm !== null && currentArm !== null &&
+                currentArm !== this._lastRepArm) {
+              console.log('[REP] Arm switch ' + this._lastRepArm + '→' +
+                          currentArm + ' — counter reset');
+              this.repCount = 0;
+            }
+            this._lastRepArm  = currentArm;
+            this._lastRepTime = nowS;
+
+            this.repCount += 1;
+            console.log('[REP] #' + this.repCount + '  ROM=' +
+                        Math.round(rom) + '°  arm=' + currentArm);
+          }
+          this.phase = 'returning';
+        }
+      } else if (this.phase === 'returning') {
+        if (angle > ANGLE_TOP) {
+          this.phase = 'waiting';
+          this._minAngle = 180; this._maxAngle = angle;
+        }
+      }
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * Pose smoothing & rendering (60 fps render loop)
+   * ───────────────────────────────────────────────────────────────────── */
+
+  let smoothed = null;
+  let target   = null;
+  const SMOOTH_ALPHA = 0.65;
+  const KP_DRAW_THRESH = 0.25;
+
+  function ingestPose(kps) {
+    target = kps.map(k => [k[0], k[1], k[2]]);
+    if (!smoothed) smoothed = kps.map(k => [k[0], k[1], k[2]]);
+  }
+
+  function clearPose() {
+    smoothed = null; target = null;
+    const r = $canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, r.width, r.height);
+  }
+
+  function resizeCanvas() {
+    const r = $canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    $canvas.width  = Math.round(r.width  * dpr);
+    $canvas.height = Math.round(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  function drawPose() {
+    const r = $canvas.getBoundingClientRect();
+    const W = r.width, H = r.height;
+    ctx.clearRect(0, 0, W, H);
+
+    if (!smoothed || !target) return;
+
+    // EMA toward target
+    for (let i = 0; i < 17; i++) {
+      const s = smoothed[i], t = target[i];
+      if (!s || !t) continue;
+      s[0] += (t[0] - s[0]) * SMOOTH_ALPHA;
+      s[1] += (t[1] - s[1]) * SMOOTH_ALPHA;
+      s[2] += (t[2] - s[2]) * 0.5;
+    }
+
+    // Mirror horizontally because the underlying video is mirrored.
+    ctx.save();
+    ctx.translate(W, 0);
+    ctx.scale(-1, 1);
+
+    ctx.strokeStyle = '#22c8ff';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    for (const [a, b] of SKELETON_EDGES) {
+      const ka = smoothed[a], kb = smoothed[b];
+      if (!ka || !kb || ka[2] < KP_DRAW_THRESH || kb[2] < KP_DRAW_THRESH) continue;
+      ctx.moveTo(ka[0]*W, ka[1]*H);
+      ctx.lineTo(kb[0]*W, kb[1]*H);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    for (const k of smoothed) {
+      if (!k || k[2] < KP_DRAW_THRESH) continue;
+      ctx.beginPath();
+      ctx.arc(k[0]*W, k[1]*H, 5, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 60 fps render loop — pose drawn even between MoveNet inferences
+  (function renderLoop() {
+    drawPose();
+    requestAnimationFrame(renderLoop);
+  })();
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * Camera + MoveNet
+   * ───────────────────────────────────────────────────────────────────── */
+
+  let detector = null;
+
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'user',     // front camera (selfie-style)
+          width:  { ideal: 1280 },
+          height: { ideal: 720  },
+        },
+        audio: false,
+      });
+      $video.srcObject = stream;
+      await new Promise(res => $video.onloadedmetadata = res);
+      await $video.play();
+    } catch (err) {
+      throw new Error('Camera access denied or unavailable: ' + err.message);
+    }
+  }
+
+  async function loadModel() {
+    detector = await poseDetection.createDetector(
+      poseDetection.SupportedModels.MoveNet,
+      { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
+    );
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * Main inference + UI loop
+   * ───────────────────────────────────────────────────────────────────── */
+
+  const engagement = new EngagementDetector();
+  const counter    = new RepCounter();
+  let prevEngaged  = false;
+
+  function updateUI(engaged, repCount) {
+    $repCount.textContent = repCount;
+    $engagePill.textContent = engaged ? 'Engaged' : 'Not Engaged';
+    $engagePill.classList.toggle('engaged', engaged);
+    $phaseBadge.textContent = engaged ? 'ENGAGED' : 'IDLE';
+    $phaseBadge.classList.toggle('engaged', engaged);
+  }
+
+  async function inferenceLoop() {
+    while (true) {
+      try {
+        const poses = await detector.estimatePoses($video, { maxPoses: 1 });
+        if (poses && poses.length > 0) {
+          const pose = poses[0];
+
+          // Convert MoveNet keypoints → COCO normalised array.
+          // MoveNet returns keypoints in PIXEL coords of the input image,
+          // which is the video's intrinsic frame (1280x720 ish).
+          const vw = $video.videoWidth  || 1;
+          const vh = $video.videoHeight || 1;
+          const kps = pose.keypoints.map(k => [k.x / vw, k.y / vh, k.score || 0]);
+
+          const bbox    = bboxFromKeypoints(kps);
+          const armData = getBestArm(kps);
+
+          let engaged = false;
+          if (bbox) {
+            engaged = engagement.update(kps, bbox);
+          }
+
+          if (engaged) {
+            if (!counter.sessionActive) counter.startSession();
+            counter.update(armData);
+            ingestPose(kps);
+            $poseWrap.classList.add('has-pose');
+          } else {
+            if (counter.sessionActive) counter.endSession();
+            $poseWrap.classList.remove('has-pose');
+            if (smoothed) clearPose();
+          }
+
+          updateUI(engaged, counter.repCount);
+          prevEngaged = engaged;
+        } else {
+          // No pose at all — clear engagement
+          if (engagement.engaged) {
+            engagement.reset();
+            counter.endSession();
+          }
+          $poseWrap.classList.remove('has-pose');
+          if (smoothed) clearPose();
+          updateUI(false, counter.repCount);
+        }
+      } catch (err) {
+        console.error('[loop] error:', err);
+      }
+      await new Promise(r => setTimeout(r, 0));
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * Boot
+   * ───────────────────────────────────────────────────────────────────── */
+
+  async function boot() {
+    $bootMsg.textContent = 'Loading pose model…';
+    try {
+      await loadModel();
+      $bootMsg.textContent = 'Requesting camera permission…';
+      await startCamera();
+      // Show app, hide boot
+      $boot.style.display = 'none';
+      $app.style.display  = 'grid';
+      resizeCanvas();
+      $connDot.classList.add('live');
+      // Start the inference loop — fire and forget
+      inferenceLoop();
+    } catch (err) {
+      console.error('[boot] error:', err);
+      $boot.classList.add('error');
+      $bootMsg.textContent = 'Setup failed: ' + err.message +
+        '. Check the camera permission and refresh.';
+      $bootRetry.style.display = 'inline-block';
+      $bootRetry.onclick = () => location.reload();
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * Triple-tap fullscreen toggle (bottom-left invisible hotspot)
+   * ───────────────────────────────────────────────────────────────────── */
+  (() => {
+    const $hot = document.getElementById('fs-hotspot');
+    if (!$hot) return;
+    const TAPS_NEEDED = 3, WINDOW_MS = 1500;
+    let taps = [];
+    const flash = () => {
+      $hot.classList.add('flash');
+      setTimeout(() => $hot.classList.remove('flash'), 120);
+    };
+    const toggleFs = () => {
+      const doc = document, el = doc.documentElement;
+      if (!doc.fullscreenElement && !doc.webkitFullscreenElement) {
+        (el.requestFullscreen || el.webkitRequestFullscreen || (() => {})).call(el);
+      } else {
+        (doc.exitFullscreen || doc.webkitExitFullscreen || (() => {})).call(doc);
+      }
+    };
+    $hot.addEventListener('click', e => {
+      e.preventDefault();
+      flash();
+      const now = Date.now();
+      taps = taps.filter(t => now - t < WINDOW_MS);
+      taps.push(now);
+      if (taps.length >= TAPS_NEEDED) { taps = []; toggleFs(); }
+    });
+  })();
+
+  // Kick off
+  boot();
+})();
+</script>
+</body>
+</html>
