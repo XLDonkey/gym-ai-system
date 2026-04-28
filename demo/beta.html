@@ -1118,22 +1118,28 @@
     $bootMsg.textContent = 'Loading pose model…';
     try {
       await loadModel();
-      // Show app shell now — schedule decides whether camera + inference run
-      $boot.style.display = 'none';
-      $app.style.display  = 'grid';
-      resizeCanvas();
 
+      // Decide based on schedule BEFORE hiding the boot overlay so any
+      // camera-permission failure stays visible to the user.
       if (isOpenNow()) {
-        $bootMsg.textContent = 'Requesting camera permission…';
+        $bootMsg.textContent = 'Tap "Allow" when your browser asks for camera access…';
         await startCamera();
         acquireWakeLock();
         scheduleMode = 'open';
+
+        // Camera ready — now reveal the app and start inference.
+        $boot.style.display = 'none';
+        $app.style.display  = 'grid';
+        resizeCanvas();
         inferenceLoop();
       } else {
-        // Booting during closed hours — go straight to sleep overlay,
-        // skip the camera prompt entirely.
+        // Closed hours — skip the camera prompt entirely, go straight
+        // to the sleep overlay.
         scheduleMode = 'closed';
         $sleepOpens.textContent = 'Opens at ' + formatHour(OPEN_HOUR);
+        $boot.style.display = 'none';
+        $app.style.display  = 'grid';
+        resizeCanvas();
         $sleepOverlay.classList.add('show');
       }
 
@@ -1143,9 +1149,11 @@
 
     } catch (err) {
       console.error('[boot] error:', err);
+      // Make sure the boot overlay is visible so the user sees the error.
+      $boot.style.display = 'flex';
       $boot.classList.add('error');
       $bootMsg.textContent = 'Setup failed: ' + err.message +
-        '. Check the camera permission and refresh.';
+        '. Check the camera permission and tap Retry.';
       $bootRetry.style.display = 'inline-block';
       $bootRetry.onclick = () => location.reload();
     }
