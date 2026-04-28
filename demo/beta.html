@@ -356,6 +356,43 @@
     text-transform: uppercase; cursor: pointer;
   }
 
+  /* ── Sleep / closed-hours overlay ─────────────────────────────────────
+     Covers the entire screen during gym closed hours. Black background,
+     small message in the centre. The tablet's screen will sleep on its
+     own once the wake lock is released, but this is what's shown if the
+     user (or staff) wakes the screen during closed hours. */
+  #sleep-overlay {
+    position: fixed; inset: 0; z-index: 990;
+    background: #000;
+    display: none;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 24px;
+    color: var(--text-muted);
+  }
+  #sleep-overlay.show { display: flex; }
+  #sleep-overlay .closed-label {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 8px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  #sleep-overlay .opens-at {
+    font-size: 60px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+  #sleep-overlay .opens-sub {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-top: 12px;
+    letter-spacing: 1px;
+  }
+
   /* ── Secret triple-tap fullscreen toggle (bottom-left) ─────────────── */
   .fs-hotspot {
     position: fixed;
@@ -383,6 +420,13 @@
 
 <!-- Hidden hotspot for triple-tap fullscreen -->
 <div class="fs-hotspot" id="fs-hotspot" aria-hidden="true"></div>
+
+<!-- Sleep / closed-hours overlay -->
+<div id="sleep-overlay">
+  <div class="closed-label">Closed</div>
+  <div class="opens-at" id="sleep-opens">Opens at 6:00 AM</div>
+  <div class="opens-sub">Power-saving mode</div>
+</div>
 
 <div class="app" style="display:none;" id="main-app">
   <header>
@@ -866,8 +910,11 @@
    * ───────────────────────────────────────────────────────────────────── */
 
   let detector = null;
+  let cameraStream = null;
+  let inferenceRunning = false;
 
   async function startCamera() {
+    if (cameraStream) return;  // already running
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -877,6 +924,7 @@
         },
         audio: false,
       });
+      cameraStream = stream;
       $video.srcObject = stream;
       await new Promise(res => $video.onloadedmetadata = res);
       await $video.play();
@@ -885,11 +933,107 @@
     }
   }
 
+  function stopCamera() {
+    // Release the camera hardware — biggest battery saver.
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+      cameraStream = null;
+    }
+    $video.srcObject = null;
+  }
+
   async function loadModel() {
     detector = await poseDetection.createDetector(
       poseDetection.SupportedModels.MoveNet,
       { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
     );
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+   * Sleep schedule — power-saving during gym closed hours
+   *
+   * Default: open 06:00, closed 23:00.  Override via URL params:
+   *    ?open=6&close=23
+   *    ?open=18&close=4   (overnight gym — open 6pm to 4am)
+   * ───────────────────────────────────────────────────────────────────── */
+  const _qs = new URLSearchParams(location.search);
+  const OPEN_HOUR  = parseInt(_qs.get('open')  || '6',  10);
+  const CLOSE_HOUR = parseInt(_qs.get('close') || '23', 10);
+
+  function isOpenNow() {
+    const h = new Date().getHours();
+    if (OPEN_HOUR < CLOSE_HOUR) {
+      // Same-day window, e.g. 6:00 → 23:00
+      return h >= OPEN_HOUR && h < CLOSE_HOUR;
+    } else {
+      // Window crosses midnight, e.g. 18:00 → 04:00
+      return h >= OPEN_HOUR || h < CLOSE_HOUR;
+    }
+  }
+
+  function formatHour(h) {
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12  = ((h % 12) || 12);
+    return h12 + ':00 ' + ampm;
+  }
+
+  // Wake-lock keeps the screen awake during open hours. Released during
+  // closed hours so the tablet's screen sleeps and saves battery.
+  let wakeLock = null;
+  async function acquireWakeLock() {
+    try {
+      if ('wakeLock' in navigator && !wakeLock) {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+      }
+    } catch (err) {
+      console.warn('[wake-lock] failed:', err);
+    }
+  }
+  function releaseWakeLock() {
+    if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+  }
+  // Re-acquire wake lock if the page becomes visible again during open hours
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && isOpenNow()) {
+      acquireWakeLock();
+    }
+  });
+
+  let scheduleMode = null;  // 'open' | 'closed'
+  const $sleepOverlay = document.getElementById('sleep-overlay');
+  const $sleepOpens   = document.getElementById('sleep-opens');
+
+  async function applySchedule() {
+    const open = isOpenNow();
+    const desired = open ? 'open' : 'closed';
+    if (desired === scheduleMode) return;  // no change
+    scheduleMode = desired;
+
+    if (open) {
+      console.log('[schedule] OPENING — gym hours');
+      $sleepOverlay.classList.remove('show');
+      acquireWakeLock();
+      try {
+        await startCamera();
+      } catch (err) {
+        console.error('[schedule] camera restart failed:', err);
+      }
+      if (!inferenceRunning) inferenceLoop();
+    } else {
+      console.log('[schedule] CLOSING — power-saving mode');
+      $sleepOpens.textContent = 'Opens at ' + formatHour(OPEN_HOUR);
+      $sleepOverlay.classList.add('show');
+      releaseWakeLock();
+      // Stop inference + release the camera hardware
+      inferenceRunning = false;
+      stopCamera();
+      // Clear the visible state so when we reopen it's a fresh canvas
+      engagement.reset();
+      counter.endSession();
+      clearPose();
+      $poseWrap.classList.remove('has-pose');
+    }
   }
 
   /* ──────────────────────────────────────────────────────────────────────
@@ -909,7 +1053,11 @@
   }
 
   async function inferenceLoop() {
-    while (true) {
+    if (inferenceRunning) return;  // guard — only one loop at a time
+    inferenceRunning = true;
+    while (inferenceRunning) {
+      // Bail out instantly if the schedule put us to sleep
+      if (!cameraStream) { inferenceRunning = false; break; }
       try {
         const poses = await detector.estimatePoses($video, { maxPoses: 1 });
         if (poses && poses.length > 0) {
@@ -970,14 +1118,29 @@
     $bootMsg.textContent = 'Loading pose model…';
     try {
       await loadModel();
-      $bootMsg.textContent = 'Requesting camera permission…';
-      await startCamera();
-      // Show app, hide boot
+      // Show app shell now — schedule decides whether camera + inference run
       $boot.style.display = 'none';
       $app.style.display  = 'grid';
       resizeCanvas();
-      // Start the inference loop — fire and forget
-      inferenceLoop();
+
+      if (isOpenNow()) {
+        $bootMsg.textContent = 'Requesting camera permission…';
+        await startCamera();
+        acquireWakeLock();
+        scheduleMode = 'open';
+        inferenceLoop();
+      } else {
+        // Booting during closed hours — go straight to sleep overlay,
+        // skip the camera prompt entirely.
+        scheduleMode = 'closed';
+        $sleepOpens.textContent = 'Opens at ' + formatHour(OPEN_HOUR);
+        $sleepOverlay.classList.add('show');
+      }
+
+      // Re-evaluate every 30 s so we wake/sleep on schedule transitions.
+      setInterval(applySchedule, 30 * 1000);
+      console.log('[schedule] open=' + OPEN_HOUR + ':00  close=' + CLOSE_HOUR + ':00  now=' + (isOpenNow() ? 'OPEN' : 'CLOSED'));
+
     } catch (err) {
       console.error('[boot] error:', err);
       $boot.classList.add('error');
