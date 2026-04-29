@@ -528,6 +528,17 @@
     [11,13],[13,15],[12,14],[14,16],
   ];
 
+  // Indices of keypoints in the legs/lower body — need a stricter
+  // confidence threshold because MoveNet hallucinates leg positions
+  // when they're occluded or out of frame.
+  const LEG_KP_INDICES = new Set([11, 12, 13, 14, 15, 16]); // hips, knees, ankles
+  const KP_DRAW_THRESH      = 0.40;   // base — was 0.25, too generous
+  const KP_DRAW_THRESH_LEGS = 0.55;   // legs need clearer evidence
+
+  // Grace period — keep the last visible pose on screen for this many
+  // ms after MoveNet returns nothing, instead of an instant blank.
+  const POSE_GRACE_MS = 600;
+
   /* ──────────────────────────────────────────────────────────────────────
    * Element refs
    * ───────────────────────────────────────────────────────────────────── */
@@ -833,7 +844,6 @@
   let smoothed = null;
   let target   = null;
   const SMOOTH_ALPHA = 0.65;
-  const KP_DRAW_THRESH = 0.25;
 
   function ingestPose(kps) {
     target = kps.map(k => [k[0], k[1], k[2]]);
@@ -876,6 +886,12 @@
     ctx.translate(W, 0);
     ctx.scale(-1, 1);
 
+    // Per-keypoint threshold — leg keypoints (11-16) need higher
+    // confidence because MoveNet hallucinates their positions when
+    // they're out of frame.
+    const threshFor = (idx) =>
+      LEG_KP_INDICES.has(idx) ? KP_DRAW_THRESH_LEGS : KP_DRAW_THRESH;
+
     ctx.strokeStyle = '#22c8ff';
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
@@ -883,15 +899,17 @@
     ctx.beginPath();
     for (const [a, b] of SKELETON_EDGES) {
       const ka = smoothed[a], kb = smoothed[b];
-      if (!ka || !kb || ka[2] < KP_DRAW_THRESH || kb[2] < KP_DRAW_THRESH) continue;
+      if (!ka || !kb) continue;
+      if (ka[2] < threshFor(a) || kb[2] < threshFor(b)) continue;
       ctx.moveTo(ka[0]*W, ka[1]*H);
       ctx.lineTo(kb[0]*W, kb[1]*H);
     }
     ctx.stroke();
 
     ctx.fillStyle = '#ffffff';
-    for (const k of smoothed) {
-      if (!k || k[2] < KP_DRAW_THRESH) continue;
+    for (let i = 0; i < smoothed.length; i++) {
+      const k = smoothed[i];
+      if (!k || k[2] < threshFor(i)) continue;
       ctx.beginPath();
       ctx.arc(k[0]*W, k[1]*H, 5, 0, Math.PI*2);
       ctx.fill();
@@ -943,9 +961,12 @@
   }
 
   async function loadModel() {
+    // Thunder is the more accurate variant of MoveNet — bigger model,
+    // slower per frame, but much more stable and far less likely to
+    // hallucinate keypoints when limbs are partially occluded.
     detector = await poseDetection.createDetector(
       poseDetection.SupportedModels.MoveNet,
-      { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
+      { modelType: poseDetection.movenet.modelType.SINGLEPOSE_THUNDER }
     );
   }
 
@@ -1043,6 +1064,7 @@
   const engagement = new EngagementDetector();
   const counter    = new RepCounter();
   let prevEngaged  = false;
+  let lastPoseTs   = 0;   // ms timestamp of last successful detection
 
   function updateUI(engaged, repCount) {
     $repCount.textContent = repCount;
@@ -1078,6 +1100,9 @@
             engaged = engagement.update(kps, bbox);
           }
 
+          // Pose was detected this frame — refresh the grace timer
+          lastPoseTs = Date.now();
+
           // Skeleton ALWAYS draws when a pose is detected — gives the
           // demo viewer instant feedback that the AI is working. The
           // engagement gate still controls reps + the green pill.
@@ -1094,14 +1119,20 @@
           updateUI(engaged, counter.repCount);
           prevEngaged = engaged;
         } else {
-          // No pose at all — clear engagement
-          if (engagement.engaged) {
-            engagement.reset();
-            counter.endSession();
+          // No pose this frame. Don't clear immediately — keep the last
+          // skeleton for POSE_GRACE_MS to absorb single-frame blinks
+          // (MoveNet occasionally returns nothing on a fast frame).
+          const sincePose = Date.now() - lastPoseTs;
+          if (sincePose > POSE_GRACE_MS) {
+            if (engagement.engaged) {
+              engagement.reset();
+              counter.endSession();
+            }
+            $poseWrap.classList.remove('has-pose');
+            if (smoothed) clearPose();
+            updateUI(false, counter.repCount);
           }
-          $poseWrap.classList.remove('has-pose');
-          if (smoothed) clearPose();
-          updateUI(false, counter.repCount);
+          // Within grace window — leave the canvas as-is, just wait
         }
       } catch (err) {
         console.error('[loop] error:', err);
